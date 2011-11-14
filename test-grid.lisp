@@ -33,21 +33,21 @@ TODO:
         - needs special handling in libtest eql specialization
         - good ro READ (package independent)
         - needs care to work with GETF when working with the database      
- - Generate a sufficiently large database so that we can
+ + Generate a sufficiently large database so that we can
    evaluate our reporting solution. We may generate
-   fake test results programmatically make this task
+   fake test results programmatically to make this task
    easier.
  - simpliest reporting to allow overview of library test statuses 
    + Test Runs report: every test run as a row in a table
      + legend or a tooltip in the report for test statuses
      + color for statuses
    - CSV export of the database to use it then with spreadsheets,
-     google fusion tables etc and format as a pivot for 
-     various projections (by quicklisp releases, but 
+     google fusion tables, etc. and format as a pivot for 
+     various projections (by quicklisp releases, by
      platform, etc)
      5h
-   - an informer which may be embedded to a library
-     project page with reports the test statuses 
+   - an informer which may be embedded into a library
+     project page, with reports about the test statuses 
      for this single library on various platforms with
      various quicklisp versions
  - simple UI (command line) with guiding messages
