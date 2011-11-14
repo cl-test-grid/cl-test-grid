@@ -1,0 +1,3 @@
+Collaborative testing of Common Lisp libraries.
+
+The project is under development, documentation will be added later.
