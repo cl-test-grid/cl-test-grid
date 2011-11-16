@@ -390,8 +390,7 @@ data (libraries test suites output and the run results) will be saved."
 (defun save-run-info (test-run directory)
   (let ((run-file (merge-pathnames "test-run-info.lisp"
                                    directory)))
-    (write-to-file test-run run-file)))
-    
+    (write-to-file test-run run-file)))   
 
 (defun run-libtests (&optional (libs *all-libs*))
   (let* ((run-descr (make-run-descr))
@@ -582,7 +581,7 @@ Thank you for participating."
     (:fail "fail-status")
     (:no-resource "no-resource-status")
     (otherwise "")))
-              
+           
 (defun render-single-letter-status (test-run lib-name lib-test-result)
   (let ((status (normalize-status (getf lib-test-result :status))))
     (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
@@ -625,6 +624,19 @@ Thank you for participating."
                  (subseq template 0 pos)
                  html-table
                  (subseq template (+ pos (length placeholder))))))
+
+(defun export-to-csv (out &optional
+                      (db *db*))
+ 
+ (format out "Lib World,Lisp,Runner,LibName,Status~%")
+  (dolist (run (getf db :runs))
+    (do-plist (key value (run-results run))
+      (format out "~a,~a,~a,~a,~a~%"
+                     (getf (run-descr run) :lib-world)
+                     (getf (run-descr run) :lisp) 
+                     (getf (getf (run-descr run) :contact) :email)
+                     (string-downcase key) 
+                     (getf value :status)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
