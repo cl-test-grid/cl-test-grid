@@ -5,9 +5,9 @@
 ;;; See LICENSE for details.
 
 (asdf:defsystem #:test-grid
-  :serial t
   :version "0.1.0"
-  :depends-on (#:quicklisp)
+  :serial t
+  :depends-on (#:quicklisp #:test-grid-blobstore)
   :components ((:file "test-grid")))
 
 (defpackage #:test-grid-config (:export #:*src-base-dir*))

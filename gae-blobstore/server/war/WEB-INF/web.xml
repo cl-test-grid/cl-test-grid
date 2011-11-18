@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://java.sun.com/xml/ns/javaee"
+  xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <display-name>CL Test Grid</display-name>
+
+  <servlet>
+    <servlet-name>upload</servlet-name>
+    <servlet-class>cltestgrid.Upload</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>upload</servlet-name>
+    <url-pattern>/upload</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>upload-url</servlet-name>
+    <servlet-class>cltestgrid.GetUploadUrl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>upload-url</servlet-name>
+    <url-pattern>/upload-url</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>blob</servlet-name>
+    <servlet-class>cltestgrid.GetBlob</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>blob</servlet-name>
+    <url-pattern>/blob</url-pattern>
+  </servlet-mapping>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>all</web-resource-name>
+      <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+</web-app>
