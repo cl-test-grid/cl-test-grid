@@ -56,8 +56,6 @@
                      :if-exists :supersede
                      :if-does-not-exist :create)
 (export-to-csv out))
-                  
-
 
 
 

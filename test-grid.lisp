@@ -432,6 +432,36 @@ Thank you for participating."
      (do-plist-impl ,plist (lambda (,key ,val) ,@body))
      ,result))
 
+;; copy/paste from 
+;; http://www.gigamonkeys.com/book/practical-an-mp3-browser.html
+(defmacro with-safe-io-syntax (&body body)
+  `(with-standard-io-syntax
+     (let ((*read-eval* nil))
+       ,@body)))
+
+
+
+(defun safe-read (&rest args)
+  (with-safe-io-syntax (apply #'read args)))
+
+;; copy/paste from 
+;; http://cl-user.net/asp/-1MB/sdataQ0mpnsnLt7msDQ3YNypX8yBX8yBXnMq=/sdataQu3F$sSHnB==
+(defun file-string (path)
+  "Sucks up an entire file from PATH into a freshly-allocated string,
+      returning two values: the string and the number of bytes read."
+  (with-open-file (s path)
+    (let* ((len (file-length s))
+           (data (make-string len)))
+      (values data (read-sequence data s)))))
+
+
+(defun safe-read-file (file)
+  (with-open-file (in file 
+                      :direction :input 
+                      :element-type 'character ;'(unsigned-byte 8) + flexi-stream
+                      )
+    (safe-read in)))
+
 (defun plist-comparator (&rest props-and-preds)
   (lambda (plist-a plist-b)
     (do-plist (prop pred props-and-preds)
@@ -448,6 +478,7 @@ Thank you for participating."
         ;; property/predicate pair.
         (when (funcall pred val-b val-a)
           (return nil))))))
+
 
 ;; examples:
 #|
@@ -466,25 +497,24 @@ Thank you for participating."
 |#
 
 
-;; copy/paste from 
-;; http://www.gigamonkeys.com/book/practical-an-mp3-browser.html
-(defmacro with-safe-io-syntax (&body body)
-  `(with-standard-io-syntax
-     (let ((*read-eval* nil))
-       ,@body)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Settings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun get-settings-file()
+ (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
 
-(defun safe-read (&rest args)
-  (with-safe-io-syntax (apply #'read args)))
+(defun prompt-for-email ()
+             (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, adds")
+             (force-output *query-io*)
+             (string-trim " " (read-line *query-io*)))
 
-;; copy/paste from 
-;; http://cl-user.net/asp/-1MB/sdataQ0mpnsnLt7msDQ3YNypX8yBX8yBXnMq=/sdataQu3F$sSHnB==
-(defun file-string (path)
-  "Sucks up an entire file from PATH into a freshly-allocated string,
-      returning two values: the string and the number of bytes read."
-  (with-open-file (s path)
-    (let* ((len (file-length s))
-           (data (make-string len)))
-      (values data (read-sequence data s)))))
+(defun get-use-email ()
+((handler-case
+      (when (string= "" (getf (safe-read-file (get-settings-file)) :user-email))
+          (format t "Warning! You don't entered your email~%"))
+(t ()
+  (progn
+      (write-to-file (list :user-email (prompt-for-email)) (get-settings-file))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Database
@@ -633,7 +663,7 @@ Thank you for participating."
     (do-plist (key value (run-results run))
       (format out "~a,~a,~a,~a,~a~%"
                      (getf (run-descr run) :lib-world)
-                     (getf (run-descr run) :lisp) 
+                     (getf (run-descr run) :lisp)
                      (getf (getf (run-descr run) :contact) :email)
                      (string-downcase key) 
                      (getf value :status)))))
