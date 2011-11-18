@@ -376,6 +376,25 @@ contains the tests of _both_ libraries."
       (values data (read-sequence data s)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Settings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun get-settings-file()
+ (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
+
+(defun prompt-for-email ()
+             (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, adds")
+             (force-output *query-io*)
+             (string-trim " " (read-line *query-io*)))
+
+(defun get-use-email ()
+  (handler-case
+      (when (string= "" (getf (safe-read-file (get-settings-file)) :user-email))
+        (format t "Warning! You don't entered your email~%"))
+    (t ()
+      (progn
+        (write-to-file (list :user-email (prompt-for-email)) (get-settings-file))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -539,135 +558,29 @@ data (libraries test suites output and the run results) will be saved."
     (let ((run (list run-descr lib-results)))
       (save-run-info run run-dir)
 (format t "The test results were saved to this directory:
-+   ~A.~%" (truename run-dir)))
-+     (format t "~%Submitting libraries test logs to the online blobstore...~%")
-+     (handler-case 
-+         (progn 
-+           (submit-logs run-dir)
-+           (format t "The log files are successfully uploaded to the online blobstore.
-+ 
-+ Please submit the test run results file 
-+   ~A 
-+ to the cl-test-grid issue tracker: 
-+   https://github.com/cl-test-grid/cl-test-grid/issues
-+ 
-+  (we are working on automating the test results upload).~%"
-+                   (truename (run-info-file run-dir))))
-+       (t (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
-+ Please submit manually the full content of the results directory 
-+   ~A
-+ to the cl-test-grid issue tracker: 
-+   https://github.com/cl-test-grid/cl-test-grid/issues~%"
-+                      (type-of e)
-+                      e
-+                      (truename run-dir))))
-+     (format t "~%Thank you for the participation!~%")))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Utils
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun do-plist-impl (plist handler)
-  (do* ((cur-pos plist (cddr cur-pos))
-        (prop (first cur-pos) (first cur-pos))
-        (val (second cur-pos) (second cur-pos)))
-       ((null prop))
-    (funcall handler prop val)))
-
-(defmacro do-plist ((key val plist &optional result) &body body)
-  `(block nil 
-     (do-plist-impl ,plist (lambda (,key ,val) ,@body))
-     ,result))
-
-;; copy/paste from 
-;; http://www.gigamonkeys.com/book/practical-an-mp3-browser.html
-(defmacro with-safe-io-syntax (&body body)
-  `(with-standard-io-syntax
-     (let ((*read-eval* nil))
-       ,@body)))
-
-
-
-(defun safe-read (&rest args)
-  (with-safe-io-syntax (apply #'read args)))
-
-;; copy/paste from 
-;; http://cl-user.net/asp/-1MB/sdataQ0mpnsnLt7msDQ3YNypX8yBX8yBXnMq=/sdataQu3F$sSHnB==
-(defun file-string (path)
-  "Sucks up an entire file from PATH into a freshly-allocated string,
-      returning two values: the string and the number of bytes read."
-  (with-open-file (s path)
-    (let* ((len (file-length s))
-           (data (make-string len)))
-      (values data (read-sequence data s)))))
-
-
-(defun safe-read-file (file)
-  (with-open-file (in file 
-                      :direction :input 
-                      :element-type 'character ;'(unsigned-byte 8) + flexi-stream
-                      )
-    (safe-read in)))
-
-(defun plist-comparator (&rest props-and-preds)
-  (lambda (plist-a plist-b)
-    (do-plist (prop pred props-and-preds)
-      ;; iterate over all the property/predicate pairs
-      ;; "compare" the values of the current property
-      ;; in both plists
-      (let ((val-a (getf plist-a prop))
-            (val-b (getf plist-b prop)))                    
-        (if (funcall pred val-a val-b)
-            (return t))
-        ;; Ok, val-a is not less than val-b (as defined by our predicate).
-        ;; Lets check if they are equal. If the reverse comparation [val-b less val-a] 
-        ;; is also false, then they are equal, and we proceed to the next 
-        ;; property/predicate pair.
-        (when (funcall pred val-b val-a)
-          (return nil))))))
-
-
-;; examples:
-#|
- (let ((less (plist-comparator :a '< :b 'string<)))
-   (and (funcall less '(:a 1 :b "x") '(:a 2 :b "y"))
-        (funcall less '(:a 2 :b "x") '(:a 2 :b "y"))
-        (not (funcall less '(:a 3 :b "x") '(:a 2 :b "y")))))
-
- (equalp 
-  (sort '((:a 1 :b "x")
-          (:a 2 :b "y")
-          (:a 2 :b "y")
-          (:a 3 :b "z"))
-        (plist-comparator :a '< :b 'string<))
-  '((:A 1 :B "x") (:A 2 :B "y") (:A 2 :B "y") (:A 3 :B "z")))
-|#
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Settings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun get-settings-file()
- (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
-
-(defun prompt-for-email ()
-             (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, adds")
-             (force-output *query-io*)
-             (string-trim " " (read-line *query-io*)))
-
-(defun get-use-email ()
-((handler-case
-      (when (string= "" (getf (safe-read-file (get-settings-file)) :user-email))
-          (format t "Warning! You don't entered your email~%"))
-(t ()
-  (progn
-      (write-to-file (list :user-email (prompt-for-email)) (get-settings-file))))))
-      (format t "The test results were saved to this directory:
-  ~A.~%" (truename run-dir)))
-    (format t "~%Submitting libraries test logs to the online blobstore...~%")
-    (handler-case 
-        (progn 
-          (submit-logs run-dir)
-          (format t "The log files are successfully uploaded to the online blobstore.
+   ~A.~%" (truename run-dir)))
+     (format t "~%Submitting libraries test logs to the online blobstore...~%")
+     (handler-case 
+         (progn 
+           (submit-logs run-dir)
+           (format t "The log files are successfully uploaded to the online blobstore.
+ 
+ Please submit the test run results file 
+   ~A 
+ to the cl-test-grid issue tracker: 
+   https://github.com/cl-test-grid/cl-test-grid/issues
+ 
+  (we are working on automating the test results upload).~%"
+                   (truename (run-info-file run-dir))))
+       (t (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
+ Please submit manually the full content of the results directory 
+   ~A
+ to the cl-test-grid issue tracker: 
+   https://github.com/cl-test-grid/cl-test-grid/issues~%"
+                      (type-of e)
+                      e
+                      (truename run-dir))))
+     (format t "~%Thank you for the participation!~%")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Database

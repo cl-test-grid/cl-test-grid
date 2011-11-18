@@ -21,7 +21,7 @@
 
 (setf *db* (read-db))
 (setf run-result
-      (run-libtests))
+      (run-libtests '(:trivial-features)))
 (add-run run-result)
 (save-db)
 
@@ -41,7 +41,7 @@
             :key #'first))
 
 ;; generate report    
-(with-open-file (out "D:\\cl-test-grid\\report.html"
+(with-open-file (out "C:\\Users\\anton\\projects\\cl-test-grid\\report.html"
                      :direction :output
                      :if-exists :supersede
                      :if-does-not-exist :create)
