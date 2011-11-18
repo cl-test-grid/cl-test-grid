@@ -11,6 +11,7 @@
              :initform (error "The :base-url parameter is required."))))
 
 (defun make-blob-store (&rest params &key base-url)
+  (declare (ignore base-url))
   (apply #'make-instance 'blobstore params))
 
 ;; copy/paste from 
