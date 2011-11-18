@@ -3,10 +3,12 @@
 #+clisp 
 (load "/Users/anton/.clisprc")
 
-(pushnew "C:/Users/anton/projects/cl-test-grid/"
-         asdf:*central-registry*)
+(pushnew "D:/cl-test-grid/" asdf:*central-registry*)
+
+(pushnew "C:/Users/anton/projects/cl-test-grid/" asdf:*central-registry*)
 
 (asdf:operate 'asdf:load-op :test-grid)
+
 (setf test-grid::*gae-blobstore-base-url* "http://localhost:8080")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -38,8 +40,8 @@
             (plist-comparator :lisp #'string<)
             :key #'first))
 
-;; generate report      
-(with-open-file (out "C:\\Users\\anton\\projects\\cl-test-grid\\report.html"
+;; generate report    
+(with-open-file (out "D:\\cl-test-grid\\report.html"
                      :direction :output
                      :if-exists :supersede
                      :if-does-not-exist :create)
@@ -51,3 +53,8 @@
 (let ((run-dir #P"C:\\Users\\anton\\projects\\cl-test-grid\\test-runs\\20111118032502-sbcl-1.0.47.9.275.wth.kovalenko-win-x86\\"))
   (submit-logs run-dir))
 
+(with-open-file (out "D:\\cl-test-grid\\results.csv"
+                     :direction :output
+                     :if-exists :supersede
+                     :if-does-not-exist :create)
+  (export-to-csv out))

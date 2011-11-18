@@ -653,7 +653,7 @@ to the cl-test-grid issue tracker:
     (:fail "fail-status")
     (:no-resource "no-resource-status")
     (otherwise "")))
-              
+           
 (defun render-single-letter-status (test-run lib-name lib-test-result)
   (let ((status (normalize-status (getf lib-test-result :status))))
     (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
@@ -696,6 +696,19 @@ to the cl-test-grid issue tracker:
                  (subseq template 0 pos)
                  html-table
                  (subseq template (+ pos (length placeholder))))))
+
+(defun export-to-csv (out &optional
+                      (db *db*))
+ 
+ (format out "Lib World,Lisp,Runner,LibName,Status~%")
+  (dolist (run (getf db :runs))
+    (do-plist (key value (run-results run))
+      (format out "~a,~a,~a,~a,~a~%"
+                     (getf (run-descr run) :lib-world)
+                     (getf (run-descr run) :lisp) 
+                     (getf (getf (run-descr run) :contact) :email)
+                     (string-downcase key) 
+                     (getf value :status)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
