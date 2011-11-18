@@ -7,6 +7,7 @@
          asdf:*central-registry*)
 
 (asdf:operate 'asdf:load-op :test-grid)
+(setf test-grid::*gae-blobstore-base-url* "http://localhost:8080")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; User (my) session
@@ -21,7 +22,6 @@
       (run-libtests))
 (add-run run-result)
 (save-db)
-
 
 (defun read-file (file)
   (with-open-file (in file
@@ -47,3 +47,7 @@
 
 ;; generate fake database content to test reporting
 (setf (getf *db* :runs) (generate-fake-run-results))
+
+(let ((run-dir #P"C:\\Users\\anton\\projects\\cl-test-grid\\test-runs\\20111118032502-sbcl-1.0.47.9.275.wth.kovalenko-win-x86\\"))
+  (submit-logs run-dir))
+

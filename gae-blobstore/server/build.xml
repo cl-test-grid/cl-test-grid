@@ -1,0 +1,60 @@
+<project name="cltestgridblobstore" default="compile">
+  <property name="project.dir" location="." />
+  <property file="${project.dir}/build.properties"/>
+
+  <import file="${appengine.sdk}/config/user/ant-macros.xml" />
+
+  <path id="project.classpath">
+    <pathelement path="${project.dir}/war/WEB-INF/classes" />
+    <fileset dir="${project.dir}/war/WEB-INF/lib">
+      <include name="**/*.jar" />
+    </fileset>
+    <fileset dir="${appengine.sdk}/lib">
+      <include name="shared/**/*.jar" />
+    </fileset>
+  </path>
+
+  <target name="clean">
+    <delete includeemptydirs="true">
+      <fileset dir="${project.dir}/war/WEB-INF/classes"
+                includes="**/*"/>
+      <fileset dir="${project.dir}/war/WEB-INF/lib"
+                includes="**/*"/>
+    </delete>
+  </target>
+
+  <target name="copyjars">
+    <copy
+        todir="${project.dir}/war/WEB-INF/lib"
+         flatten="true">
+      <fileset dir="${appengine.sdk}/lib/user">
+        <include name="appengine-api-*.jar" />
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="compile" depends="copyjars">
+    <javac
+        srcdir="${project.dir}/src"
+        destdir="${project.dir}/war/WEB-INF/classes"
+        classpathref="project.classpath"
+        debug="on" />
+  </target>
+
+  <target name="runserver" depends="compile"
+      description="Starts the development server.">
+    <dev_appserver war="${project.dir}/war" />
+  </target>
+
+  <target name="update" depends="compile"
+      description="Uploads the application to App Engine.">
+    <appcfg action="update" war="${project.dir}/war" />
+  </target>
+
+  <target name="rollback" depends="compile"
+      description="Rolls back an interrupted application update.">
+    <appcfg action="rollback" war="${project.dir}/war" />
+  </target>
+
+</project>
+

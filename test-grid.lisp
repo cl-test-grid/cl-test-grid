@@ -38,9 +38,10 @@ TODO:
    fake test results programmatically to make this task
    easier.
  - simpliest reporting to allow overview of library test statuses 
-   + Test Runs report: every test run as a row in a table
+   - Test Runs report: every test run as a row in a table
      + legend or a tooltip in the report for test statuses
      + color for statuses
+     - use the online blob URL in the report
    - CSV export of the database to use it then with spreadsheets,
      google fusion tables, etc. and format as a pivot for 
      various projections (by quicklisp releases, by
@@ -57,6 +58,11 @@ TODO:
  - readme with explanation of the project goal and
    how to use it
    5h
+ - change db format
+   - test run as plist (:descr <descr> :run-results <run-results>)
+     instead of just (<descr> <run-results>)
+   - run-results as alist instead of plist (more convenient
+     for standard mapping functions, instead of current do-lib-results)
  - add more libraries: total number of 20 libraries
    is enough for the beginning
  - when loading of a library or library test system
@@ -72,6 +78,7 @@ TODO:
    checkout procedure will be too long to be considered
    convenient)
    5h
+ - run the tests on all the implementations available for us.
 ==================================================
 ==========    Milestone: release 0    ============
 ==================================================
@@ -108,9 +115,6 @@ TODO:
    time about minute to finish, and if during this minute
    nithing happens it is not user-friendly)
 |#
-
-(defparameter *src-base-dir* :src-base-dir-is-not-initialized
-  "Base directory of the source code. Initialized from test-grid.asd.")
 
 (defgeneric libtest (library-name)
   (:documentation "Define a method for this function
@@ -293,7 +297,7 @@ contains the tests of _both_ libraries."
         (format t "~A tests failed." lib))
       (let ((output (get-output-stream-string buf)))
         (list :status status :output output
-              :output-char-length (length output))))))
+              :log-char-length (length output))))))
 
 (defun run-descr (run)
   "The description part of the test run."
@@ -302,6 +306,9 @@ contains the tests of _both_ libraries."
 (defun run-results (run)
   "The list of test suite statuses for every library in the specified test run."
   (second run))
+
+(defun (setf run-results) (new-run-results test-run)
+  (setf (second test-run) new-run-results))
 
 (defmacro do-lib-results ((lib lib-result run-results) &body body)
   `(do-plist (,lib ,lib-result ,run-results) ,@body))
@@ -357,7 +364,6 @@ data (libraries test suites output and the run results) will be saved."
           (fmt-time (getf run-descr :time))
           (getf run-descr :lisp)))
 
-;; todo: config
 (defun test-output-base-dir ()
   (merge-pathnames "test-runs/"
                    test-grid-config:*src-base-dir*))
@@ -369,9 +375,12 @@ data (libraries test suites output and the run results) will be saved."
                     :type      nil)
                    (test-output-base-dir)))
 
+(defun lib-log-file (test-run-directory lib-name)
+  (merge-pathnames (string-downcase lib-name)
+                   test-run-directory))
+
 (defun save-lib-log (lib-name log test-run-directory)
-  (let ((lib-log-file (merge-pathnames (string-downcase lib-name)
-                                       test-run-directory)))
+  (let ((lib-log-file (lib-log-file test-run-directory lib-name)))
   (with-open-file (out lib-log-file
                        :direction :output
                        :if-exists :overwrite
@@ -387,11 +396,52 @@ data (libraries test suites output and the run results) will be saved."
     (pprint obj out))
   obj)
 
+(defun run-info-file (test-run-directory)
+  (merge-pathnames "test-run-info.lisp"
+                   test-run-directory))
+
 (defun save-run-info (test-run directory)
-  (let ((run-file (merge-pathnames "test-run-info.lisp"
-                                   directory)))
-    (write-to-file test-run run-file)))
-    
+  (let ((run-file (run-info-file directory)))
+    (write-to-file test-run run-file)))    
+
+(defun gae-blobstore-dir ()
+  (merge-pathnames "gae-blobstore/lisp-client/" test-grid-config:*src-base-dir*))
+
+(defparameter *gae-blobstore-base-url* "http://cl-test-grid.appspot.com")
+
+(defun get-blobstore ()
+  (pushnew (truename (gae-blobstore-dir)) asdf:*central-registry* :test #'equal)
+  (asdf:operate 'asdf:load-op '#:test-grid-gae-blobstore)
+  (funcall (intern (string '#:make-blob-store) '#:test-grid-gae-blobstore) 
+           :base-url *gae-blobstore-base-url*))
+
+(defun submit-logs (test-run-dir)
+  (let* ((blobstore (get-blobstore))
+         (run-info (safe-read-file (run-info-file test-run-dir)))
+         (submit-params '()))
+    ;; prepare parameters for the SUBMIT-FILES blobstore function
+    (do-lib-results (lib lib-result (run-results run-info))
+      (declare (ignore lib-result))
+      (push (cons lib 
+                  (lib-log-file test-run-dir lib))
+            submit-params))
+    ;; submit files to the blobstore and receive their blobkeys
+    ;; in response
+    (let* ((libname-to-blobkey-alist (test-grid-blobstore:submit-files blobstore submit-params)))
+      ;; Now store the blobkeys for every library in the run-info.
+      ;; Note, we destructively modify parts of the previously
+      ;; read run-info.
+      (flet ((get-blob-key (lib)
+               (or (cdr (assoc lib libname-to-blobkey-alist))
+                   (error "blobstore didn't returned blob bey for the log of the ~A libary" lib))))
+        (let ((new-run-results '()))
+          (do-lib-results (lib lib-result (run-results run-info))
+            (setf (getf lib-result :log-blob-key) (get-blob-key lib))
+            (push lib-result new-run-results)
+            (push lib new-run-results))
+          (setf (run-results run-info) new-run-results)
+          (save-run-info run-info test-run-dir)
+          run-info)))))
 
 (defun run-libtests (&optional (libs *all-libs*))
   (let* ((run-descr (make-run-descr))
@@ -408,15 +458,29 @@ data (libraries test suites output and the run results) will be saved."
              (getf run-descr :time)))
     (let ((run (list run-descr lib-results)))
       (save-run-info run run-dir)
-      (format t "
+      (format t "The test results were saved to this directory:
+  ~A.~%" (truename run-dir)))
+    (format t "~%Submitting libraries test logs to the online blobstore...~%")
+    (handler-case 
+        (progn 
+          (submit-logs run-dir)
+          (format t "The log files are successfully uploaded to the online blobstore.
 
-The test results were saved to ~A. 
+Please submit the test run results file 
+  ~A 
+to the cl-test-grid issue tracker: 
+  https://github.com/cl-test-grid/cl-test-grid/issues
 
-Please submit the results to the cl-test-grid project (we are working on automating the test results submission).
-
-Thank you for participating." 
-              (truename run-dir))
-      run)))
+ (we are working on automating the test results upload).~%"
+                  (truename (run-info-file run-dir))))
+      (t (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A.
+Please submit manually the full content of the results directory 
+  ~A
+to the cl-test-grid issue tracker: 
+  https://github.com/cl-test-grid/cl-test-grid/issues~%"
+                     e
+                     (truename run-dir))))
+    (format t "~%Thank you for the participation!~%")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
@@ -476,6 +540,13 @@ Thank you for participating."
 
 (defun safe-read (&rest args)
   (with-safe-io-syntax (apply #'read args)))
+
+(defun safe-read-file (file)
+  (with-open-file (in file 
+                      :direction :input 
+                      :element-type 'character ;'(unsigned-byte 8) + flexi-stream
+                      )
+    (safe-read in)))
 
 ;; copy/paste from 
 ;; http://cl-user.net/asp/-1MB/sdataQ0mpnsnLt7msDQ3YNypX8yBX8yBXnMq=/sdataQu3F$sSHnB==
@@ -541,7 +612,7 @@ Thank you for participating."
                 (lib-results '()))
             (dolist (lib *all-libs*)
               (setf (getf lib-results lib)
-                    (list :status (random-status) :output-char-length 50)))
+                    (list :status (random-status) :log-char-length 50)))
             (push (list run-descr lib-results) runs))))
       runs)))
 
