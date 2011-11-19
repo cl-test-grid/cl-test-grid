@@ -42,7 +42,7 @@
                      :direction :output
                      :if-exists :supersede
                      :if-does-not-exist :create)
-  (write-sequence (fmt-report (summary-table-html)) out))
+  (write-sequence (test-runs-report) out))
 
 (with-open-file (out "C:\\Users\\anton\\projects\\cl-test-grid\\report.csv"
                      :direction :output

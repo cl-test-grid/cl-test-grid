@@ -708,9 +708,9 @@ data (libraries test suites output and the run results) will be saved."
             (lib-log-uri test-run lib-test-result)
             (single-letter-status status))))
 
-(defun summary-table-html (&optional 
-                           (status-renderer 'render-single-letter-status)
-                           (db *db*))
+(defun test-runs-table-html (&optional 
+                             (db *db*)
+                             (status-renderer 'render-single-letter-status))
   (with-output-to-string (out)
     (write-line "<table cellspacing=\"1\" class=\"tablesorter\">" out)
     
@@ -735,7 +735,7 @@ data (libraries test suites output and the run results) will be saved."
     (write-line "</tbody>" out)
     (write-line "</table>" out)))
 
-(defun fmt-report (html-table)
+(defun fmt-test-runs-report (html-table)
   (let* ((template (file-string *report-template*))
          (placeholder "{THE-TABLE}")
          (pos (or (search placeholder template)
@@ -744,6 +744,9 @@ data (libraries test suites output and the run results) will be saved."
                  (subseq template 0 pos)
                  html-table
                  (subseq template (+ pos (length placeholder))))))
+
+(defun test-runs-report (&optional (db *db*))
+  (fmt-test-runs-report (test-runs-table-html db)))
 
 (defun export-to-csv (out &optional (db *db*))
   (format out "Lib World,Lisp,Runner,LibName,Status~%")
