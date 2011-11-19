@@ -649,10 +649,10 @@ data (libraries test suites output and the run results) will be saved."
             (push (make-run run-descr lib-results) runs))))
       runs)))
 
-(defvar *report-template* 
-  (merge-pathnames "report-template.html"
+(defvar *test-runs-report-template* 
+  (merge-pathnames "test-runs-report-template.html"
                    test-grid-config:*src-base-dir*))
- 
+
 (defun vertical-html (libname) 
   (let ((maybeBr "")
         (libname (string libname)))
@@ -736,7 +736,7 @@ data (libraries test suites output and the run results) will be saved."
     (write-line "</table>" out)))
 
 (defun fmt-test-runs-report (html-table)
-  (let* ((template (file-string *report-template*))
+  (let* ((template (file-string *test-runs-report-template*))
          (placeholder "{THE-TABLE}")
          (pos (or (search placeholder template)
                   (error "Can't find the placeholder ~A in the report template file ~A" placeholder *report-template*))))
