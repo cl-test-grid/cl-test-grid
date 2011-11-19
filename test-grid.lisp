@@ -560,13 +560,12 @@ data (libraries test suites output and the run results) will be saved."
              (getf run-descr :time)))
     (let ((run (make-run run-descr lib-results)))
       (save-run-info run run-dir)
-(format t "The test results were saved to this directory:
-   ~A.~%" (truename run-dir)))
-     (format t "~%Submitting libraries test logs to the online blobstore...~%")
-     (handler-case 
-         (progn 
-           (submit-logs run-dir)
-           (format t "The log files are successfully uploaded to the online blobstore.
+      (format t "The test results were saved to this directory:
+   ~A.~%" (truename run-dir))
+      (format t "~%Submitting libraries test logs to the online blobstore...~%")
+      (handler-case 
+          (let ((run-with-blobkeys (submit-logs run-dir)))          
+            (format t "The log files are successfully uploaded to the online blobstore.
  
  Please submit the test run results file 
    ~A 
@@ -574,16 +573,18 @@ data (libraries test suites output and the run results) will be saved."
    https://github.com/cl-test-grid/cl-test-grid/issues
  
   (we are working on automating the test results upload).~%"
-                   (truename (run-info-file run-dir))))
-       (t (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
+                    (truename (run-info-file run-dir)))
+            run-with-blobkeys)
+        (t (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
  Please submit manually the full content of the results directory 
    ~A
  to the cl-test-grid issue tracker: 
    https://github.com/cl-test-grid/cl-test-grid/issues~%"
-                      (type-of e)
-                      e
-                      (truename run-dir))))
-     (format t "~%Thank you for the participation!~%")))
+                       (type-of e)
+                       e
+                       (truename run-dir))))
+      (format t "~%Thank you for the participation!~%")
+      run)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Database
