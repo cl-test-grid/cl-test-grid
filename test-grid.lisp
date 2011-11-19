@@ -61,8 +61,10 @@ TODO:
  - change db format
    + test run as plist (:descr <descr> :run-results <run-results>)
      instead of just (<descr> <run-results>)
-   - run-results as alist instead of plist (more convenient
-     for standard mapping functions, instead of current do-lib-results)
+   + run-results as a list instead of plist; libname
+     which was a plist key is now a property of the lib-result 
+     object. It is more convenient for standard mapping functions, 
+     instead of current do-lib-results.
  - add more libraries: total number of 20 libraries
    is enough for the beginning
  - when loading of a library or library test system
@@ -296,7 +298,8 @@ contains the tests of _both_ libraries."
       (when (eq :fail status)
         (format t "~A tests failed." lib))
       (let ((output (get-output-stream-string buf)))
-        (list :status status :output output
+        (list :libname lib
+              :status status :output output
               :log-char-length (length output))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -347,6 +350,9 @@ contains the tests of _both_ libraries."
   '((:A 1 :B "x") (:A 2 :B "y") (:A 2 :B "y") (:A 3 :B "z")))
 |#
 
+(defun getter (prop)
+  #'(lambda (plist)
+      (getf plist prop)))
 
 ;; copy/paste from 
 ;; http://www.gigamonkeys.com/book/practical-an-mp3-browser.html
@@ -412,33 +418,6 @@ contains the tests of _both_ libraries."
 (defun make-run (description lib-results)
   (list :descr description :results lib-results))
 
-(defmacro do-lib-results ((lib lib-result run-results) &body body)
-  `(do-plist (,lib ,lib-result ,run-results) ,@body))
-
-;; these two functions are not used now, maybe delete them
-
-(defun save-run-logs (run directory)
-  (ensure-directories-exist directory)
-  (let ((lib-results (run-results run)))
-    (do-lib-results (lib lib-result lib-results)
-      (let ((lib-output (getf lib-result :output))
-            (lib-log-file (merge-pathnames (string-downcase lib)
-                                            directory)))
-        (with-open-file (out lib-log-file
-                             :direction :output
-                             :if-exists :overwrite
-                             :if-does-not-exist :create)
-          (write-sequence lib-output out))))))
-
-(defun delete-output (run)
-  (let ((lib-results (run-results run)))
-    (do ((cur lib-results (cddr cur)))
-        ((null cur))
-      (remf (second cur) :output)))
-  run)
-
-;; end of the two functions to be deleted
-
 (defun fmt-time (universal-time &optional destination)
   "The preferred time format used in the cl-test-grid project."
   (multiple-value-bind (sec min hour date month year)
@@ -483,11 +462,11 @@ data (libraries test suites output and the run results) will be saved."
 
 (defun save-lib-log (lib-name log test-run-directory)
   (let ((lib-log-file (lib-log-file test-run-directory lib-name)))
-  (with-open-file (out lib-log-file
-                       :direction :output
-                       :if-exists :overwrite
-                       :if-does-not-exist :create)
-    (write-sequence log out))))
+    (with-open-file (out lib-log-file
+                         :direction :output
+                         :if-exists :overwrite
+                         :if-does-not-exist :create)
+      (write-sequence log out))))
 
 (defun write-to-file (obj file)
   "Write to file the lisp object OBJ in a format acceptable to READ."
@@ -520,31 +499,33 @@ data (libraries test suites output and the run results) will be saved."
 (defun submit-logs (test-run-dir)
   (let* ((blobstore (get-blobstore))
          (run-info (safe-read-file (run-info-file test-run-dir)))
-         (submit-params '()))
-    ;; prepare parameters for the SUBMIT-FILES blobstore function
-    (do-lib-results (lib lib-result (run-results run-info))
-      (declare (ignore lib-result))
-      (push (cons lib 
-                  (lib-log-file test-run-dir lib))
-            submit-params))
-    ;; submit files to the blobstore and receive their blobkeys
-    ;; in response
-    (let* ((libname-to-blobkey-alist (test-grid-blobstore:submit-files blobstore submit-params)))
+         ;; prepare parameters for the SUBMIT-FILES blobstore function
+         (submit-params (mapcar #'(lambda (lib-result)
+                                    (let ((libname (getf lib-result :libname)))
+                                      (cons libname
+                                            (lib-log-file test-run-dir libname))))
+                                (run-results run-info))))
+    ;; submit files to the blobstore and receive 
+    ;; their blobkeys in response
+    (let ((libname-to-blobkey-alist 
+           (test-grid-blobstore:submit-files blobstore 
+                                             submit-params)))
       ;; Now store the blobkeys for every library in the run-info.
       ;; Note, we destructively modify parts of the previously
       ;; read run-info.
       (flet ((get-blob-key (lib)
                (or (cdr (assoc lib libname-to-blobkey-alist))
-                   (error "blobstore didn't returned blob bey for the log of the ~A libary" lib))))
-        (let ((new-run-results '()))
-          (do-lib-results (lib lib-result (run-results run-info))
-            (setf (getf lib-result :log-blob-key) (get-blob-key lib))
-            (push lib-result new-run-results)
-            (push lib new-run-results))
-          (setf (run-results run-info) new-run-results)
-          (save-run-info run-info test-run-dir)
-          run-info)))))
-
+                   (error "blobstore didn't returned blob key for the log of the ~A libary" lib))))
+        (setf (run-results run-info)
+              (mapcar #'(lambda (lib-result)
+                          (setf (getf lib-result :log-blob-key) 
+                                (get-blob-key (getf lib-result :libname)))
+                          lib-result)
+                      (run-results run-info))))
+      ;; finally, save the updated run-info with blobkeys 
+      ;; to the file. Returns the run-info.
+      (save-run-info run-info test-run-dir))))
+  
 (defun run-libtests (&optional (libs *all-libs*))
   (let* ((run-descr (make-run-descr))
          (run-dir (run-directory run-descr))
@@ -554,14 +535,14 @@ data (libraries test suites output and the run results) will be saved."
       (let ((lib-result (run-libtest lib)))
         (save-lib-log lib (getf lib-result :output) run-dir)
         (remf lib-result :output)
-        (setf (getf lib-results lib) lib-result)))
+        (push lib-result lib-results)))
     (setf (getf run-descr :run-duration) 
           (- (get-universal-time)
              (getf run-descr :time)))
     (let ((run (make-run run-descr lib-results)))
       (save-run-info run run-dir)
-      (format t "The test results were saved to this directory:
-   ~A.~%" (truename run-dir))
+      (format t "The test results were saved to this directory: ~%~A.~%" 
+              (truename run-dir))
       (format t "~%Submitting libraries test logs to the online blobstore...~%")
       (handler-case 
           (let ((run-with-blobkeys (submit-logs run-dir)))          
@@ -639,8 +620,8 @@ data (libraries test suites output and the run results) will be saved."
                                                                   "foo@gmail.com")))))
                 (lib-results '()))
             (dolist (lib *all-libs*)
-              (setf (getf lib-results lib)
-                    (list :status (random-status) :log-char-length 50)))
+              (push (list :libname lib :status (random-status) :log-char-length 50)
+                    lib-results))
             (push (make-run run-descr lib-results) runs))))
       runs)))
 
@@ -682,11 +663,11 @@ data (libraries test suites output and the run results) will be saved."
     (:no-resource "no-resource-status")
     (otherwise "")))
            
-(defun render-single-letter-status (test-run lib-name lib-test-result)
+(defun render-single-letter-status (test-run lib-test-result)
   (let ((status (normalize-status (getf lib-test-result :status))))
     (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
             (status-css-class status)
-            (lib-log-uri test-run lib-name)
+            (lib-log-uri test-run (getf lib-test-result :libname))
             (single-letter-status status))))
 
 (defun summary-table-html (&optional 
@@ -704,14 +685,15 @@ data (libraries test suites output and the run results) will be saved."
     (dolist (run (getf db :runs))
       (let ((run-descr (run-descr run))
             (lib-statuses (run-results run)))
-      (format out "<tr><td>~A</td><td>~A</td><td>~A</td>" 
-              (getf run-descr :lib-world) 
-              (getf run-descr :lisp)
-              (getf (getf run-descr :contact) :email))
-      (dolist (lib *all-libs*)
-        (format out "<td>~A</td>" 
-                (funcall status-renderer run lib (getf lib-statuses lib))))
-      (write-line "</tr>" out)))
+        (format out "<tr><td>~A</td><td>~A</td><td>~A</td>" 
+                (getf run-descr :lib-world) 
+                (getf run-descr :lisp)
+                (getf (getf run-descr :contact) :email))
+        (dolist (lib *all-libs*)
+          (format out "<td>~A</td>" 
+                  (funcall status-renderer run (find lib lib-statuses 
+                                                     :key (getter :libname)))))
+        (write-line "</tr>" out)))
     (write-line "</tbody>" out)
     (write-line "</table>" out)))
 
@@ -725,18 +707,17 @@ data (libraries test suites output and the run results) will be saved."
                  html-table
                  (subseq template (+ pos (length placeholder))))))
 
-(defun export-to-csv (out &optional
-                      (db *db*))
- 
- (format out "Lib World,Lisp,Runner,LibName,Status~%")
+(defun export-to-csv (out &optional (db *db*))
+  (format out "Lib World,Lisp,Runner,LibName,Status~%")
   (dolist (run (getf db :runs))
-    (do-plist (key value (run-results run))
-      (format out "~a,~a,~a,~a,~a~%"
-                     (getf (run-descr run) :lib-world)
-                     (getf (run-descr run) :lisp)
-                     (getf (getf (run-descr run) :contact) :email)
-                     (string-downcase key) 
-                     (getf value :status)))))
+    (let ((run-descr (run-descr run)))
+      (dolist (lib-result (run-results run))
+        (format out "~a,~a,~a,~a,~a~%"
+                (getf run-descr :lib-world)
+                (getf run-descr :lisp)
+                (getf (getf run-descr :contact) :email)
+                (string-downcase (getf lib-result :libname))
+                (getf lib-result :status))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
