@@ -59,7 +59,7 @@ TODO:
    how to use it
    5h
  - change db format
-   - test run as plist (:descr <descr> :run-results <run-results>)
+   + test run as plist (:descr <descr> :run-results <run-results>)
      instead of just (<descr> <run-results>)
    - run-results as alist instead of plist (more convenient
      for standard mapping functions, instead of current do-lib-results)
@@ -400,14 +400,17 @@ contains the tests of _both_ libraries."
 
 (defun run-descr (run)
   "The description part of the test run."
-  (first run))
+  (getf run :descr))
 
 (defun run-results (run)
   "The list of test suite statuses for every library in the specified test run."
-  (second run))
+  (getf run :results))
 
 (defun (setf run-results) (new-run-results test-run)
-  (setf (second test-run) new-run-results))
+  (setf (getf test-run :results) new-run-results))
+
+(defun make-run (description lib-results)
+  (list :descr description :results lib-results))
 
 (defmacro do-lib-results ((lib lib-result run-results) &body body)
   `(do-plist (,lib ,lib-result ,run-results) ,@body))
@@ -416,7 +419,7 @@ contains the tests of _both_ libraries."
 
 (defun save-run-logs (run directory)
   (ensure-directories-exist directory)
-  (let ((lib-results (second run)))
+  (let ((lib-results (run-results run)))
     (do-lib-results (lib lib-result lib-results)
       (let ((lib-output (getf lib-result :output))
             (lib-log-file (merge-pathnames (string-downcase lib)
@@ -428,7 +431,7 @@ contains the tests of _both_ libraries."
           (write-sequence lib-output out))))))
 
 (defun delete-output (run)
-  (let ((lib-results (second run)))
+  (let ((lib-results (run-results run)))
     (do ((cur lib-results (cddr cur)))
         ((null cur))
       (remf (second cur) :output)))
@@ -555,7 +558,7 @@ data (libraries test suites output and the run results) will be saved."
     (setf (getf run-descr :run-duration) 
           (- (get-universal-time)
              (getf run-descr :time)))
-    (let ((run (list run-descr lib-results)))
+    (let ((run (make-run run-descr lib-results)))
       (save-run-info run run-dir)
 (format t "The test results were saved to this directory:
    ~A.~%" (truename run-dir)))
@@ -637,7 +640,7 @@ data (libraries test suites output and the run results) will be saved."
             (dolist (lib *all-libs*)
               (setf (getf lib-results lib)
                     (list :status (random-status) :log-char-length 50)))
-            (push (list run-descr lib-results) runs))))
+            (push (make-run run-descr lib-results) runs))))
       runs)))
 
 (defvar *report-template* 
