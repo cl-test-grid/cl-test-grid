@@ -29,26 +29,14 @@
 (setf *db* '(:version 0 :runs ()))
 (setf *db* (read-db))
 
-(add-run run-result)
+(add-run run-result *db*)
 
-(save-db)
+(save-db *db*)
+
+(generate-reports *db*)
 
 ;; generate fake database content to test reporting
 (setf (getf *db* :runs) (generate-fake-run-results))
-
-;; generate reports
-
-(with-open-file (out "C:\\Users\\anton\\projects\\cl-test-grid\\report.html"
-                     :direction :output
-                     :if-exists :supersede
-                     :if-does-not-exist :create)
-  (write-sequence (test-runs-report) out))
-
-(with-open-file (out "C:\\Users\\anton\\projects\\cl-test-grid\\report.csv"
-                     :direction :output
-                     :if-exists :supersede
-                     :if-does-not-exist :create)
-  (export-to-csv out))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; developer experiments

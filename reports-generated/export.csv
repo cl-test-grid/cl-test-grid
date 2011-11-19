@@ -1,0 +1,9 @@
+Lib World,Lisp,Runner,LibName,Status
+quicklisp 2011-07-30,sbcl-1.0.47.9.275.wth.kovalenko-win-x86,avodonosov@yandex.ru,bordeaux-threads,FAIL
+quicklisp 2011-07-30,sbcl-1.0.47.9.275.wth.kovalenko-win-x86,avodonosov@yandex.ru,flexi-streams,FAIL
+quicklisp 2011-07-30,sbcl-1.0.47.9.275.wth.kovalenko-win-x86,avodonosov@yandex.ru,usocket,FAIL
+quicklisp 2011-07-30,sbcl-1.0.47.9.275.wth.kovalenko-win-x86,avodonosov@yandex.ru,cl-ppcre,OK
+quicklisp 2011-07-30,sbcl-1.0.47.9.275.wth.kovalenko-win-x86,avodonosov@yandex.ru,cffi,FAIL
+quicklisp 2011-07-30,sbcl-1.0.47.9.275.wth.kovalenko-win-x86,avodonosov@yandex.ru,trivial-features,OK
+quicklisp 2011-07-30,sbcl-1.0.47.9.275.wth.kovalenko-win-x86,avodonosov@yandex.ru,babel,FAIL
+quicklisp 2011-07-30,sbcl-1.0.47.9.275.wth.kovalenko-win-x86,avodonosov@yandex.ru,alexandria,FAIL

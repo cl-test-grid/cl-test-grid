@@ -603,7 +603,7 @@ data (libraries test suites output and the run results) will be saved."
 (defun add-run (run-info &optional (db *db*))
   (push run-info (getf db :runs)))
 
-(defun save-db (&optional (stream-or-path *standard-db-file*) (db *db*))
+(defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
   (with-open-file (out stream-or-path 
                        :direction :output 
                        :element-type 'character ;'(unsigned-byte 8) + flexi-stream
@@ -759,6 +759,26 @@ data (libraries test suites output and the run results) will be saved."
                 (getf (getf run-descr :contact) :email)
                 (string-downcase (getf lib-result :libname))
                 (getf lib-result :status))))))
+
+(defun generate-reports (&optional (db *db*))
+                          
+  (with-open-file (out (merge-pathnames "test-runs-report.html"
+                                        (reports-dir))
+                       :direction :output
+                       :if-exists :supersede
+                       :if-does-not-exist :create)
+    (write-sequence (test-runs-report) out))
+  
+  (with-open-file (out (merge-pathnames "export.csv"
+                                        (reports-dir))
+                       :direction :output
+                       :if-exists :supersede
+                       :if-does-not-exist :create)
+    (export-to-csv out)))
+
+(defun reports-dir () 
+  (merge-pathnames "reports-generated/"
+                   test-grid-config:*src-base-dir*))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
