@@ -416,13 +416,14 @@ contains the tests of _both_ libraries."
              (force-output *query-io*)
              (string-trim " " (read-line *query-io*)))
 
-(defun get-use-email ()
+(defun get-user-email ()
   (handler-case
       (when (string= "" (getf (safe-read-file (get-settings-file)) :user-email))
         (format t "Warning! You don't entered your email~%"))
     (t ()
       (progn
-        (write-to-file (list :user-email (prompt-for-email)) (get-settings-file))))))
+        (write-to-file (list :user-email (prompt-for-email)) (get-settings-file)))))
+(getf (safe-read-file (get-settings-file)) :user-email))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
