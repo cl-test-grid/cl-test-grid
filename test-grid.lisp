@@ -42,10 +42,21 @@ TODO:
      + legend or a tooltip in the report for test statuses
      + color for statuses
      - use the online blob URL in the report
-   - CSV export of the database to use it then with spreadsheets,
-     google fusion tables, etc. and format as a pivot for 
-     various projections (by quicklisp releases, by
-     platform, etc)
+   - A table table -like report of library test results, allowing
+     rows/columns to be any of quicklisp distro, lisp version
+     library name. With grouping and sorging.
+   + CSV export of the database to use it then with spreadsheets,
+     google fusion tables, etc. Initial intent
+     was to format it as a pivot for various projections 
+     (by quicklisp releases, by platform, etc).
+     But neither google docs spreadsheet, nor google fusion
+     table allow as to format results as we want
+     (the main problem, it is impossible to use
+     a custom aggregation function for pivot
+     cells, because standard aggregation functions
+     are numeric, but we want a report cell
+     to represent test result(s) for a particular
+     library, i.e. :ok, :fail, :no-resource).
      5h
    - an informer which may be embedded into a library
      project page, with reports about the test statuses 
