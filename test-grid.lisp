@@ -41,7 +41,7 @@ TODO:
    - Test Runs report: every test run as a row in a table
      + legend or a tooltip in the report for test statuses
      + color for statuses
-     - use the online blob URL in the report
+     + use the online blob URL in the report
    - A table table -like report of library test results, allowing
      rows/columns to be any of quicklisp distro, lisp version
      library name. With grouping and sorging.
@@ -95,6 +95,19 @@ TODO:
 ==================================================
 ==========    Milestone: release 0    ============
 ==================================================
+ - finalize the terminology we use in the code
+   to refer our main data: 
+   - test status for a particular library
+   - library test result object (includes the status 
+     as well as log length, the key of the log
+     in the online blob store, probably the
+     library test duration)
+   - list of library test results in a particular test 
+     run
+   - test run description, consists of lisp name,
+     libraries set (think quicklisp distro),
+     the user contacts, total test run duration,
+     etc.
  + more abstract accessor to parts of DB info instead of
    getf by properties: run-descr, run-results.
    1h
@@ -655,10 +668,24 @@ data (libraries test suites output and the run results) will be saved."
           "c<br/>l<br/>|<br/>a<br/>b<br/>c")
 |#
 
-(defun lib-log-uri (test-run lib-name)
-  (format nil "file://~A~A" 
+;; todo: this should be a blobstore method, but
+;; until we move the reporting to a separate
+;; asdf system, we don't want the dependency 
+;; on blobstore here.
+(defun blob-uri (blob-key)
+  (format nil "~A/blob?key=~A" 
+          *gae-blobstore-base-url* blob-key))
+
+(defun lib-log-local-uri (test-run lib-result)
+  (format nil "file://~A~A"
           (run-directory (run-descr test-run))
-          (string-downcase lib-name)))
+          (string-downcase (getf lib-result :libname))))
+
+(defun lib-log-uri (test-run lib-result)
+  (let ((blob-key (getf lib-result :log-blob-key)))
+    (if blob-key
+        (blob-uri blob-key)
+        "javascript:alert('The blobstore key is not specified, seems like the library log was not submitted to the online storage')")))
 
 (defun single-letter-status (normalized-status) 
   (case normalized-status
@@ -678,7 +705,7 @@ data (libraries test suites output and the run results) will be saved."
   (let ((status (normalize-status (getf lib-test-result :status))))
     (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
             (status-css-class status)
-            (lib-log-uri test-run (getf lib-test-result :libname))
+            (lib-log-uri test-run lib-test-result)
             (single-letter-status status))))
 
 (defun summary-table-html (&optional 
