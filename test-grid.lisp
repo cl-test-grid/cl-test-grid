@@ -408,6 +408,7 @@ contains the tests of _both_ libraries."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun get-settings-file()
  (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
 
@@ -417,13 +418,19 @@ contains the tests of _both_ libraries."
              (string-trim " " (read-line *query-io*)))
 
 (defun get-user-email ()
-  (handler-case
-      (when (string= "" (getf (safe-read-file (get-settings-file)) :user-email))
-        (format t "Warning! You don't entered your email~%"))
-    (t ()
-      (progn
-        (write-to-file (list :user-email (prompt-for-email)) (get-settings-file)))))
-(getf (safe-read-file (get-settings-file)) :user-email))
+  (LET ((USER-EMAIL nil))
+    (handler-case
+        (if (STRING= "" (setf user-email(GETF (SAFE-READ-FILE (GET-SETTINGS-FILE)
+                                                              ) :USER-EMAIL)))
+          (FORMAT t "WARNING! YOU DON'T ENTERED YOUR EMAIL~%"))
+        (t ()
+           (PROGN
+             (write-to-file (list :user-email (setf user-email (prompt-for-email)))
+                                  (get-settings-file)))))
+        user-email))
+
+
+        
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
@@ -460,7 +467,7 @@ performed in the current lisp system."
                            (ql-dist:version (ql-dist:dist "quicklisp")))
         :time (get-universal-time)
         :run-duration :unknown
-        :contact (list :email "avodonosov@yandex.ru")))
+        :contact (list :email (get-user-email))))
 
 (defun name-run-directory (run-descr)
   "Generate name for the directory where test run 
