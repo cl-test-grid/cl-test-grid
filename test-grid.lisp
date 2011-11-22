@@ -311,7 +311,8 @@ contains the tests of _both_ libraries."
   (let* ((orig-std-out *standard-output*)
          (buf (make-string-output-stream))
          (*standard-output* buf)
-         (*error-output* buf))
+         (*error-output* buf)
+         (start-time (get-internal-real-time)))
 
     (format orig-std-out "Running tests for library ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
             lib)
@@ -324,7 +325,9 @@ contains the tests of _both_ libraries."
       (let ((output (get-output-stream-string buf)))
         (list :libname lib
               :status status :output output
-              :log-char-length (length output))))))
+              :log-char-length (length output) 
+              :test-duration (/ (- (get-internal-real-time) start-time) 
+                                internal-time-units-per-second))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
@@ -422,7 +425,7 @@ contains the tests of _both_ libraries."
     (handler-case
         (if (STRING= "" (setf user-email(GETF (SAFE-READ-FILE (GET-SETTINGS-FILE)
                                                               ) :USER-EMAIL)))
-          (FORMAT t "WARNING! YOU DON'T ENTERED YOUR EMAIL~%"))
+          (FORMAT t "Warning! Empty email is specified in the settings file ~a~%" (get-settings-file)))
         (t ()
            (PROGN
              (write-to-file (list :user-email (setf user-email (prompt-for-email)))
@@ -757,16 +760,17 @@ data (libraries test suites output and the run results) will be saved."
   (fmt-test-runs-report (test-runs-table-html db)))
 
 (defun export-to-csv (out &optional (db *db*))
-  (format out "Lib World,Lisp,Runner,LibName,Status~%")
+  (format out "Lib World,Lisp,Runner,LibName,Status,TestDuration~%")
   (dolist (run (getf db :runs))
     (let ((run-descr (run-descr run)))
       (dolist (lib-result (run-results run))
-        (format out "~a,~a,~a,~a,~a~%"
+        (format out "~a,~a,~a,~a,~a,~a~%"
                 (getf run-descr :lib-world)
                 (getf run-descr :lisp)
                 (getf (getf run-descr :contact) :email)
                 (string-downcase (getf lib-result :libname))
-                (getf lib-result :status))))))
+                (getf lib-result :status)
+                (getf lib-result :test-duration))))))
 
 (defun generate-reports (&optional (db *db*))
                           
@@ -775,14 +779,14 @@ data (libraries test suites output and the run results) will be saved."
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
-    (write-sequence (test-runs-report) out))
+    (write-sequence (test-runs-report db) out))
   
   (with-open-file (out (merge-pathnames "export.csv"
                                         (reports-dir))
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
-    (export-to-csv out)))
+    (export-to-csv out db)))
 
 (defun reports-dir () 
   (merge-pathnames "reports-generated/"
