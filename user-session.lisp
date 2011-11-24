@@ -35,16 +35,16 @@
 
 (generate-reports *db*)
 
-;; generate fake database content to test reporting
-(setf (getf *db* :runs) (generate-fake-run-results))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; developer experiments
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; sort test runs in the database according some criteria
+;; sort test runs in the database according to some criteria
 (setf (getf *db* :runs)
       (sort (getf *db* :runs)
             (plist-comparator :lisp #'string<)
             :key #'first))
+
+    
+(print-pivot-reports *db*)
 

@@ -42,7 +42,7 @@ TODO:
      + legend or a tooltip in the report for test statuses
      + color for statuses
      + use the online blob URL in the report
-   - A table table -like report of library test results, allowing
+   - A pivot -like table report of library test results, allowing
      rows/columns to be any of quicklisp distro, lisp version
      library name. With grouping and sorging.
    + CSV export of the database to use it then with spreadsheets,
@@ -378,6 +378,49 @@ contains the tests of _both_ libraries."
 (defun getter (prop)
   #'(lambda (plist)
       (getf plist prop)))
+
+(defun list< (predicates l1 l2)
+  "Compares two lists L1 and L2 of equal lenght,
+using for every pair of elements a corresponding predicate 
+from the PREDICATES list (of the same length). Returns
+T if L1 is less than (according the PREDICATES) L2.
+Othersise returns NIL."
+  (if (null predicates)
+      nil
+      (let ((pred (car predicates))
+            (elem1 (car l1))
+            (elem2 (car l2)))
+        (if (funcall pred elem1 elem2)
+            t
+            ;; Ok, elem1 is not less than elem2 (as defined by our predicate).
+            ;; Lets check if they are equal. If the reverse comparation [elem2 less elem1] 
+            ;; is also false, then they are equal, and we proceed to the next 
+            ;; property/predicate pair.
+            (if (funcall pred elem2 elem1)
+                nil
+                (list< (cdr predicates)
+                       (cdr l1)
+                       (cdr l2)))))))
+
+#|
+Examples:
+
+ (and
+  (list< '(< <) '(1 2) '(2 2))
+  (not (list< '(< <) '(1 2) '(1 2)))
+  (list< '(< <) '(1 2) '(1 3))
+  (not (list< '(string< string<)
+              '("quicklisp-fake-2011-00-02" "ccl-fake-1")
+              '("quicklisp-fake-2011-00-01" "clisp-fake-1"))))
+|#
+
+(defun hash-table-keys (hash-table)
+  (let (keys)
+    (maphash #'(lambda (key val)
+                 (declare (ignore val))
+                 (push key keys))
+             hash-table)
+    keys))
 
 ;; copy/paste from 
 ;; http://www.gigamonkeys.com/book/practical-an-mp3-browser.html
@@ -761,6 +804,258 @@ data (libraries test suites output and the run results) will be saved."
                 (string-downcase (getf lib-result :libname))
                 (getf lib-result :status))))))
 
+;; ========= Pivot Reports ==================
+
+(defun build-joined-index (db)
+  (let ((all-results (make-hash-table :test 'equal)))
+    (dolist (run (getf db :runs))
+      (let* ((run-descr (run-descr run))
+             (lisp (getf run-descr :lisp))
+             (lib-world (getf run-descr :lib-world)))
+        (dolist (lib-result (run-results run))
+          (let ((libname (getf lib-result :libname)))
+            (push lib-result
+                  (gethash (list lisp lib-world libname) all-results))))))
+    all-results))
+
+
+#|    
+HTML table properties:
+ - rows and cols are not equal: html tables are row-first - TR includes TDs
+
+Only the deepest level row and col fields will have corresponding
+TR and TD cells in the table data (we do not consider the table 
+column headers now).
+
+And the TD cells are included in a TR.
+
+Algorithm sketch:
+  Iterate over all row properties and their values in rows.
+  For every deepest level combination create a TR (if 
+  any values exist for this combination).
+
+    Iterate over all the col properties and their values.
+    For every deepest level combination create a TD.
+
+partitioning structure
+-----------------------------
+    field1 | field2
+-----------------------------
+    field1 val1 (count)
+             field2 val1 (count)
+             field2 val2 (count)
+    field1 val2 (count)
+             field2 val1 (count)
+             field2 val3 (count)
+    field1 val3 (count)
+             field2 val2 (count)
+
+
+<tr> <td> <td> <td>
+<tr>      <td> <td>
+<tr>           <td>
+<tr>      <td> <td>
+<tr>      <td> <td>
+<tr>           <td>
+<tr> <td> <td> <td>
+<tr>      <td> <td>
+<tr> <td> <td> <td>
+<tr>      <td> <td>
+<tr>           <td>
+
+|#
+
+(defun make-fields-values-setter (fields)
+  "Creates a function which destructively modifies
+the specified fields in the index key passed to it 
+as a parameter"
+  (let ((index-key-setters (list :lisp #'(lambda (index-key lisp)
+                                           (setf (first index-key) lisp))
+                                 :lib-world #'(lambda (index-key lib-world)
+                                                (setf (second index-key) lib-world))
+                                 :libname #'(lambda (index-key libname)
+                                              (setf (third index-key) libname)))))
+    (flet ((field-setter (field)
+             (or (getf index-key-setters field)
+                 (error "field ~A is unknown" field))))
+      (let ((setters (mapcar #'field-setter fields)))
+        #'(lambda (index-key field-vals)
+            (mapc #'(lambda (setter field-val)
+                      (funcall setter index-key field-val))
+                  setters
+                  field-vals)
+            index-key)))))
+
+(defun make-fields-values-getter (fields)
+  (let ((index-key-getters (list :lisp #'first
+                                 :lib-world #'second
+                                 :libname #'third)))
+    (flet ((field-getter (field)
+             (or (getf index-key-getters field)
+                 (error "field ~A is unknown" field))))
+      (let ((getters (mapcar #'field-getter fields)))
+        #'(lambda (index-key)
+            (mapcar #'(lambda (getter)
+                        (funcall getter index-key))
+                    getters))))))
+
+(defun calc-rows-and-cols (joined-index rows-fields cols-fields)
+  (let ((rows-fields-getter (make-fields-values-getter rows-fields))
+        (rows-fields-setter (make-fields-values-setter rows-fields))
+        (rows (make-hash-table :test #'equal))
+        (cols-fields-getter (make-fields-values-getter cols-fields))
+        (cols-fields-setter (make-fields-values-setter cols-fields))
+        (cols (make-hash-table :test #'equal)))
+    (maphash #'(lambda (index-key index-value)
+                 (declare (ignore index-value))
+                 (setf (gethash (funcall rows-fields-getter index-key)
+                                rows)
+                       t)
+                 (setf (gethash (funcall cols-fields-getter index-key)
+                                cols)
+                       t))
+             joined-index)
+    (values (hash-table-keys rows)
+            (hash-table-keys cols)
+            #'(lambda (index-key row-addr col-addr)
+                (funcall rows-fields-setter index-key row-addr)
+                (funcall cols-fields-setter index-key col-addr)))))
+
+(defstruct (header-print-helper :conc-name)
+  (span 0 :type fixnum)
+  (printed nil))
+
+(defun subaddrs (row-address)
+  (nreverse (maplist #'reverse (reverse row-address))))
+
+(defun calc-spans (row-or-col-addrs)
+  (let ((helpers (make-hash-table :test #'equal)))
+    (dolist (row-or-col-addr row-or-col-addrs)
+      (dolist (subaddr (subaddrs row-or-col-addr))
+        (let ((helper (or (gethash subaddr helpers)
+                          (setf (gethash subaddr helpers)
+                                (make-header-print-helper)))))
+          (incf (span helper)))))
+    helpers))
+
+
+;; generate fake database content to test reporting
+(setf (getf *db* :runs) (generate-fake-run-results))
+         
+(defun print-row-header (row-addr row-spans out)
+  (dolist (subaddr (subaddrs row-addr))
+    (let ((helper (gethash subaddr row-spans)))
+      (when (not (printed helper))
+        (format out "<td rowspan=\"~A\">~A</td>" (span helper) (car (last subaddr)))
+        (setf (printed helper) t)))))
+
+(defun print-table-headers (row-field-count col-field-count cols out)
+  (let ((col-spans (calc-spans cols)))
+    (dotimes (header-row-num col-field-count)
+      (princ "<tr>" out)
+      (dotimes (row-header row-field-count)
+        (princ "<td>&nbsp;</td>" out))
+      (dolist (col-addr cols)
+        (let* ((cell-addr (subseq col-addr 0 (1+ header-row-num)))
+               (helper (gethash cell-addr col-spans)))
+          (when (not (printed helper))
+            (format out "<td colspan=\"~A\">~A</td>" (span helper) (car (last cell-addr)))
+            (setf (printed helper) t))))
+      (format out "</tr>~%"))))
+
+(defun pivot-table-html (out 
+                         joined-index
+                         row-fields row-fields-sort-predicates
+                         col-fields col-fields-sort-predicates)
+  (princ "<table border=\"1\">" out)
+  (let (rows
+        cols
+        index-key-setter
+        (row-comparator #'(lambda (rowa rowb)
+                            (list< row-fields-sort-predicates
+                                   rowa rowb)))
+        (col-comparator #'(lambda (cola colb)
+                            (list< col-fields-sort-predicates
+                                   cola colb))))
+
+    (setf (values rows cols index-key-setter) 
+          (calc-rows-and-cols joined-index row-fields col-fields))
+    
+    (setf rows (sort rows row-comparator)
+          cols (sort cols col-comparator))
+    
+    (print-table-headers (length row-fields) (length col-fields) cols out)
+    (let ((row-spans (calc-spans rows))
+          (index-key (make-sequence 'list (+ (length row-fields)
+                                             (length col-fields)))))
+      (dolist (row rows)
+        (princ "<tr>" out)
+        (print-row-header row row-spans out)
+        (dolist (col cols)
+          (funcall index-key-setter index-key row col)
+          (let ((data (gethash index-key joined-index)))
+            (format out "<td>~A</td>" data)))      
+        (format out "</tr>~%"))))
+    (princ "</table>" out))
+  
+(defun print-pivot-reports (db)
+  (let ((joined-index (build-joined-index db))
+        (reports-dir (reports-dir)))
+    (flet ((print-report (filename 
+                          row-fields row-fields-sort-predicates
+                          col-fields col-fields-sort-predicates)
+             (with-open-file (out (merge-pathnames filename reports-dir)
+                                  :direction :output 
+                                  :element-type 'character ;'(unsigned-byte 8) + flexi-stream
+                                  :if-exists :supersede
+                                  :if-does-not-exist :create)
+               (pivot-table-html out 
+                                 joined-index
+                                 row-fields row-fields-sort-predicates
+                                 col-fields col-fields-sort-predicates))))
+      
+      (print-report "pivot_ql_lisp-lib.html"
+                    '(:lib-world) (list #'string<)
+                    '(:lisp :libname) (list #'string< #'string<))
+      (print-report "pivot_ql_lib-lisp.html"
+                    '(:lib-world) (list #'string<)
+                    '(:libname :lisp) (list #'string< #'string<))
+      
+      (print-report "pivot_lisp_lib-ql.html"
+                    '(:lisp) (list #'string<)
+                    '(:libname :lib-world) (list #'string< #'string<))
+      (print-report "pivot_lisp_ql-lib.html"
+                    '(:lisp) (list #'string<)
+                    '(:lib-world :libname) (list #'string< #'string<))
+      
+      (print-report "pivot_lib_lisp-ql.html"
+                    '(:libname) (list #'string<)
+                    '(:lisp :lib-world) (list #'string< #'string<))
+      (print-report "pivot_lib_ql-lisp.html"
+                    '(:libname) (list #'string<)
+                    '(:lib-world :lisp) (list #'string< #'string<))
+      
+      (print-report "pivot_ql-lisp_lib.html"
+                    '(:lib-world :lisp) (list #'string<)
+                    '(:libname) (list #'string< #'string<))
+      (print-report "pivot_ql-lib_lisp.html"
+                    '(:lib-world :libname) (list #'string<)
+                    '(:lisp) (list #'string< #'string<))
+      
+      (print-report "pivot_lisp-lib_ql.html"
+                    '(:lisp :libname) (list #'string<)
+                    '(:lib-world) (list #'string< #'string<))
+      (print-report "pivot_lisp-ql_lib.html"
+                    '(:lisp :lib-world) (list #'string<)
+                    '(:libname) (list #'string< #'string<))
+      
+      (print-report "pivot_lib-lisp_ql.html"
+                    '(:libname :lisp) (list #'string<)
+                    '(:lib-world) (list #'string< #'string<))
+      (print-report "pivot_lib-ql_lisp.html"
+                    '(:libname :lib-world) (list #'string<)
+                    '(:lisp) (list #'string< #'string<)))))
+
 (defun generate-reports (&optional (db *db*))
                           
   (with-open-file (out (merge-pathnames "test-runs-report.html"
@@ -775,7 +1070,9 @@ data (libraries test suites output and the run results) will be saved."
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
-    (export-to-csv out)))
+    (export-to-csv out))
+  
+  (print-pivot-reports db))
 
 (defun reports-dir () 
   (merge-pathnames "reports-generated/"
