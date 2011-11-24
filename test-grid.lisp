@@ -78,7 +78,7 @@ TODO:
      instead of current do-lib-results.
  - add more libraries: total number of 20 libraries
    is enough for the beginning
- - when loading of a library or library test system
+ + when loading of a library or library test system
    fails, ensure we have the error description in the output
    0.5h
  + The "thank you" message: where exactly to submit test results?
