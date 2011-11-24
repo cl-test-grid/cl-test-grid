@@ -792,7 +792,7 @@ data (libraries test suites output and the run results) will be saved."
   (let* ((template (file-string *test-runs-report-template*))
          (placeholder "{THE-TABLE}")
          (pos (or (search placeholder template)
-                  (error "Can't find the placeholder ~A in the report template file ~A" placeholder *report-template*))))
+                  (error "Can't find the placeholder ~A in the report template file ~A" placeholder *test-runs-report-template*))))
     (concatenate 'string 
                  (subseq template 0 pos)
                  html-table
