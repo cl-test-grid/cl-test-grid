@@ -311,7 +311,8 @@ contains the tests of _both_ libraries."
   (let* ((orig-std-out *standard-output*)
          (buf (make-string-output-stream))
          (*standard-output* buf)
-         (*error-output* buf))
+         (*error-output* buf)
+         (start-time (get-internal-real-time)))
 
     (format orig-std-out 
             "Running tests for library ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
@@ -325,7 +326,9 @@ contains the tests of _both_ libraries."
       (let ((output (get-output-stream-string buf)))
         (list :libname lib
               :status status :output output
-              :log-char-length (length output))))))
+              :log-char-length (length output) 
+              :test-duration (/ (- (get-internal-real-time) start-time) 
+                                internal-time-units-per-second))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
@@ -452,6 +455,7 @@ Examples:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun get-settings-file()
  (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
 
@@ -460,13 +464,17 @@ Examples:
              (force-output *query-io*)
              (string-trim " " (read-line *query-io*)))
 
-(defun get-use-email ()
-  (handler-case
-      (when (string= "" (getf (safe-read-file (get-settings-file)) :user-email))
-        (format t "Warning! You don't entered your email~%"))
-    (t ()
-      (progn
-        (write-to-file (list :user-email (prompt-for-email)) (get-settings-file))))))
+(defun get-user-email ()
+  (LET ((USER-EMAIL nil))
+    (handler-case
+        (if (STRING= "" (setf user-email(GETF (SAFE-READ-FILE (GET-SETTINGS-FILE)
+                                                              ) :USER-EMAIL)))
+          (FORMAT t "Warning! Empty email is specified in the settings file ~a~%" (get-settings-file)))
+        (t ()
+           (PROGN
+             (write-to-file (list :user-email (setf user-email (prompt-for-email)))
+                                  (get-settings-file)))))
+        user-email))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
@@ -503,7 +511,7 @@ performed in the current lisp system."
                            (ql-dist:version (ql-dist:dist "quicklisp")))
         :time (get-universal-time)
         :run-duration :unknown
-        :contact (list :email "avodonosov@yandex.ru")))
+        :contact (list :email (get-user-email))))
 
 (defun name-run-directory (run-descr)
   "Generate name for the directory where test run 
@@ -793,16 +801,17 @@ data (libraries test suites output and the run results) will be saved."
   (fmt-test-runs-report (test-runs-table-html db)))
 
 (defun export-to-csv (out &optional (db *db*))
-  (format out "Lib World,Lisp,Runner,LibName,Status~%")
+  (format out "Lib World,Lisp,Runner,LibName,Status,TestDuration~%")
   (dolist (run (getf db :runs))
     (let ((run-descr (run-descr run)))
       (dolist (lib-result (run-results run))
-        (format out "~a,~a,~a,~a,~a~%"
+        (format out "~a,~a,~a,~a,~a,~a~%"
                 (getf run-descr :lib-world)
                 (getf run-descr :lisp)
                 (getf (getf run-descr :contact) :email)
                 (string-downcase (getf lib-result :libname))
-                (getf lib-result :status))))))
+                (getf lib-result :status)
+                (getf lib-result :test-duration))))))
 
 ;; ========= Pivot Reports ==================
 
@@ -1063,7 +1072,7 @@ as a parameter"
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
-    (write-sequence (test-runs-report) out))
+    (write-sequence (test-runs-report db) out))
   
   (with-open-file (out (merge-pathnames "export.csv"
                                         (reports-dir))
