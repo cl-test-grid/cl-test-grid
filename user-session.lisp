@@ -45,6 +45,9 @@
             (plist-comparator :lisp #'string<)
             :key #'first))
 
+
+;; generate fake database content to test reporting
+(setf (getf *db* :runs) (generate-fake-run-results))
     
 (print-pivot-reports *db*)
 

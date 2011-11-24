@@ -946,10 +946,6 @@ as a parameter"
                                 (make-header-print-helper)))))
           (incf (span helper)))))
     helpers))
-
-
-;; generate fake database content to test reporting
-(setf (getf *db* :runs) (generate-fake-run-results))
          
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))
