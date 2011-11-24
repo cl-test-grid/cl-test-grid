@@ -93,6 +93,14 @@ TODO:
    5h
    Solution: files are stored in Google App Engine blob store.
  - run the tests on all the implementations available for us.
+ - usocket test suite might need manual configuration,
+   see their README. Distinguish the case 
+   when the manual configuration hasn't been
+   performed and return :no-resource status.
+ - For all the libraries which need manual configuration
+   (cffi, usocket) provide giding message to the
+   user how to configure them.
+
 ==================================================
 ==========    Milestone: release 0    ============
 ==================================================
@@ -167,7 +175,9 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
     ((nil :fail) :fail)
     (otherwise status)))
 
-(defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi :cl-ppcre :usocket :flexi-streams :bordeaux-threads)
+(defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
+                           :cl-ppcre :usocket :flexi-streams :bordeaux-threads
+                           :cl-base64)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -275,7 +285,7 @@ contains the tests of _both_ libraries."
   ;;       see their README. Distinguish the case
   ;;       when the manual configuration hasn't been
   ;;       performed and return :no-resource status.
-;;
+  ;;
   ;; (setf usocket-test::*common-lisp-net*
   ;;       (or usocket-test::*common-lisp-net*
   ;;           "74.115.254.14"))
@@ -307,6 +317,15 @@ contains the tests of _both_ libraries."
     (zerop (count-if (lambda (res)
                        (typep res test-failure-type))
                      results))))
+
+(defmethod libtest ((library-name (eql :cl-base64)))
+
+  ;; The test framework used: ptester.
+  
+  (quicklisp:quickload :cl-base64-tests)
+  
+  (funcall (intern (symbol-name '#:do-tests)
+                   (find-package '#:cl-base64-tests))))
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
@@ -1104,9 +1123,9 @@ colunmns: download count, has common-lisp test suite
     403 + flexi-streams
     398 + bordeaux-threads
     393 - slime
-    386 cl+ssl
-    371 chunga
-    370 cl-base64
+    386 - cl+ssl (thre is a test.lisp, but it's not automated, and no (asdf:operate (op asdf:test-op) ...)
+    371 - chunga
+    370 + cl-base64
     361 cl-fad
     339 md5
     327 quicklisp-slime-helper
