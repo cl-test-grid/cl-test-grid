@@ -10,7 +10,7 @@ TODO:
   - information about test run: 
    + lisp-version-string, 
    + lib-world, 
-   - author contact (get it from some settings file), 
+   + author contact (get it from some settings file), 
    + date, 
    + run-duration
  + organize database file format
@@ -81,9 +81,9 @@ TODO:
  - when loading of a library or library test system
    fails, ensure we have the error description in the output
    0.5h
- - The "thank you" message: where exactly to submit test results?
+ + The "thank you" message: where exactly to submit test results?
    Specify an email or issue tracker of the cl-test-grid project.
- - how to store public (central) database and failed library 
+ + how to store public (central) database and failed library 
    outputs (files).
    An appealing way is to store it in the same git repository 
    on github, but with the std-out files the repository will 
@@ -91,6 +91,7 @@ TODO:
    checkout procedure will be too long to be considered
    convenient)
    5h
+   Solution: files are stored in Google App Engine blob store.
  - run the tests on all the implementations available for us.
 ==================================================
 ==========    Milestone: release 0    ============
