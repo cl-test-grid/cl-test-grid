@@ -45,7 +45,7 @@ TODO:
    - A pivot -like table report of library test results, allowing
      rows/columns to be any of quicklisp distro, lisp version
      library name. With grouping and sorging.
-   + CSV export of the database to use it then with spreadsheets,
+   - CSV export of the database to use it then with spreadsheets,
      google fusion tables, etc. Initial intent
      was to format it as a pivot for various projections 
      (by quicklisp releases, by platform, etc).
@@ -58,10 +58,27 @@ TODO:
      to represent test result(s) for a particular
      library, i.e. :ok, :fail, :no-resource).
      5h
+     - Test that the test-duration field value
+       (Common Lisp rational) can be read
+       by spreadsheet software (MS/Open Offices,
+       Google Spreadsheets).
    - an informer which may be embedded into a library
      project page, with reports about the test statuses 
      for this single library on various platforms with
      various quicklisp versions
+   - an overview page with brief explanation of all
+     the above reports and links to the reports.
+     - change 
+       "represents every test run as a separate row" 
+       to
+       "represents every <tt>test-grid:run-tests</tt> as a separate row"
+       (after user will know this command from the main project description)
+       ?
+     - Description of CSV report may link to an example
+       of the CSV report imported to a Google Spreadsheet
+       with pivot calculating avearage duration of 
+       tests for every library.
+     - spell check
  - simple UI (command line) with guiding messages
    for the user who runs the tests. Spend as little 
    efforts as possible on this task, to release quickly.
@@ -100,6 +117,9 @@ TODO:
  - For all the libraries which need manual configuration
    (cffi, usocket) provide giding message to the
    user how to configure them.
+ - finalize the decision what command user runs
+   to performs the tests. Describe this main command
+   in the README (in the first paragraph).
 
 ==================================================
 ==========    Milestone: release 0    ============
