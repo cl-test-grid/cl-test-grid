@@ -20,6 +20,7 @@
 
         .test-table td {
           font-weight: bold;
+          border-color: black;
         }
 
         .test-table .ok {
@@ -70,6 +71,32 @@
         }
 
     </style>
+
+    <script type="text/javascript" id="js"> 
+
+      /**
+       * IE, unlike other browsers, doesn't support
+       * tables (even with style "display: inline-table",
+       * even in HTML5) inside the <A> tag. We fix this 
+       * by providing javascript onclick handler for the 
+       * tables; the handler delegates the click to the 
+       * first found parent <A> element.
+       */
+      function ieTableAnchorFix(table) {
+        if (navigator.userAgent.indexOf('MSIE') >= 0) {
+          var parent = table.parentNode;
+          while (parent && String(parent.nodeName).toUpperCase() != 'A') {
+            parent = parent.parentNode;
+          }
+          if (parent) {
+            parent.click();
+          }
+          return false;
+        } else {
+          return true;
+        }
+      }
+    </script>
 
 </head>
 <body>
@@ -123,7 +150,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
   <tr>
     <td>
       <a href="pivot_lib_ql-lisp.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>ql</td></tr>
           <tr><td>&nbsp;</td><td>lisp</td></tr>
           <tr><td>lib</td><td>&nbsp;</td></tr>
@@ -132,7 +159,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_lib_lisp-ql.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>lisp</td></tr>
           <tr><td>&nbsp;</td><td>ql</td></tr>
           <tr><td>lib</td><td>&nbsp;</td></tr>
@@ -141,7 +168,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_ql_lib-lisp.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>lib</td></tr>
           <tr><td>&nbsp;</td><td>lisp</td></tr>
           <tr><td>ql</td><td>&nbsp;</td></tr>
@@ -150,7 +177,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_ql_lisp-lib.html" >
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>lisp</td></tr>
           <tr><td>&nbsp;</td><td>lib</td></tr>
           <tr><td>ql</td><td>&nbsp;</td></tr>
@@ -159,7 +186,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_lisp_lib-ql.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>lib</td></tr>
           <tr><td>&nbsp;</td><td>ql</td></tr>
           <tr><td>lisp</td><td>&nbsp;</td></tr>
@@ -168,7 +195,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_lisp_ql-lib.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>ql</td></tr>
           <tr><td>&nbsp;</td><td>lib</td></tr>
           <tr><td>lisp</td><td>&nbsp;</td></tr>
@@ -179,7 +206,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
   <tr>
     <td>
       <a href="pivot_lib-ql_lisp.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>&nbsp;</td><td>lisp</td></tr>
           <tr><td>lib</td><td>ql</td><td>&nbsp;</td></tr>
         </table>
@@ -187,7 +214,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_lib-lisp_ql.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>&nbsp;</td><td>ql</td></tr>
           <tr><td>lib</td><td>lisp</td><td>&nbsp;</td></tr>
         </table>
@@ -195,7 +222,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_ql-lib_lisp.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>&nbsp;</td><td>lisp</td></tr>
           <tr><td>ql</td><td>lib</td><td>&nbsp;</td></tr>
         </table>
@@ -203,7 +230,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_ql-lisp_lib.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>&nbsp;</td><td>lib</td></tr>
           <tr><td>ql</td><td>lisp</td><td>&nbsp;</td></tr>
         </table>
@@ -211,7 +238,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_lisp-lib_ql.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>&nbsp;</td><td>ql</td></tr>
           <tr><td>lisp</td><td>lib</td><td>&nbsp;</td></tr>
         </table>
@@ -219,7 +246,7 @@ except unfortunatelly Internet Explorer - to be fixed):</p>
     </td>
     <td>
       <a href="pivot_lisp-ql_lib.html">
-        <table>
+        <table onclick="return ieTableAnchorFix(this)">
           <tr><td>&nbsp;</td><td>&nbsp;</td><td>lib</td></tr>
           <tr><td>lisp</td><td>ql</td><td>&nbsp;</td></tr>
         </table>
