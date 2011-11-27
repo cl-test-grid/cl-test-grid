@@ -199,7 +199,7 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
                            :cl-base64 :trivial-backtrace :puri :anaphora
-                           :parenscript)
+                           :parenscript :trivial-garbage)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -408,6 +408,20 @@ contains the tests of _both_ libraries."
                        (typep res test-failure-type))
                      results))))
 
+(defmethod libtest ((library-name (eql :trivial-garbage)))
+
+  ;; The test framework used: rt.
+  (clean-rt)
+  (asdf:clear-system :trivial-garbage)  ; yes, trivial-garbage but not trivial-garbage-tests,
+                                        ; because the trivial-garbage-tests system is defined
+                                        ; in the same trivial-garbage.asd and neither
+                                        ; asdf nor quicklisp can't find trivial-garbage-tests.
+
+  (quicklisp:quickload :trivial-garbage); trivial-garbage but not trivial-garbage-tests,
+                                        ; for the same reasons as explained above.
+  (asdf:operate 'asdf:load-op :trivial-garbage-tests)
+  
+  (funcall (find-symbol (string '#:do-tests) '#:rtest)))
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
@@ -1229,8 +1243,8 @@ colunmns: download count, has common-lisp test suite
                       to be intended for automated regression testing of closer-mop)
     225 + anaphora
     224 + parenscript
-    221 cl-who
-    207 trivial-garbage
+    221 - cl-who
+    207 + trivial-garbage
     201 iterate
     193 cl-vectors
     190 zpng
