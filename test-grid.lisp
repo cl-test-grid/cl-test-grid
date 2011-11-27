@@ -818,6 +818,7 @@ data (libraries test suites output and the run results) will be saved."
           (string-downcase (getf lib-result :libname))))
 
 (defun lib-log-uri (test-run lib-result)
+  (declare (ignore test-run))
   (let ((blob-key (getf lib-result :log-blob-key)))
     (if blob-key
         (blob-uri blob-key)
