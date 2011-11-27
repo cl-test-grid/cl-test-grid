@@ -1185,11 +1185,11 @@ colunmns: download count, has common-lisp test suite
     321 - rfc2388 (there is a test.lisp, but there is no asdf:test-op, and the code in test.lisp 
                    doesn't return fail/ok status, it jsut prints something to the console)
     317 - hunchentoot (thre are tests and asdf:test-op, but I am affrait it might take
-                       loot of work to automate it; test-op starts server and doesn't
-                       stop; I am also affraid i might hand sometime; Implementation
+                       lot of work to automate it: test-op starts server and doesn't
+                       stop. I am also affraid i might hang sometimes; Implementation
                        would also require checking for single-threaded lisps
                        (by hunchentoot::*supports-threadss-p* ?)
-                       and returning :no-resource. Leave hunchentoot for later
+                       and returning :no-resource. Leave hunchentoot for a later
                        stage)
     293 - salza2
     289 + puri
