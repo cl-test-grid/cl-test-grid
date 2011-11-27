@@ -198,7 +198,8 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
 
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
-                           :cl-base64 :trivial-backtrace :puri :anaphora)
+                           :cl-base64 :trivial-backtrace :puri :anaphora
+                           :parenscript)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -389,6 +390,23 @@ contains the tests of _both_ libraries."
 
   ;; copy/paste from anaphora.asd
   (funcall (intern "DO-TESTS" :rt)))
+
+(defmethod libtest ((library-name (eql :parenscript)))
+  ;; The test framework used: eos (similar to FiveAM).
+
+  ;; asdf:test-op is not provided for parenscript,
+  ;; only a separate package ps-test with public
+  ;; function run-tests.
+
+  ;; The test suites to run determined by looking
+  ;; into the function run-tests in the file test.lisp.
+  (let* ((run (intern (string '#:run) :eos))
+         (test-failure-type (intern (string '#:test-failure) :eos))
+         (results (append (funcall run (intern (string '#:output-tests) :ps-test))
+                          (funcall run (intern (string '#:package-system-tests) :ps-test)))))  
+    (zerop (count-if (lambda (res)
+                       (typep res test-failure-type))
+                     results))))
 
 
 (defun run-libtest (lib)
@@ -1210,7 +1228,7 @@ colunmns: download count, has common-lisp test suite
                       but it's a code to reproduce some particular issue. It does not seem
                       to be intended for automated regression testing of closer-mop)
     225 + anaphora
-    224 parenscript
+    224 + parenscript
     221 cl-who
     207 trivial-garbage
     201 iterate
