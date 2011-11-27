@@ -198,7 +198,7 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
 
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
-                           :cl-base64 :trivial-backtrace)
+                           :cl-base64 :trivial-backtrace :puri)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -361,12 +361,23 @@ contains the tests of _both_ libraries."
         (errors (intern (symbol-name '#:errors) :lift))
         (expected-errors (intern (symbol-name '#:expected-errors) :lift))
         (failures (intern (symbol-name '#:failures) :lift))
-        (errors (intern (symbol-name '#:expected-failures) :lift)))
+        (expected-failures (intern (symbol-name '#:expected-failures) :lift)))
+    (describe result t)
     (zerop
      (+ (length (set-difference (funcall errors result)
                                 (funcall expected-errors result)))
         (length (set-difference (funcall failures result)
                                 (funcall expected-failures result)))))))
+
+(defmethod libtest ((library-name (eql :puri)))
+
+  ;; The test framework used: ptester.
+
+  (quicklisp:quickload :puri-tests)
+  
+  ;; copy/paste from puri.asd
+  (funcall (intern (symbol-name '#:do-tests)
+                   (find-package :puri-tests))))
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
@@ -1171,11 +1182,17 @@ colunmns: download count, has common-lisp test suite
     339 - md5
     327 - quicklisp-slime-helper
     323 + trivial-backtrace
-    321 - rfc2388 (there is a test.lisp, but there is no asdf:operate, and the code in test.lisp 
+    321 - rfc2388 (there is a test.lisp, but there is no asdf:test-op, and the code in test.lisp 
                    doesn't return fail/ok status, it jsut prints something to the console)
-    317 hunchentoot
-    293 salza2
-    289 puri
+    317 - hunchentoot (thre are tests and asdf:test-op, but I am affrait it might take
+                       loot of work to automate it; test-op starts server and doesn't
+                       stop; I am also affraid i might hand sometime; Implementation
+                       would also require checking for single-threaded lisps
+                       (by hunchentoot::*supports-threadss-p* ?)
+                       and returning :no-resource. Leave hunchentoot for later
+                       stage)
+    293 - salza2
+    289 + puri
     285 closer-mop
     225 anaphora
     224 parenscript
