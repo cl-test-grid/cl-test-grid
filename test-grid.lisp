@@ -885,7 +885,7 @@ data (libraries test suites output and the run results) will be saved."
   (with-output-to-string (out)
     (write-line "<table cellspacing=\"1\" class=\"tablesorter\">" out)
     
-    (princ "<thead><tr style=\"vertical-align: bottom;\"><th>Lib World</th><th>Lisp</th><th>Runner</th>" out)
+    (princ "<thead><tr style=\"vertical-align: bottom;\"><th>Start Time</th><th>Lib World</th><th>Lisp</th><th>Runner</th>" out)
     (dolist (lib *all-libs*)
       (format out "<th>~A</th>" (vertical-html lib)))
     (write-line "</tr></thead>" out)
@@ -894,7 +894,8 @@ data (libraries test suites output and the run results) will be saved."
     (dolist (run (getf db :runs))
       (let ((run-descr (run-descr run))
             (lib-statuses (run-results run)))
-        (format out "<tr><td>~A</td><td>~A</td><td>~A</td>" 
+        (format out "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td>" 
+                (fmt-time (getf run-descr :time)) 
                 (getf run-descr :lib-world) 
                 (getf run-descr :lisp)
                 (getf (getf run-descr :contact) :email))
