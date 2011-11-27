@@ -871,11 +871,13 @@ data (libraries test suites output and the run results) will be saved."
     (otherwise "")))
            
 (defun render-single-letter-status (test-run lib-test-result)
-  (let ((status (normalize-status (getf lib-test-result :status))))
-    (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
-            (status-css-class status)
-            (lib-log-uri test-run lib-test-result)
-            (single-letter-status status))))
+  (if (null lib-test-result)
+      "&nbsp;"
+      (let ((status (normalize-status (getf lib-test-result :status))))
+        (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
+                (status-css-class status)
+                (lib-log-uri test-run lib-test-result)
+                (single-letter-status status)))))
 
 (defun test-runs-table-html (&optional 
                              (db *db*)
