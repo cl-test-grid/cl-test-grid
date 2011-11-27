@@ -358,12 +358,12 @@ contains the tests of _both_ libraries."
   (let ((result 
          ;; copy/paste from trivial-backtrace.asd
          (funcall (intern (symbol-name '#:run-tests) :lift)
-                         :suite :trivial-backtrace-test))
+                  :suite :trivial-backtrace-test))
         (errors (intern (symbol-name '#:errors) :lift))
         (expected-errors (intern (symbol-name '#:expected-errors) :lift))
         (failures (intern (symbol-name '#:failures) :lift))
         (expected-failures (intern (symbol-name '#:expected-failures) :lift)))
-    (describe result t)
+    (describe result *standard-output*)
     (zerop
      (+ (length (set-difference (funcall errors result)
                                 (funcall expected-errors result)))
