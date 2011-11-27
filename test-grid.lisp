@@ -619,6 +619,15 @@ Examples:
              "~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D" 
              year month date hour min sec)))
 
+(defun pretty-fmt-time (universal-time &optional destination)
+  "The human-readable time format, used in reports."
+  (multiple-value-bind (sec min hour date month year)
+      (decode-universal-time universal-time 0)
+    (funcall #'format 
+             destination 
+             "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D" 
+             year month date hour min sec)))
+
 (defun make-run-descr () 
   "Generate a description for a test run which might be 
 performed in the current lisp system."
@@ -895,7 +904,7 @@ data (libraries test suites output and the run results) will be saved."
       (let ((run-descr (run-descr run))
             (lib-statuses (run-results run)))
         (format out "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td>" 
-                (fmt-time (getf run-descr :time)) 
+                (pretty-fmt-time (getf run-descr :time)) 
                 (getf run-descr :lib-world) 
                 (getf run-descr :lisp)
                 (getf (getf run-descr :contact) :email))
@@ -1232,9 +1241,9 @@ colunmns: download count, has common-lisp test suite
     323 + trivial-backtrace
     321 - rfc2388 (there is a test.lisp, but there is no asdf:test-op, and the code in test.lisp 
                    doesn't return fail/ok status, it jsut prints something to the console)
-    317 - hunchentoot (thre are tests and asdf:test-op, but I am affrait it might take
+    317 - hunchentoot (there are tests and asdf:test-op, but I am affrait it might take
                        lot of work to automate it: test-op starts server and doesn't
-                       stop. I am also affraid i might hang sometimes; Implementation
+                       stop; I am also afraid it might hang sometimes; implementation
                        would also require checking for single-threaded lisps
                        (by hunchentoot::*supports-threadss-p* ?)
                        and returning :no-resource. Leave hunchentoot for a later
