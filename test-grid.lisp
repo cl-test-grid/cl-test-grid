@@ -137,6 +137,7 @@ TODO:
      libraries set (think quicklisp distro),
      the user contacts, total test run duration,
      etc.
+ - watchdog for hanging tests
  + more abstract accessor to parts of DB info instead of
    getf by properties: run-descr, run-results.
    1h
@@ -197,7 +198,7 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
 
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
-                           :cl-base64)
+                           :cl-base64 :trivial-backtrace)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -346,6 +347,26 @@ contains the tests of _both_ libraries."
   
   (funcall (intern (symbol-name '#:do-tests)
                    (find-package '#:cl-base64-tests))))
+
+(defmethod libtest ((library-name (eql :trivial-backtrace)))
+  
+  ;; The test framework used: lift.
+  
+  (quicklisp:quickload :trivial-backtrace-test)
+  
+  (let ((result 
+         ;; copy/paste from trivial-backtrace.asd
+         (funcall (intern (symbol-name '#:run-tests) :lift)
+                         :suite :trivial-backtrace-test))
+        (errors (intern (symbol-name '#:errors) :lift))
+        (expected-errors (intern (symbol-name '#:expected-errors) :lift))
+        (failures (intern (symbol-name '#:failures) :lift))
+        (errors (intern (symbol-name '#:expected-failures) :lift)))
+    (zerop
+     (+ (length (set-difference (funcall errors result)
+                                (funcall expected-errors result)))
+        (length (set-difference (funcall failures result)
+                                (funcall expected-failures result)))))))
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
@@ -1146,11 +1167,12 @@ colunmns: download count, has common-lisp test suite
     386 - cl+ssl (thre is a test.lisp, but it's not automated, and no (asdf:operate (op asdf:test-op) ...)
     371 - chunga
     370 + cl-base64
-    361 cl-fad
-    339 md5
-    327 quicklisp-slime-helper
-    323 trivial-backtrace
-    321 rfc2388
+    361 - cl-fad
+    339 - md5
+    327 - quicklisp-slime-helper
+    323 + trivial-backtrace
+    321 - rfc2388 (there is a test.lisp, but there is no asdf:operate, and the code in test.lisp 
+                   doesn't return fail/ok status, it jsut prints something to the console)
     317 hunchentoot
     293 salza2
     289 puri
