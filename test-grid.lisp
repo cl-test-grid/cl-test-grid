@@ -198,7 +198,7 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
 
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
-                           :cl-base64 :trivial-backtrace :puri)
+                           :cl-base64 :trivial-backtrace :puri :anaphora)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -378,6 +378,18 @@ contains the tests of _both_ libraries."
   ;; copy/paste from puri.asd
   (funcall (intern (symbol-name '#:do-tests)
                    (find-package :puri-tests))))
+
+(defmethod libtest ((library-name (eql :anaphora)))
+
+  ;; The test framework used: rt.
+  (clean-rt)
+  (asdf:clear-system :anaphora-test)
+
+  (quicklisp:quickload :anaphora-test)
+
+  ;; copy/paste from anaphora.asd
+  (funcall (intern "DO-TESTS" :rt)))
+
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
@@ -1193,8 +1205,10 @@ colunmns: download count, has common-lisp test suite
                        stage)
     293 - salza2
     289 + puri
-    285 closer-mop
-    225 anaphora
+    285 - closer-mop (no asdf:test-op. there is a folder "test" with some file jeffs-code.lisp,
+                      but it's a code to reproduce some particular issue. It does not seem
+                      to be intended for automated regression testing of closer-mop)
+    225 + anaphora
     224 parenscript
     221 cl-who
     207 trivial-garbage
