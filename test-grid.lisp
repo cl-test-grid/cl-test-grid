@@ -199,7 +199,8 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
                            :cl-base64 :trivial-backtrace :puri :anaphora
-                           :parenscript :trivial-garbage :iterate :metabang-bind)
+                           :parenscript :trivial-garbage :iterate :metabang-bind
+                           :cl-json)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
