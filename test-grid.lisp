@@ -200,7 +200,7 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
                            :cl-base64 :trivial-backtrace :puri :anaphora
                            :parenscript :trivial-garbage :iterate :metabang-bind
-                           :cl-json)
+                           :cl-json :cl-containers)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -476,6 +476,10 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :cl-json.test)
   (run-fiveam-suite (intern (symbol-name '#:json) :json-test)))
 
+(defmethod libtest ((library-name (eql :cl-containers)))
+  ;; The test framework used: lift.
+  (quicklisp:quickload :cl-containers-test)
+  (run-lift-tests :cl-containers-test))
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
