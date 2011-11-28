@@ -326,19 +326,29 @@ contains the tests of _both_ libraries."
   (funcall (intern (symbol-name :run-all-tests)
                    (find-package :flexi-streams-test))))
 
+(defun run-fiveam-suite (fiveam-test-spec)
+  "Runs the specified test suite created with the FiveAM 
+test framework. Returns T if all the tests succeeded and
+NIL otherwise. The FIVEAM-TEST-SPEC specifies the tests
+suite according to the FiveAM convention."
+  (let ((run (intern (string '#:run) :fiveam))
+        (explain (intern (string '#:explain) :fiveam))
+        (detailed-text-explainer (intern (string '#:detailed-text-explainer) :fiveam))
+        (test-failure-type (intern (string '#:test-failure) :fiveam)))
+    
+    (let ((results (funcall run fiveam-test-spec)))
+      (funcall explain (make-instance detailed-text-explainer) results *standard-output*)
+      (zerop (count-if (lambda (res)
+                         (typep res test-failure-type))
+                       results)))))
+
 (defmethod libtest ((library-name (eql :bordeaux-threads)))
 
   ;; The test framework used: fiveam.
   
   (quicklisp:quickload :bordeaux-threads-test)
-  
-  (let ((results (funcall (intern (string '#:run) :fiveam)
-                          :bordeaux-threads))
-        (test-failure-type (intern (string '#:test-failure) :fiveam)))
-        
-    (zerop (count-if (lambda (res)
-                       (typep res test-failure-type))
-                     results))))
+
+  (run-fiveam-suite :bordeaux-threads))
 
 (defmethod libtest ((library-name (eql :cl-base64)))
 
@@ -449,13 +459,22 @@ if all the tests succeeded and NIL othersize."
   
   ;; The test framework used: lift.
   
-  ;; metabang-bind-test includes regular-expression
-  ;; bindings and tests, which is only loaded if
-  ;; cl-ppcre to be loaded first.
+  ;; metabang-bind-test includes binding syntax 
+  ;; for regular-expression and corresponding
+  ;; tests; but this functionality is only 
+  ;; loaded if cl-ppcre is loaded first.
+  ;; (this conditional loading is achieaved
+  ;; with asdf-system-connections).
   (quicklisp:quickload :cl-ppcre)
   (quicklisp:quickload :metabang-bind-test)
 
   (run-lift-tests :metabang-bind-test))
+
+(defmethod libtest ((library-name (eql :cl-json)))
+  ;; The test framework used: fiveam.
+  (quicklisp:quickload :cl-json.test)
+  (run-fiveam-suite (intern (symbol-name '#:json) :json-test)))
+
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
@@ -1301,15 +1320,15 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
                make the uffi-tests.asd availabel for ql:quickload. A study is needed about 
                how to include this system, therefore I avoid it for now.
     173 + metabang-bind
-  ------------------------ << I am here
     170 - split-sequence
     164 - vecto (there is a test.lisp, but it's not automated, intended for manual run and eye-testing of the resulting images)
     163 + cl-json
+  ------------------------ << I am here
     162 + cl-containers
     161 + metatilities-base
     159 - fare-utils
     156 + weblocks (do these tests start hunchentoot? seems no, it creates mock objects for request, response, etc.)
-    156 - fare-matcher (not test-op, but there is fare-matcher-test.asd with one test defined using stefil)
+    156 - fare-matcher (no test-op, but there is fare-matcher-test.asd with one test defined using stefil)
     148 - drakma
     144 + cl-cont
     143 - closure-common
@@ -1321,7 +1340,9 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
                  DB servers you specified in the configiration. Therefore
                  we need to think how to represent results - we can't
                  just collect results under the same name "clsql", because 
-                 different agents might have tested different servers).
+                 different agents might have tested different servers.
+                 Conclusion: very useful test suite to include into 
+                 our test set, but we will do it later).
     133 + cxml (but how to run it? seems like it requires some .xml 
                 files which are not in the repository, so it probably
                 is not fully automated).
