@@ -10,7 +10,7 @@ TODO:
   - information about test run: 
    + lisp-version-string, 
    + lib-world, 
-   - author contact (get it from some settings file), 
+   + author contact (get it from some settings file), 
    + date, 
    + run-duration
  + organize database file format
@@ -69,7 +69,7 @@ TODO:
  - readme with explanation of the project goal and
    how to use it
    5h
- - change db format
+ + change db format
    + test run as plist (:descr <descr> :run-results <run-results>)
      instead of just (<descr> <run-results>)
    + run-results as a list instead of plist; libname
@@ -78,12 +78,12 @@ TODO:
      instead of current do-lib-results.
  - add more libraries: total number of 20 libraries
    is enough for the beginning
- - when loading of a library or library test system
+ + when loading of a library or library test system
    fails, ensure we have the error description in the output
    0.5h
- - The "thank you" message: where exactly to submit test results?
+ + The "thank you" message: where exactly to submit test results?
    Specify an email or issue tracker of the cl-test-grid project.
- - how to store public (central) database and failed library 
+ + how to store public (central) database and failed library 
    outputs (files).
    An appealing way is to store it in the same git repository 
    on github, but with the std-out files the repository will 
@@ -416,21 +416,21 @@ contains the tests of _both_ libraries."
  (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
 
 (defun prompt-for-email ()
-             (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, adds")
-             (force-output *query-io*)
-             (string-trim " " (read-line *query-io*)))
+  (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, etc.")
+  (force-output *query-io*)
+  (string-trim " " (read-line *query-io*)))
 
 (defun get-user-email ()
-  (LET ((USER-EMAIL nil))
+  (let ((user-email nil))
     (handler-case
-        (if (STRING= "" (setf user-email(GETF (SAFE-READ-FILE (GET-SETTINGS-FILE)
-                                                              ) :USER-EMAIL)))
-          (FORMAT t "Warning! Empty email is specified in the settings file ~a~%" (get-settings-file)))
-        (t ()
-           (PROGN
-             (write-to-file (list :user-email (setf user-email (prompt-for-email)))
-                                  (get-settings-file)))))
-        user-email))
+        (if (string= "" (setf user-email(getf (safe-read-file (get-settings-file)
+                                                              ) :user-email)))
+            (format t "Warning! Empty email is specified in the settings file ~a~%" (get-settings-file)))
+      (t ()
+        (PROGN
+          (write-to-file (list :user-email (setf user-email (prompt-for-email)))
+                         (get-settings-file)))))
+    user-email))
 
 
         
