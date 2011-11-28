@@ -115,7 +115,7 @@ TODO:
    when the manual configuration hasn't been
    performed and return :no-resource status.
  - For all the libraries which need manual configuration
-   (cffi, usocket) provide giding message to the
+   (cffi, usocket) provide guiding message to the
    user how to configure them.
  - finalize the decision what command user runs
    to performs the tests. Describe this main command
@@ -199,7 +199,7 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
                            :cl-base64 :trivial-backtrace :puri :anaphora
-                           :parenscript :trivial-garbage)
+                           :parenscript :trivial-garbage :iterate :metabang-bind)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -349,26 +349,36 @@ contains the tests of _both_ libraries."
   (funcall (intern (symbol-name '#:do-tests)
                    (find-package '#:cl-base64-tests))))
 
+(defun lift-tests-ok-p (lift-tests-result)
+  "Helper function to work with Lift test framework.
+Examines the tests result object and retuns T is all
+the tests are successull and NIL otherwise."
+  (let ((errors (intern (symbol-name '#:errors) :lift))
+        (expected-errors (intern (symbol-name '#:expected-errors) :lift))
+        (failures (intern (symbol-name '#:failures) :lift))
+        (expected-failures (intern (symbol-name '#:expected-failures) :lift)))
+    (zerop
+     (+ (length (set-difference (funcall errors lift-tests-result)
+                                (funcall expected-errors lift-tests-result)))
+        (length (set-difference (funcall failures lift-tests-result)
+                                (funcall expected-failures lift-tests-result)))))))
+
+(defun run-lift-tests (suite-name)
+  "Helper function to work with the Lift test framework.
+Runs the specified Lift test suite and returns T
+if all the tests succeeded and NIL othersize."
+  (let ((result (funcall (intern (symbol-name '#:run-tests) :lift)
+                         :suite suite-name)))
+    (describe result *standard-output*)
+    (lift-tests-ok-p result)))
+  
 (defmethod libtest ((library-name (eql :trivial-backtrace)))
   
   ;; The test framework used: lift.
   
   (quicklisp:quickload :trivial-backtrace-test)
-  
-  (let ((result 
-         ;; copy/paste from trivial-backtrace.asd
-         (funcall (intern (symbol-name '#:run-tests) :lift)
-                  :suite :trivial-backtrace-test))
-        (errors (intern (symbol-name '#:errors) :lift))
-        (expected-errors (intern (symbol-name '#:expected-errors) :lift))
-        (failures (intern (symbol-name '#:failures) :lift))
-        (expected-failures (intern (symbol-name '#:expected-failures) :lift)))
-    (describe result *standard-output*)
-    (zerop
-     (+ (length (set-difference (funcall errors result)
-                                (funcall expected-errors result)))
-        (length (set-difference (funcall failures result)
-                                (funcall expected-failures result)))))))
+
+  (run-lift-tests :trivial-backtrace-test))
 
 (defmethod libtest ((library-name (eql :puri)))
 
@@ -423,6 +433,30 @@ contains the tests of _both_ libraries."
   
   (funcall (find-symbol (string '#:do-tests) '#:rtest)))
 
+(defmethod libtest ((library-name (eql :iterate)))
+
+  ;; The test framework used: rt.
+  (clean-rt)
+  (asdf:clear-system :iterate-tests)
+  (asdf:clear-system :iterate)
+
+  (quicklisp:quickload :iterate-tests)
+  
+  (funcall (intern "DO-TESTS" (find-package #+sbcl "SB-RT"
+                                            #-sbcl "REGRESSION-TEST"))))
+
+(defmethod libtest ((library-name (eql :metabang-bind)))
+  
+  ;; The test framework used: lift.
+  
+  ;; metabang-bind-test includes regular-expression
+  ;; bindings and tests, which is only loaded if
+  ;; cl-ppcre to be loaded first.
+  (quicklisp:quickload :cl-ppcre)
+  (quicklisp:quickload :metabang-bind-test)
+
+  (run-lift-tests :metabang-bind-test))
+
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
          (buf (make-string-output-stream))
@@ -431,7 +465,7 @@ contains the tests of _both_ libraries."
          (start-time (get-internal-real-time)))
 
     (format orig-std-out 
-            "Running tests for library ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
+            "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
             lib)
     (finish-output orig-std-out)
     
@@ -750,17 +784,17 @@ data (libraries test suites output and the run results) will be saved."
             (setf run (submit-logs run-dir))
             (format t "The log files are successfully uploaded to the online blobstore.
  
- Please submit the test run results file 
+Please submit the test run results file 
    ~A 
- to the cl-test-grid issue tracker: 
+to the cl-test-grid issue tracker: 
    https://github.com/cl-test-grid/cl-test-grid/issues
  
-  (we are working on automating the test results upload).~%"
+ (we are working on automating the test results upload).~%"
                     (truename (run-info-file run-dir))))
         (t (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
- Please submit manually the full content of the results directory 
+Please submit manually the full content of the results directory 
    ~A
- to the cl-test-grid issue tracker: 
+to the cl-test-grid issue tracker: 
    https://github.com/cl-test-grid/cl-test-grid/issues~%"
                        (type-of e)
                        e
@@ -1220,7 +1254,7 @@ Quicklisp download statistics:
 
 http://blog.quicklisp.org/2010/11/project-download-statistics.html
 
-colunmns: download count, has common-lisp test suite
+colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30).
 
     714 + alexandria
     596 + babel
@@ -1257,28 +1291,38 @@ colunmns: download count, has common-lisp test suite
     224 + parenscript
     221 - cl-who
     207 + trivial-garbage
-    201 iterate
-    193 cl-vectors
-    190 zpng
-    177 asdf-system-connections
-    174 zpb-ttf
-    173 uffi
-    173 metabang-bind
-    170 split-sequence
-    164 vecto
-    163 cl-json
-    162 cl-containers
-    161 metatilities-base
-    159 fare-utils
-    156 weblocks
-    156 fare-matcher
-    148 drakma
-    144 cl-cont
-    143 closure-common
-    140 moptilities
-    138 f-underscore
-    137 trivial-timeout
-    136 metatilities
-    135 clsql
-    133 cxml
+    201 + iterate
+    193 - cl-vectors
+    190 - zpng
+    177 - asdf-system-connections
+    174 - zpb-ttf
+    173 + uffi But the test suite is non trivial (for example, it defines asdf:compile-op 
+               for C files using make). Probably that's why quickisp does not
+               make the uffi-tests.asd availabel for ql:quickload. A study is needed about 
+               how to include this system, therefore I avoid it for now.
+    173 + metabang-bind
+  ------------------------ << I am here
+    170 - split-sequence
+    164 - vecto (there is a test.lisp, but it's not automated, intended for manual run and eye-testing of the resulting images)
+    163 + cl-json
+    162 + cl-containers
+    161 + metatilities-base
+    159 - fare-utils
+    156 + weblocks (do these tests start hunchentoot? seems no, it creates mock objects for request, response, etc.)
+    156 - fare-matcher (not test-op, but there is fare-matcher-test.asd with one test defined using stefil)
+    148 - drakma
+    144 + cl-cont
+    143 - closure-common
+    140 + moptilities
+    138 - f-underscore
+    137 + trivial-timeout
+    136 + metatilities
+    135 + clsql (big test suite, requires database server(s). Runs test on the 
+                 DB servers you specified in the configiration. Therefore
+                 we need to think how to represent results - we can't
+                 just collect results under the same name "clsql", because 
+                 different agents might have tested different servers).
+    133 + cxml (but how to run it? seems like it requires some .xml 
+                files which are not in the repository, so it probably
+                is not fully automated).
 |#
