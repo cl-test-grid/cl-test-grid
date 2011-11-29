@@ -511,7 +511,7 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :metatilities)))
   ;; The test framework used: lift.
   (quicklisp:quickload :metatilities-test)
-  (run-lift-tests :metatilities-test)))
+  (run-lift-tests :metatilities-test))
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
