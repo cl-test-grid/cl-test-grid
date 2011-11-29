@@ -501,12 +501,12 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :moptilities)))
   ;; The test framework used: lift.
   (quicklisp:quickload :moptilities-test)
-  (run-lift-tests :moptilities-test)))
+  (run-lift-tests :moptilities-test))
 
 (defmethod libtest ((library-name (eql :trivial-timeout)))
   ;; The test framework used: lift.
   (quicklisp:quickload :trivial-timeout-test)
-  (run-lift-tests :trivial-timeout-test)))
+  (run-lift-tests :trivial-timeout-test))
 
 (defmethod libtest ((library-name (eql :metatilities)))
   ;; The test framework used: lift.
