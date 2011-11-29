@@ -93,8 +93,9 @@ TODO:
      which was a plist key is now a property of the lib-result 
      object. It is more convenient for standard mapping functions, 
      instead of current do-lib-results.
- - add more libraries: total number of 20 libraries
-   is enough for the beginning
+ + add more libraries: total number of 20 libraries
+   is enough for the beginning.
+   Result: we have 23 libraries.
  + when loading of a library or library test system
    fails, ensure we have the error description in the output
    0.5h
@@ -112,6 +113,16 @@ TODO:
  - More detailed output for libraries using the RT test
    framework. Ensure the libs with other test framework
    are all have sufficiently detailed output too.
+ - Some libraries stil print messages to console, 
+   meaning their output is not only *standard-output*
+   and *standard-error*. Fix that, all the output
+   should be in the log files, but not on console.
+   Examples of such libraries: trivieal-backtrace,
+   trival-timeout, metatilities (i.e. the ones
+   using the Lift test framework).
+ - On Windows, SBCL and CCL seem to have different
+   results of (user-homedir-pathname); in result
+   CCL doesn't see the settings file created by SBCL.
  - run the tests on all the implementations available for us.
  - usocket test suite might need manual configuration,
    see their README. Distinguish the case 
