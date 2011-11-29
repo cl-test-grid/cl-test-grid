@@ -109,6 +109,9 @@ TODO:
    convenient)
    5h
    Solution: files are stored in Google App Engine blob store.
+ - More detailed output for libraries using the RT test
+   framework. Ensure the libs with other test framework
+   are all have sufficiently detailed output too.
  - run the tests on all the implementations available for us.
  - usocket test suite might need manual configuration,
    see their README. Distinguish the case 
@@ -200,7 +203,7 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
                            :cl-base64 :trivial-backtrace :puri :anaphora
                            :parenscript :trivial-garbage :iterate :metabang-bind
-                           :cl-json :cl-containers)
+                           :cl-json :cl-containers :metatilities-base :cl-cont)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -480,6 +483,19 @@ if all the tests succeeded and NIL othersize."
   ;; The test framework used: lift.
   (quicklisp:quickload :cl-containers-test)
   (run-lift-tests :cl-containers-test))
+
+(defmethod libtest ((library-name (eql :metatilities-base)))
+  ;; The test framework used: lift.
+  (quicklisp:quickload :metatilities-base-test)
+  (run-lift-tests :metatilities-base-test))
+
+(defmethod libtest ((library-name (eql :cl-cont)))
+  ;; The test framework used: rt.
+  (clean-rt)
+  (asdf:clear-system :cl-cont-test)
+
+  (quicklisp:quickload :cl-cont-test)
+  (funcall (intern (string '#:test-cont) :cl-cont-test)))
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
@@ -1328,14 +1344,16 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
     170 - split-sequence
     164 - vecto (there is a test.lisp, but it's not automated, intended for manual run and eye-testing of the resulting images)
     163 + cl-json
-  ------------------------ << I am here
     162 + cl-containers
     161 + metatilities-base
     159 - fare-utils
     156 + weblocks (do these tests start hunchentoot? seems no, it creates mock objects for request, response, etc.)
+          Unfortunately, as of today, (quicklisp:quickload :weblock-test) doesn't work.
+          https://github.com/quicklisp/quicklisp-projects/issues/232
     156 - fare-matcher (no test-op, but there is fare-matcher-test.asd with one test defined using stefil)
     148 - drakma
     144 + cl-cont
+  ------------------------ << I am here
     143 - closure-common
     140 + moptilities
     138 - f-underscore
