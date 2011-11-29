@@ -203,7 +203,8 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
                            :cl-base64 :trivial-backtrace :puri :anaphora
                            :parenscript :trivial-garbage :iterate :metabang-bind
-                           :cl-json :cl-containers :metatilities-base :cl-cont)
+                           :cl-json :cl-containers :metatilities-base :cl-cont
+                           :moptilities :trivial-timeout :metatilities)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -496,6 +497,21 @@ if all the tests succeeded and NIL othersize."
 
   (quicklisp:quickload :cl-cont-test)
   (funcall (intern (string '#:test-cont) :cl-cont-test)))
+
+(defmethod libtest ((library-name (eql :moptilities)))
+  ;; The test framework used: lift.
+  (quicklisp:quickload :moptilities-test)
+  (run-lift-tests :moptilities-test)))
+
+(defmethod libtest ((library-name (eql :trivial-timeout)))
+  ;; The test framework used: lift.
+  (quicklisp:quickload :trivial-timeout-test)
+  (run-lift-tests :trivial-timeout-test)))
+
+(defmethod libtest ((library-name (eql :metatilities)))
+  ;; The test framework used: lift.
+  (quicklisp:quickload :metatilities-test)
+  (run-lift-tests :metatilities-test)))
 
 (defun run-libtest (lib)
   (let* ((orig-std-out *standard-output*)
@@ -1348,25 +1364,28 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
     161 + metatilities-base
     159 - fare-utils
     156 + weblocks (do these tests start hunchentoot? seems no, it creates mock objects for request, response, etc.)
-          Unfortunately, as of today, (quicklisp:quickload :weblock-test) doesn't work.
+          Unfortunately, as of today, (quicklisp:quickload :weblock-test) doesn't work,
+          bacause the test suite does not compile.
           https://github.com/quicklisp/quicklisp-projects/issues/232
     156 - fare-matcher (no test-op, but there is fare-matcher-test.asd with one test defined using stefil)
     148 - drakma
     144 + cl-cont
-  ------------------------ << I am here
     143 - closure-common
     140 + moptilities
     138 - f-underscore
     137 + trivial-timeout
     136 + metatilities
-    135 + clsql (big test suite, requires database server(s). Runs test on the 
-                 DB servers you specified in the configiration. Therefore
-                 we need to think how to represent results - we can't
+    135 + clsql (big test suite, requires database server(s). Runs the tests 
+                 tests on the DB servers you specified in the configiration. 
+                 Therefore we need to think how to represent results - we can't
                  just collect results under the same name "clsql", because 
                  different agents might have tested different servers.
                  Conclusion: very useful test suite to include into 
                  our test set, but we will do it later).
-    133 + cxml (but how to run it? seems like it requires some .xml 
-                files which are not in the repository, so it probably
-                is not fully automated).
+    133 + cxml (But testing it requires manual preparation of test data:
+                checkout the XML test suite from w3.org CVS repostory,
+                patch it, build with ant. Conclusion: desirable to fix
+                improve the situation, e.g. by providing ready
+                to use test data files in a .tar archive
+                and downloading it using quicklisp' http utility).
 |#
