@@ -86,7 +86,7 @@ TODO:
  - readme with explanation of the project goal and
    how to use it
    5h
- - change db format
+ + change db format
    + test run as plist (:descr <descr> :run-results <run-results>)
      instead of just (<descr> <run-results>)
    + run-results as a list instead of plist; libname
@@ -678,21 +678,21 @@ Examples:
  (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
 
 (defun prompt-for-email ()
-             (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, adds")
-             (force-output *query-io*)
-             (string-trim " " (read-line *query-io*)))
+  (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, etc.")
+  (force-output *query-io*)
+  (string-trim " " (read-line *query-io*)))
 
 (defun get-user-email ()
-  (LET ((USER-EMAIL nil))
+  (let ((user-email nil))
     (handler-case
-        (if (STRING= "" (setf user-email(GETF (SAFE-READ-FILE (GET-SETTINGS-FILE)
-                                                              ) :USER-EMAIL)))
-          (FORMAT t "Warning! Empty email is specified in the settings file ~a~%" (get-settings-file)))
-        (t ()
-           (PROGN
-             (write-to-file (list :user-email (setf user-email (prompt-for-email)))
-                                  (get-settings-file)))))
-        user-email))
+        (if (string= "" (setf user-email(getf (safe-read-file (get-settings-file)
+                                                              ) :user-email)))
+            (format t "Warning! Empty email is specified in the settings file ~a~%" (get-settings-file)))
+      (t ()
+        (progn
+          (write-to-file (list :user-email (setf user-email (prompt-for-email)))
+                         (get-settings-file)))))
+    user-email))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
