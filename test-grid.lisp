@@ -7,7 +7,7 @@
 #|
 
 TODO: 
-  - information about test run: 
+  + information about test run:
    + lisp-version-string, 
    + lib-world, 
    + author contact (get it from some settings file), 
@@ -117,12 +117,9 @@ TODO:
    meaning their output is not only *standard-output*
    and *standard-error*. Fix that, all the output
    should be in the log files, but not on console.
-   Examples of such libraries: trivieal-backtrace,
+   Examples of such libraries: trivial-backtrace,
    trival-timeout, metatilities (i.e. the ones
    using the Lift test framework).
- - On Windows, SBCL and CCL seem to have different
-   results of (user-homedir-pathname); in result
-   CCL doesn't see the settings file created by SBCL.
  - run the tests on all the implementations available for us.
  - usocket test suite might need manual configuration,
    see their README. Distinguish the case 
@@ -393,10 +390,14 @@ the tests are successull and NIL otherwise."
   "Helper function to work with the Lift test framework.
 Runs the specified Lift test suite and returns T
 if all the tests succeeded and NIL othersize."
-  (let ((result (funcall (intern (symbol-name '#:run-tests) :lift)
-                         :suite suite-name)))
-    (describe result *standard-output*)
-    (lift-tests-ok-p result)))
+  (let ((run (intern (symbol-name '#:run-tests) :lift))
+        (lift-debug-output (intern (string :*lift-debug-output*) :lift)))
+    ;; bind lift:*debug-output* to *standard-output*,
+    ;; wich is then redirected to file by run-libtests.
+    (progv (list lift-debug-output) (list *standard-output*)
+      (let ((result (funcall run :suite suite-name)))
+        (describe result *standard-output*)
+        (lift-tests-ok-p result)))))
   
 (defmethod libtest ((library-name (eql :trivial-backtrace)))
   
