@@ -537,8 +537,13 @@ if all the tests succeeded and NIL othersize."
             lib)
     (finish-output orig-std-out)
     
-    (let ((status (handler-case (normalize-status (libtest lib)) 
-                    (t () :fail))))      
+    (let ((status (handler-case
+                      (normalize-status (libtest lib))
+                    (error (condition) (progn
+                                         (format t
+                                                 "Unhandled ERROR is signaled: ~A~%"
+                                                 condition)
+                                         :fail)))))
       (when (eq :fail status)
         (format t "~A tests failed." lib))
       (let ((output (get-output-stream-string buf)))
@@ -859,7 +864,7 @@ to the cl-test-grid issue tracker:
  
  (we are working on automating the test results upload).~%"
                     (truename (run-info-file run-dir))))
-        (t (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
+        (error (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
 Please submit manually the full content of the results directory 
    ~A
 to the cl-test-grid issue tracker: 
