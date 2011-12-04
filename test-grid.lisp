@@ -431,6 +431,8 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :parenscript)))
   ;; The test framework used: eos (similar to FiveAM).
 
+  (quicklisp:quickload :parenscript.test)
+
   ;; asdf:test-op is not provided for parenscript,
   ;; only a separate package ps-test with public
   ;; function run-tests.
