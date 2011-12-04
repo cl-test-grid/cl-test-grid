@@ -272,15 +272,33 @@ contains the tests of _both_ libraries."
   (clean-rt)
   (asdf:clear-system :cffi-tests)
 
-  (handler-case (quicklisp:quickload :cffi-tests)
-    ;; CFFI tests work with a small test C 
-    ;; library. The user is expected to compile
-    ;; the library. If the library is not available,
-    ;; CFFI tests signal cffi:load-foreign-library-error.
-    (t (e)
-      (when (eq (type-of e) 
-                (find-symbol (symbol-name '#:load-foreign-library-error) '#:cffi))
-        (return-from libtest :no-resource))))
+  ;; CFFI tests work with a small test C library.
+  ;; The user is expected to compile the library manually.
+  ;; If the library is not available, CFFI tests
+  ;; signal cffi:load-foreign-library-error.
+  (handler-bind ((error #'(lambda (condition)
+                            ;; Check if the error is a
+                            ;; cffi:load-foreign-library-error.
+                            ;; Take into account that it might
+                            ;; be some other error which prevents
+                            ;; even CFFI system to load,
+                            ;; and therefore CFFI package may be
+                            ;; abset. That's why use use ignore-errors
+                            ;; when looking for a symbol in the CFFI
+                            ;; packge.
+                            (when (eq (type-of condition)
+                                      (ignore-errors (find-symbol (symbol-name '#:load-foreign-library-error)
+                                                                  '#:cffi)))
+                              ;; todo: add the full path to the 'test' directory,
+                              ;; where user can find the scripts to compile
+                              ;; the test C library, to the error message.
+                              (format t 
+                                      "~& An error occurred during (quicklisp:quickload :cffi-tests):~%~A~&This means the small C library used by CFFI tests is not available (probably you haven't compiled it). The compilation script for the library may be found in the 'test' directory in the CFFI distribution.~%" 
+                                      condition)
+                              (return-from libtest :no-resource))
+                            ;; resignal the condition
+                            (error condition))))
+    (quicklisp:quickload :cffi-tests))
 
   (flet (
          ;; copy/paste from cffi-tests.asd
