@@ -249,8 +249,9 @@ contains the tests of _both_ libraries."
   ;; The test framework used: stefil.
   
   (quicklisp:quickload :babel-tests)
-  
-  (let* ((result (funcall (intern (string '#:run) '#:babel-tests)))
+
+  (let* ((*debug-io* *standard-output*)
+         (result (funcall (intern (string '#:run) '#:babel-tests)))
          (failures (funcall (intern (string '#:failure-descriptions-of) '#:hu.dwim.stefil)
                             result))
          (failed-p (> (length failures) 0)))
