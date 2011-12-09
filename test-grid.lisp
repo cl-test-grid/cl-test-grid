@@ -950,6 +950,14 @@ to the cl-test-grid issue tracker:
 ;; until we move the reporting to a separate
 ;; asdf system, we don't want the dependency 
 ;; on blobstore here.
+(defun format-results (lib-result)
+  (let ((links))
+    (dolist (value lib-result)
+      (setf links (concatenate 'string links " " (format nil "<a href=\"~a\">~a</a>" 
+                                                         (lib-log-uri nil value)
+                                                         (string-downcase (getf value :status))))))
+    links))
+
 (defun blob-uri (blob-key)
   (format nil "~A/blob?key=~A" 
           *gae-blobstore-base-url* blob-key))
@@ -1229,10 +1237,11 @@ as a parameter"
         (dolist (col cols)
           (funcall index-key-setter index-key row col)
           (let ((data (gethash index-key joined-index)))
-            (format out "<td>~A</td>" data)))      
+            (format out "<td>~a</td>" (get-link data))))
         (format out "</tr>~%"))))
-    (princ "</table>" out))
+  (princ "</table>" out))
   
+
 (defun print-pivot-reports (db)
   (let ((joined-index (build-joined-index db))
         (reports-dir (reports-dir)))
