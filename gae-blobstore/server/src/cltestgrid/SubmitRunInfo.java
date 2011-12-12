@@ -65,6 +65,10 @@ public class SubmitRunInfo extends HttpServlet {
         throw new Exception("The \"run-info\" parameter is missed");
       }
 
+      if (logger.isLoggable(Level.FINE)) {
+        logger.log(Level.FINE, "run-info: " + runInfo);
+      }
+
       Message msg = new MimeMessage(session);
       msg.setFrom(new InternetAddress("cl.test.grid@gmail.com", "cl-test-grid GAE server"));
       msg.addRecipient(Message.RecipientType.TO,
