@@ -53,7 +53,9 @@ public class SubmitRunInfo extends HttpServlet {
   {
     resp.setContentType("text/html; charset=utf-8");
 
-    logger.log(Level.INFO, "Handling the run-info submit from " + req.getRemoteAddr());
+    logger.log(Level.INFO, 
+        "Handling the run-info submit from " + req.getRemoteAddr() 
+        + "; X-AppEngine-Country: " + req.getHeader("X-AppEngine-Country"));
     
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
