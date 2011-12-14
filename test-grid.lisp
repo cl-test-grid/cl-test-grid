@@ -952,7 +952,7 @@ to the cl-test-grid issue tracker:
 ;; on blobstore here.
 (defun format-results (out lib-result)
   (dolist (value lib-result)
-    (format out "<a href=\"~a\">~a</a> " 
+    (format out "<a href=\"~a\" class=\"~a\">~a</a> " 
             (lib-log-uri nil value)
             (string-downcase (getf value :status)))))
 
