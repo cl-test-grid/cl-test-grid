@@ -1,0 +1,26 @@
+/* Results */
+
+a.ok  {
+		color: green;
+}
+
+a.fail {
+		color: red;
+}
+
+a.no-resource {
+		color :#7A7A7A;
+}
+
+a.link {
+	font-size: 20;
+}
+
+/* Titles */
+
+.nHeader {
+	margin: 5;
+	white-space: nowrap;
+	text-transform: lowercase;
+	font-weight: bold;
+}
