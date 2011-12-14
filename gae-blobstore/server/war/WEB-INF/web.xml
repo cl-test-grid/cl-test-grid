@@ -32,6 +32,15 @@
     <url-pattern>/blob</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>submit-run-info</servlet-name>
+    <servlet-class>cltestgrid.SubmitRunInfo</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>submit-run-info</servlet-name>
+    <url-pattern>/submit-run-info</url-pattern>
+  </servlet-mapping>
+
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>all</web-resource-name>
