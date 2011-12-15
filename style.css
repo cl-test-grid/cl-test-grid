@@ -16,11 +16,11 @@ a.link {
 	font-size: 20;
 }
 
-/* Titles */
+/* Table */
 
-.nHeader {
+.test-table {
+	border-spacing: 0px;
 	margin: 5;
 	white-space: nowrap;
-	text-transform: lowercase;
 	font-weight: bold;
 }
