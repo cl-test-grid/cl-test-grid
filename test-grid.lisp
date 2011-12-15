@@ -251,11 +251,23 @@ contains the tests of _both_ libraries."
   ;; The test framework used: stefil.
   
   (quicklisp:quickload :babel-tests)
-  
-  (let ((result (funcall (intern (string '#:run) '#:babel-tests))))
-    (zerop 
-     (length (funcall (intern (string '#:failure-descriptions-of) '#:hu.dwim.stefil)  
-                      result)))))
+
+(let* ((*debug-io* *standard-output*)
+       (result (funcall (intern (string '#:run) '#:babel-tests)))
+       (failures (funcall (intern (string '#:failure-descriptions-of) '#:hu.dwim.stefil)
+                          result))
+       (failed-p (> (length failures) 0)))
+(when failed-p	  	
+  (format t "~&~%-------------------------------------------------------------------------------------------------~%")
+	  	
+  (format t "The test result details (printed by cl-test-grid in addition to the standard Stefil output above)~%")
+  (format t "~%(DESCRIBE RESULT):~%")	  	
+  (describe result)	  	
+  (format t "~&~%Individual failures:~%")
+  (map 'nil
+       (lambda (descr) (format t "~A~%" descr))	  	
+       failures))
+(not failed-p)))
 
 (defmethod libtest ((library-name (eql :trivial-features)))
   
@@ -1215,7 +1227,7 @@ as a parameter"
                          joined-index
                          row-fields row-fields-sort-predicates
                          col-fields col-fields-sort-predicates)
-  (princ "<table border=\"1\">" out)
+  (princ "<table border=\"1\" class=test-table>" out)
   (let (rows
         cols
         index-key-setter
