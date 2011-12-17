@@ -1,6 +1,6 @@
 (defpackage #:test-grid-blobstore
   (:use :cl)
-  (:export #:submit-files))
+  (:export #:submit-files #:submit-run-info))
 
 (in-package #:test-grid-blobstore)
 
@@ -24,3 +24,5 @@ that all the files are submitted and the return value
 has a blobkey for every file.
 
 Signals an ERROR in case of problems."))
+
+(defgeneric submit-run-info (blobstore run-info))

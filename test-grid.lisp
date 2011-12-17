@@ -149,6 +149,9 @@ TODO:
      libraries set (think quicklisp distro),
      the user contacts, total test run duration,
      etc.
+ - when GAE quotas (for requests, emails, anything else)
+   are exceeded, recognize it and display a meaningfull
+   message to the user.
  - watchdog for hanging tests
  + more abstract accessor to parts of DB info instead of
    getf by properties: run-descr, run-results.
@@ -848,9 +851,8 @@ data (libraries test suites output and the run results) will be saved."
   (funcall (intern (string '#:make-blob-store) '#:test-grid-gae-blobstore) 
            :base-url *gae-blobstore-base-url*))
 
-(defun submit-logs (test-run-dir)
-  (let* ((blobstore (get-blobstore))
-         (run-info (safe-read-file (run-info-file test-run-dir)))
+(defun submit-logs (blobstore test-run-dir)
+  (let* ((run-info (safe-read-file (run-info-file test-run-dir)))
          ;; prepare parameters for the SUBMIT-FILES blobstore function
          (submit-params (mapcar #'(lambda (lib-result)
                                     (let ((libname (getf lib-result :libname)))
@@ -877,6 +879,14 @@ data (libraries test suites output and the run results) will be saved."
       ;; finally, save the updated run-info with blobkeys 
       ;; to the file. Returns the run-info.
       (save-run-info run-info test-run-dir))))
+
+(defun submit-results (test-run-dir)
+  (let* ((blobstore (get-blobstore))
+         (run-info (submit-logs blobstore test-run-dir)))
+    (format t "The log files are submitted. Submitting the test run info...~%")
+    (test-grid-blobstore:submit-run-info blobstore run-info)
+    (format t "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.~%")
+    run-info))
   
 (defun run-libtests (&optional (libs *all-libs*))
   (let* ((run-descr (make-run-descr))
@@ -895,27 +905,17 @@ data (libraries test suites output and the run results) will be saved."
       (save-run-info run run-dir)
       (format t "The test results were saved to this directory: ~%~A.~%" 
               (truename run-dir))
-      (format t "~%Submitting libraries test logs to the online blobstore...~%")
+      (format t "~%Submitting the test results to the server...~%")
       (handler-case 
-          (progn
-            (setf run (submit-logs run-dir))
-            (format t "The log files are successfully uploaded to the online blobstore.
- 
-Please submit the test run results file 
-   ~A 
-to the cl-test-grid issue tracker: 
-   https://github.com/cl-test-grid/cl-test-grid/issues
- 
- (we are working on automating the test results upload).~%"
-                    (truename (run-info-file run-dir))))
-        (error (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
+          (setf run (submit-results run-dir))
+        (error (e) (format t "Error occured while uploading the test results to the server: ~A: ~A.
 Please submit manually the full content of the results directory 
    ~A
 to the cl-test-grid issue tracker: 
    https://github.com/cl-test-grid/cl-test-grid/issues~%"
-                       (type-of e)
-                       e
-                       (truename run-dir))))
+                           (type-of e)
+                           e
+                           (truename run-dir))))
       (format t "~%Thank you for the participation!~%")
       run)))
 
