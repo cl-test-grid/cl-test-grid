@@ -1302,7 +1302,7 @@ as a parameter"
   (princ "<html>" out)
   (princ "<head>" out)
   (princ "<title>" out) (princ "CL Test Grid Pivot Report" out) (princ "</title>" out)
-  (princ "<link href=../style.css rel=stylesheet />" out)
+  (princ "<link href=\"style.css\" rel=\"stylesheet\"/>" out)
   (princ "</head>" out)
   (princ "<body>" out)
   (pivot-table-html out 
