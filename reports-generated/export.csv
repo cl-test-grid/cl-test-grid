@@ -1,9 +1,0 @@
-Lib World,Lisp,Runner,LibName,Status,TestDuration
-quicklisp 2011-11-05,sbcl-1.0.53.19.mswinmt.1042-de54330-win-x86,ivanov@mail.ru,bordeaux-threads,FAIL,82/125
-quicklisp 2011-11-05,sbcl-1.0.53.19.mswinmt.1042-de54330-win-x86,ivanov@mail.ru,flexi-streams,FAIL,141/500
-quicklisp 2011-11-05,sbcl-1.0.53.19.mswinmt.1042-de54330-win-x86,ivanov@mail.ru,usocket,FAIL,3/8
-quicklisp 2011-11-05,sbcl-1.0.53.19.mswinmt.1042-de54330-win-x86,ivanov@mail.ru,cl-ppcre,FAIL,5/8
-quicklisp 2011-11-05,sbcl-1.0.53.19.mswinmt.1042-de54330-win-x86,ivanov@mail.ru,cffi,FAIL,416/125
-quicklisp 2011-11-05,sbcl-1.0.53.19.mswinmt.1042-de54330-win-x86,ivanov@mail.ru,trivial-features,FAIL,203/500
-quicklisp 2011-11-05,sbcl-1.0.53.19.mswinmt.1042-de54330-win-x86,ivanov@mail.ru,babel,FAIL,383/500
-quicklisp 2011-11-05,sbcl-1.0.53.19.mswinmt.1042-de54330-win-x86,ivanov@mail.ru,alexandria,FAIL,289/500
