@@ -31,7 +31,7 @@
         - needs care to work with GETF when working with the database      
 ** DONE A tool to generate fake DB content to test reporting
    CLOSED: [2011-12-18 Вс 01:42]
-** TODO simpliest reporting to overview the libraries test statuses [4/9] :report:
+** TODO simpliest reporting to overview the libraries test statuses [4/12] :report:
 *** DONE Test Runs report: every test run as a row in a table :report:testruns:
     CLOSED: [2011-12-18 Вс 02:19]
      + legend or a tooltip in the report for test statuses
@@ -41,6 +41,12 @@
     CLOSED: [2011-12-18 Вс 01:43]
     rows/columns to be any of quicklisp distro, lisp version
     library name. With grouping and sorging.
+*** TODO clean up the pivot reports Lisp coce      :report:pivot:codequality:
+*** TODO quick access to the test run info from the pivot report table cell  :report:pivot:
+    (or maybe just print the test run info to the log, like a header;
+    but it is a duplication and also we will have invonviniences
+    if we want to modify this infromation in the lob BLOB)
+*** TODO highlight rows and columns in the pivot reports       :report:pivot:
 *** DONE CSV export of the database to use it then with spreadsheets, :report:csv:
     CLOSED: [2011-12-18 Вс 01:57]
      google fusion tables, etc. Initial intent
