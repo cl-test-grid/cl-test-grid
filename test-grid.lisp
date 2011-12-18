@@ -539,7 +539,7 @@ Examples:
  (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
 
 (defun prompt-for-email ()
-  (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, etc.")
+  (format *query-io* "~a: " "Please enter your email for questions about this test, your environment, etc.")
   (force-output *query-io*)
   (string-trim " " (read-line *query-io*)))
 
