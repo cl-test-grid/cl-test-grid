@@ -41,7 +41,7 @@
     CLOSED: [2011-12-18 Вс 01:43]
     rows/columns to be any of quicklisp distro, lisp version
     library name. With grouping and sorging.
-*** TODO clean up the pivot reports Lisp coce      :report:pivot:codequality:
+*** TODO clean up the pivot reports Lisp code      :report:pivot:codequality:
 *** TODO quick access to the test run info from the pivot report table cell  :report:pivot:
     (or maybe just print the test run info to the log, like a header;
     but it is a duplication and also we will have invonviniences
