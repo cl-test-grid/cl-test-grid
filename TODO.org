@@ -9,6 +9,9 @@
 ** DONE organize the database file format                                :db:
    CLOSED: [2011-12-18 Вс 01:42]
 ** TODO format the DB equally on all the Lisps                           :db:
+   so that diff shows only new records.
+   (use pprint ?)
+   4h
 ** DONE better decision for library name representation.
    CLOSED: [2011-12-18 Вс 01:42]
      This representation is used in the:
@@ -152,14 +155,14 @@
    how the email will be used and ensure there is a way
    to avoid providing email.
 * Backlog
- - run-libtests: redirect the library output to log file directly
+** TODO run-libtests: redirect the library output to log file directly
    without caching it in memory. It is more convenient when you are 
    watching the testing process, you can observe the file being 
    populated with logs (because some libraries, like flexi-streams, 
    take time about minute to finish, and if during this minute
    nithing happens it is not user-friendly)
 
- - finalize the terminology we use in the code
+** TODO finalize the terminology we use in the code
    to refer our main data: 
    - test status for a particular library
    - library test result object (includes the status 
@@ -172,25 +175,26 @@
      libraries set (think quicklisp distro),
      the user contacts, total test run duration,
      etc.
- - when GAE quotas (for requests, emails, anything else)
+** TODO when GAE quotas (for requests, emails, anything else)
    are exceeded, recognize it and display a meaningfull
    message to the user.
- - watchdog for hanging tests
- + more abstract accessor to parts of DB info instead of
+** TODO watchdog for hanging tests
+** DONE more abstract accessor to parts of DB info instead of
+   CLOSED: [2011-12-20 Вт 04:29]
    getf by properties: run-descr, run-results.
    1h
- + safe-read database
- + create a project with asdf system
+** DONE safe-read database
+   CLOSED: [2011-12-20 Вт 04:29]
+** DONE create a project with asdf system
+   CLOSED: [2011-12-20 Вт 04:29]
    0.5h
- + DB file path based on the asdf system location
+** DONE DB file path based on the asdf system location
+   CLOSED: [2011-12-20 Вт 04:29]
    0.5h
- + accumulate failed library output
+** DONE accumulate failed library output
+   CLOSED: [2011-12-20 Вт 04:29]
    1h
- - DB file formatting should be equal in all lisps,
-   so that diff shows only new records.
-   (use pprint ?)
-   4h
- - a way to specify lib-wold as a quicklisp version with some 
+** TODO a way to specify lib-wold as a quicklisp version with some 
    library versions overriden (checkout this particular 
    libraries from the scm), so that library author can quickly 
    get test result for his changes (fixes)  in scm. 
@@ -199,5 +203,5 @@
    be reused here, whithout running a shell command for 
    checkout.
    24h
- - should we save library log to a file only if the tests failed, 
+** TODO should we save library log to a file only if the tests failed, 
    or always? (now we save log in any case)
