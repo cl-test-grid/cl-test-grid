@@ -140,11 +140,25 @@
    (cffi, usocket) provide guiding message to the
    user how to configure them, before running
    the tests.
-** TODO finalize the decision what command user runs
+** DONE finalize the decision what command user runs
+   CLOSED: [2011-12-20 Вт 04:19]
    to performs the tests. Describe this main command
    in the README (in the first paragraph).
-
+   The solution: user runs (load "agent.lisp"); precondition: quicklisp installed.
+** TODO When the settings file is populated, inform user where     :settings:
+   it is stored (and to be sure user understood us, ask
+   him to press Enter before continuing).
+** TODO When asking user for email, explain him more carefully     :settings:
+   how the email will be used and ensure there is a way
+   to avoid providing email.
 * Backlog
+ - run-libtests: redirect the library output to log file directly
+   without caching it in memory. It is more convenient when you are 
+   watching the testing process, you can observe the file being 
+   populated with logs (because some libraries, like flexi-streams, 
+   take time about minute to finish, and if during this minute
+   nithing happens it is not user-friendly)
+
  - finalize the terminology we use in the code
    to refer our main data: 
    - test status for a particular library
@@ -187,10 +201,3 @@
    24h
  - should we save library log to a file only if the tests failed, 
    or always? (now we save log in any case)
- - During run-libtests, probably we should redirect the library
-   output to file directly, without caching it in memory
-   - it is more convenient when you are watching the testing
-   process, you can observe the file being populated with 
-   logs (because some libraries, like flexi-streams, take 
-   time about minute to finish, and if during this minute
-   nithing happens it is not user-friendly)
