@@ -1261,7 +1261,7 @@ as a parameter"
                          joined-index
                          row-fields row-fields-sort-predicates
                          col-fields col-fields-sort-predicates)
-  (princ "<table border=\"1\" class=test-table>" out)
+  (princ "<table border=\"1\" class=\"test-table\" id=\"pivot-table\">" out)
   (let (rows
         cols
         index-key-setter
@@ -1277,7 +1277,14 @@ as a parameter"
     
     (setf rows (sort rows row-comparator)
           cols (sort cols col-comparator))
-    
+
+    (dolist (row row-fields)
+      (princ "<colgroup>" out)
+      (princ "</colgroup>" out)
+      (dolist (col cols)
+        (princ "<colgroup>" out)
+        (princ "</colgroup>" out)))
+      
     (print-table-headers (length row-fields) (length col-fields) cols out)
     (let ((row-spans (calc-spans rows))
           (index-key (make-sequence 'list (+ (length row-fields)
@@ -1302,14 +1309,30 @@ as a parameter"
   (princ "<html>" out)
   (princ "<head>" out)
   (princ "<title>" out) (princ "CL Test Grid Pivot Report" out) (princ "</title>" out)
-  (princ "<link href=../style.css rel=stylesheet />" out)
+  (princ "<link href=\"../style.css\" rel=\"stylesheet /\">" out)
+  (princ "<script type=\"text/javascript\" 
+                  src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js\">" out)
+  (princ "</script>" out)
+  (princ "<script type=\"text/javascript\">" out)
+  (princ "$(document).ready(function (){$(\"table\").delegate('td','mouseover mouseleave', function(e) {
+         if (e.type == 'mouseover') {
+           $(this).parent().addClass(\"hover\");
+           $(\"colgroup\").eq($(this).index()).addClass(\"hover\");
+         }
+         else {
+           $(this).parent().removeClass(\"hover\");
+           $(\"colgroup\").eq($(this).index()).removeClass(\"hover\");
+         }
+         });})" 
+         out)
+  (princ "</script>" out)
   (princ "</head>" out)
   (princ "<body>" out)
   (pivot-table-html out 
                     joined-index
                     row-fields row-fields-sort-predicates
                     col-fields col-fields-sort-predicates)
-  (princ "<a href=reports-overview.html class=link>" out) 
+  (princ "<a href=\"reports-overview.html\" class=\"link\">" out) 
   (princ "To reports overview" out) 
   (princ "</a>" out)
   (format out "<p>Generation date: ~a</p>" (current-date-string))

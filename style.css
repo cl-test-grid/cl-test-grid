@@ -1,8 +1,8 @@
 /* Results */
 
 a.ok  {
-		color: green;
-}
+			color: green;
+}	
 
 a.fail {
 		color: red;
@@ -23,4 +23,11 @@ a.link {
 	margin: 5;
 	white-space: nowrap;
 	font-weight: bold;
+}
+
+/* Table highlighting */
+
+
+.hover { 
+	background-color: gold; 
 }
