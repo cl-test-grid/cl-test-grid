@@ -2,188 +2,6 @@
 
 (in-package #:test-grid)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-#|
-
-TODO: 
-  + information about test run:
-   + lisp-version-string, 
-   + lib-world, 
-   + author contact (get it from some settings file), 
-   + date, 
-   + run-duration
- + organize database file format
- + better decision for library name representation.
-     This representation is used in the:
-     - libtest method parameter (eql specialized)
-     - in the database and testrun datastructure.
-     Possible alternatives:
-     a keyword
-        good for READ (package independent),
-        good for EQL specializer
-        good for GETF when working with the database
-     a symbol from the test-grid package
-        - good for EQL specializer
-        - package dependent in READ
-        - good for GETF when working with the database
-        - adds one more (unnecessary) way to represent a library 
-          in addition the specified for ASDF and Quicklisp
-     or a downcased string
-        - needs special handling in libtest eql specialization
-        - good ro READ (package independent)
-        - needs care to work with GETF when working with the database      
- + Generate a sufficiently large database so that we can
-   evaluate our reporting solution. We may generate
-   fake test results programmatically to make this task
-   easier.
- - simpliest reporting to allow overview of library test statuses 
-   - Test Runs report: every test run as a row in a table
-     + legend or a tooltip in the report for test statuses
-     + color for statuses
-     + use the online blob URL in the report
-   - A pivot -like table report of library test results, allowing
-     rows/columns to be any of quicklisp distro, lisp version
-     library name. With grouping and sorging.
-   - CSV export of the database to use it then with spreadsheets,
-     google fusion tables, etc. Initial intent
-     was to format it as a pivot for various projections 
-     (by quicklisp releases, by platform, etc).
-     But neither google docs spreadsheet, nor google fusion
-     table allow as to format results as we want
-     (the main problem, it is impossible to use
-     a custom aggregation function for pivot
-     cells, because standard aggregation functions
-     are numeric, but we want a report cell
-     to represent test result(s) for a particular
-     library, i.e. :ok, :fail, :no-resource).
-     5h
-     - Test that the test-duration field value
-       (Common Lisp rational) can be read
-       by spreadsheet software (MS/Open Offices,
-       Google Spreadsheets).
-   - an informer which may be embedded into a library
-     project page, with reports about the test statuses 
-     for this single library on various platforms with
-     various quicklisp versions
-   - an overview page with brief explanation of all
-     the above reports and links to the reports.
-     - change 
-       "represents every test run as a separate row" 
-       to
-       "represents every <tt>test-grid:run-tests</tt> as a separate row"
-       (after user will know this command from the main project description)
-       ?
-     - Description of CSV report may link to an example
-       of the CSV report imported to a Google Spreadsheet
-       with pivot calculating avearage duration of 
-       tests for every library.
-     - spell check
- - simple UI (command line) with guiding messages
-   for the user who runs the tests. Spend as little 
-   efforts as possible on this task, to release quickly.
-   4h
- - readme with explanation of the project goal and
-   how to use it
-   5h
- + change db format
-   + test run as plist (:descr <descr> :run-results <run-results>)
-     instead of just (<descr> <run-results>)
-   + run-results as a list instead of plist; libname
-     which was a plist key is now a property of the lib-result 
-     object. It is more convenient for standard mapping functions, 
-     instead of current do-lib-results.
- + add more libraries: total number of 20 libraries
-   is enough for the beginning.
-   Result: we have 23 libraries.
- + when loading of a library or library test system
-   fails, ensure we have the error description in the output
-   0.5h
- + The "thank you" message: where exactly to submit test results?
-   Specify an email or issue tracker of the cl-test-grid project.
- + how to store public (central) database and failed library 
-   outputs (files).
-   An appealing way is to store it in the same git repository 
-   on github, but with the std-out files the repository will 
-   quickly grow to an unconvenient size (for new people the
-   checkout procedure will be too long to be considered
-   convenient)
-   5h
-   Solution: files are stored in Google App Engine blob store.
- + More detailed output for libraries using the RT test
-   framework. Ensure the libs with other test framework
-   are all have sufficiently detailed output too.
- + Log of the BABEL tests (generated by the Stefil test
-   framework) does not contain information about
-   errors. Add these details.
- + Some libraries (babel and cl-json) stil print messages to 
-   console, meaning their output is not only *standard-output*
-   and *standard-error*. Fix that, all the output
-   should be in the log files, but not on console.
- - run the tests on all the implementations available for us.
- - usocket test suite might need manual configuration,
-   see their README. Distinguish the case 
-   when the manual configuration hasn't been
-   performed and return :no-resource status.
- - For all the libraries which need manual configuration
-   (cffi, usocket) provide guiding message to the
-   user how to configure them, before running
-   the tests.
- - finalize the decision what command user runs
-   to performs the tests. Describe this main command
-   in the README (in the first paragraph).
-
-==================================================
-==========    Milestone: release 0    ============
-==================================================
- - finalize the terminology we use in the code
-   to refer our main data: 
-   - test status for a particular library
-   - library test result object (includes the status 
-     as well as log length, the key of the log
-     in the online blob store, probably the
-     library test duration)
-   - list of library test results in a particular test 
-     run
-   - test run description, consists of lisp name,
-     libraries set (think quicklisp distro),
-     the user contacts, total test run duration,
-     etc.
- - watchdog for hanging tests
- + more abstract accessor to parts of DB info instead of
-   getf by properties: run-descr, run-results.
-   1h
- + safe-read database
- + create a project with asdf system
-   0.5h
- + DB file path based on the asdf system location
-   0.5h
- + accumulate failed library output
-   1h
- - DB file formatting should be equal in all lisps,
-   so that diff shows only new records.
-   (use pprint ?)
-   4h
- - a way to specify lib-wold as a quicklisp version with some 
-   library versions overriden (checkout this particular 
-   libraries from the scm), so that library author can quickly 
-   get test result for his changes (fixes)  in scm. 
-   An implementation idea to consider: almost every scm allows 
-   to download asnapshot via http, so the quicklisp http machinery may
-   be reused here, whithout running a shell command for 
-   checkout.
-   24h
- - should we save library log to a file only if the tests failed, 
-   or always? (now we save log in any case)
- - During run-libtests, probably we should redirect the library
-   output to file directly, without caching it in memory
-   - it is more convenient when you are watching the testing
-   process, you can observe the file being populated with 
-   logs (because some libraries, like flexi-streams, take 
-   time about minute to finish, and if during this minute
-   nithing happens it is not user-friendly)
-|#
-
 (defgeneric libtest (library-name)
   (:documentation "Define a method for this function
 with LIBRARY-NAME eql-specialized for for every library added 
@@ -721,7 +539,7 @@ Examples:
  (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
 
 (defun prompt-for-email ()
-  (format *query-io* "~a: " "Please enter your email for questions about this, test, your environment, etc.")
+  (format *query-io* "~a: " "Please enter your email for questions about this test, your environment, etc.")
   (force-output *query-io*)
   (string-trim " " (read-line *query-io*)))
 
@@ -848,9 +666,8 @@ data (libraries test suites output and the run results) will be saved."
   (funcall (intern (string '#:make-blob-store) '#:test-grid-gae-blobstore) 
            :base-url *gae-blobstore-base-url*))
 
-(defun submit-logs (test-run-dir)
-  (let* ((blobstore (get-blobstore))
-         (run-info (safe-read-file (run-info-file test-run-dir)))
+(defun submit-logs (blobstore test-run-dir)
+  (let* ((run-info (safe-read-file (run-info-file test-run-dir)))
          ;; prepare parameters for the SUBMIT-FILES blobstore function
          (submit-params (mapcar #'(lambda (lib-result)
                                     (let ((libname (getf lib-result :libname)))
@@ -877,6 +694,14 @@ data (libraries test suites output and the run results) will be saved."
       ;; finally, save the updated run-info with blobkeys 
       ;; to the file. Returns the run-info.
       (save-run-info run-info test-run-dir))))
+
+(defun submit-results (test-run-dir)
+  (let* ((blobstore (get-blobstore))
+         (run-info (submit-logs blobstore test-run-dir)))
+    (format t "The log files are submitted. Submitting the test run info...~%")
+    (test-grid-blobstore:submit-run-info blobstore run-info)
+    (format t "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.~%")
+    run-info))
   
 (defun run-libtests (&optional (libs *all-libs*))
   (let* ((run-descr (make-run-descr))
@@ -895,27 +720,17 @@ data (libraries test suites output and the run results) will be saved."
       (save-run-info run run-dir)
       (format t "The test results were saved to this directory: ~%~A.~%" 
               (truename run-dir))
-      (format t "~%Submitting libraries test logs to the online blobstore...~%")
+      (format t "~%Submitting the test results to the server...~%")
       (handler-case 
-          (progn
-            (setf run (submit-logs run-dir))
-            (format t "The log files are successfully uploaded to the online blobstore.
- 
-Please submit the test run results file 
-   ~A 
-to the cl-test-grid issue tracker: 
-   https://github.com/cl-test-grid/cl-test-grid/issues
- 
- (we are working on automating the test results upload).~%"
-                    (truename (run-info-file run-dir))))
-        (error (e) (format t "Error occured while uploading the libraries test logs to the online store: ~A: ~A.
+          (setf run (submit-results run-dir))
+        (error (e) (format t "Error occured while uploading the test results to the server: ~A: ~A.
 Please submit manually the full content of the results directory 
    ~A
 to the cl-test-grid issue tracker: 
    https://github.com/cl-test-grid/cl-test-grid/issues~%"
-                       (type-of e)
-                       e
-                       (truename run-dir))))
+                           (type-of e)
+                           e
+                           (truename run-dir))))
       (format t "~%Thank you for the participation!~%")
       run)))
 
@@ -1261,7 +1076,7 @@ as a parameter"
                          joined-index
                          row-fields row-fields-sort-predicates
                          col-fields col-fields-sort-predicates)
-  (princ "<table border=\"1\" class=\"test-table\" id=\"pivot-table\">" out)
+  (princ "<table border=\"1\" class=test-table>" out)
   (let (rows
         cols
         index-key-setter
@@ -1277,14 +1092,14 @@ as a parameter"
     
     (setf rows (sort rows row-comparator)
           cols (sort cols col-comparator))
-
+    
     (dolist (row row-fields)
       (princ "<colgroup>" out)
       (princ "</colgroup>" out)
       (dolist (col cols)
         (princ "<colgroup>" out)
         (princ "</colgroup>" out)))
-      
+
     (print-table-headers (length row-fields) (length col-fields) cols out)
     (let ((row-spans (calc-spans rows))
           (index-key (make-sequence 'list (+ (length row-fields)
@@ -1309,7 +1124,7 @@ as a parameter"
   (princ "<html>" out)
   (princ "<head>" out)
   (princ "<title>" out) (princ "CL Test Grid Pivot Report" out) (princ "</title>" out)
-  (princ "<link href=\"../style.css\" rel=\"stylesheet /\">" out)
+  (princ "<link href=\"style.css\" rel=\"stylesheet\"/>" out)
   (princ "<script type=\"text/javascript\" 
                   src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js\">" out)
   (princ "</script>" out)
@@ -1332,7 +1147,7 @@ as a parameter"
                     joined-index
                     row-fields row-fields-sort-predicates
                     col-fields col-fields-sort-predicates)
-  (princ "<a href=\"reports-overview.html\" class=\"link\">" out) 
+  (princ "<a href=reports-overview.html class=link>" out) 
   (princ "To reports overview" out) 
   (princ "</a>" out)
   (format out "<p>Generation date: ~a</p>" (current-date-string))
@@ -1419,90 +1234,4 @@ as a parameter"
   (merge-pathnames "reports-generated/"
                    test-grid-config:*src-base-dir*))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#|
-
-Quicklisp download statistics:
-
-http://blog.quicklisp.org/2010/11/project-download-statistics.html
-
-colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30).
-
-    714 + alexandria
-    596 + babel
-    520 + trivial-features
-    503 + cffi
-    450 + cl-ppcre
-    423 - trivial-gray-streams
-    404 + usocket
-    403 + flexi-streams
-    398 + bordeaux-threads
-    393 - slime
-    386 - cl+ssl (thre is a test.lisp, but it's not automated, and no (asdf:operate (op asdf:test-op) ...)
-    371 - chunga
-    370 + cl-base64
-    361 - cl-fad
-    339 - md5
-    327 - quicklisp-slime-helper
-    323 + trivial-backtrace
-    321 - rfc2388 (there is a test.lisp, but there is no asdf:test-op, and the code in test.lisp 
-                   doesn't return fail/ok status, it jsut prints something to the console)
-    317 - hunchentoot (there are tests and asdf:test-op, but I am affrait it might take
-                       lot of work to automate it: test-op starts server and doesn't
-                       stop; I am also afraid it might hang sometimes; implementation
-                       would also require checking for single-threaded lisps
-                       (by hunchentoot::*supports-threadss-p* ?)
-                       and returning :no-resource. Leave hunchentoot for a later
-                       stage)
-    293 - salza2
-    289 + puri
-    285 - closer-mop (no asdf:test-op. there is a folder "test" with some file jeffs-code.lisp,
-                      but it's a code to reproduce some particular issue. It does not seem
-                      to be intended for automated regression testing of closer-mop)
-    225 + anaphora
-    224 + parenscript
-    221 - cl-who
-    207 + trivial-garbage
-    201 + iterate
-    193 - cl-vectors
-    190 - zpng
-    177 - asdf-system-connections
-    174 - zpb-ttf
-    173 + uffi But the test suite is non trivial (for example, it defines asdf:compile-op 
-               for C files using make). Probably that's why quickisp does not
-               make the uffi-tests.asd availabel for ql:quickload. A study is needed about 
-               how to include this system, therefore I avoid it for now.
-    173 + metabang-bind
-    170 - split-sequence
-    164 - vecto (there is a test.lisp, but it's not automated, intended for manual run and eye-testing of the resulting images)
-    163 + cl-json
-    162 + cl-containers
-    161 + metatilities-base
-    159 - fare-utils
-    156 + weblocks (do these tests start hunchentoot? seems no, it creates mock objects for request, response, etc.)
-          Unfortunately, as of today, (quicklisp:quickload :weblock-test) doesn't work,
-          bacause the test suite does not compile.
-          https://github.com/quicklisp/quicklisp-projects/issues/232
-    156 - fare-matcher (no test-op, but there is fare-matcher-test.asd with one test defined using stefil)
-    148 - drakma
-    144 + cl-cont
-    143 - closure-common
-    140 + moptilities
-    138 - f-underscore
-    137 + trivial-timeout
-    136 + metatilities
-    135 + clsql (big test suite, requires database server(s). Runs the tests 
-                 tests on the DB servers you specified in the configiration. 
-                 Therefore we need to think how to represent results - we can't
-                 just collect results under the same name "clsql", because 
-                 different agents might have tested different servers.
-                 Conclusion: very useful test suite to include into 
-                 our test set, but we will do it later).
-    133 + cxml (But testing it requires manual preparation of test data:
-                checkout the XML test suite from w3.org CVS repostory,
-                patch it, build with ant. Conclusion: desirable to fix
-                improve the situation, e.g. by providing ready
-                to use test data files in a .tar archive
-                and downloading it using quicklisp' http utility).
-|#
