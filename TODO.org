@@ -45,11 +45,11 @@
     rows/columns to be any of quicklisp distro, lisp version
     library name. With grouping and sorging.
 *** TODO clean up the pivot reports Lisp code      :report:pivot:codequality:
-*** TODO quick access to the test run info from the pivot report table cell  :report:pivot:
+*** TODO quick access to the test run info from the pivot report table cell :report:pivot:
     (or maybe just print the test run info to the log, like a header;
     but it is a duplication and also we will have invonviniences
     if we want to modify this infromation in the lob BLOB)
-*** TODO highlight rows and columns in the pivot reports       :report:pivot:
+*** TODO Fix rows and columns highlight in the pivot reports   :report:pivot:
 *** DONE CSV export of the database to use it then with spreadsheets, :report:csv:
     CLOSED: [2011-12-18 Вс 01:57]
      google fusion tables, etc. Initial intent
@@ -143,6 +143,7 @@
    (cffi, usocket) provide guiding message to the
    user how to configure them, before running
    the tests.
+** TODO test-run-info.lisp as attachment, instead of letter body     :server:
 ** DONE finalize the decision what command user runs
    CLOSED: [2011-12-20 Вт 04:19]
    to performs the tests. Describe this main command
@@ -154,6 +155,8 @@
 ** TODO When asking user for email, explain him more carefully     :settings:
    how the email will be used and ensure there is a way
    to avoid providing email.
+** TODO ECL: recover from stack alexandria overflow and continute tests :ecl:agent:
+** TODO ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
 * Backlog
 ** TODO run-libtests: redirect the library output to log file directly
    without caching it in memory. It is more convenient when you are 
