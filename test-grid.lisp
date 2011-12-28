@@ -920,7 +920,7 @@ to the cl-test-grid issue tracker:
                 (getf (getf run-descr :contact) :email)
                 (string-downcase (getf lib-result :libname))
                 (getf lib-result :status)
-                (getf lib-result :test-duration))))))
+                (float (getf lib-result :test-duration)))))))
 
 ;; ========= Pivot Reports ==================
 
