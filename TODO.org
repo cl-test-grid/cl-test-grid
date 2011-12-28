@@ -34,7 +34,7 @@
         - needs care to work with GETF when working with the database      
 ** DONE A tool to generate fake DB content to test reporting
    CLOSED: [2011-12-18 Вс 01:42]
-** TODO simpliest reporting to overview the libraries test statuses [4/12] :report:
+** TODO simpliest reporting to overview the libraries test statuses [5/12] :report:
 *** DONE Test Runs report: every test run as a row in a table :report:testruns:
     CLOSED: [2011-12-18 Вс 02:19]
      + legend or a tooltip in the report for test statuses
@@ -64,7 +64,8 @@
      to represent test result(s) for a particular
      library, i.e. :ok, :fail, :no-resource).
      5h
-*** TODO Test that the test-duration field value                 :report:csv:
+*** DONE Test that the test-duration field value                 :report:csv:
+    CLOSED: [2011-12-28 Ср 20:20]
      (Common Lisp rational) can be read
      by spreadsheet software (MS/Open Offices,
      Google Spreadsheets).     
@@ -140,10 +141,6 @@
    see their README. Distinguish the case 
    when the manual configuration hasn't been
    performed and return :no-resource status.
-** TODO For all the libraries which need manual configuration
-   (cffi, usocket) provide guiding message to the
-   user how to configure them, before running
-   the tests.
 ** TODO test-run-info.lisp as attachment, instead of letter body     :server:
 ** DONE Fix lisp name sorting in pivot_lib-lisp_ql.html              :report:
    CLOSED: [2011-12-28 Ср 08:05]
@@ -160,7 +157,6 @@
    to avoid providing email.
 ** TODO ECL: recover from stack alexandria overflow and continute tests :ecl:agent:
 ** TODO ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
-** TODO CCL: why loading puri-test failed on Linux?               :ccl:agent:
 * Backlog
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
 ** TODO Prevent HTML injection via test-run-info                     :report:
@@ -188,6 +184,10 @@
    are exceeded, recognize it and display a meaningfull
    message to the user.
 ** TODO watchdog for hanging tests
+** TODO For all the libraries which need manual configuration
+   (cffi, usocket) provide guiding message to the
+   user how to configure them, before running
+   the tests.
 ** DONE more abstract accessor to parts of DB info instead of
    CLOSED: [2011-12-20 Вт 04:29]
    getf by properties: run-descr, run-results.
