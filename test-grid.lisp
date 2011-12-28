@@ -765,6 +765,27 @@ to the cl-test-grid issue tracker:
 ;; Reports
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Templating
+;; (will be replaced by cl-closure-templates or html-template
+;; after the reports are moved to a separate ASDF system).
+
+(defun replace-str (template placeholder value)
+  "Differs from CL:REPLACE in that placeholder and value may be of different length."
+  (let* ((pos (or (search placeholder template)
+                  (error "Can't find the placeholder ~A in the template." placeholder))))
+    (concatenate 'string 
+                 (subseq template 0 pos)
+                 value
+                 (subseq template (+ pos (length placeholder))))))
+
+(defun fmt-template (file substitutions-alist)
+  (let ((template (file-string file)))
+    (dolist (subst substitutions-alist)
+      (setf template (replace-str template (car subst) (cdr subst))))
+    template))
+
+;; -------- end of templating -------------
+
 (defun generate-fake-run-results ()
   "Generate fake test run result enought to test our reports."
   (flet ((random-status ()
@@ -889,18 +910,9 @@ to the cl-test-grid issue tracker:
     (write-line "</tbody>" out)
     (write-line "</table>" out)))
 
-(defun fmt-test-runs-report (html-table)
-  (let* ((template (file-string *test-runs-report-template*))
-         (placeholder "{THE-TABLE}")
-         (pos (or (search placeholder template)
-                  (error "Can't find the placeholder ~A in the report template file ~A" placeholder *test-runs-report-template*))))
-    (concatenate 'string 
-                 (subseq template 0 pos)
-                 html-table
-                 (subseq template (+ pos (length placeholder))))))
-
 (defun test-runs-report (&optional (db *db*))
-  (fmt-test-runs-report (test-runs-table-html db)))
+  (fmt-template *test-runs-report-template* 
+                `(("{THE-TABLE}" . ,(test-runs-table-html db)))))
 
 (defun export-to-csv (out &optional (db *db*))
   (format out "Lib World,Lisp,Runner,LibName,Status,TestDuration~%")
@@ -1053,21 +1065,23 @@ as a parameter"
   (dolist (subaddr (subaddrs row-addr))
     (let ((helper (gethash subaddr row-spans)))
       (when (not (printed helper))
-        (format out "<td rowspan=\"~A\">~A</td>" (span helper) 
+        (format out "<th rowspan=\"~A\">~A</th>" (span helper) 
                 (string-downcase (car (last subaddr))))
         (setf (printed helper) t)))))
 
 (defun print-table-headers (row-field-count col-field-count cols out)
+  (dotimes (i (+ row-field-count (length cols)))
+    (princ "<colgroup/>" out))
   (let ((col-spans (calc-spans cols)))
     (dotimes (header-row-num col-field-count)
       (princ "<tr>" out)
       (dotimes (row-header row-field-count)
-        (princ "<td>&nbsp;</td>" out))
+        (princ "<th>&nbsp;</th>" out))
       (dolist (col-addr cols)
         (let* ((cell-addr (subseq col-addr 0 (1+ header-row-num)))
                (helper (gethash cell-addr col-spans)))
           (when (not (printed helper))
-            (format out "<td colspan=\"~A\">~A</td>" (span helper) 
+            (format out "<th colspan=\"~A\">~A</th>" (span helper) 
                     (string-downcase (car (last cell-addr))))
             (setf (printed helper) t))))
       (format out "</tr>~%"))))
@@ -1093,13 +1107,6 @@ as a parameter"
     (setf rows (sort rows row-comparator)
           cols (sort cols col-comparator))
     
-    (dolist (row row-fields)
-      (princ "<colgroup>" out)
-      (princ "</colgroup>" out)
-      (dolist (col cols)
-        (princ "<colgroup>" out)
-        (princ "</colgroup>" out)))
-
     (print-table-headers (length row-fields) (length col-fields) cols out)
     (let ((row-spans (calc-spans rows))
           (index-key (make-sequence 'list (+ (length row-fields)
@@ -1116,44 +1123,33 @@ as a parameter"
         (format out "</tr>~%"))))
   (princ "</table>" out))
 
-(defun pivot-report-html  (out 
-                           joined-index
-                           row-fields row-fields-sort-predicates
-                           col-fields col-fields-sort-predicates)
-  (princ "<!DOCTYPE html>" out)
-  (princ "<html>" out)
-  (princ "<head>" out)
-  (princ "<title>" out) (princ "CL Test Grid Pivot Report" out) (princ "</title>" out)
-  (princ "<link href=\"style.css\" rel=\"stylesheet\"/>" out)
-  (princ "<script type=\"text/javascript\" 
-                  src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js\">" out)
-  (princ "</script>" out)
-  (princ "<script type=\"text/javascript\">" out)
-  (princ "$(document).ready(function (){$(\"table\").delegate('td','mouseover mouseleave', function(e) {
-          if (e.type == 'mouseover') {
-            $(this).parent().addClass(\"hover\");
-            $(\"colgroup\").eq($(this).index()).addClass(\"hover\");
-          }
-          else {
-            $(this).parent().removeClass(\"hover\");
-            $(\"colgroup\").eq($(this).index()).removeClass(\"hover\");
-          }
-          });})" 
-         out)
-  (princ "</script>" out)
-  (princ "</head>" out)
-  (princ "<body>" out)
-  (pivot-table-html out 
-                    joined-index
-                    row-fields row-fields-sort-predicates
-                    col-fields col-fields-sort-predicates)
-  (princ "<a href=reports-overview.html class=link>" out) 
-  (princ "To reports overview" out) 
-  (princ "</a>" out)
-  (format out "<p>Generation date: ~a</p>" (current-date-string))
-  (princ "</body>" out)
-  (princ "</html>" out))
-  
+(defvar *pivot-report-template*
+  (merge-pathnames "pivot-report-template.html"
+                   test-grid-config:*src-base-dir*))
+
+(defun pivot-report-html (out
+                          joined-index
+                          row-fields row-fields-sort-predicates
+                          col-fields col-fields-sort-predicates)
+  (let ((table (with-output-to-string (str) 
+                 (pivot-table-html str
+                                   joined-index
+                                   row-fields row-fields-sort-predicates
+                                   col-fields col-fields-sort-predicates))))
+
+    (write-sequence (fmt-template *pivot-report-template*
+                                  `(("{THE-TABLE}" . ,table)
+                                    ("{DATE}" . ,(current-date-string))))
+                    out)))
+
+(defun file-string (path)
+  "Sucks up an entire file from PATH into a freshly-allocated string,
+      returning two values: the string and the number of bytes read."
+  (with-open-file (s  *pivot-report-template*)
+    (let* ((len (file-length s))
+           (data (make-string len)))
+      (values data (read-sequence data s)))))
+
 (defun print-pivot-reports (db)
   (let ((joined-index (build-joined-index db))
         (reports-dir (reports-dir)))

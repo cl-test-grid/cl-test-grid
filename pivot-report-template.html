@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CL Test Grid Pivot Report</title>
+    <link href="style.css" rel="stylesheet"/>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js">
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("table").delegate('td','mouseover mouseleave', function(e) {
+              var $thisTd = $(this);  
+              
+              var $tr = $thisTd.parent();
+              var $tdSiblings = $tr.find('td');
+              var indexFromEnd = $tdSiblings.size() - $tdSiblings.index($thisTd);
+            
+              var $colgroups = $("colgroup");
+
+              if (e.type == 'mouseover') {
+                $tr.addClass("hover");
+                $colgroups.eq($colgroups.size() - indexFromEnd).addClass("hover");
+              }
+              else {
+                $tr.removeClass("hover");
+                $colgroups.eq($colgroups.size() - indexFromEnd).removeClass("hover");
+            }
+        });})
+    </script>
+</head>
+<body>
+    {THE-TABLE}
+    <a href="reports-overview.html" class=link>To reports overview</a>
+    <p>Generation date: {DATE}</p>
+</body></html>

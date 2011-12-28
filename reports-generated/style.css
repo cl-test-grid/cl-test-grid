@@ -1,6 +1,6 @@
 /* Results */
 
-a.ok  {
+a.ok {
     color: green;
 }	
 
@@ -28,5 +28,5 @@ a.link {
 /* Table highlighting */
 
 .hover { 
-    background-color: gold; 
+    background-color: #dadada; 
 }
