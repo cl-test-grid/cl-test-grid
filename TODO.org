@@ -145,7 +145,8 @@
    user how to configure them, before running
    the tests.
 ** TODO test-run-info.lisp as attachment, instead of letter body     :server:
-** TODO Fix lisp name sorting in pivot_lib-lisp_ql.html              :report:
+** DONE Fix lisp name sorting in pivot_lib-lisp_ql.html              :report:
+   CLOSED: [2011-12-28 Ср 08:05]
 ** DONE finalize the decision what command user runs
    CLOSED: [2011-12-20 Вт 04:19]
    to performs the tests. Describe this main command
@@ -160,6 +161,8 @@
 ** TODO ECL: recover from stack alexandria overflow and continute tests :ecl:agent:
 ** TODO ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
 * Backlog
+** TODO An utility to delete blobs not used in db.lisp from the blobstore
+** TODO Prevent HTML injection via test-run-info
 ** TODO run-libtests: redirect the library output to log file directly
    without caching it in memory. It is more convenient when you are 
    watching the testing process, you can observe the file being 
