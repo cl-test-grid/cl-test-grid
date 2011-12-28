@@ -1086,6 +1086,10 @@ as a parameter"
                          joined-index
                          row-fields row-fields-sort-predicates
                          col-fields col-fields-sort-predicates)
+
+  (assert (= (length row-fields) (length row-fields-sort-predicates)))
+  (assert (= (length col-fields) (length col-fields-sort-predicates)))
+
   (princ "<table border=\"1\" class=test-table>" out)
   (let (rows
         cols
@@ -1096,7 +1100,7 @@ as a parameter"
         (col-comparator #'(lambda (cola colb)
                             (list< col-fields-sort-predicates
                                    cola colb))))
-
+    
     (setf (values rows cols index-key-setter) 
           (calc-rows-and-cols joined-index row-fields col-fields))
     
@@ -1127,6 +1131,7 @@ as a parameter"
                           joined-index
                           row-fields row-fields-sort-predicates
                           col-fields col-fields-sort-predicates)
+
   (let ((table (with-output-to-string (str) 
                  (pivot-table-html str
                                    joined-index
@@ -1137,14 +1142,6 @@ as a parameter"
                                   `(("{THE-TABLE}" . ,table)
                                     ("{TIME}" . ,(pretty-fmt-time (get-universal-time)))))
                     out)))
-
-(defun file-string (path)
-  "Sucks up an entire file from PATH into a freshly-allocated string,
-      returning two values: the string and the number of bytes read."
-  (with-open-file (s  *pivot-report-template*)
-    (let* ((len (file-length s))
-           (data (make-string len)))
-      (values data (read-sequence data s)))))
 
 (defun print-pivot-reports (db)
   (let ((joined-index (build-joined-index db))
@@ -1184,25 +1181,25 @@ as a parameter"
                     '(:lib-world :lisp) (list #'string< #'string<))
       
       (print-report "pivot_ql-lisp_lib.html"
-                    '(:lib-world :lisp) (list #'string<)
-                    '(:libname) (list #'string< #'string<))
+                    '(:lib-world :lisp) (list #'string< #'string<)
+                    '(:libname) (list #'string<))
       (print-report "pivot_ql-lib_lisp.html"
-                    '(:lib-world :libname) (list #'string<)
-                    '(:lisp) (list #'string< #'string<))
+                    '(:lib-world :libname) (list #'string< #'string<)
+                    '(:lisp) (list #'string<))
       
       (print-report "pivot_lisp-lib_ql.html"
-                    '(:lisp :libname) (list #'string<)
-                    '(:lib-world) (list #'string< #'string<))
+                    '(:lisp :libname) (list #'string< #'string<)
+                    '(:lib-world) (list #'string<))
       (print-report "pivot_lisp-ql_lib.html"
-                    '(:lisp :lib-world) (list #'string<)
-                    '(:libname) (list #'string< #'string<))
+                    '(:lisp :lib-world) (list #'string< #'string<)
+                    '(:libname) (list #'string<))
       
       (print-report "pivot_lib-lisp_ql.html"
-                    '(:libname :lisp) (list #'string<)
-                    '(:lib-world) (list #'string< #'string<))
+                    '(:libname :lisp) (list #'string< #'string<)
+                    '(:lib-world) (list #'string<))
       (print-report "pivot_lib-ql_lisp.html"
-                    '(:libname :lib-world) (list #'string<)
-                    '(:lisp) (list #'string< #'string<)))))
+                    '(:libname :lib-world) (list #'string< #'string<)
+                    '(:lisp) (list #'string<)))))
 
 (defun generate-reports (&optional (db *db*))
                           
