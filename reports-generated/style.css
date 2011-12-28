@@ -12,10 +12,6 @@ a.no-resource {
     color :#7A7A7A;
 }
 
-a.to-overview {
-    font-size: 20;
-}
-
 /* Table */
 
 .test-table {
@@ -29,4 +25,8 @@ a.to-overview {
 
 .hover { 
     background-color: #dadada; 
+}
+
+.timestamp {
+    font-style: italic;
 }
