@@ -521,15 +521,21 @@ Examples:
                       )
     (safe-read in)))
 
-;; copy/paste from 
+;; based on
 ;; http://cl-user.net/asp/-1MB/sdataQ0mpnsnLt7msDQ3YNypX8yBX8yBXnMq=/sdataQu3F$sSHnB==
+;; but fixed in respect to file-length returing file length in bytest
+;; instead of characters (and violating the spec therefore) at least
+;; on CLISP 2.49 and ABCL 1.0.0.
 (defun file-string (path)
   "Sucks up an entire file from PATH into a freshly-allocated string,
       returning two values: the string and the number of bytes read."
   (with-open-file (s path)
     (let* ((len (file-length s))
-           (data (make-string len)))
-      (values data (read-sequence data s)))))
+           (data (make-string len))
+           (char-len (read-sequence data s)))
+      (if (len > char-len)
+          (setf data (subseq data 0 char-len)))
+      data)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
