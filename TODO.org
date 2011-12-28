@@ -160,9 +160,10 @@
    to avoid providing email.
 ** TODO ECL: recover from stack alexandria overflow and continute tests :ecl:agent:
 ** TODO ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
+** TODO CCL: why loading puri-test failed on Linux?               :ccl:agent:
 * Backlog
-** TODO An utility to delete blobs not used in db.lisp from the blobstore
-** TODO Prevent HTML injection via test-run-info
+** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
+** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO run-libtests: redirect the library output to log file directly
    without caching it in memory. It is more convenient when you are 
    watching the testing process, you can observe the file being 
