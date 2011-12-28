@@ -90,3 +90,160 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
   ABCL 1.0.0 - stack overflow when compiling alexandria tests, hungs for very long time when running CL-PPCRE tests.
   Allegro Express Edition 8.2, Windows - not enough heap to compile the test.
   ECL 11.1.1, Window - quicklisp doesn't work: https://sourceforge.net/tracker/?func=detail&aid=3462618&group_id=30035&atid=398053
+
+* Quicklisp 2011-12-03
+
+  From 23 libraries, 9 libries pass tests on all the lisps:
+  cl-base64, cl-containers, cl-ppcre, metatilities, metatilities-base,
+  parenscript, puri, trivial-features, trivial-garbage.
+
+  Other libraries fail on some or on all Lisps. Often is not a 
+  bug in the library itself, but bug in tests.
+
+  Details:
+** alexandria                                              :expected_failure:
+   Fails on CLISP, but all the failures are "expected failures":
+
+   3 out of 208 total tests failed: ALEXANDRIA-TESTS::COPY-HASH-TABLE.1, 
+       ALEXANDRIA-TESTS::ALIST-HASH-TABLE.1, 
+       ALEXANDRIA-TESTS::PLIST-HASH-TABLE.1.
+   No unexpected failures.
+
+   I am not sure how to understand the term "expected failure",
+   does it mean the library does not function property
+   on the given lisp implementation and it's a kown issue,
+   or just that the given implementation can not test 
+   the functionality properly; or something else.
+** anaphora                                                        :reported:
+   Fails on windows implementations due to bug in tests:
+
+   Test ANAPHORA-TEST::SCOND.3 failed
+   Form: (ANAPHORA:SCOND
+            ((SYMBOL-VALUE '*DEFAULT-PATHNAME-DEFAULTS*)
+             (LET ((ANAPHORA-TEST::TMP ANAPHORA:IT))
+               (UNWIND-PROTECT (PROGN (SETF ANAPHORA:IT (TRUENAME "/tmp/")) 
+                                                        (NAMESTRING *DEFAULT-PATHNAME-DEFAULTS*)) 
+                   (SETF ANAPHORA:IT ANAPHORA-TEST::TMP)))))
+   Expected value: "/tmp/"
+   Actual value: "c:/tmp/".
+
+   Reported to the anaphora-devel:
+   http://lists.common-lisp.net/pipermail/anaphora-devel/2011-December/000542.html
+   
+** babel                                                           :reported:
+   Different number of failures/errors of unknown nature 
+   on different Lisps (8, 9 or 5).
+
+   Reported to bable-devel:
+   http://lists.common-lisp.net/pipermail/babel-devel/2011-December/000121.html   
+** bordeaux-threads                                            :correct_fail:
+   Fails on CLISP with error  "There is no thread support in this instance..."
+   That's correct, CLISP does not support threads in official builds
+   (threading is considered "experimental" due to absense of thread-safe
+   hash-tables).
+
+** cffi                                                            :reported:
+   Tested only on Linux, has different number (of expected and unexpected)
+   failures on different Lisps.
+   
+   Reported to cffi-devel:
+   http://lists.common-lisp.net/pipermail/cffi-devel/2011-December/003644.html
+** cl-cont                                                         :reported:
+   1 test fails on CLISP:
+   Test CL-CONT-TEST::DOCUMENTATION-SYMBOL-LOOKUP failed
+   Form: 
+     (PROGN (FMAKUNBOUND 'CL-CONT-TEST::DOC-TEST-FUN) (CL-CONT:DEFUN/CC CL-CONT-TEST::DOC-TEST-FUN NIL "foo" T)
+       (SETF (DOCUMENTATION 'CL-CONT-TEST::DOC-TEST-FUN 'FUNCTION) "bar")
+       (EQUAL (DOCUMENTATION 'CL-CONT-TEST::DOC-TEST-FUN 'FUNCTION) "bar"))
+   Expected value: T
+   Actual value: NIL.
+
+   Reported to the weblocks google group (as cl-cont doesn't have
+   separate mailing list):
+   https://groups.google.com/forum/#!topic/weblocks/OyFvVsFh-Fk
+
+** cl-json                                                 :expected_failure:
+   One "expected" failure. The developers keep this failing test
+   to not forget to implement a feature: calling cl-json:bind
+   inside of cl-json:bind (as far as I understand).
+
+** flexi-streams                                                   :reported:
+   Fails on SBCL with message "0 is not of type (MEMBER NIL T)".
+   Most likely it's a bug in tests.
+   Reported to the flexi-streams-devel mailing list:
+   http://lists.common-lisp.net/pipermail/flexi-streams-devel/2011-October/000275.html
+** iterate                                                         :reported:
+   One test fails on all the lisps:
+
+   Test ITERATE.TEST::BUG/WALK.2 failed
+   Form: (ITERATE:ITER
+           (RETURN
+            (IF (ODDP 1)
+                (PROGN)
+                'ITERATE.TEST::EVEN)))
+   Expected value: NIL
+   Actual value: ITERATE.TEST::EVEN.
+
+   Probably a bug in tests.
+
+   Reported to iterate-devel:
+   http://lists.common-lisp.net/pipermail/iterate-devel/2011-December/000686.html
+** metabang-bind                                                   :reported:
+   Fails on CLISP with error:
+
+   [package metabang-bind-test].....Unhandled ERROR is signaled: 
+   FUNCALL: undefined function #:BINDING-GENERATOR267598
+
+   Reported to Gary King (the author) by email.
+
+** moptilities                                                     :reported:
+
+   Fails differently on different Lisps.
+
+   For example CLISP does not implement FUNCTION-ARGLIST, and 
+   on CCL and SBCL FUNCTION-ARGLIST returns different value
+   than expected by moptilities tests: 
+   (&KEY :A :B) vs (&KEY A B) on CCL and
+   (&KEY A (B 2)) vs (&KEY A B) on SBCL, and similar erros.
+
+   Also SBCL inserts special class SB-PCL::SLOT-OBJECT
+   into the class precedence list of usuall classes, but
+   moptilities tests expect only STANDARD-OBJECT and T
+   here.
+
+   Reported to Gary King (the author) by email.
+
+** trivial-backtrace                                               :reported:
+   Fails on CCL and SBCL because the test code tries to produce
+   a division by zero error, but these lisps seem to optimize
+   out the division experession as a dead code, therefore the
+   error does not occur at all and the test does not generate
+   the stacktrace.
+
+   Reported to Gary King (the author) by email.
+
+   The same error on all the lisps:
+
+   ERROR : trivial-timeout-test : test-1
+   Condition : <: NIL is not a real number
+   During       : TESTING
+   Code         : 
+   ((MULTIPLE-VALUE-BIND (RESULT MEASURES CONDITION)
+        (HANDLER-CASE (WHILE-MEASURING (SECONDS) (WITH-TIMEOUT (0.5) (SLEEP 1.0)))
+                      (ERROR (C) (DECLARE (IGNORE C))))
+      (DECLARE (IGNORE RESULT))
+      (ENSURE (< (FIRST MEASURES) 0.75) :REPORT "timeout worked")
+      (ENSURE (AND CONDITION (TYPEP CONDITION 'TIMEOUT-ERROR))
+              :REPORT
+              "Received timeout error")))
+  
+
+   Looks like (< (FIRST MEASURES) 0.75) signals this error.
+
+   Reported to Gary King (the author) by email.
+
+** usocket                                                         :reported:
+   Different failures on different lisps.
+
+   Reported to usocket-devel:
+   http://lists.common-lisp.net/pipermail/usocket-devel/2011-December/000719.html
