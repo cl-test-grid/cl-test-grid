@@ -134,7 +134,8 @@
    and *standard-error*. Fix that, all the output
    should be in the log files, but not on console.
 ** TODO run the tests on all the implementations available for us.
-** TODO publish the reports
+** DONE publish the reports
+   CLOSED: [2011-12-28 Ср 06:57]
 ** TODO usocket test suite might need manual configuration,
    see their README. Distinguish the case 
    when the manual configuration hasn't been
@@ -144,6 +145,7 @@
    user how to configure them, before running
    the tests.
 ** TODO test-run-info.lisp as attachment, instead of letter body     :server:
+** TODO Fix lisp name sorting in pivot_lib-lisp_ql.html              :report:
 ** DONE finalize the decision what command user runs
    CLOSED: [2011-12-20 Вт 04:19]
    to performs the tests. Describe this main command
