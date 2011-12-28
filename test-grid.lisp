@@ -555,12 +555,6 @@ Examples:
                          (get-settings-file)))))
     user-email))
 
-(defun current-date-string ()
-  (multiple-value-bind (sec min hr day mon yr dow dst-p tz)
-                       (get-decoded-time)
-    (declare (ignore sec min hr dow dst-p tz))
-    (format nil "~A-~A-~A" yr mon day)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -912,7 +906,8 @@ to the cl-test-grid issue tracker:
 
 (defun test-runs-report (&optional (db *db*))
   (fmt-template *test-runs-report-template* 
-                `(("{THE-TABLE}" . ,(test-runs-table-html db)))))
+                `(("{THE-TABLE}" . ,(test-runs-table-html db))
+                  ("{TIME}" . ,(pretty-fmt-time (get-universal-time))))))
 
 (defun export-to-csv (out &optional (db *db*))
   (format out "Lib World,Lisp,Runner,LibName,Status,TestDuration~%")
@@ -1139,7 +1134,7 @@ as a parameter"
 
     (write-sequence (fmt-template *pivot-report-template*
                                   `(("{THE-TABLE}" . ,table)
-                                    ("{DATE}" . ,(current-date-string))))
+                                    ("{TIME}" . ,(pretty-fmt-time (get-universal-time)))))
                     out)))
 
 (defun file-string (path)

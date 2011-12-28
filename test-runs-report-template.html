@@ -3,12 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us">
 <head>
 
-	<title>Test Runs - CL Test Grid Report</title>
+    <title>Test Runs - CL Test Grid Report</title>
+    <link href="style.css" rel="stylesheet"/>
 
-	<link rel="stylesheet" href="http://tablesorter.com/themes/blue/style.css" type="text/css" id="" media="print, projection, screen" />
+    <link rel="stylesheet" href="http://tablesorter.com/themes/blue/style.css" type="text/css" id="" media="print, projection, screen" />
 
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
-	<script type="text/javascript" src="http://autobahn.tablesorter.com/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <script type="text/javascript" src="http://autobahn.tablesorter.com/jquery.tablesorter.min.js"></script>
 
     <script type="text/javascript" id="js">
         $(document).ready(function() {
@@ -59,9 +60,12 @@
         <p>In the result table you may click the status letter to open the library test logs</p>
         <p>Sort columns by clicking the column. Hold Shift when clicking to create multi-column sorting.</p>
     </div>
-<!-- the table should have attributes cellspacing="1" class="tablesorter" -->
-{THE-TABLE}
-<small>Table sorting is powered by <a href="http://tablesorter.com/">http://tablesorter.com/</a></small>
+    <!-- the table should have attributes cellspacing="1" class="tablesorter" -->
+    {THE-TABLE}
+    <a href="reports-overview.html" class="to-overview">To reports overview</a>
+    <p>Generated at: {TIME}</p>
+
+    <small>Table sorting is powered by <a href="http://tablesorter.com/">http://tablesorter.com/</a></small>
 </body>
 </html>
 
