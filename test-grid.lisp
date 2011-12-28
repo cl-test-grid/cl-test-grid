@@ -830,13 +830,6 @@ to the cl-test-grid issue tracker:
 ;; until we move the reporting to a separate
 ;; asdf system, we don't want the dependency 
 ;; on blobstore here.
-(defun format-results (out lib-result)
-  (dolist (value lib-result)
-    (format out "<a href=\"~a\" class=\"~a\">~a</a> " 
-            (lib-log-uri nil value)
-            (string-downcase (getf value :status))
-                             (string-downcase (getf value :status)))))
-
 (defun blob-uri (blob-key)
   (format nil "~A/blob?key=~A" 
           *gae-blobstore-base-url* blob-key))
@@ -846,7 +839,7 @@ to the cl-test-grid issue tracker:
           (run-directory (run-descr test-run))
           (string-downcase (getf lib-result :libname))))
 
-(defun lib-log-uri (test-run lib-result)
+(defun lib-log-uri (lib-result)
   (declare (ignore test-run))
   (let ((blob-key (getf lib-result :log-blob-key)))
     (if blob-key
@@ -868,12 +861,13 @@ to the cl-test-grid issue tracker:
     (otherwise "")))
            
 (defun render-single-letter-status (test-run lib-test-result)
+  (declare (ignore test-run))
   (if (null lib-test-result)
       "&nbsp;"
       (let ((status (normalize-status (getf lib-test-result :status))))
         (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
                 (status-css-class status)
-                (lib-log-uri test-run lib-test-result)
+                (lib-log-uri lib-test-result)
                 (single-letter-status status)))))
 
 (defun test-runs-table-html (&optional 
@@ -1055,6 +1049,13 @@ as a parameter"
                                 (make-header-print-helper)))))
           (incf (span helper)))))
     helpers))
+
+(defun format-lib-results (out lib-results)
+  (dolist (lib-result lib-results)
+    (format out "<a href=\"~a\" class=\"~a\">~a</a> " 
+            (lib-log-uri lib-result)
+            (string-downcase (getf lib-result :status))
+            (string-downcase (getf lib-result :status)))))
          
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))
@@ -1111,10 +1112,10 @@ as a parameter"
         (print-row-header row row-spans out)
         (dolist (col cols)
           (funcall index-key-setter index-key row col)
-          (let ((data (gethash index-key joined-index)))
-            (with-output-to-string (out) 
-              (format-results out data))
-            (princ "<td>" out) (format-results out data) (princ "</td>" out)))
+          (let ((lib-results (gethash index-key joined-index)))
+            (princ "<td>" out) 
+            (format-lib-results out lib-results) 
+            (princ "</td>" out)))
         (format out "</tr>~%"))))
   (princ "</table>" out))
 
