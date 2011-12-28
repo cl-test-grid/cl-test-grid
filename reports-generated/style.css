@@ -1,32 +1,32 @@
 /* Results */
 
 a.ok  {
-			color: green;
+    color: green;
 }	
 
 a.fail {
-		color: red;
+    color: red;
 }
 
 a.no-resource {
-		color :#7A7A7A;
+    color :#7A7A7A;
 }
 
 a.link {
-	font-size: 20;
+    font-size: 20;
 }
 
 /* Table */
 
 .test-table {
-	border-spacing: 0px;
-	margin: 5;
-	white-space: nowrap;
-	font-weight: bold;
+    border-spacing: 0px;
+    margin: 5;
+    white-space: nowrap;
+    font-weight: bold;
 }
 
 /* Table highlighting */
 
 .hover { 
-	background-color: gold; 
+    background-color: gold; 
 }
