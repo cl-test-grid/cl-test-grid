@@ -222,6 +222,7 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 
    Reported to Gary King (the author) by email.
 
+** trivial-timeout                                                 :reported:
    The same error on all the lisps:
 
    ERROR : trivial-timeout-test : test-1
