@@ -533,7 +533,7 @@ Examples:
     (let* ((len (file-length s))
            (data (make-string len))
            (char-len (read-sequence data s)))
-      (if (len > char-len)
+      (if (> len char-len)
           (setf data (subseq data 0 char-len)))
       data)))
 
@@ -846,7 +846,6 @@ to the cl-test-grid issue tracker:
           (string-downcase (getf lib-result :libname))))
 
 (defun lib-log-uri (lib-result)
-  (declare (ignore test-run))
   (let ((blob-key (getf lib-result :log-blob-key)))
     (if blob-key
         (blob-uri blob-key)
