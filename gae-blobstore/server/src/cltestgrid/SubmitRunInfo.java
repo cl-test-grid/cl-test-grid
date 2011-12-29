@@ -35,6 +35,9 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 
 public class SubmitRunInfo extends HttpServlet {
 
@@ -76,7 +79,22 @@ public class SubmitRunInfo extends HttpServlet {
       msg.addRecipient(Message.RecipientType.TO,
                        new InternetAddress("avodonosov@yandex.ru", "Anton Vodonosov"));
       msg.setSubject("[cl-test-grid] [test run submitted]");
-      msg.setText(runInfo);
+
+      Multipart multipart = new MimeMultipart();
+
+      // Set the email message text.
+      MimeBodyPart messagePart = new MimeBodyPart();
+      messagePart.setText("see attach.");
+      multipart.addBodyPart(messagePart);
+
+      // Attach the test run info.
+      MimeBodyPart attachmentPart = new MimeBodyPart();
+      attachmentPart.setFileName("test-run-info.lisp");
+      attachmentPart.setText(runInfo, "UTF-8");
+      multipart.addBodyPart(attachmentPart);
+
+      msg.setContent(multipart);
+    
       Transport.send(msg);
     
       logger.log(Level.INFO, "The run-info successfully received and resend further by email.");
