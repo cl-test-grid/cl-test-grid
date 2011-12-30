@@ -541,23 +541,40 @@ Examples:
 ;; Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defconstant +settings-file-name+ "cl-test-grid-settings.lisp")
+
 (defun get-settings-file()
- (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
+  (merge-pathnames (user-homedir-pathname) +settings-file-name+))
 
 (defun prompt-for-email ()
-  (format *query-io* "~a: " "Please enter your email for questions about this test, your environment, etc.")
+  (format *query-io* "~&~%")
+  (format *query-io* "Please enter your email so that we know who is submitting the test results.~%") 
+  (format *query-io* "Also the email will be published in the online reports, and the library~%")
+  (format *query-io* "authors can later contact you in case of questions about this test run, ~%")
+  (format *query-io* "your environment, etc.~%~%")
+
+  (format *query-io* "If you are strongly opposed to publishing you email, please type \"none\".~%~%")
+
+  (format *query-io* "The value you enter will be saved and reused in the future. You can change~%")
+  (format *query-io* "it in the file ~A in your home directory.~%~%" +settings-file-name+)
+  
+  (format *query-io* "email: ")
+
   (force-output *query-io*)
   (string-trim " " (read-line *query-io*)))
 
 (defun get-user-email ()
   (let ((user-email nil))
     (handler-case
-        (if (string= "" (setf user-email(getf (safe-read-file (get-settings-file)
-                                                              ) :user-email)))
-            (format t "Warning! Empty email is specified in the settings file ~a~%" (get-settings-file)))
-      (t ()
+        (progn 
+          (setf user-email (getf (safe-read-file (get-settings-file)) 
+                                 :user-email))
+          (if (zerop (length user-email))
+              (warn "Empty email is specified in the settings file ~a~%" (get-settings-file))))
+      (file-error ()
         (progn
-          (write-to-file (list :user-email (setf user-email (prompt-for-email)))
+          (setf user-email (prompt-for-email))
+          (write-to-file (list :user-email user-email)
                          (get-settings-file)))))
     user-email))
 
