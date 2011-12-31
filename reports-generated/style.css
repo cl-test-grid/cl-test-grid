@@ -21,6 +21,11 @@ a.no-resource {
     font-weight: bold;
 }
 
+.test-table td, .test-table th {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
 /* Table highlighting */
 
 .hover { 
@@ -29,4 +34,28 @@ a.no-resource {
 
 .timestamp {
     font-style: italic;
+}
+
+.rotated-header {
+    border-right: none;            
+    border-left: 1px solid #e0e0e0;            
+    vertical-align: bottom;
+}
+
+.rotated-header div {
+
+    /* Firefox 3.5+ (Gecko 1.9.1+) */ 	
+    -moz-transform: rotate(-35deg);
+    -moz-transform-origin: 0 0;
+    /* Safari 3.1+, Chrome */
+    -webkit-transform: rotate(-35deg); 	
+    -webkit-transform-origin: 0 0;
+    /* IE 9+ */
+    -ms-transform: rotate(-35deg);
+    -ms-transform-origin: 0 0;
+    /* Opera 10.5+*/ 	
+    -o-transform: rotate(-35deg);
+    -o-transform-origin: 0 0;
+
+    width: 1ex;
 }

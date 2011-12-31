@@ -161,7 +161,8 @@
 ** TODO ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
 ** TODO Ensure UTF-8 is used by READ-DB/SAVE-DB, and reading   :db:
    the test run info from file (received by email), uses UTF-8.
-** TODO Optimize horizontal space in the reports: the headers        :report:
+** DONE Optimize horizontal space in the reports: the headers        :report:
+   CLOSED: [2011-12-31 Сб 04:58]
    take to much space
 * Backlog
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:

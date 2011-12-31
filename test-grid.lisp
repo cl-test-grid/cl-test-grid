@@ -1087,11 +1087,27 @@ as a parameter"
                 (string-downcase (car (last subaddr))))
         (setf (printed helper) t)))))
 
+(defun print-usual-header (colspan text out)
+  (format out "<th colspan=\"~A\">~A</th>" colspan text))
+
+(defun print-rotated-header (colspan text out)
+  ;; Calculate the heiht so that rotated text fits
+  ;; into it. Multiply the length of the text to 
+  ;; sine of the rotation (35 deegrees) 
+  ;; and add 3 ex for sure.
+  (let ((css-height (+ (ceiling (* (sin (/ (* pi 35.0) 180.0))
+                                   (length text)))
+                       3)))    
+    (format out "<th colspan=\"~A\" class=\"rotated-header\" style=\"height: ~Aex\"><div>~A</div></th>" 
+            colspan css-height text)))
+
 (defun print-table-headers (row-field-count col-field-count cols out)
-  (dotimes (i (+ row-field-count (length cols)))
-    (princ "<colgroup/>" out))
-  (let ((col-spans (calc-spans cols)))
-    (dotimes (header-row-num col-field-count)
+  (let ((col-count (length cols))
+        (col-spans (calc-spans cols))
+        (header-row-count col-field-count))
+    (dotimes (i (+ row-field-count col-count))
+      (princ "<colgroup/>" out))
+    (dotimes (header-row-num header-row-count)
       (princ "<tr>" out)
       (dotimes (row-header row-field-count)
         (princ "<th>&nbsp;</th>" out))
@@ -1099,8 +1115,13 @@ as a parameter"
         (let* ((cell-addr (subseq col-addr 0 (1+ header-row-num)))
                (helper (gethash cell-addr col-spans)))
           (when (not (printed helper))
-            (format out "<th colspan=\"~A\">~A</th>" (span helper) 
-                    (string-downcase (car (last cell-addr))))
+            (let ((colspan (span helper))
+                  (text (string-downcase (car (last cell-addr)))))
+              (if (and (> col-count 7)
+                       ;; and the last header row:
+                       (= header-row-num (1- header-row-count)))
+                  (print-rotated-header colspan text out)                   
+                  (print-usual-header colspan text out)))
             (setf (printed helper) t))))
       (format out "</tr>~%"))))
 
