@@ -1081,16 +1081,19 @@ as a parameter"
          
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))
-    (let ((helper (gethash subaddr row-spans)))
+    (let* ((helper (gethash subaddr row-spans))
+           (rowspan (span helper))
+           (maybe-css-class (if (> rowspan 1) "class=\"no-hover\"" "")))
       (when (not (printed helper))
-        (format out "<th rowspan=\"~A\">~A</th>" (span helper) 
+        (format out "<th rowspan=\"~A\" ~A>~A</th>" 
+                rowspan maybe-css-class
                 (string-downcase (car (last subaddr))))
         (setf (printed helper) t)))))
 
-(defun print-usual-header (colspan text out)
+(defun print-usual-col-header (colspan text out)
   (format out "<th colspan=\"~A\">~A</th>" colspan text))
 
-(defun print-rotated-header (colspan text out)
+(defun print-rotated-col-header (colspan text out)
   ;; Calculate the heiht so that rotated text fits
   ;; into it. Multiply the length of the text to 
   ;; sine of the rotation (35 deegrees) 
@@ -1108,7 +1111,7 @@ as a parameter"
     (dotimes (i (+ row-field-count col-count))
       (princ "<colgroup/>" out))
     (dotimes (header-row-num header-row-count)
-      (princ "<tr>" out)
+      (princ "<tr class=\"header-row\">" out)
       (dotimes (row-header row-field-count)
         (princ "<th>&nbsp;</th>" out))
       (dolist (col-addr cols)
@@ -1120,8 +1123,8 @@ as a parameter"
               (if (and (> col-count 7)
                        ;; and the last header row:
                        (= header-row-num (1- header-row-count)))
-                  (print-rotated-header colspan text out)                   
-                  (print-usual-header colspan text out)))
+                  (print-rotated-col-header colspan text out)                   
+                  (print-usual-col-header colspan text out)))
             (setf (printed helper) t))))
       (format out "</tr>~%"))))
 

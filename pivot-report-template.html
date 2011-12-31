@@ -14,15 +14,23 @@
               var $tdSiblings = $tr.find('td');
               var indexFromEnd = $tdSiblings.size() - $tdSiblings.index($thisTd);
             
-              var $colgroups = $("colgroup");
+              var $colgroups = $('colgroup');
+              var $colgroup = $colgroups.eq($colgroups.size() - indexFromEnd);
+
+              // column header TH cell
+              var $hdrRow = $('.header-row').last();
+              var $colHdrThs = $hdrRow.find('th');
+              var $colHdrTh = $colHdrThs.eq($colHdrThs.size() - indexFromEnd);
 
               if (e.type == 'mouseover') {
-                $tr.addClass("hover");
-                $colgroups.eq($colgroups.size() - indexFromEnd).addClass("hover");
+                $tr.addClass('hover');
+                $colgroup.addClass('hover');
+                $colHdrTh.addClass('hover');
               }
               else {
-                $tr.removeClass("hover");
-                $colgroups.eq($colgroups.size() - indexFromEnd).removeClass("hover");
+                $tr.removeClass('hover');
+                $colgroup.removeClass('hover');
+                $colHdrTh.removeClass('hover');
             }
         });})
     </script>

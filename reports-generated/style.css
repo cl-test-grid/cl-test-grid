@@ -12,6 +12,10 @@ a.no-resource {
     color :#7A7A7A;
 }
 
+.timestamp {
+    font-style: italic;
+}
+
 /* Table */
 
 .test-table {
@@ -24,19 +28,10 @@ a.no-resource {
 .test-table td, .test-table th {
     padding-left: 2px;
     padding-right: 2px;
+    border-color: black;
 }
 
-/* Table highlighting */
-
-.hover { 
-    background-color: #f2f2f2; 
-}
-
-.timestamp {
-    font-style: italic;
-}
-
-.rotated-header {
+th.rotated-header {
     border-right: none;            
     border-left: 1px solid #e0e0e0;            
     vertical-align: bottom;
@@ -58,4 +53,19 @@ a.no-resource {
     -o-transform-origin: 0 0;
 
     width: 1ex;
+}
+
+/* Table highlighting */
+
+.hover { 
+    background-color: #f2f2f2; 
+}
+
+th.no-hover {
+    background-color: white;
+    color: black !important;
+}
+
+.hover th, th.hover {
+    color: blue;
 }
