@@ -9,17 +9,17 @@
 ;;;        (load "ensure-quicklisp-updated.lisp")
 ;;;
 
-(let* ((this-file (load-time-value (or *load-truename* #.*compile-file-pathname*)))
-       (this-file-dir (make-pathname :directory (pathname-directory this-file))))
+(defparameter *this-file* (load-time-value (or *load-truename* #.*compile-file-pathname*)))
+(defparameter *this-file-dir* (make-pathname :directory (pathname-directory *this-file*)))
 
-  (load (merge-pathnames "quicklisp.lisp" this-file-dir))
+(load (merge-pathnames "quicklisp.lisp" *this-file-dir*))
 
-  (handler-bind ((error #'(lambda (err)
-                            (declare (ignore err))
-                            (when (find-restart 'quicklisp-quickstart::load-setup)
-                              (invoke-restart 'quicklisp-quickstart::load-setup)))))
-    (quicklisp-quickstart:install :path (merge-pathnames "quicklisp/"
-                                                         this-file-dir))))
+(handler-bind ((error #'(lambda (err)
+                          (declare (ignore err))
+                          (when (find-restart 'quicklisp-quickstart::load-setup)
+                            (invoke-restart 'quicklisp-quickstart::load-setup)))))
+  (quicklisp-quickstart:install :path (merge-pathnames "quicklisp/"
+                                                       *this-file-dir*)))
 
 (quicklisp:update-client)
 (quicklisp:update-all-dists)
