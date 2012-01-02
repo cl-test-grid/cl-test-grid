@@ -541,7 +541,7 @@ Examples:
 ;; Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defconstant +settings-file-name+ "cl-test-grid-settings.lisp")
+(defparameter +settings-file-name+ "cl-test-grid-settings.lisp")
 
 (defun get-settings-file()
   (merge-pathnames (user-homedir-pathname) +settings-file-name+))
