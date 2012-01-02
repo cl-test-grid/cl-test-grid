@@ -553,7 +553,7 @@ Examples:
   (format *query-io* "authors can later contact you in case of questions about this test run, ~%")
   (format *query-io* "your environment, etc.~%~%")
 
-  (format *query-io* "If you are strongly opposed to publishing you email, please type \"none\".~%~%")
+  (format *query-io* "If you are strongly opposed to publishing you email, please type e.g. some nickname or just \"none\".~%~%")
 
   (format *query-io* "The value you enter will be saved and reused in the future. You can change~%")
   (format *query-io* "it in the file ~A in your home directory.~%~%" +settings-file-name+)
