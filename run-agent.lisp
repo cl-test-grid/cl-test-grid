@@ -10,7 +10,8 @@
 ;;;
 
 (let* ((this-file (load-time-value (or *load-truename* #.*compile-file-pathname*)))
-       (this-file-dir (make-pathname :directory (pathname-directory this-file))))  
+       (this-file-dir (make-pathname :directory (pathname-directory this-file))))
+
   (pushnew this-file-dir asdf:*central-registry* :test #'equal))
 
 (asdf:operate 'asdf:load-op :test-grid)
