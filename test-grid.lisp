@@ -752,7 +752,24 @@ to the cl-test-grid issue tracker:
                        :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                        :if-exists :overwrite
                        :if-does-not-exist :create)
-    (write db :stream out)))
+    (format out "(~s ~s" (car db) (car (cdr db)))
+    (format out "~5t~%~6t~s~%~6t(" (car (cddr db)))
+    (dolist (tests (car (cdddr db)))
+      (format out "~%~7t(")
+      (do-plist  (key val tests)
+        (format out "~s~%~10t(" key)
+        (if (string-equal "DESCR" key)
+            (progn
+              (do-plist (nkey nval val) 
+                (format out "~s ~s " nkey nval)) (format out ")~%~8t"))
+            (progn
+              (dolist (ntest val)
+                (format out "(")
+                (do-plist (nkey nval ntest)
+                  (format out "~s ~s " nkey nval))
+                (format out ")"))
+              (format out "))")))))
+    (format out "))")))
 
 (defun read-db (&optional (stream-or-path *standard-db-file*))
   (with-open-file (in stream-or-path 
