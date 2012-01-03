@@ -541,23 +541,40 @@ Examples:
 ;; Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defparameter +settings-file-name+ "cl-test-grid-settings.lisp")
+
 (defun get-settings-file()
- (merge-pathnames (user-homedir-pathname) "cl-test-grid-settings.lisp"))
+  (merge-pathnames (user-homedir-pathname) +settings-file-name+))
 
 (defun prompt-for-email ()
-  (format *query-io* "~a: " "Please enter your email for questions about this test, your environment, etc.")
+  (format *query-io* "~&~%")
+  (format *query-io* "Please enter your email so that we know who is submitting the test results.~%") 
+  (format *query-io* "Also the email will be published in the online reports, and the library~%")
+  (format *query-io* "authors can later contact you in case of questions about this test run, ~%")
+  (format *query-io* "your environment, etc.~%~%")
+
+  (format *query-io* "If you are strongly opposed to publishing you email, please type e.g. some nickname or just \"none\".~%~%")
+
+  (format *query-io* "The value you enter will be saved and reused in the future. You can change~%")
+  (format *query-io* "it in the file ~A in your home directory.~%~%" +settings-file-name+)
+  
+  (format *query-io* "email: ")
+
   (force-output *query-io*)
   (string-trim " " (read-line *query-io*)))
 
 (defun get-user-email ()
   (let ((user-email nil))
     (handler-case
-        (if (string= "" (setf user-email(getf (safe-read-file (get-settings-file)
-                                                              ) :user-email)))
-            (format t "Warning! Empty email is specified in the settings file ~a~%" (get-settings-file)))
-      (t ()
+        (progn 
+          (setf user-email (getf (safe-read-file (get-settings-file)) 
+                                 :user-email))
+          (if (zerop (length user-email))
+              (warn "Empty email is specified in the settings file ~a~%" (get-settings-file))))
+      (file-error ()
         (progn
-          (write-to-file (list :user-email (setf user-email (prompt-for-email)))
+          (setf user-email (prompt-for-email))
+          (write-to-file (list :user-email user-email)
                          (get-settings-file)))))
     user-email))
 
@@ -1081,26 +1098,50 @@ as a parameter"
          
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))
-    (let ((helper (gethash subaddr row-spans)))
+    (let* ((helper (gethash subaddr row-spans))
+           (rowspan (span helper))
+           (maybe-css-class (if (> rowspan 1) "class=\"no-hover\"" "")))
       (when (not (printed helper))
-        (format out "<th rowspan=\"~A\">~A</th>" (span helper) 
+        (format out "<th rowspan=\"~A\" ~A>~A</th>" 
+                rowspan maybe-css-class
                 (string-downcase (car (last subaddr))))
         (setf (printed helper) t)))))
 
+(defun print-usual-col-header (colspan text out)
+  (format out "<th colspan=\"~A\">~A</th>" colspan text))
+
+(defun print-rotated-col-header (colspan text out)
+  ;; Calculate the heiht so that rotated text fits
+  ;; into it. Multiply the length of the text to 
+  ;; sine of the rotation (35 deegrees) 
+  ;; and add 3 ex for sure.
+  (let ((css-height (+ (ceiling (* (sin (/ (* pi 35.0) 180.0))
+                                   (length text)))
+                       3)))    
+    (format out "<th colspan=\"~A\" class=\"rotated-header\" style=\"height: ~Aex\"><div>~A</div></th>" 
+            colspan css-height text)))
+
 (defun print-table-headers (row-field-count col-field-count cols out)
-  (dotimes (i (+ row-field-count (length cols)))
-    (princ "<colgroup/>" out))
-  (let ((col-spans (calc-spans cols)))
-    (dotimes (header-row-num col-field-count)
-      (princ "<tr>" out)
+  (let ((col-count (length cols))
+        (col-spans (calc-spans cols))
+        (header-row-count col-field-count))
+    (dotimes (i (+ row-field-count col-count))
+      (princ "<colgroup/>" out))
+    (dotimes (header-row-num header-row-count)
+      (princ "<tr class=\"header-row\">" out)
       (dotimes (row-header row-field-count)
         (princ "<th>&nbsp;</th>" out))
       (dolist (col-addr cols)
         (let* ((cell-addr (subseq col-addr 0 (1+ header-row-num)))
                (helper (gethash cell-addr col-spans)))
           (when (not (printed helper))
-            (format out "<th colspan=\"~A\">~A</th>" (span helper) 
-                    (string-downcase (car (last cell-addr))))
+            (let ((colspan (span helper))
+                  (text (string-downcase (car (last cell-addr)))))
+              (if (and (> col-count 7)
+                       ;; and the last header row:
+                       (= header-row-num (1- header-row-count)))
+                  (print-rotated-col-header colspan text out)                   
+                  (print-usual-col-header colspan text out)))
             (setf (printed helper) t))))
       (format out "</tr>~%"))))
 

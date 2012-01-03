@@ -1,0 +1,33 @@
+#!/bin/sh
+
+echo
+echo "************************************************************************"
+echo "Updating to the recent cl-test-grid version..."
+echo "************************************************************************"
+git pull
+
+echo
+echo "************************************************************************"
+echo "Bootstrap quicklisp in a local directory and update to the recent version (if necessary)..."
+echo "************************************************************************"
+# Any Lisp may be used, use the one which works better on your plantform.
+/home/anton/ccl/ccl-1.7/lx86cl --no-init --load ensure-quicklisp-updated.lisp --eval "(quit)"
+
+echo
+echo "************************************************************************"
+echo "Running the tests (don't load the standard init files; using our local quicklisp)..."
+echo "************************************************************************"
+
+# If you are running this first time, do not uncomment all the Lisps - please
+# run them one by one to check how it works.
+
+# CCL
+#/home/anton/ccl/ccl-1.7/lx86cl --no-init --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
+
+# SBCL
+/home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
+
+# Allegro
+#alisp -qq -L quicklisp\setup.lisp -L run-agent.lisp
+
+

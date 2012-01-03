@@ -150,7 +150,8 @@
    to performs the tests. Describe this main command
    in the README (in the first paragraph).
    The solution: user runs (load "agent.lisp"); precondition: quicklisp installed.
-** TODO When the settings file is populated, inform user where     :settings:
+** DONE When the settings file is populated, inform user where     :settings:
+   CLOSED: [2011-12-31 Сб 01:59]
    it is stored (and to be sure user understood us, ask
    him to press Enter before continuing).
 ** TODO When asking user for email, explain him more carefully     :settings:
@@ -160,6 +161,9 @@
 ** TODO ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
 ** TODO Ensure UTF-8 is used by READ-DB/SAVE-DB, and reading   :db:
    the test run info from file (received by email), uses UTF-8.
+** DONE Optimize horizontal space in the reports: the headers        :report:
+   CLOSED: [2011-12-31 Сб 04:58]
+   take to much space
 * Backlog
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
 ** TODO Prevent HTML injection via test-run-info                     :report:
