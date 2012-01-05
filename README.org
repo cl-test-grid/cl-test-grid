@@ -1,3 +1,79 @@
 Collaborative testing of Common Lisp libraries.
 
-The project is under development, documentation will be added later.
+(This README file is a work-in-progress)
+
+* The Goal
+  Improve stability of the Common Lisp ecosystem
+  by performing automated tests on as wide set of 
+  envionments as possible. Environments vary
+  mainly in 3 dimensions:
+
+  1. Common Lisp implementations. They have incompatibilities,
+     sometimes allowed by the standard (features specified
+     as implementation-dependent), somtimes due to bugs,
+     and sometimes in non-standartized features (threading,
+     sockets, FFI, etc.). Moreover, impementations are
+     evolving over the time, we should care about different
+     version of the same implementation.
+  2. Growing number of CL libraries (which are also evolving 
+     over the time).
+  3. Compatibility between library versions - libraries
+     depend on other libraries and work correctly
+     only with particular version of the dependencies.
+ 
+  We address the library versions compatibility problem
+  by a dterm "lib-world" - set of libraries with a particular
+  versio specified for every library. 
+  
+  The important example of lib-world are Quicklisp 
+  distros.
+  
+  So, when we run a test suite, we can speak about success
+  or failure only in context of given Common Lisp implementation,
+  and version of all the dependent libraries (lib-world).
+  
+  It is hoped that contantly running tests on wide variety 
+  of environments will help the CL community by:
+  
+  1. Fast response to the library authors in case new
+     changes cause bugs on implementations not available
+     to the author. Otherwise author may receive notification
+     about the bug years after he made the change, and 
+     this may make the cost of fixing the bug much
+     higher that fixing it week or two after the 
+     change.
+  2. The same benefit for CL implementors - when they
+     release new version, run test suites of large
+     number of libraries and quickly detect
+     possible regressions in the new release.
+  3. Help to discover and maintain compatible
+     set of library versions (e.g. Quicklisp distros).
+
+* The Idea
+  Everyone can run a simple command which will run tests 
+  of Common Lisp libraries and upload results to 
+  the central server. 
+
+  That way, instead of setting up a central build farm with 
+  all the possible hardware/OS/Lisp implementation combinations,
+  we provide a way for Common Lisp users to contribute
+  test results from their systems, and collictively
+  monitor the CL world. (Of course, if anyone whould want
+  to setup a test farm, cl-test-grid provides requied building 
+  blocks for this).
+
+* Status
+
+* Participation
+
+  Everyone interested to discuss the project is invited to the
+  "mailing list" - http://groups.google.com/group/cl-test-grid.
+  
+
+* TODO
+  Terminology - I say "quicklisp distro", but if be precise,
+  quicklisp calls it "quicklisp distro version". But
+  if I say "lib-world is a set of libraries with specified
+  versions. An example of lib-world is a quicklisp 
+  distro version" the word "version" is repeated twice
+  with diffirent sense - confusing.
