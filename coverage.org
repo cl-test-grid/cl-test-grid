@@ -167,11 +167,16 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    to not forget to implement a feature: calling cl-json:bind
    inside of cl-json:bind (as far as I understand).
 
+** cl-ppcre                                                        :reported:
+   Fails on Allegro
+   Reported: https://github.com/edicl/cl-ppcre/issues/2
 ** flexi-streams                                                   :reported:
    Fails on SBCL with message "0 is not of type (MEMBER NIL T)".
    Most likely it's a bug in tests.
    Reported to the flexi-streams-devel mailing list:
    http://lists.common-lisp.net/pipermail/flexi-streams-devel/2011-October/000275.html
+   Registered aslo in the issue tracker:
+   https://github.com/edicl/flexi-streams/issues/2
 ** iterate                                                         :reported:
    One test fails on all the lisps:
 
