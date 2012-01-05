@@ -62,7 +62,7 @@ Collaborative testing of Common Lisp libraries.
 * Participation
 
   Everyone interested to discuss the project is invited to the
-  "mailing list" - http://groups.google.com/group/cl-test-grid.
+  "mailing list" - [[http://groups.google.com/group/cl-test-grid]].
   
 
 * TODO
