@@ -80,15 +80,15 @@ Collaborative testing of Common Lisp libraries.
 
   Currently we have considered the top 50 of 
   [[http://blog.quicklisp.org/2010/11/project-download-statistics.html][most often quicklisp-downloaded libraries]]. 23 of these libraries
-  had test suites appropriate to be added to the cl-test-grid
-  (fully automated, no user interaction is needed).
+  have appropriate test suites (fully automated, no user interaction is needed)
+  and are added to the cl-test-grid.
 
   File [[https://github.com/cl-test-grid/cl-test-grid/blob/master/run.sh.sample][run.sh.sample]] shows what parameters to use for particular
   CL implementations so that it bootstraps quicklisp in a local
   directory and updates it to the recent version (if necessary),
   and then preforms test-grid::run-libtests using this local
   quicklisp installation. The CL implementation parameters
-  suppress loading the starndard init of the implementaion
+  suppress loading the starndard init files of the implementaion
   (to avoid interference with the quicklisp installation
   user might have on his computer).
 
