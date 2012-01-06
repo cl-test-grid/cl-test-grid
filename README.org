@@ -69,8 +69,14 @@ Collaborative testing of Common Lisp libraries.
 
 * Status
   We have function test-grid::run-libtests wich runs tests
-  of the CL libraries using quicklisp to download the libraries
-  and uploads the test results to the central server.
+  of the CL libraries. Quicklisp is used to download the libraries.
+  The test results are uploaded to the central server and
+  published as reports here:
+  [[http://common-lisp.net/project/cl-test-grid/]].
+
+  Clicking library test status (or/fail) in any report
+  refers to the library test logs with the failure
+  details.
 
   Currently we have considered the top 50 of 
   [[http://blog.quicklisp.org/2010/11/project-download-statistics.html][most often quicklisp-downloaded libraries]]. 23 of these libraries
@@ -85,13 +91,6 @@ Collaborative testing of Common Lisp libraries.
   suppress loading the starndard init of the implementaion
   (to avoid interference with the quicklisp installation
   user might have on his computer).
-
-  Test results are published as reports here:
-  [[http://common-lisp.net/project/cl-test-grid/]].
-
-  Clicking library test status (or/fail) in any report
-  refers to the library test logs with the failure
-  details.
 
 * Participation
 ** Running tetsts
