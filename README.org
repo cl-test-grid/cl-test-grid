@@ -119,7 +119,11 @@ Collaborative testing of Common Lisp libraries.
    lisp process. 
    
    If you decided to give this project a try and run tests, 
-   contact us, we will be glad to assist you.
+   feel free contact us, we will be glad to assist you 
+   (actually it is even recommended, because the project
+   is in the early stage of the development and problems
+   are possible; and also we are interested to see
+   how it goes and how to make test running more convenient).
 
 ** Discussing the project
    Feedback, discussions of the apporach and suggestesion
