@@ -28,6 +28,6 @@ echo "************************************************************************"
 /home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
 
 # Allegro
-#alisp -qq -L quicklisp\setup.lisp -L run-agent.lisp
+#alisp -qq -L quicklisp/setup.lisp -L run-agent.lisp
 
 
