@@ -49,12 +49,10 @@ Collaborative testing of Common Lisp libraries.
   Of course, we should understand that tests success
   does not always mean the library is workable -
   there might be bugs which are not covered by the tests.
-
   And other way around - failed tests not always
   means the library is broken - it may be just 
   a bug in the tests themselves. 
-
-  Redusing this gap increases the utility of automated testing.
+  Reducing this gap increases the utility of automated testing.
 
 * The Implementaion Idea
   Everyone can run a simple command which will run tests 
@@ -74,9 +72,12 @@ Collaborative testing of Common Lisp libraries.
   of the CL libraries using quicklisp to download the libraries
   and uploads the test results to the central server.
 
-  Current we have added 23 [[http://blog.quicklisp.org/2010/11/project-download-statistics.html][most often quicklisp-downloaded libraries]].
+  Currently we have considered the top 50 of 
+  [[http://blog.quicklisp.org/2010/11/project-download-statistics.html][most often quicklisp-downloaded libraries]]. 23 of these libraries
+  had test suites appropriate to be added to the cl-test-grid
+  (fully automated, no user interaction is needed).
 
-  File [[run.sh.sample]] shows what parameters to use for particular
+  File [[https://github.com/cl-test-grid/cl-test-grid/blob/master/run.sh.sample][run.sh.sample]] shows what parameters to use for particular
   CL implementations so that it bootstraps quicklisp in a local
   directory and updates it to the recent version (if necessary),
   and then preforms test-grid::run-libtests using this local
