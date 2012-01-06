@@ -113,9 +113,9 @@ Collaborative testing of Common Lisp libraries.
 
    - Currently we run tests only on the quicklisp release.
      But it is very desirable to run tests on the latest
-     versions from the source control too. For example
-     if we found a bug and the library author has fixed
-     it, he might want to issue a request to cl-test-grid
+     library versions from the source control too. For 
+     example if we found a bug and the library author has 
+     fixed  it, he might want to issue a request to cl-test-grid
      to run tests of the recent version of his library
      on all the platforms available. This feature would
      also help to ensure quicklisp distro quality before 
