@@ -91,6 +91,10 @@ contains the tests of _both_ libraries."
   (clean-rt)
   (asdf:clear-system :trivial-features-tests)
 
+  ;; Load cffi-grovel which is used in trivial-features-tests.asd,
+  ;; but not in the asdf:defsystem macro (issue #2). 
+  (quicklisp:quickload :cffi-grovel)
+
   (quicklisp:quickload :trivial-features-tests)
   
   ;; copy/past from trivial-features-tests.asd
