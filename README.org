@@ -46,7 +46,7 @@ Collaborative testing of Common Lisp libraries.
 
   Limitations.
 
-  Of course, we should understand that tests success
+  Of course, we should understand that test sute success
   does not always mean the library is workable -
   there might be bugs which are not covered by the tests.
   And the other way around - failed tests not always
