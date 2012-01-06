@@ -218,6 +218,9 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 
    Reported to Gary King (the author) by email.
 
+** parenscript                                                     :reported:
+   Fails on Allegro. Reported to the parenscript-devel:
+   http://lists.common-lisp.net/pipermail/parenscript-devel/2012-January/001076.html
 ** trivial-backtrace                                               :reported:
    Fails on CCL and SBCL because the test code tries to produce
    a division by zero error, but these lisps seem to optimize
