@@ -49,7 +49,7 @@ Collaborative testing of Common Lisp libraries.
   Of course, we should understand that tests success
   does not always mean the library is workable -
   there might be bugs which are not covered by the tests.
-  And other way around - failed tests not always
+  And the other way around - failed tests not always
   means the library is broken - it may be just 
   a bug in the tests themselves. 
   Reducing this gap increases the utility of automated testing.
