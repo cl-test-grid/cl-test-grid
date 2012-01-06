@@ -99,7 +99,7 @@ Collaborative testing of Common Lisp libraries.
 
    1. git clone git://github.com/cl-test-grid/cl-test-grid.git
    2. cd cl-test-grid
-   3. cp run.sh.sample run.sh; chmod +x run.sh. 
+   3. cp run.sh.sample run.sh; chmod +x run.sh
    4. Edit the run.sh (you may need to change paths to your CL implementation(s)).
    5. ./run.sh
 
@@ -148,7 +148,7 @@ Collaborative testing of Common Lisp libraries.
      This work might be distributed between several
      contributors - everyone runs part of the tests.
 
-     [Today hhis featus has quite low priority]
+     [Today this featus has quite low priority]
 
    - ...
   
@@ -160,7 +160,8 @@ Collaborative testing of Common Lisp libraries.
    same approach to define a method test-grid::libtest eql specilized 
    for that library and send us this code. 
 
-   See examples for the already added libraries in the [[test-grid.lisp]].
+   See examples for the already added libraries in the 
+   [[[[https://github.com/cl-test-grid/cl-test-grid/blob/master/test-grid.lisp]]][test-grid.lisp]].
 
    Today adding more libraries has low priority because we are
    testing how cl-test-grid works, polishing corner cases
