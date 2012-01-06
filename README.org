@@ -132,7 +132,7 @@ Collaborative testing of Common Lisp libraries.
      a portable way to start lisp process and making
      it to run particular code. 
 
-   - Distribuing the work. Currently we considered
+   - Distributing the work. Currently we considered
      only 50 libraries and 23 of them had test suites
      appropriate to be added to the cl-test-grid.
      Running these 23 test sutes (including download 
