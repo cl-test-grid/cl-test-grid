@@ -216,6 +216,11 @@ suite according to the FiveAM convention."
 
   ;; The test framework used: ptester.
   
+  ;; Load cl-base64 first, because cl-base64-tests
+  ;; is defined in cl-base64.asd which confuses
+  ;; quicklisp (some versions of, see issue #1)
+  (quicklisp:quickload :cl-base64)
+
   (quicklisp:quickload :cl-base64-tests)
   
   (funcall (intern (symbol-name '#:do-tests)
@@ -260,6 +265,11 @@ if all the tests succeeded and NIL othersize."
 
   ;; The test framework used: ptester.
 
+  ;; Load puri first, because puri-tests
+  ;; is defined in puri.asd which confuses
+  ;; quicklisp (some versions of, see issue #1)
+  (quicklisp:quickload :puri)
+
   (quicklisp:quickload :puri-tests)
   
   ;; copy/paste from puri.asd
@@ -277,6 +287,10 @@ if all the tests succeeded and NIL othersize."
   ;; we need to clean the :anaphora system too
   (asdf:clear-system :anaphora)
 
+  ;; Load anaphora first, because anaphora-tests
+  ;; is defined in anaphora.asd which confuses
+  ;; quicklisp (some versions of, see issue #1)
+  (quicklisp:quickload :anaphora)
   (quicklisp:quickload :anaphora-test)
 
   ;; copy/paste from anaphora.asd
@@ -323,6 +337,10 @@ if all the tests succeeded and NIL othersize."
   (asdf:clear-system :iterate-tests)
   (asdf:clear-system :iterate)
 
+  ;; Load iterate first, because iterate-tests
+  ;; is defined in iterate.asd which confuses
+  ;; quicklisp (some versions of, see issue #1)
+  (quicklisp:quickload :iterate)
   (quicklisp:quickload :iterate-tests)
   
   (funcall (intern "DO-TESTS" (find-package #+sbcl "SB-RT"
@@ -346,6 +364,12 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :cl-json)))
   ;; The test framework used: fiveam.
   (let ((*trace-output* *standard-output*))
+
+    ;; Load cl-json first, because cl-json.tests
+    ;; is defined in cl-json.asd which confuses
+    ;; quicklisp (some versions of, see issue #1)
+    (quicklisp:quickload :cl-json)
+
     (quicklisp:quickload :cl-json.test)
     (run-fiveam-suite (intern (symbol-name '#:json) :json-test))))
 
