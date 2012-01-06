@@ -14,7 +14,7 @@ Collaborative testing of Common Lisp libraries.
      and sometimes in non-standartized features (threading,
      sockets, FFI, etc.). Moreover, impementations are
      evolving over the time, we should care about different
-     version of the same implementation.
+     versions of the same implementation.
   2. Growing number of CL libraries (which are also evolving 
      over the time).
   3. Compatibility between library versions - libraries
@@ -44,7 +44,19 @@ Collaborative testing of Common Lisp libraries.
   3. Help to discover and maintain compatible
      set of library versions (e.g. Quicklisp distros).
 
-* The Idea
+  Limitations.
+
+  Of course, we should understand that tests success
+  does not always mean the library is workable -
+  there might be bugs which are not covered by the tests.
+
+  And other way around - failed tests not always
+  means the library is broken - it may be just 
+  a bug in the tests themselves. 
+
+  Redusing this gap increases the utility of automated testing.
+
+* The Implementaion Idea
   Everyone can run a simple command which will run tests 
   of Common Lisp libraries and upload results to 
   the central server. 
@@ -58,14 +70,109 @@ Collaborative testing of Common Lisp libraries.
   by providing required building blocks).
 
 * Status
+  We have function test-grid::run-libtests wich runs tests
+  of the CL libraries using quicklisp to download the libraries
+  and uploads the test results to the central server.
+
+  Current we have added 23 [[http://blog.quicklisp.org/2010/11/project-download-statistics.html][most often quicklisp-downloaded libraries]].
+
+  File [[run.sh.sample]] shows what parameters to use for particular
+  CL implementations so that it bootstraps quicklisp in a local
+  directory and updates it to the recent version (if necessary),
+  and then preforms test-grid::run-libtests using this local
+  quicklisp installation. The CL implementation parameters
+  suppress loading the starndard init of the implementaion
+  (to avoid interference with the quicklisp installation
+  user might have on his computer).
+
+  Test results are published as reports here:
+  [[http://common-lisp.net/project/cl-test-grid/]].
+
+  Clicking library test status (or/fail) in any report
+  refers to the library test logs with the failure
+  details.
 
 * Participation
+** Running tetsts
+   The most appreciated way to participate.
 
-  Everyone interested to discuss the project is invited to the
-  "mailing list" - [[http://groups.google.com/group/cl-test-grid]].
+   1. git clone git://github.com/cl-test-grid/cl-test-grid.git
+   2. cd cl-test-grid
+   3. cp run.sh.sample run.sh; chmod +x run.sh. 
+   4. Edit the run.sh (you may need to change paths to your CL implementation(s)).
+   5. ./run.sh
+
+** Discussing the project
+   Feedback, discussions of the apporach and suggestesion
+   for the open problems are very welcome.
+
+   Everyone interested is invited to the "mailing list" - 
+   [[http://groups.google.com/group/cl-test-grid]].
+
+   Examples of the problems which need solution:
+
+   - Currently we run tests only on the quicklisp release.
+     But it is very desirable to run tests on the latest
+     versions from the source control too. For example
+     if we found a bug and the library author has fixed
+     it, he might want to issue a request to cl-test-grid
+     to run tests of the recent version of his library
+     on all the platforms available. This feature would
+     would also help to ensure quicklisp distro
+     quality before releasing the distro.
+
+   - Protecting from hanging tests or crashes.
+
+     All the test sutes run in a single Lisp session.
+     If some test hangs, or cruses unrecoverably
+     (core dump for example), it will block other tests.
+
+     Possible solution would be to run every test 
+     as a separate process, but it would require
+     a portable way to start lisp process and making
+     it to run particular code. 
+
+   - Distribuing the work. Currently we considered
+     only 50 libraries and 23 of them had test suites
+     appropriate to be added to the cl-test-grid.
+     Running these 23 test sutes (including download 
+     and compilation)takes 6-10 minutes on a single 
+     CL implementation.
+
+     Quicklisp today contains almost 650 libraries.
+     Based on this, we may estimate that running
+     all the test suites available in quicklisp
+     may take around 1.5 hours on a single implementation.
+     
+     This work might be distributed between several
+     contributors - everyone runs part of the tests.
+
+     [Today hhis featus has quite low priority]
+
+   - ...
   
+** Adding more libraries
+   It is quite easy - few lines of code. 
+   
+   Look how the library tests are started in the asdf:perform method 
+   for asdf:test-op defined in the library .asd file. Then use the
+   same approach to define a method test-grid::libtest eql specilized 
+   for that library and send us this code. 
 
-* TODO
+   See examples for the already added libraries in the [[test-grid.lisp]].
+
+   Today adding more libraries has low priority because we are
+   testing how cl-test-grid works, polishing corner cases
+   and reporting already found bugs to the libraries/CL implementation
+   mainteners. After we stabilize these libaries, we can add more.
+
+** More
+   Lot of things may be done in this project. But the project
+   has no independent value, it is only useful if it helps
+   to improve the CL ecosystem quality. Fixing bugs in the
+   CL libraries, writing more tests is the most important.
+
+* TODO fix in this README:
   Terminology - I say "quicklisp distro", but if be precise,
   quicklisp calls it "quicklisp distro version". But
   if I say "lib-world is a set of libraries with specified
