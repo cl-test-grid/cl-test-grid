@@ -96,11 +96,25 @@ Collaborative testing of Common Lisp libraries.
 ** Running tetsts
    The most appreciated way to participate.
 
+   The first time you will need do the following:
+
    1. git clone git://github.com/cl-test-grid/cl-test-grid.git
    2. cd cl-test-grid
    3. cp run.sh.sample run.sh; chmod +x run.sh
    4. Edit the run.sh (you may need to change paths to your CL implementation(s)).
    5. ./run.sh
+
+   Next time all you need is to just start ./run.sh. It will update the 
+   cl-test-grid from git, update quicklisp to the latest distro 
+   (and of course run tests and upload the results).
+
+   We are looking for contributors who would agree to run
+   this command periodically, for example once a month.
+
+   Note also, that this is not 100% automated system.
+   For example uploading results uses [[http://weitz.de/drakma/][drakma]]. But if
+   drakma is broken on your planform and the upload fails,
+   you will be asked to send us the resuls manually.
 
 ** Discussing the project
    Feedback, discussions of the apporach and suggestesion
