@@ -84,7 +84,8 @@ public class SubmitRunInfo extends HttpServlet {
 
       // Set the email message text.
       MimeBodyPart messagePart = new MimeBodyPart();
-      messagePart.setText("see attach.");
+      String runInfoBeginning = runInfo.substring(0, Math.min(runInfo.length(), 300));
+      messagePart.setText("See attach. The first 300 characters:\r\n\r\n" + runInfoBeginning);
       multipart.addBodyPart(messagePart);
 
       // Attach the test run info.
