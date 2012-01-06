@@ -118,19 +118,19 @@ Collaborative testing of Common Lisp libraries.
      it, he might want to issue a request to cl-test-grid
      to run tests of the recent version of his library
      on all the platforms available. This feature would
-     would also help to ensure quicklisp distro
-     quality before releasing the distro.
+     also help to ensure quicklisp distro quality before 
+     releasing the distro.
 
    - Protecting from hanging tests or crashes.
 
      All the test sutes run in a single Lisp session.
-     If some test hangs, or cruses unrecoverably
+     If some test hangs, or crases unrecoverably
      (core dump for example), it will block other tests.
 
      Possible solution would be to run every test 
      as a separate process, but it would require
      a portable way to start lisp process and making
-     it to run particular code. 
+     it run particular lisp code. 
 
    - Distributing the work. Currently we considered
      only 50 libraries and 23 of them had test suites
