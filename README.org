@@ -93,7 +93,7 @@ Collaborative testing of Common Lisp libraries.
   user might have on his computer).
 
 * Participation
-** Running tetsts
+** Running tests
    The most appreciated way to participate.
 
    The first time you will need do the following:
