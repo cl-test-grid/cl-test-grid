@@ -114,7 +114,11 @@ Collaborative testing of Common Lisp libraries.
    Note also, that this is not 100% automated system.
    For example uploading results uses [[http://weitz.de/drakma/][drakma]]. But if
    drakma is broken on your planform and the upload fails,
-   you will be asked to send us the resuls manually.
+   you will be asked to send us the resuls manually. Or
+   if some test sute hangs, you will need to kill the
+   lisp process. If you decided to give this project
+   a try and run tests, contact us, we will be glad
+   to assist you.
 
 ** Discussing the project
    Feedback, discussions of the apporach and suggestesion
