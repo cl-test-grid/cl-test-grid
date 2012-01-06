@@ -161,7 +161,7 @@ Collaborative testing of Common Lisp libraries.
    for that library and send us this code. 
 
    See examples for the already added libraries in the 
-   [[[[https://github.com/cl-test-grid/cl-test-grid/blob/master/test-grid.lisp]]][test-grid.lisp]].
+   [[https://github.com/cl-test-grid/cl-test-grid/blob/master/test-grid.lisp][test-grid.lisp]].
 
    Today adding more libraries has low priority because we are
    testing how cl-test-grid works, polishing corner cases
