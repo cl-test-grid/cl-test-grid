@@ -154,10 +154,10 @@ Collaborative testing of Common Lisp libraries.
      it run particular lisp code. 
 
    - Distributing the work. Currently we considered
-     only 50 libraries and 23 of them had test suites
+     only 50 libraries and 23 of them have test suites
      appropriate to be added to the cl-test-grid.
      Running these 23 test sutes (including download 
-     and compilation)takes 6-10 minutes on a single 
+     and compilation) takes 6-10 minutes on a single 
      CL implementation.
 
      Quicklisp today contains almost 650 libraries.
