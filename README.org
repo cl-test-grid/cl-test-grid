@@ -86,7 +86,7 @@ Collaborative testing of Common Lisp libraries.
   directory and updates it to the recent version (if necessary),
   and then preforms test-grid::run-libtests using this local
   quicklisp installation. The CL implementation parameters
-  suppress loading the starndard init files of the implementaion
+  suppress loading the standard init files of the implementaion
   (to avoid interference with the quicklisp installation
   user might have on his computer).
 
