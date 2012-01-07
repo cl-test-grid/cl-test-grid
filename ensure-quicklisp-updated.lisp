@@ -4,7 +4,7 @@
 ;;;
 ;;; See LICENSE for details.
 ;;;
-;;; This file is supposed to be LOADed by user: 
+;;; This file is supposed to be LOADed by user:
 ;;;
 ;;;        (load "ensure-quicklisp-updated.lisp")
 ;;;
@@ -21,5 +21,6 @@
   (quicklisp-quickstart:install :path (merge-pathnames "quicklisp/"
                                                        *this-file-dir*)))
 
-(quicklisp:update-client)
-(quicklisp:update-all-dists)
+(quicklisp:update-client :prompt nil)
+(quicklisp:update-all-dists :prompt nil)
+
