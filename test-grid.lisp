@@ -427,7 +427,7 @@ if all the tests succeeded and NIL othersize."
     (fresh-line stream)
     (terpri stream)
     (format stream "============================================================~%")
-    (format stream "  cl-test-grid status for ~A: ~A~%" libname status))
+    (format stream "  cl-test-grid status for ~A: ~A~%" libname status)
     (format stream "============================================================~%")))
 
 (defun run-libtest (lib run-descr)
