@@ -154,8 +154,8 @@ contains the tests of _both_ libraries."
   #+abcl
   (progn
     (format t "~&Due to ABCL bug #188 (http://trac.common-lisp.net/armedbear/ticket/188)~%")
-    (format t "cl-ppcre tests fail, repeating the same error huge number of times, in result~%")
-    (format t "hanging for a long time and producing huge log.")
+    (format t "cl-ppcre tests fail, repeating this error huge number of times, in result~%")
+    (format t "hanging for a long time and producing a huge log.")
     (return-from libtest :fail))
     
   ;; The test framework used: custom.
