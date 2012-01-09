@@ -4,7 +4,7 @@ echo.
 echo "************************************************************************"
 echo "Updating to the recent cl-test-grid version..."
 echo "************************************************************************"
-git pull
+call git pull
 
 echo.
 echo "************************************************************************"
@@ -22,7 +22,7 @@ rem If you are running this first time, do not uncomment all the Lisps - please
 rem run them one by one to check how it works.
 
 rem ABCL
- C:\Users\anton\unpacked\abcl\abcl.bat --noinit --nosystem --batch --load quicklisp/setup.lisp --load run-agent.lisp
+rem call C:\Users\anton\unpacked\abcl\abcl.bat --noinit --nosystem --batch --load quicklisp/setup.lisp --load run-agent.lisp
 
 rem Allegro
 rem "C:\Program Files (x86)\acl82express\alisp.exe" -qq -L quicklisp/setup.lisp -L run-agent.lisp
