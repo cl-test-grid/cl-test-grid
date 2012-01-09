@@ -262,6 +262,46 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 
    Reported to usocket-devel:
    http://lists.common-lisp.net/pipermail/usocket-devel/2011-December/000719.html
+** usocket hangs on ABCL                                      :report_needed:
+   Usocket hangs on ABCL. The last log message is
+   USOCKET-TEST::WAIT-FOR-INPUT.3
+** parenscript on ABCL: Out Of Memory: PermGen                :report_needed:
+   Running java with -XX:MaxPermSize=256m fixes that.
+
+   The log of the failure:
+
+   ; in (EVAL-WHEN (:COMPILE-TOPLEVEL) ...)
+   
+   ; Caught SIMPLE-STYLE-WARNING:
+   ;     EDITOR-HINTS.NAMED-READTABLES has not been ported to
+   Armed Bear Common Lisp. We fall back to a portable implementation
+   of readtable iterators. This implementation has to grovel through
+   all available characters. On Unicode-aware implementations this may
+   come with some costs.
+   
+   ; Caught SIMPLE-WARNING:
+   ;   COMPILE-FILE warned while performing #<ASDF:COMPILE-OP (:VERBOSE NIL) {DF8CC93}> on #<ASDF::NAMED-READTABLES-SOURCE-FILE "named-readtables" "cruft">.
+   
+   ..........
+   [package parenscript]
+   ; Caught SIMPLE-STYLE-WARNING:
+   ;   Overwriting already existing readtable #<org.armedbear.lisp.Readtable@68f0d4e7>.
+   
+   .............................
+   [package ps-js-symbols]...........................
+   [package ps-dom1-symbols].........................
+   [package ps-dom2-symbols].........................
+   [package ps-window-wd-symbols]....................
+   [package ps-dom-nonstandard-symbols]..............
+   [package ps-dhtml-symbols]........................
+   [package ps-js]...................................
+   [package ps-test].......
+   ; Compilation unit finished
+   ;   Caught 1 WARNING condition
+   ;   Caught 2 STYLE-WARNING conditions
+   
+   Unhandled SERIOUS-CONDITION is signaled: Out of memory PermGen space
+
 ** lift on ECL                                                     :reported:
    Lift is a test framework used 6 from the 23 libriaries we test
    now: cl-containers, metabang-bind, metatilities, metatilities-base,
