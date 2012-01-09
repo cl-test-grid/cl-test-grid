@@ -441,21 +441,21 @@ if all the tests succeeded and NIL othersize."
          (*standard-output* buf)
          (*error-output* buf)
          (start-time (get-internal-real-time)))
-
+    
     (format orig-std-out 
             "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
             lib)
     (finish-output orig-std-out)
 
     (print-log-header lib run-descr *standard-output*)
-    
+
     (let ((status (handler-case
                       (normalize-status (libtest lib))
-                    (error (condition) (progn
-                                         (format t
-                                                 "Unhandled ERROR is signaled: ~A~%"
-                                                 condition)
-                                         :fail)))))
+                    (serious-condition (condition) (progn
+                                                     (format t
+                                                             "~&Unhandled SERIOUS-CONDITION is signaled: ~A~%"
+                                                             condition)
+                                                     :fail)))))
       (print-log-footer lib status *standard-output*)
       (let ((output (get-output-stream-string buf)))
         (list :libname lib
