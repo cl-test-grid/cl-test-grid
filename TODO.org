@@ -167,6 +167,7 @@
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
 * Backlog
+** TODO Limit log file size (how?).
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
 ** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO run-libtests: redirect the library output to log file directly
