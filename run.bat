@@ -1,15 +1,40 @@
-rem C:\Users\anton\unpacked\ccl\ccl-1.7-windows\wx86cl64.exe --no-init --load ensure-quicklisp-updated.lisp --eval "(quit)"
+@echo off
 
+echo.
+echo "************************************************************************"
+echo "Updating to the recent cl-test-grid version..."
+echo "************************************************************************"
+git pull
+
+echo.
+echo "************************************************************************"
+echo "Bootstrap quicklisp in a local directory and update to the recent version (if necessary)..."
+echo "************************************************************************"
+rem Any Lisp may be used, use the one which works better on your plantform.
+sbcl --no-sysinit --no-userinit --load ensure-quicklisp-updated.lisp --eval "(quit)"
+
+echo.
+echo "************************************************************************"
+echo "Running the tests (don't load the standard init files; using our local quicklisp)..."
+echo "************************************************************************"
+
+rem If you are running this first time, do not uncomment all the Lisps - please
+rem run them one by one to check how it works.
+
+rem ABCL
+ C:\Users\anton\unpacked\abcl\abcl.bat --noinit --nosystem --batch --load quicklisp/setup.lisp --load run-agent.lisp
+
+rem Allegro
+rem "C:\Program Files (x86)\acl82express\alisp.exe" -qq -L quicklisp/setup.lisp -L run-agent.lisp
+
+rem CCL
 rem C:\Users\anton\unpacked\ccl\ccl-1.7-windows\wx86cl64.exe --no-init --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
 
-rem sbcl --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
+rem ECL
+rem C:\Users\anton\unpacked\ecl\ecl-11.1.1\bin\ecl -norc -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
 
-rem C:\Users\anton\unpacked\abcl\abcl.bat --load agent.lisp
+rem SBCL
+rem sbcl --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
 
-rem "C:\Program Files (x86)\acl82express\alisp.exe" -qq -L quicklisp\setup.lisp -L run-agent.lisp
 
-C:\Users\anton\unpacked\ecl\ecl-11.1.1\bin\ecl -norc -load quicklisp\setup.lisp -load run-agent.lisp -eval "(quit)"
 
-rem C:\Users\anton\unpacked\ccl\ccl-1.6-windowsx86\wx86cl64.exe --load run-agent.lisp --eval "(quit)"
-rem C:\Users\anton\unpacked\ccl\ccl-1.7-windows\wx86cl64.exe --load run-agent.lisp --eval "(quit)"
-rem C:\Users\anton\unpacked\ccl\ccl-1.7-windows\wx86cl.exe --quiet --load run-agent.lisp --eval "(quit)"
