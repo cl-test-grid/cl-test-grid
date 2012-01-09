@@ -436,35 +436,40 @@ if all the tests succeeded and NIL othersize."
     (format stream "  cl-test-grid status for ~A: ~A~%" libname status)
     (format stream "============================================================~%")))
 
-(defun run-libtest (lib run-descr)
-  (let* ((orig-std-out *standard-output*)
-         (buf (make-string-output-stream))
-         (*standard-output* buf)
-         (*error-output* buf)
-         (start-time (get-internal-real-time)))
+(defun run-libtest (lib run-descr log-directory)
+  (let (status
+        (log-file (lib-log-file log-directory lib))
+        (start-time (get-internal-real-time)))
+    (with-open-file (log-stream log-file
+                                :direction :output
+                                :if-exists :overwrite
+                                :if-does-not-exist :create)    
+      (let* ((orig-std-out *standard-output*)
+             (*standard-output* log-stream)
+             (*error-output* log-stream))
+        
+        (format orig-std-out 
+                "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
+                lib)
+        (finish-output orig-std-out)
+        
+        (print-log-header lib run-descr *standard-output*)
+        
+        (setf status (handler-case
+                         (normalize-status (libtest lib))
+                       (serious-condition (condition) (progn
+                                                        (format t
+                                                                "~&Unhandled SERIOUS-CONDITION is signaled: ~A~%"
+                                                                condition)
+                                                        :fail))))
+        (print-log-footer lib status *standard-output*)))
     
-    (format orig-std-out 
-            "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
-            lib)
-    (finish-output orig-std-out)
-
-    (print-log-header lib run-descr *standard-output*)
-
-    (let ((status (handler-case
-                      (normalize-status (libtest lib))
-                    (serious-condition (condition) (progn
-                                                     (format t
-                                                             "~&Unhandled SERIOUS-CONDITION is signaled: ~A~%"
-                                                             condition)
-                                                     :fail)))))
-      (print-log-footer lib status *standard-output*)
-      (let ((output (get-output-stream-string buf)))
-        (list :libname lib
-              :status status :output output
-              :log-char-length (length output) 
-              :test-duration (/ (- (get-internal-real-time) start-time) 
-                                internal-time-units-per-second))))))
-
+    (list :libname lib
+          :status status 
+          :log-byte-length (file-byte-length log-file) 
+          :test-duration (/ (- (get-internal-real-time) start-time) 
+                            internal-time-units-per-second))))
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -579,7 +584,7 @@ Examples:
 
 ;; based on
 ;; http://cl-user.net/asp/-1MB/sdataQ0mpnsnLt7msDQ3YNypX8yBX8yBXnMq=/sdataQu3F$sSHnB==
-;; but fixed in respect to file-length returing file length in bytest
+;; but fixed in respect to file-length returing file length in bytes
 ;; instead of characters (and violating the spec therefore) at least
 ;; on CLISP 2.49 and ABCL 1.0.0.
 (defun file-string (path)
@@ -593,6 +598,12 @@ Examples:
           (setf data (subseq data 0 char-len)))
       data)))
 
+(defun file-byte-length (path)
+  (with-open-file (s path 
+                     :direction :input
+                     :element-type '(unsigned-byte 8))
+    (file-length s)))
+                    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -703,14 +714,6 @@ data (libraries test suites output and the run results) will be saved."
   (merge-pathnames (string-downcase lib-name)
                    test-run-directory))
 
-(defun save-lib-log (lib-name log test-run-directory)
-  (let ((lib-log-file (lib-log-file test-run-directory lib-name)))
-    (with-open-file (out lib-log-file
-                         :direction :output
-                         :if-exists :overwrite
-                         :if-does-not-exist :create)
-      (write-sequence log out))))
-
 (defun write-to-file (obj file)
   "Write to file the lisp object OBJ in a format acceptable to READ."
   (with-open-file (out file
@@ -775,16 +778,14 @@ data (libraries test suites output and the run results) will be saved."
     (test-grid-blobstore:submit-run-info blobstore run-info)
     (format t "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.~%")
     run-info))
-  
+
 (defun run-libtests (&optional (libs *all-libs*))
   (let* ((run-descr (make-run-descr))
          (run-dir (run-directory run-descr))
          (lib-results))
     (ensure-directories-exist run-dir)
     (dolist (lib libs)
-      (let ((lib-result (run-libtest lib run-descr)))
-        (save-lib-log lib (getf lib-result :output) run-dir)
-        (remf lib-result :output)
+      (let ((lib-result (run-libtest lib run-descr run-dir)))
         (push lib-result lib-results)))
     (setf (getf run-descr :run-duration) 
           (- (get-universal-time)
