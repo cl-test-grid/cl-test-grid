@@ -173,6 +173,13 @@ contains the tests of _both_ libraries."
 
 (defmethod libtest ((library-name (eql :usocket)))
 
+  #+abcl
+  (progn
+    (format t "~&On ABCL abcl-1.0.0 the usocket test suite hangs (after producing significant~%")
+    (format t "number of errors/failures in the log). The last log message before it hangs is:~%")
+    (format t "USOCKET-TEST::WAIT-FOR-INPUT.3")
+    (return-from libtest :fail))
+    
   ;; The test framework used: rt.
   (clean-rt)
   (asdf:clear-system :usocket-test)
