@@ -410,7 +410,22 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :metatilities-test)
   (run-lift-tests :metatilities-test))
 
-(defun run-libtest (lib)
+(defun print-log-header (libname run-descr stream)
+  (let ((*print-case* :downcase))
+    (format stream "============================================================~%")
+    (format stream "  cl-test-grid test run~%")
+    (format stream "------------------------------------------------------------~%")
+    (format stream "  library:   ~A~%" libname)
+    (format stream "  lisp:      ~A~%" (getf run-descr :lisp))
+    (format stream "  lib-world: ~A~%" (getf run-descr :lob-world))
+    (format stream "  timestamp: ~A~%" (pretty-fmt-time (get-universal-time)))
+    (format stream "============================================================~%~%")))
+
+(defun print-log-footer (libname status stream)
+  (let ((*print-case* :downcase))
+    (format stream "~&~%cl-test-grid status for ~A: ~A~%" libname status)))
+
+(defun run-libtest (lib run-descr)
   (let* ((orig-std-out *standard-output*)
          (buf (make-string-output-stream))
          (*standard-output* buf)
@@ -421,6 +436,8 @@ if all the tests succeeded and NIL othersize."
             "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
             lib)
     (finish-output orig-std-out)
+
+    (print-log-header lib run-descr *standard-output*)
     
     (let ((status (handler-case
                       (normalize-status (libtest lib))
@@ -429,7 +446,7 @@ if all the tests succeeded and NIL othersize."
                                                  "Unhandled ERROR is signaled: ~A~%"
                                                  condition)
                                          :fail)))))
-      (format t "~&~%cl-test-grid status for ~A: ~A~%" lib status)
+      (print-log-footer lib status *standard-output*)
       (let ((output (get-output-stream-string buf)))
         (list :libname lib
               :status status :output output
@@ -754,7 +771,7 @@ data (libraries test suites output and the run results) will be saved."
          (lib-results))
     (ensure-directories-exist run-dir)
     (dolist (lib libs)
-      (let ((lib-result (run-libtest lib)))
+      (let ((lib-result (run-libtest lib run-descr)))
         (save-lib-log lib (getf lib-result :output) run-dir)
         (remf lib-result :output)
         (push lib-result lib-results)))
