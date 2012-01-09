@@ -21,14 +21,17 @@ echo "************************************************************************"
 # If you are running this first time, do not uncomment all the Lisps - please
 # run them one by one to check how it works.
 
-# CCL
-#/home/anton/ccl/ccl-1.7/lx86cl --no-init --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
-
-# SBCL
-/home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
+# ABCL
+#\path\to\abcl\abcl.sh --noinit --nosystem --batch --load quicklisp/setup.lisp --load run-agent.lisp
 
 # Allegro
 #alisp -qq -L quicklisp/setup.lisp -L run-agent.lisp
 
+# CCL
+#/home/anton/ccl/ccl-1.7/lx86cl --no-init --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
+
 # ECL
 #ecl -norc -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
+
+# SBCL
+/home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
