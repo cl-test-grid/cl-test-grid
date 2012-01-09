@@ -415,61 +415,6 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :metatilities-test)
   (run-lift-tests :metatilities-test))
 
-(defun print-log-header (libname run-descr stream)
-  (let ((*print-case* :downcase) (*print-pretty* nil))
-    (format stream "============================================================~%")
-    (format stream "  cl-test-grid test run~%")
-    (format stream "------------------------------------------------------------~%")
-    (format stream "  library:           ~A~%" libname)
-    (format stream "  lib-world:         ~A~%" (getf run-descr :lib-world))
-    (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
-    (format stream "  *features*:        ~A~%" (sort (copy-list *features*) #'string<))
-    (format stream "  contributor email: ~A~%" (getf (getf run-descr :contact) :email))
-    (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
-    (format stream "============================================================~%~%")))
-
-(defun print-log-footer (libname status stream)
-  (let ((*print-case* :downcase))
-    (fresh-line stream)
-    (terpri stream)
-    (format stream "============================================================~%")
-    (format stream "  cl-test-grid status for ~A: ~A~%" libname status)
-    (format stream "============================================================~%")))
-
-(defun run-libtest (lib run-descr log-directory)
-  (let (status
-        (log-file (lib-log-file log-directory lib))
-        (start-time (get-internal-real-time)))
-    (with-open-file (log-stream log-file
-                                :direction :output
-                                :if-exists :overwrite
-                                :if-does-not-exist :create)    
-      (let* ((orig-std-out *standard-output*)
-             (*standard-output* log-stream)
-             (*error-output* log-stream))
-        
-        (format orig-std-out 
-                "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
-                lib)
-        (finish-output orig-std-out)
-        
-        (print-log-header lib run-descr *standard-output*)
-        
-        (setf status (handler-case
-                         (normalize-status (libtest lib))
-                       (serious-condition (condition) (progn
-                                                        (format t
-                                                                "~&Unhandled SERIOUS-CONDITION is signaled: ~A~%"
-                                                                condition)
-                                                        :fail))))
-        (print-log-footer lib status *standard-output*)))
-    
-    (list :libname lib
-          :status status 
-          :log-byte-length (file-byte-length log-file) 
-          :test-duration (/ (- (get-internal-real-time) start-time) 
-                            internal-time-units-per-second))))
-  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -581,6 +526,15 @@ Examples:
                       :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                       )
     (safe-read in)))
+
+(defun write-to-file (obj file)
+  "Write to file the lisp object OBJ in a format acceptable to READ."
+  (with-open-file (out file
+                       :direction :output
+                       :if-exists :supersede
+                       :if-does-not-exist :create)
+    (pprint obj out))
+  obj)
 
 ;; based on
 ;; http://cl-user.net/asp/-1MB/sdataQ0mpnsnLt7msDQ3YNypX8yBX8yBXnMq=/sdataQu3F$sSHnB==
@@ -714,15 +668,61 @@ data (libraries test suites output and the run results) will be saved."
   (merge-pathnames (string-downcase lib-name)
                    test-run-directory))
 
-(defun write-to-file (obj file)
-  "Write to file the lisp object OBJ in a format acceptable to READ."
-  (with-open-file (out file
-                       :direction :output
-                       :if-exists :supersede
-                       :if-does-not-exist :create)
-    (pprint obj out))
-  obj)
+(defun print-log-header (libname run-descr stream)
+  (let ((*print-case* :downcase) (*print-pretty* nil))
+    (format stream "============================================================~%")
+    (format stream "  cl-test-grid test run~%")
+    (format stream "------------------------------------------------------------~%")
+    (format stream "  library:           ~A~%" libname)
+    (format stream "  lib-world:         ~A~%" (getf run-descr :lib-world))
+    (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
+    (format stream "  *features*:        ~A~%" (sort (copy-list *features*) #'string<))
+    (format stream "  contributor email: ~A~%" (getf (getf run-descr :contact) :email))
+    (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
+    (format stream "============================================================~%~%")))
 
+(defun print-log-footer (libname status stream)
+  (let ((*print-case* :downcase))
+    (fresh-line stream)
+    (terpri stream)
+    (format stream "============================================================~%")
+    (format stream "  cl-test-grid status for ~A: ~A~%" libname status)
+    (format stream "============================================================~%")))
+
+(defun run-libtest (lib run-descr log-directory)
+  (let (status
+        (log-file (lib-log-file log-directory lib))
+        (start-time (get-internal-real-time)))
+    (with-open-file (log-stream log-file
+                                :direction :output
+                                :if-exists :overwrite
+                                :if-does-not-exist :create)    
+      (let* ((orig-std-out *standard-output*)
+             (*standard-output* log-stream)
+             (*error-output* log-stream))
+        
+        (format orig-std-out 
+                "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
+                lib)
+        (finish-output orig-std-out)
+        
+        (print-log-header lib run-descr *standard-output*)
+        
+        (setf status (handler-case
+                         (normalize-status (libtest lib))
+                       (serious-condition (condition) (progn
+                                                        (format t
+                                                                "~&Unhandled SERIOUS-CONDITION is signaled: ~A~%"
+                                                                condition)
+                                                        :fail))))
+        (print-log-footer lib status *standard-output*)))
+    
+    (list :libname lib
+          :status status 
+          :log-byte-length (file-byte-length log-file) 
+          :test-duration (/ (- (get-internal-real-time) start-time) 
+                            internal-time-units-per-second))))
+  
 (defun run-info-file (test-run-directory)
   (merge-pathnames "test-run-info.lisp"
                    test-run-directory))
