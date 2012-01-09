@@ -265,10 +265,11 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 ** usocket hangs on ABCL                                      :report_needed:
    Usocket hangs on ABCL. The last log message is
    USOCKET-TEST::WAIT-FOR-INPUT.3
-** parenscript on ABCL: Out Of Memory: PermGen                :report_needed:
-   Running java with -XX:MaxPermSize=256m fixes that.
+** parenscript on ABCL: OutOfMemory: PermGen                  :report_needed:
+   Running java with -XX:MaxPermSize=256m fixes the OutOfMenory, but
+   fails with some other error.
 
-   The log of the failure:
+   The OutOfMemory failure log:
 
    ; in (EVAL-WHEN (:COMPILE-TOPLEVEL) ...)
    
