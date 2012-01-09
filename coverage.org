@@ -167,6 +167,12 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    to not forget to implement a feature: calling cl-json:bind
    inside of cl-json:bind (as far as I understand).
 
+** cl-json on ECL                                                  :reported:
+   When running tests of cl-json, the following SERIOUS-CONDITION is signaled:
+   Detected access to an invalid or protected memory address.
+
+   ECL bug is opened:
+   https://sourceforge.net/tracker/?func=detail&aid=3471348&group_id=30035&atid=398053
 ** cl-ppcre                                                        :reported:
    Fails on Allegro
    Reported: https://github.com/edicl/cl-ppcre/issues/2
@@ -256,3 +262,14 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 
    Reported to usocket-devel:
    http://lists.common-lisp.net/pipermail/usocket-devel/2011-December/000719.html
+** lift on ECL                                                     :reported:
+   Lift is a test framework used 6 from the 23 libriaries we test
+   now: cl-containers, metabang-bind, metatilities, metatilities-base,
+   moptilities, trivial-timeout.
+
+   It can't not be compiled by ECL because it uses non-standard
+   order of clauses in LOOP.
+
+   Reported to lift-devel: 
+   http://lists.common-lisp.net/pipermail/lift-devel/2012-January/000137.html
+
