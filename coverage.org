@@ -1,4 +1,5 @@
 * Libraries
+** Statistics 2010-11-10
 
 Quicklisp download statistics:
 
@@ -83,6 +84,57 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
                 to use test data files in a .tar archive
                 and downloading it using quicklisp' http utility).
 
+** Statistics 2011-12-05
+   1950 alexandria
+   1203 slime
+   1126 cl+ssl
+   1033 babel
+    936 usocket
+    907 trivial-features
+    904 rfc2388
+    902 bordeaux-threads
+    899 hunchentoot
+    889 cffi
+    849 trivial-garbage
+    828 closer-mop
+    820 trivial-gray-streams
+    789 cl-ppcre
+    703 flexi-streams
+    665 cl-fad
+    620 iterate
+    612 cl-base64
+    591 quicklisp-slime-helper
+    579 chunga
+    499 puri
+    488 md5
+    480 trivial-backtrace
+    470 drakma
+    426 split-sequence
+    412 metatilities-base
+    365 anaphora
+    340 cl-who
+    327 fare-utils
+    313 salza2
+    297 cl-json
+    292 metabang-bind
+    280 uffi
+    273 named-readtables
+    257 clsql
+    242 parenscript
+    237 zpb-ttf
+    230 asdf-system-connections
+    227 zpng
+    210 postmodern
+    208 fare-matcher
+    201 cl-vectors
+    200 ironclad
+    196 vecto
+    190 cl-opengl
+    189 clx
+    182 arnesi
+    169 osicat
+    168 parse-number
+    167 cl-containers
 * CL implementations
   CLISP/Windows - OK
   SBCL/Windows - OK
@@ -313,4 +365,17 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 
    Reported to lift-devel: 
    http://lists.common-lisp.net/pipermail/lift-devel/2012-January/000137.html
+
+
+* Quicklisp 2012-01-07
+** bordeaux-threads taests crash CMUCL                        :report_needed:
+   On CMUCL bordeaux-threads test suite traps into some active
+   deadlock, produces 8 MB of '.' symbols in log, constantly runs GC
+   and finally dies when heap is exhausted.
+** ECL/ASDF issue: ECL with bytecompiler and ECL with         :report_needed:
+   lisp-to-c compiler have the same 
+   (asdf:implementation-identifier), in result
+   the .fasl files are stored in the same location.
+   But .files files from these two favors of ECL
+   are not interchangable.
 
