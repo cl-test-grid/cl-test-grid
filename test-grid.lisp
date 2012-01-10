@@ -46,10 +46,10 @@ contains the tests of _both_ libraries."
   
 (defmethod libtest ((library-name (eql :alexandria)))
 
-  #+ecl
-  (progn
-    (format t "ECL 11.1.1 has bug causing a stack overflow on alexandria tests. http://sourceforge.net/tracker/?func=detail&aid=3463131&group_id=30035&atid=398053~%")
-    (return-from libtest :fail))
+;  #+ecl
+;  (progn
+;    (format t "ECL 11.1.1 has bug causing a stack overflow on alexandria tests. http://sourceforge.net/tracker/?func=detail&aid=3463131&group_id=30035&atid=398053~%")
+;    (return-from libtest :fail))
 
   ;; The test framework used: rt.
   (clean-rt)
