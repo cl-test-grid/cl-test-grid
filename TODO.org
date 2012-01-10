@@ -170,6 +170,7 @@
 * Backlog
 ** TODO classify all the errors and register as tickets
 ** TODO ABCL, cffi testts: return :no-resource if JNA is not available
+** TODO new status, :expected-failure
 ** TODO add more libraries
 ** TODO how to enforce rebuild when loading an ASDF system?
    Important for ECL, because ECL bytecompiler and lisp-to-c
