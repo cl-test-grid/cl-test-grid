@@ -89,7 +89,8 @@
    for the user who runs the tests. Spend as little 
    efforts as possible on this task, to release quickly.
    4h
-** TODO readme with explanation of the project goal and              :readme:
+** DONE readme with explanation of the project goal and              :readme:
+   CLOSED: [2012-01-10 Вт 05:05]
    how to use it
    5h
 ** DONE change db format                                                 :db:
@@ -167,10 +168,24 @@
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
 * Backlog
+** TODO classify all the errors and register as tickets
+** TODO ABCL, cffi testts: return :no-resource if JNA is not available
+** TODO add more libraries
+** TODO how to enforce rebuild when loading an ASDF system?
+** TODO save all the output to a log, so that the tests may be run in background
 ** TODO Limit log file size (how?).
-** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
+** TODO a way to specify lib-wold as a quicklisp version with some 
+   library versions overriden (checkout this particular 
+   libraries from the scm), so that library author can quickly 
+   get test result for his changes (fixes)  in scm. 
+   An implementation idea to consider: almost every scm allows 
+   to download asnapshot via http, so the quicklisp http machinery may
+   be reused here, whithout running a shell command for 
+   checkout.
+   24h
 ** TODO Prevent HTML injection via test-run-info                     :report:
-** TODO run-libtests: redirect the library output to log file directly
+** DONE run-libtests: redirect the library output to log file directly
+   CLOSED: [2012-01-10 Вт 05:01]
    without caching it in memory. It is more convenient when you are 
    watching the testing process, you can observe the file being 
    populated with logs (because some libraries, like flexi-streams, 
@@ -213,14 +228,6 @@
 ** DONE accumulate failed library output
    CLOSED: [2011-12-20 Вт 04:29]
    1h
-** TODO a way to specify lib-wold as a quicklisp version with some 
-   library versions overriden (checkout this particular 
-   libraries from the scm), so that library author can quickly 
-   get test result for his changes (fixes)  in scm. 
-   An implementation idea to consider: almost every scm allows 
-   to download asnapshot via http, so the quicklisp http machinery may
-   be reused here, whithout running a shell command for 
-   checkout.
-   24h
 ** TODO should we save library log to a file only if the tests failed, 
    or always? (now we save log in any case)
+** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
