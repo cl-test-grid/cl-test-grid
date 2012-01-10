@@ -48,7 +48,7 @@ contains the tests of _both_ libraries."
 
 ; commented out because in the recent version of ECL it is not needed.
 ; we keep it here in case we want to test the 11.1.1 release
-; (unti new release is out).
+; (until new release is out).
 ;
 ;  #+ecl
 ;  (progn
@@ -1298,45 +1298,45 @@ as a parameter"
                                   col-fields col-fields-sort-predicates))))
       
       (print-report "pivot_ql_lisp-lib.html"
-                    '(:lib-world) (list #'string<)
+                    '(:lib-world) (list #'string>)
                     '(:lisp :libname) (list #'string< #'string<))
       (print-report "pivot_ql_lib-lisp.html"
-                    '(:lib-world) (list #'string<)
+                    '(:lib-world) (list #'string>)
                     '(:libname :lisp) (list #'string< #'string<))
       
       (print-report "pivot_lisp_lib-ql.html"
                     '(:lisp) (list #'string<)
-                    '(:libname :lib-world) (list #'string< #'string<))
+                    '(:libname :lib-world) (list #'string< #'string>))
       (print-report "pivot_lisp_ql-lib.html"
                     '(:lisp) (list #'string<)
-                    '(:lib-world :libname) (list #'string< #'string<))
+                    '(:lib-world :libname) (list #'string> #'string<))
       
       (print-report "pivot_lib_lisp-ql.html"
                     '(:libname) (list #'string<)
-                    '(:lisp :lib-world) (list #'string< #'string<))
+                    '(:lisp :lib-world) (list #'string< #'string>))
       (print-report "pivot_lib_ql-lisp.html"
                     '(:libname) (list #'string<)
-                    '(:lib-world :lisp) (list #'string< #'string<))
+                    '(:lib-world :lisp) (list #'string> #'string<))
       
       (print-report "pivot_ql-lisp_lib.html"
-                    '(:lib-world :lisp) (list #'string< #'string<)
+                    '(:lib-world :lisp) (list #'string> #'string<)
                     '(:libname) (list #'string<))
       (print-report "pivot_ql-lib_lisp.html"
-                    '(:lib-world :libname) (list #'string< #'string<)
+                    '(:lib-world :libname) (list #'string> #'string<)
                     '(:lisp) (list #'string<))
       
       (print-report "pivot_lisp-lib_ql.html"
                     '(:lisp :libname) (list #'string< #'string<)
-                    '(:lib-world) (list #'string<))
+                    '(:lib-world) (list #'string>))
       (print-report "pivot_lisp-ql_lib.html"
-                    '(:lisp :lib-world) (list #'string< #'string<)
+                    '(:lisp :lib-world) (list #'string< #'string>)
                     '(:libname) (list #'string<))
       
       (print-report "pivot_lib-lisp_ql.html"
                     '(:libname :lisp) (list #'string< #'string<)
-                    '(:lib-world) (list #'string<))
+                    '(:lib-world) (list #'string>))
       (print-report "pivot_lib-ql_lisp.html"
-                    '(:libname :lib-world) (list #'string< #'string<)
+                    '(:libname :lib-world) (list #'string< #'string>)
                     '(:lisp) (list #'string<)))))
 
 (defun generate-reports (&optional (db *db*))
