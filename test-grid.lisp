@@ -235,9 +235,9 @@ suite according to the FiveAM convention."
 
   #+cmucl
   (progn
-    (format t "On CMUCL bordeaux-threads traps into some active deadlock, ~
-               produces 8 MB of '.' symbols in log, constantly runs GC ~
-               and dies when heap is exhausted.")
+    (format t "~&On CMUCL bordeaux-threads traps into some active deadlock~%")
+    (format t "produces 8 MB of '.' symbols in log, constantly runs GC~%")
+    (format t "and dies when heap is exhausted.~%")
     (return-from libtest :fail))
 
   ;; The test framework used: fiveam.
