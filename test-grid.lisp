@@ -233,6 +233,13 @@ suite according to the FiveAM convention."
 
 (defmethod libtest ((library-name (eql :bordeaux-threads)))
 
+  #+cmucl
+  (progn
+    (format t "On CMUCL bordeaux-threads traps into some active deadlock, ~
+               produces 8 MB of '.' symbols in log, constantly runs GC ~
+               and dies when heap is exhausted.")
+    (return-from libtest :fail))
+
   ;; The test framework used: fiveam.
   
   (quicklisp:quickload :bordeaux-threads-test)
