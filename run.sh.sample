@@ -30,8 +30,11 @@ echo "************************************************************************"
 # CCL
 #/home/anton/ccl/ccl-1.7/lx86cl --no-init --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
 
+# CMUCL
+#/opt/cmucl-20c/bin/lisp -noinit --nositeinit -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
+
 # ECL
 #ecl -norc -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
 
 # SBCL
-/home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
+#/home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
