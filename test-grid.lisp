@@ -46,6 +46,10 @@ contains the tests of _both_ libraries."
   
 (defmethod libtest ((library-name (eql :alexandria)))
 
+; commented out because in the recent version of ECL it is not needed.
+; we keep it here in case we want to test the 11.1.1 release
+; (unti new release is out).
+;
 ;  #+ecl
 ;  (progn
 ;    (format t "ECL 11.1.1 has bug causing a stack overflow on alexandria tests. http://sourceforge.net/tracker/?func=detail&aid=3463131&group_id=30035&atid=398053~%")
