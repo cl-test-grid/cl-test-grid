@@ -172,6 +172,10 @@
 ** TODO ABCL, cffi testts: return :no-resource if JNA is not available
 ** TODO add more libraries
 ** TODO how to enforce rebuild when loading an ASDF system?
+   Important for ECL, because ECL bytecompiler and lisp-to-c
+   compiler produce incompatible .fasl files, but ASDF
+   stores the files in the same location, because both
+   flavors of ECL have the same (asdf:immplementation-identifier).
 ** TODO save all the output to a log, so that the tests may be run in background
 ** TODO Limit log file size (how?).
 ** TODO a way to specify lib-wold as a quicklisp version with some 
