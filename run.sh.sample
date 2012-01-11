@@ -30,6 +30,9 @@ echo "************************************************************************"
 # CCL
 #/home/anton/ccl/ccl-1.7/lx86cl --no-init --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
 
+# CLISP
+#clisp -norc -x '(load "quicklisp/setup.lisp") (load "run-agent.lisp")'
+
 # CMUCL
 #/opt/cmucl-20c/bin/lisp -noinit --nositeinit -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
 
