@@ -36,9 +36,6 @@ rem clisp -norc -x "(load \"quicklisp/setup.lisp\") (load \"run-agent.lisp\")"
 rem ECL
 rem C:\Users\anton\unpacked\ecl\ecl-11.1.1\bin\ecl -norc -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
 
-rem ECL
-rem C:\Users\anton\unpacked\ecl\ecl-11.1.1\bin\ecl -norc -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
-
 rem SBCL
 rem sbcl --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
 
