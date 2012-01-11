@@ -379,3 +379,8 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    But .files files from these two favors of ECL
    are not interchangable.
 
+
+** ABCL regression: 1.0.0 passes bordeaux-threads tests,      :report_needed:
+   while 1.0.1 fails to build.
+
+** ECL seems to enter debugger randomily ignoring my handler-case :investigate:

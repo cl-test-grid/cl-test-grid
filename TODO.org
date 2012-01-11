@@ -158,18 +158,25 @@
 ** TODO When asking user for email, explain him more carefully     :settings:
    how the email will be used and ensure there is a way
    to avoid providing email.
-** TODO ECL: recover from stack alexandria overflow and continute tests :ecl:agent:
-** TODO ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
-** TODO Ensure UTF-8 is used by READ-DB/SAVE-DB, and reading   :db:
-   the test run info from file (received by email), uses UTF-8.
+** DONE ECL: recover from stack alexandria overflow and continute tests :ecl:agent:
+   CLOSED: [2012-01-11 Ср 07:21]
+** DONE ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
+   CLOSED: [2012-01-11 Ср 07:21]
 ** DONE Optimize horizontal space in the reports: the headers        :report:
    CLOSED: [2011-12-31 Сб 04:58]
    take to much space
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
 * Backlog
+** TODO Ensure UTF-8 is used by READ-DB/SAVE-DB, and reading   :db:
+   the test run info from file (received by email), uses UTF-8.
 ** TODO classify all the errors and register as tickets
 ** TODO ABCL, cffi testts: return :no-resource if JNA is not available
+** TODO how to make the development tasks/questions more visible 
+   for other people? Today github displays TODO.org very
+   ugly, so that only people who will checkout the soruces
+   and open TODO.org in emacs could understand open
+   questions.
 ** TODO new status, :expected-failure
 ** TODO add more libraries
 ** TODO how to enforce rebuild when loading an ASDF system?
