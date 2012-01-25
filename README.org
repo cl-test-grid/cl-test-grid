@@ -168,7 +168,7 @@ Collaborative testing of Common Lisp libraries.
      This work might be distributed between several
      contributors - everyone runs part of the tests.
 
-     [Today this featus has quite low priority]
+     [Today this feature has quite low priority]
 
    - ...
   
