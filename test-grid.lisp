@@ -875,12 +875,11 @@ to the cl-test-grid issue tracker:
                                        (getf (getf elem :descr) :run-duration)
                                        (getf (getf (getf elem :descr) :contact) :email))
                                (format out "~8t:results (")
-                               (setf lib-results-sorted (sort (copy-list (getf elem :results)) 
-                                                              #'string< :key #'(lambda (lib-result)
-                                                                                 (getf lib-result :libname))))
                                (print-list-elements :separator (concatenate 'string (string #\newline) (string #\tab) "          ")
                                                     :write-to out
-                                                    :list lib-results-sorted
+                                                    :list (sort (copy-list (getf elem :results)) 
+                                                                #'string< :key #'(lambda (lib-result)
+                                                                                   (getf lib-result :libname)))
                                                     :fn (lambda (lib-result)
                                                           (format out 
                                                                   "(:libname ~s :status ~s :test-duration ~s :log-char-length ~s :log-blob-key ~s)"
