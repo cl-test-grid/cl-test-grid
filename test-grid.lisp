@@ -847,12 +847,11 @@ to the cl-test-grid issue tracker:
   (push run-info (getf db :runs)))
 
 (defun print-list-elements (&key list fn separator write-to)
-  (let ((separator-value separator))
-    (setf separator "")
+  (let ((maybe-separator ""))
     (dolist (elem list)
-      (format write-to "~a" separator)
+      (format write-to "~a" maybe-separator)
       (funcall fn elem)
-      (setf separator separator-value))))
+      (setf maybe-separator separator))))
 
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
   (with-open-file (out stream-or-path 
