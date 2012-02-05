@@ -879,11 +879,11 @@ to the cl-test-grid issue tracker:
                                                   "~%~19t"
                                                   #'(lambda (lib-result)
                                                       (format out
-                                                              "(:libname ~s :status ~s :test-duration ~s :log-char-length ~s :log-blob-key ~s)"
+                                                              "(:libname ~s :status ~s :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
                                                               (getf lib-result :libname)
                                                               (getf lib-result :status)
                                                               (getf lib-result :test-duration)
-                                                              (getf lib-result :log-char-length)
+                                                              (getf lib-result :log-byte-length)
                                                               (getf lib-result :log-blob-key))))
                              (format out "))")))
     (format out "))")))
