@@ -860,9 +860,8 @@ to the cl-test-grid issue tracker:
                        :if-exists :supersede
                        :if-does-not-exist :create)
     (format out "(:version ~a~%" (getf db :version)) 
-    (format out " :runs ")
-    (format out "~%       (")
-    (print-list-elements :separator "~%    "
+    (format out " :runs (")
+    (print-list-elements :separator "~%~8t"
                          :write-to out
                          :list (getf db :runs)
                          :fn (lambda (elem)
@@ -873,8 +872,8 @@ to the cl-test-grid issue tracker:
                                        (getf (getf elem :descr) :time)
                                        (getf (getf elem :descr) :run-duration)
                                        (getf (getf (getf elem :descr) :contact) :email))
-                               (format out "~8t:results (")
-                               (print-list-elements :separator "~%              "
+                               (format out "~9t:results (")
+                               (print-list-elements :separator "~%~19t"
                                                     :write-to out
                                                     :list (sort (copy-list (getf elem :results)) 
                                                                 #'string< :key #'(lambda (lib-result)
