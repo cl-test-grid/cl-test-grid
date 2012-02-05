@@ -34,9 +34,10 @@
         - needs care to work with GETF when working with the database      
 ** DONE A tool to generate fake DB content to test reporting
    CLOSED: [2011-12-18 Вс 01:42]
-** TODO simpliest reporting to overview the libraries test statuses [5/12] :report:
+** DONE simpliest reporting to overview the libraries test statuses [6/6] :report:
+   CLOSED: [2012-01-13 Пт 14:26]
 *** DONE Test Runs report: every test run as a row in a table :report:testruns:
-    CLOSED: [2011-12-18 Вс 02:19]
+    CLOSED: [2012-01-13 Пт 14:26]
      + legend or a tooltip in the report for test statuses
      + color for statuses
      + use the online blob URL in the report
@@ -44,12 +45,8 @@
     CLOSED: [2011-12-18 Вс 01:43]
     rows/columns to be any of quicklisp distro, lisp version
     library name. With grouping and sorging.
-*** TODO clean up the pivot reports Lisp code      :report:pivot:codequality:
-*** TODO quick access to the test run info from the pivot report table cell :report:pivot:
-    (or maybe just print the test run info to the log, like a header;
-    but it is a duplication and also we will have invonviniences
-    if we want to modify this infromation in the lob BLOB)
-*** TODO Fix rows and columns highlight in the pivot reports   :report:pivot:
+*** DONE Fix rows and columns highlight in the pivot reports   :report:pivot:
+    CLOSED: [2012-01-13 Пт 14:24]
 *** DONE CSV export of the database to use it then with spreadsheets, :report:csv:
     CLOSED: [2011-12-18 Вс 01:57]
      google fusion tables, etc. Initial intent
@@ -69,23 +66,10 @@
      (Common Lisp rational) can be read
      by spreadsheet software (MS/Open Offices,
      Google Spreadsheets).     
-*** TODO an informer which may be embedded into a library   :report:informer:
-     project page, with reports about the test statuses 
-     for this single library on various platforms with
-     various quicklisp versions
 *** DONE an overview page with brief explanation of and links to all the reports :report:overview:
     CLOSED: [2011-12-18 Вс 02:18]
-*** TODO change "represents every test run as a separate row" :report:overview:
-       to
-       "represents every <tt>test-grid:run-tests</tt> as a separate row"
-       (after user will know this command from the main project description)
-       ?
-*** TODO Description of CSV report may link to an example of the CSV report :report:overview:
-    imported to a Google Spreadsheet
-    with pivot calculating avearage duration of 
-    tests for every library.
-*** TODO spell check                                        :report:overview:
-** TODO simple UI (command line) with guiding messages                   :ui:
+** DONE simple UI (command line) with guiding messages                   :ui:
+   CLOSED: [2012-01-13 Пт 14:23]
    for the user who runs the tests. Spend as little 
    efforts as possible on this task, to release quickly.
    4h
@@ -135,13 +119,10 @@
    console, meaning their output is not only *standard-output*
    and *standard-error*. Fix that, all the output
    should be in the log files, but not on console.
-** TODO run the tests on all the implementations available for us.
+** DONE run the tests on all the implementations available for us.
+   CLOSED: [2012-01-12 Чт 09:45]
 ** DONE publish the reports
    CLOSED: [2011-12-28 Ср 06:57]
-** TODO usocket test suite might need manual configuration,
-   see their README. Distinguish the case 
-   when the manual configuration hasn't been
-   performed and return :no-resource status.
 ** DONE test-run-info.lisp as attachment, instead of letter body     :server:
    CLOSED: [2011-12-29 Чт 04:53]
 ** DONE Fix lisp name sorting in pivot_lib-lisp_ql.html              :report:
@@ -155,7 +136,8 @@
    CLOSED: [2011-12-31 Сб 01:59]
    it is stored (and to be sure user understood us, ask
    him to press Enter before continuing).
-** TODO When asking user for email, explain him more carefully     :settings:
+** DONE When asking user for email, explain him more carefully     :settings:
+   CLOSED: [2012-01-12 Чт 09:45]
    how the email will be used and ensure there is a way
    to avoid providing email.
 ** DONE ECL: recover from stack alexandria overflow and continute tests :ecl:agent:
@@ -165,25 +147,75 @@
 ** DONE Optimize horizontal space in the reports: the headers        :report:
    CLOSED: [2011-12-31 Сб 04:58]
    take to much space
+** DONE more abstract accessor to parts of DB info instead of
+   CLOSED: [2011-12-20 Вт 04:29]
+   getf by properties: run-descr, run-results.
+   1h
+** DONE safe-read database
+   CLOSED: [2011-12-20 Вт 04:29]
+** DONE create a project with asdf system
+   CLOSED: [2011-12-20 Вт 04:29]
+   0.5h
+** DONE DB file path based on the asdf system location
+   CLOSED: [2011-12-20 Вт 04:29]
+   0.5h
+** DONE accumulate failed library output
+   CLOSED: [2011-12-20 Вт 04:29]
+   1h
+** DONE run-libtests: redirect the library output to log file directly
+   CLOSED: [2012-01-10 Вт 05:01]
+   without caching it in memory. It is more convenient when you are 
+   watching the testing process, you can observe the file being 
+   populated with logs (because some libraries, like flexi-streams, 
+   take time about minute to finish, and if during this minute
+   nithing happens it is not user-friendly)
+* Backlog
+** TODO classify all the errors and register as tickets
+** TODO new status, :expected-failure (or better :know-failure).
+   Also maybe :unexpected-ok.
+** TODO Test status should include separate indicator for the library compilationa and loading.
+** TODO ABCL, cffi testts: return :no-resource if JNA is not available
+** TODO move closed TODO items to another (archive) file, so that the
+   web presentation of the TODO file will be understandable 
+   for the public.
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
-* Backlog
-** TODO Ensure UTF-8 is used by READ-DB/SAVE-DB, and reading   :db:
-   the test run info from file (received by email), uses UTF-8.
-** TODO classify all the errors and register as tickets
-** TODO ABCL, cffi testts: return :no-resource if JNA is not available
-** TODO how to make the development tasks/questions more visible 
-   for other people? Today github displays TODO.org very
-   ugly, so that only people who will checkout the soruces
-   and open TODO.org in emacs could understand open
-   questions.
-** TODO new status, :expected-failure
 ** TODO add more libraries
 ** TODO how to enforce rebuild when loading an ASDF system?
    Important for ECL, because ECL bytecompiler and lisp-to-c
    compiler produce incompatible .fasl files, but ASDF
    stores the files in the same location, because both
    flavors of ECL have the same (asdf:immplementation-identifier).
+** TODO floating report table headers, to that when we scroll, :report:pivot:
+   headers are always visible and we always see what lisp/libary/lib-worls
+   corresponds to the current table cell.
+** TODO quicklisp distro version in report headers may be a link to 
+   list of library versions in this ql version
+   (like this: http://www.quicklisp.org/beta/releases.html, but
+   it's only for the latest QL).
+** TODO clean up the pivot reports Lisp code       :report:pivot:codequality:
+** TODO an informer which may be embedded into a library    :report:informer:
+   project page, with reports about the test statuses 
+   for this single library on various platforms with
+   various quicklisp versions
+** TODO report overview: change "represents every test run as a separate row"  :report:overview:
+   to
+   "represents every <tt>test-grid:run-tests</tt> as a separate row"
+   (after user will know this command from the main project description)
+   ?
+** TODO Description of CSV report may link to an example of the CSV report  :report:overview:
+   imported to a Google Spreadsheet
+   with pivot calculating avearage duration of 
+   tests for every library.
+** TODO spell check the reports-overview                    :report:overview:
+** TODO an informer for CL implementation with libraries statuses? :report:informer:
+** TODO quick access to the test run info from the pivot report table cell  :report:pivot:
+   (or maybe just print the test run info to the log, like a header;
+    but it is a duplication and also we will have invonviniences
+    if we want to modify this infromation in the lob BLOB)
+** TODO reduce non cl-test-grid output in the console (quicklisp output,
+   compiler output, etc), so that cl-test-grid messages to the user
+   are better visible.
 ** TODO save all the output to a log, so that the tests may be run in background
 ** TODO Limit log file size (how?).
 ** TODO a way to specify lib-wold as a quicklisp version with some 
@@ -196,14 +228,6 @@
    checkout.
    24h
 ** TODO Prevent HTML injection via test-run-info                     :report:
-** DONE run-libtests: redirect the library output to log file directly
-   CLOSED: [2012-01-10 Вт 05:01]
-   without caching it in memory. It is more convenient when you are 
-   watching the testing process, you can observe the file being 
-   populated with logs (because some libraries, like flexi-streams, 
-   take time about minute to finish, and if during this minute
-   nithing happens it is not user-friendly)
-
 ** TODO finalize the terminology we use in the code
    to refer our main data: 
    - test status for a particular library
@@ -225,21 +249,10 @@
    (cffi, usocket) provide guiding message to the
    user how to configure them, before running
    the tests.
-** DONE more abstract accessor to parts of DB info instead of
-   CLOSED: [2011-12-20 Вт 04:29]
-   getf by properties: run-descr, run-results.
-   1h
-** DONE safe-read database
-   CLOSED: [2011-12-20 Вт 04:29]
-** DONE create a project with asdf system
-   CLOSED: [2011-12-20 Вт 04:29]
-   0.5h
-** DONE DB file path based on the asdf system location
-   CLOSED: [2011-12-20 Вт 04:29]
-   0.5h
-** DONE accumulate failed library output
-   CLOSED: [2011-12-20 Вт 04:29]
-   1h
+** TODO usocket test suite might need manual configuration,
+   see their README. Distinguish the case 
+   when the manual configuration hasn't been
+   performed and return :no-resource status.
 ** TODO should we save library log to a file only if the tests failed, 
    or always? (now we save log in any case)
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
