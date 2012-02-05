@@ -849,7 +849,7 @@ to the cl-test-grid issue tracker:
 (defun print-list-elements (&key list fn separator write-to)
   (let ((maybe-separator ""))
     (dolist (elem list)
-      (format write-to "~a" maybe-separator)
+      (format write-to maybe-separator)
       (funcall fn elem)
       (setf maybe-separator separator))))
 
@@ -862,7 +862,7 @@ to the cl-test-grid issue tracker:
     (format out "(:version ~a~%" (getf db :version)) 
     (format out " :runs ")
     (format out "~%       (")
-    (print-list-elements :separator (concatenate 'string (string #\newline) (string #\tab))
+    (print-list-elements :separator "~%    "
                          :write-to out
                          :list (getf db :runs)
                          :fn (lambda (elem)
@@ -874,7 +874,7 @@ to the cl-test-grid issue tracker:
                                        (getf (getf elem :descr) :run-duration)
                                        (getf (getf (getf elem :descr) :contact) :email))
                                (format out "~8t:results (")
-                               (print-list-elements :separator (concatenate 'string (string #\newline) (string #\tab) "          ")
+                               (print-list-elements :separator "~%              "
                                                     :write-to out
                                                     :list (sort (copy-list (getf elem :results)) 
                                                                 #'string< :key #'(lambda (lib-result)
