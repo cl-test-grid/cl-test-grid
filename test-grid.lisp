@@ -846,11 +846,11 @@ to the cl-test-grid issue tracker:
 (defun add-run (run-info &optional (db *db*))
   (push run-info (getf db :runs)))
 
-(defun print-list-elements (&key list fn separator write-to)
+(defun print-list-elements (write-to list separator elem-printer)
   (let ((maybe-separator ""))
     (dolist (elem list)
       (format write-to maybe-separator)
-      (funcall fn elem)
+      (funcall elem-printer elem)
       (setf maybe-separator separator))))
 
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
@@ -861,32 +861,31 @@ to the cl-test-grid issue tracker:
                        :if-does-not-exist :create)
     (format out "(:version ~a~%" (getf db :version)) 
     (format out " :runs (")
-    (print-list-elements :separator "~%~8t"
-                         :write-to out
-                         :list (getf db :runs)
-                         :fn (lambda (elem)
-                               (format out 
+    (print-list-elements out (getf db :runs) "~%~8t"
+                         #'(lambda (elem)
+                             (let ((descr (getf elem :descr)))
+                               (format out
                                        "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact (:email ~s))~%" 
-                                       (getf (getf elem :descr) :lisp)
-                                       (getf (getf elem :descr) :lib-world)
-                                       (getf (getf elem :descr) :time)
-                                       (getf (getf elem :descr) :run-duration)
-                                       (getf (getf (getf elem :descr) :contact) :email))
-                               (format out "~9t:results (")
-                               (print-list-elements :separator "~%~19t"
-                                                    :write-to out
-                                                    :list (sort (copy-list (getf elem :results)) 
-                                                                #'string< :key #'(lambda (lib-result)
-                                                                                   (getf lib-result :libname)))
-                                                    :fn (lambda (lib-result)
-                                                          (format out 
-                                                                  "(:libname ~s :status ~s :test-duration ~s :log-char-length ~s :log-blob-key ~s)"
-                                                                  (getf lib-result :libname)
-                                                                  (getf lib-result :status)
-                                                                  (getf lib-result :test-duration)
-                                                                  (getf lib-result :log-char-length)
-                                                                  (getf lib-result :log-blob-key))))
-                               (format out "))")))
+                                       (getf descr :lisp)
+                                       (getf descr :lib-world)
+                                       (getf descr :time)
+                                       (getf descr :run-duration)
+                                       (getf (getf descr :contact) :email)))
+                             (format out "~9t:results (")
+                             (print-list-elements out
+                                                  (sort (copy-list (getf elem :results))
+                                                        #'string< :key #'(lambda (lib-result)
+                                                                           (getf lib-result :libname)))
+                                                  "~%~19t"
+                                                  #'(lambda (lib-result)
+                                                      (format out
+                                                              "(:libname ~s :status ~s :test-duration ~s :log-char-length ~s :log-blob-key ~s)"
+                                                              (getf lib-result :libname)
+                                                              (getf lib-result :status)
+                                                              (getf lib-result :test-duration)
+                                                              (getf lib-result :log-char-length)
+                                                              (getf lib-result :log-blob-key))))
+                             (format out "))")))
     (format out "))")))
 
 (defun read-db (&optional (stream-or-path *standard-db-file*))
