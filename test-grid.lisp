@@ -17,7 +17,8 @@ status. Status is one of these values:
      do it manually. In case the DLL is absent, the LIBTEST method
      for CFFI returns :NO-RESOURCE.
   Extended status in the form 
-     (:FAILED-TESTS <list of failed tests> :KNOWN-TO-FAIL <list of known failures>).
+     (:FAILED-TESTS <list of failed tests> :KNOWN-TO-FAIL <list of known failures>)
+     The test names in these lists are represented as downcased strings.
 
 If any SERIOUS-CONDITION is signalled, this is considered a failure.
 
@@ -78,8 +79,8 @@ just passed to the QUICKLISP:QUICKLOAD."
     (setf all-failures (union non-compiled-failures
                               (rt-api:failed-tests)))
 
-    (list :failed-tests all-failures
-          :known-to-fail (rt-api:known-to-fail))))
+    (list :failed-tests (mapcar #'string-downcase all-failures)
+          :known-to-fail (mapcar #'string-downcase (rt-api:known-to-fail)))))
 
 (defmethod libtest ((library-name (eql :alexandria)))
 
@@ -866,12 +867,37 @@ to the cl-test-grid issue tracker:
 (defun add-run (run-info &optional (db *db*))
   (push run-info (getf db :runs)))
 
-(defun print-list-elements (write-to list separator elem-printer)
+(defun print-list-elements (destination list separator elem-printer)
   (let ((maybe-separator ""))
     (dolist (elem list)
-      (format write-to maybe-separator)
+      (format destination maybe-separator)
       (funcall elem-printer elem)
       (setf maybe-separator separator))))
+
+(defun print-list (destination list separator elem-printer)
+  (format destination "(")
+  (print-list-elements destination list separator elem-printer)
+  (format destination ")"))
+
+(defun print-test-status (destination status)
+  (etypecase status
+    (symbol (format destination "~s" status))
+    (list (progn
+            (let ((dest (or destination (make-string-output-stream))))
+              (flet ((test-name-printer (test-name)
+                       (format dest "~s" test-name)))
+                (format dest "(:failed-tests ")
+                (print-list dest (sort (copy-list (getf status :failed-tests))
+                                       #'string<)
+                            " " #'test-name-printer)
+                (format dest " :known-to-fail ")
+                (print-list dest (sort (copy-list (getf status :known-to-fail))
+                                              #'string<)
+                            " " #'test-name-printer)
+                (format dest ")"))
+              (if (null destination)
+                  (get-output-stream-string dest)
+                  nil))))))
 
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
   (with-open-file (out stream-or-path
@@ -899,9 +925,9 @@ to the cl-test-grid issue tracker:
                                                   "~%~19t"
                                                   #'(lambda (lib-result)
                                                       (format out
-                                                              "(:libname ~s :status ~s :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
+                                                              "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
                                                               (getf lib-result :libname)
-                                                              (getf lib-result :status)
+                                                              (print-test-status nil (getf lib-result :status))
                                                               (getf lib-result :test-duration)
                                                               (getf lib-result :log-byte-length)
                                                               (getf lib-result :log-blob-key))))
