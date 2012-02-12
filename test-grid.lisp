@@ -8,14 +8,18 @@ with LIBRARY-NAME eql-specialized for for every library added
 to the test grid.
 
 The method should run test suite and return the resulting
-status. Status is one of three values: 
-:OK - all tests passed,
-:FAIL - some test failed,
-:NO-RESOURCE - test suite can not be run because some required 
-resource is absent in the environment. For example, CFFI library
-test suite needs a small C library compiled to DLL. User must
-do it manually. In case the DLL is absent, the LIBTEST method
-for CFFI returns :NO-RESOURCE.
+status. Status is one of these values: 
+  :OK - all tests passed,
+  :FAIL - some test failed,
+  :NO-RESOURCE - test suite can not be run because some required 
+     resource is absent in the environment. For example, CFFI library
+     test suite needs a small C library compiled to DLL. User must
+     do it manually. In case the DLL is absent, the LIBTEST method
+     for CFFI returns :NO-RESOURCE.
+  Extended status in the form 
+     (:FAILED-TESTS <list of failed tests> :KNOWN-TO-FAIL <list of known failures>).
+
+If any SERIOUS-CONDITION is signalled, this is considered a failure.
 
 For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
 
@@ -26,6 +30,33 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
     ((nil :fail) :fail)
     (otherwise status)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; My Require
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun require-impl (api)
+  "Loads an implementation of the specified API (if
+it is not loaded yet).
+
+Some of test-grid components have separate package
+and ASDF system for API and separate package+ASDF
+system for the implementation. This allows test-grid
+to be compilable and (partially) opereable even
+when some components are broken on particular lisp.
+
+For these known test-grid componetns REQUIRE-IMPL loads
+the implementation. Otherwise the API parameter is
+just passed to the QUICKLISP:QUICKLOAD."
+  (setf api (string-downcase api))
+  (let* ((known-impls '(("rt-api" . "rt-api-impl")))
+         (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
+                               api)))
+        (quicklisp:quickload impl-asdf-system)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; LIBTEST implementations for particular libraries
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
                            :cl-base64 :trivial-backtrace :puri :anaphora
@@ -34,16 +65,22 @@ For convenience, T may be returned instead of :OK and NIL instead of :FAIL."))
                            :moptilities :trivial-timeout :metatilities)
   "All the libraries currently supported by the test-grid.")
 
-(defun clean-rt ()
-  "Helper function to assist running test suites created using the RT 
-test framework. The problem is that RT uses global storage for all
-the tests; in result if we previously loaded any test system,
-after loading another test system the global test RT test suite
-contains the tests of _both_ libraries."
-  (let ((rem-all-tests (and (find-package '#:rt)
-                            (find-symbol (symbol-name '#:rem-all-tests) '#:rt))))
-    (when rem-all-tests (funcall rem-all-tests))))
-  
+
+(defun run-rt-test-suite()
+  (require-impl "rt-api")
+
+  (let (non-compiled-failures all-failures)
+
+    (rt-api:do-tests :compiled-p nil)
+    (setf non-compiled-failures (rt-api:failed-tests))
+
+    (rt-api:do-tests :compiled-p t)
+    (setf all-failures (union non-compiled-failures
+                              (rt-api:failed-tests)))
+
+    (list :failed-tests all-failures
+          :known-to-fail (rt-api:known-to-fail))))
+
 (defmethod libtest ((library-name (eql :alexandria)))
 
 ; We keep the below hardcoded failure in case we want to test 
@@ -57,20 +94,12 @@ contains the tests of _both_ libraries."
     (return-from libtest :fail))
 
   ;; The test framework used: rt.
-  (clean-rt)
+  (require-impl "rt-api")
+  (rt-api:clean)
   (asdf:clear-system :alexandria-tests)
-
   (quicklisp:quickload :alexandria-tests)
 
-  (flet (
-         ;; the run-tests local function is copy/pasted 
-         ;; from alexandria-tests.asd         
-         (run-tests (&rest args)
-           (apply (intern (string '#:run-tests) '#:alexandria-tests) args)))
-
-    (let ((a (run-tests :compiled nil))
-          (b (run-tests :compiled t)))
-      (and a b))))
+  (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :babel)))
   
@@ -98,23 +127,22 @@ contains the tests of _both_ libraries."
 (defmethod libtest ((library-name (eql :trivial-features)))
   
   ;; The test framework used: rt.
-  (clean-rt)
+  (require-impl "rt-api")
+  (rt-api:clean)
   (asdf:clear-system :trivial-features-tests)
 
   ;; Load cffi-grovel which is used in trivial-features-tests.asd,
   ;; but not in the asdf:defsystem macro (issue #2). 
   (quicklisp:quickload :cffi-grovel)
-
   (quicklisp:quickload :trivial-features-tests)
   
-  ;; copy/past from trivial-features-tests.asd
-  (let ((*package* (find-package 'trivial-features-tests)))
-    (funcall (find-symbol (symbol-name '#:do-tests)))))
+  (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :cffi)))
 
   ;; The test framework used: rt.
-  (clean-rt)
+  (require-impl "rt-api")
+  (rt-api:clean)
   (asdf:clear-system :cffi-tests)
 
   ;; CFFI tests work with a small test C library.
@@ -144,15 +172,7 @@ contains the tests of _both_ libraries."
                             ;; resignal the condition
                             (error condition))))
     (quicklisp:quickload :cffi-tests))
-
-  (flet (
-         ;; copy/paste from cffi-tests.asd
-         (run-tests (&rest args)
-           (apply (intern (string '#:run-cffi-tests) '#:cffi-tests) args)))
-
-    (let ((a (run-tests :compiled nil))
-          (b (run-tests :compiled t)))
-      (and a b))))
+  (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :cl-ppcre)))
 
@@ -186,7 +206,8 @@ contains the tests of _both_ libraries."
     (return-from libtest :fail))
     
   ;; The test framework used: rt.
-  (clean-rt)
+  (require-impl "rt-api")
+  (rt-api:clean)
   (asdf:clear-system :usocket-test)
 
 ;  (asdf:operate 'asdf:load-op :usocket-test :force t)
@@ -202,8 +223,7 @@ contains the tests of _both_ libraries."
   ;;       (or usocket-test::*common-lisp-net*
   ;;           "74.115.254.14"))
   
-  ;; copy/paste from usocket-test.asd 
-  (funcall (intern "DO-TESTS" "USOCKET-TEST")))
+  (run-rt-test-suite))
   
 
 (defmethod libtest ((library-name (eql :flexi-streams)))
@@ -314,10 +334,10 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :anaphora)))
 
   ;; The test framework used: rt.
-  (clean-rt)
+  (require-impl "rt-api")
+  (rt-api:clean)
   (asdf:clear-system :anaphora-test)
   ;; anaphora-test is defined in anaphora.asd,
-  ;; we need to clean the :anaphora system,
   ;; therefore to reload :anaphora-test
   ;; we need to clean the :anaphora system too
   (asdf:clear-system :anaphora)
@@ -328,8 +348,7 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :anaphora)
   (quicklisp:quickload :anaphora-test)
 
-  ;; copy/paste from anaphora.asd
-  (funcall (intern "DO-TESTS" :rt)))
+  (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :parenscript)))
   ;; The test framework used: eos (similar to FiveAM).
@@ -353,7 +372,8 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :trivial-garbage)))
 
   ;; The test framework used: rt.
-  (clean-rt)
+  (require-impl "rt-api")
+  (rt-api:clean)
   (asdf:clear-system :trivial-garbage)  ; yes, trivial-garbage but not trivial-garbage-tests,
                                         ; because the trivial-garbage-tests system is defined
                                         ; in the same trivial-garbage.asd and neither
@@ -363,12 +383,13 @@ if all the tests succeeded and NIL othersize."
                                         ; for the same reasons as explained above.
   (asdf:operate 'asdf:load-op :trivial-garbage-tests)
   
-  (funcall (find-symbol (string '#:do-tests) '#:rtest)))
+  (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :iterate)))
 
   ;; The test framework used: rt.
-  (clean-rt)
+  (require-impl "rt-api")
+  (rt-api:clean)
   (asdf:clear-system :iterate-tests)
   (asdf:clear-system :iterate)
 
@@ -378,8 +399,7 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :iterate)
   (quicklisp:quickload :iterate-tests)
   
-  (funcall (intern "DO-TESTS" (find-package #+sbcl "SB-RT"
-                                            #-sbcl "REGRESSION-TEST"))))
+  (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :metabang-bind)))
   
@@ -420,11 +440,11 @@ if all the tests succeeded and NIL othersize."
 
 (defmethod libtest ((library-name (eql :cl-cont)))
   ;; The test framework used: rt.
-  (clean-rt)
+  (require-impl "rt-api")
+  (rt-api:clean)
   (asdf:clear-system :cl-cont-test)
-
   (quicklisp:quickload :cl-cont-test)
-  (funcall (intern (string '#:test-cont) :cl-cont-test)))
+  (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :moptilities)))
   ;; The test framework used: lift.
@@ -583,7 +603,7 @@ Examples:
                      :direction :input
                      :element-type '(unsigned-byte 8))
     (file-length s)))
-                    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -627,7 +647,7 @@ Examples:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun run-descr (run)
   "The description part of the test run."
@@ -722,12 +742,12 @@ data (libraries test suites output and the run results) will be saved."
     (with-open-file (log-stream log-file
                                 :direction :output
                                 :if-exists :overwrite
-                                :if-does-not-exist :create)    
+                                :if-does-not-exist :create)
       (let* ((orig-std-out *standard-output*)
              (*standard-output* log-stream)
              (*error-output* log-stream))
         
-        (format orig-std-out 
+        (format orig-std-out
                 "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
                 lib)
         (finish-output orig-std-out)
@@ -744,9 +764,9 @@ data (libraries test suites output and the run results) will be saved."
         (print-log-footer lib status *standard-output*)))
     
     (list :libname lib
-          :status status 
-          :log-byte-length (file-byte-length log-file) 
-          :test-duration (/ (- (get-internal-real-time) start-time) 
+          :status status
+          :log-byte-length (file-byte-length log-file)
+          :test-duration (/ (- (get-internal-real-time) start-time)
                             internal-time-units-per-second))))
   
 (defun run-info-file (test-run-directory)
@@ -847,8 +867,8 @@ to the cl-test-grid issue tracker:
   (push run-info (getf db :runs)))
 
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
-  (with-open-file (out stream-or-path 
-                       :direction :output 
+  (with-open-file (out stream-or-path
+                       :direction :output
                        :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                        :if-exists :overwrite
                        :if-does-not-exist :create)
@@ -860,7 +880,7 @@ to the cl-test-grid issue tracker:
         (format out "~s~%~10t(" key)
         (if (string-equal "DESCR" key)
             (progn
-              (do-plist (nkey nval val) 
+              (do-plist (nkey nval val)
                 (format out "~s ~s " nkey nval)) (format out ")~%~8t"))
             (progn
               (dolist (ntest val)
