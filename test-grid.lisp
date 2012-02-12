@@ -866,29 +866,46 @@ to the cl-test-grid issue tracker:
 (defun add-run (run-info &optional (db *db*))
   (push run-info (getf db :runs)))
 
+(defun print-list-elements (write-to list separator elem-printer)
+  (let ((maybe-separator ""))
+    (dolist (elem list)
+      (format write-to maybe-separator)
+      (funcall elem-printer elem)
+      (setf maybe-separator separator))))
+
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
   (with-open-file (out stream-or-path
                        :direction :output
                        :element-type 'character ;'(unsigned-byte 8) + flexi-stream
-                       :if-exists :overwrite
+                       :if-exists :supersede
                        :if-does-not-exist :create)
-    (format out "(~s ~s" (car db) (car (cdr db)))
-    (format out "~5t~%~6t~s~%~6t(" (car (cddr db)))
-    (dolist (tests (car (cdddr db)))
-      (format out "~%~7t(")
-      (do-plist  (key val tests)
-        (format out "~s~%~10t(" key)
-        (if (string-equal "DESCR" key)
-            (progn
-              (do-plist (nkey nval val)
-                (format out "~s ~s " nkey nval)) (format out ")~%~8t"))
-            (progn
-              (dolist (ntest val)
-                (format out "(")
-                (do-plist (nkey nval ntest)
-                  (format out "~s ~s " nkey nval))
-                (format out ")"))
-              (format out "))")))))
+    (format out "(:version ~a~%" (getf db :version)) 
+    (format out " :runs (")
+    (print-list-elements out (getf db :runs) "~%~8t"
+                         #'(lambda (elem)
+                             (let ((descr (getf elem :descr)))
+                               (format out
+                                       "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact (:email ~s))~%" 
+                                       (getf descr :lisp)
+                                       (getf descr :lib-world)
+                                       (getf descr :time)
+                                       (getf descr :run-duration)
+                                       (getf (getf descr :contact) :email)))
+                             (format out "~9t:results (")
+                             (print-list-elements out
+                                                  (sort (copy-list (getf elem :results))
+                                                        #'string< :key #'(lambda (lib-result)
+                                                                           (getf lib-result :libname)))
+                                                  "~%~19t"
+                                                  #'(lambda (lib-result)
+                                                      (format out
+                                                              "(:libname ~s :status ~s :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
+                                                              (getf lib-result :libname)
+                                                              (getf lib-result :status)
+                                                              (getf lib-result :test-duration)
+                                                              (getf lib-result :log-byte-length)
+                                                              (getf lib-result :log-blob-key))))
+                             (format out "))")))
     (format out "))")))
 
 (defun read-db (&optional (stream-or-path *standard-db-file*))
