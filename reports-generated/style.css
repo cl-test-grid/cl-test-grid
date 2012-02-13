@@ -1,15 +1,18 @@
 /* Results */
 
-a.ok {
-    color: green;
-}	
+.test-status {
+}
 
-a.fail {
+.fail-status {
     color: red;
 }
 
-a.no-resource {
-    color :#7A7A7A;
+.no-resource-status {
+    color: #7A7A7A;
+}
+
+.ok-status {
+    color: green;
 }
 
 .timestamp {

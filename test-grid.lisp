@@ -465,6 +465,10 @@ if all the tests succeeded and NIL othersize."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun set= (set-a set-b &key (test #'eql) key)
+  (null (set-exclusive-or set-a set-b :test test :key key)))
+
 (defun do-plist-impl (plist handler)
   (do* ((cur-pos plist (cddr cur-pos))
         (prop (first cur-pos) (first cur-pos))
@@ -733,7 +737,7 @@ data (libraries test suites output and the run results) will be saved."
     (fresh-line stream)
     (terpri stream)
     (format stream "============================================================~%")
-    (format stream "  cl-test-grid status for ~A: ~A~%" libname status)
+    (format stream "  cl-test-grid status for ~A: ~S~%" libname status)
     (format stream "============================================================~%")))
 
 (defun run-libtest (lib run-descr log-directory)
@@ -1031,17 +1035,32 @@ to the cl-test-grid issue tracker:
         (blob-uri blob-key)
         "javascript:alert('The blobstore key is not specified, seems like the library log was not submitted to the online storage')")))
 
-(defun single-letter-status (normalized-status) 
-  (case normalized-status
+(defun aggregated-status (normalized-status)
+  "Returns the test resutl as one symbol, even
+if it was an \"extended status\". Possible return
+values: :OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
+  (etypecase normalized-status
+    (symbol normalized-status)
+    (list (destructuring-bind (&key failed-tests known-to-fail) normalized-status
+            (cond ((and (null failed-tests)
+                        (null known-to-fail))
+                   :ok)
+                  ((set= failed-tests known-to-fail :test #'string=)
+                   :known-fail)
+                  (t :fail))))))
+
+(defun single-letter-status (aggregated-status) 
+  (case aggregated-status
     (:ok "O")
     (:fail "F")
+    (:known-fail "K")
     (:no-resource "R")
-    (otherwise normalized-status)))
+    (otherwise aggregated-status)))
 
-(defun status-css-class (normalized-status) 
-  (case normalized-status
+(defun status-css-class (aggregated-status) 
+  (case aggregated-status
     (:ok "ok-status")
-    (:fail "fail-status")
+    ((:known-fail :fail) "fail-status")
     (:no-resource "no-resource-status")
     (otherwise "")))
            
@@ -1049,7 +1068,7 @@ to the cl-test-grid issue tracker:
   (declare (ignore test-run))
   (if (null lib-test-result)
       "&nbsp;"
-      (let ((status (normalize-status (getf lib-test-result :status))))
+      (let ((status (aggregated-status (getf lib-test-result :status))))
         (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
                 (status-css-class status)
                 (lib-log-uri lib-test-result)
@@ -1098,7 +1117,7 @@ to the cl-test-grid issue tracker:
                 (getf run-descr :lisp)
                 (getf (getf run-descr :contact) :email)
                 (string-downcase (getf lib-result :libname))
-                (getf lib-result :status)
+                (aggregated-status (getf lib-result :status))
                 (float (getf lib-result :test-duration)))))))
 
 ;; ========= Pivot Reports ==================
@@ -1237,11 +1256,12 @@ as a parameter"
 
 (defun format-lib-results (out lib-results)
   (dolist (lib-result lib-results)
-    (format out "<a href=\"~a\" class=\"~a\">~a</a> " 
-            (lib-log-uri lib-result)
-            (string-downcase (getf lib-result :status))
-            (string-downcase (getf lib-result :status)))))
-         
+    (let ((status (aggregated-status (getf lib-result :status))))
+      (format out "<a href=\"~a\" class=\"test-status ~a\">~a</a> "
+              (lib-log-uri lib-result)
+              (string-downcase status)
+              (status-css-class status)))))
+
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))
     (let* ((helper (gethash subaddr row-spans))
