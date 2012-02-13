@@ -1259,8 +1259,8 @@ as a parameter"
     (let ((status (aggregated-status (getf lib-result :status))))
       (format out "<a href=\"~a\" class=\"test-status ~a\">~a</a> "
               (lib-log-uri lib-result)
-              (string-downcase status)
-              (status-css-class status)))))
+              (status-css-class status)
+              (string-downcase status)))))
 
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))
