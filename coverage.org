@@ -386,7 +386,7 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 ** ECL seems to enter debugger randomily ignoring my handler-case :investigate:
 
 * Quicklisp 2012-02-08
-** alexandria: 9 new unexpected failures on CLISP                  :reported:
+** alexandria: 9 new unexpected failures on CLISP dui to CLISP bug  :reported:
    Reported here:
    http://lists.common-lisp.net/pipermail/alexandria-devel/2012-February/000647.html
 
@@ -394,6 +394,10 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    see http://lists.common-lisp.net/pipermail/alexandria-devel/2012-February/000646.html
    But the code is wanted to be removed not due to the bugs in CLISP, therefore
    test-grid discovered yet unknown problem.
+   
+   Turns out to be a CLISP bug (fixed after the report).
+   http://sourceforge.net/tracker/?func=detail&atid=101355&aid=3487338&group_id=1355
+
 ** parenscript tests can not be loaded because the new dependency - cl-javascript :reported:
    can not be loaded on CLISP.
    Reported here:
