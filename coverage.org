@@ -384,3 +384,17 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    while 1.0.1 fails to build.
 
 ** ECL seems to enter debugger randomily ignoring my handler-case :investigate:
+
+* Quicklisp 2012-02-08
+** alexandria: 9 new unexpected failures on CLISP                  :reported:
+   Reported here:
+   http://lists.common-lisp.net/pipermail/alexandria-devel/2012-February/000647.html
+
+   Seems to be due to a recent (and somewhat inconsistend and to-be-removed) code present on alexandria,
+   see http://lists.common-lisp.net/pipermail/alexandria-devel/2012-February/000646.html
+   But the code is wanted to be removed not due to the bugs in CLISP, therefore
+   test-grid discovered yet unknown problem.
+** parenscript tests can not be loaded because the new dependency - cl-javascript
+   can not be loaded on CLISP.
+   Reported here:
+   https://github.com/akapav/js/issues/12
