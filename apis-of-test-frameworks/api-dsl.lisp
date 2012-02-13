@@ -4,7 +4,7 @@
 
 (in-package #:api-dsl)
 
-;; To specify an API of a common-lisp module it's enought to specify
+;; To specify an API of a common-lisp module it's enough to specify
 ;; set of symbols - a package.
 ;; 
 ;; Example:
@@ -21,7 +21,7 @@
 ;;
 ;; The PROCLFUN helper macro specifies that a particular 
 ;; symbol is a funtion, with particular argument types and 
-;; return value, and to set a doc string for that function.
+;; return value, and sets a doc string for that function.
 ;;
 ;; Example of use:
 ;;

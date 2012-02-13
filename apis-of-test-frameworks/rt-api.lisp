@@ -12,7 +12,7 @@
   "Helper function to assist running test suites created using the RT 
 test framework. The problem is that RT uses global storage for all
 the tests; in result if we previously loaded any test system,
-after loading another test system the global test RT test suite
+after loading another test system the global RT test suite
 contains the tests of _both_ libraries.")
 
 (proclfun do-tests (&key (:compiled-p t)) boolean
