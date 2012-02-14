@@ -16,6 +16,7 @@
 
 (asdf:operate 'asdf:load-op :test-grid)
 
-(test-grid::run-libtests)
+(let ((results-dir (test-grid::run-libtests)))
+    (test-grid::submit-test-run results-dir))
 
 

@@ -845,19 +845,20 @@ data (libraries test suites output and the run results) will be saved."
       (save-run-info run run-dir)
       (format t "The test results were saved to this directory: ~%~A.~%" 
               (truename run-dir))
-      (format t "~%Submitting the test results to the server...~%")
-      (handler-case 
-          (setf run (submit-results run-dir))
-        (error (e) (format t "Error occured while uploading the test results to the server: ~A: ~A.
+      run-dir)))
+
+(defun submit-test-run (test-run-dir)
+  (format t "~%Submitting the test results to the server...~%")
+  (handler-case (submit-results test-run-dir)
+    (error (e) (format t "Error occured while uploading the test results to the server: ~A: ~A.
 Please submit manually the full content of the results directory 
    ~A
 to the cl-test-grid issue tracker: 
    https://github.com/cl-test-grid/cl-test-grid/issues~%"
-                           (type-of e)
-                           e
-                           (truename run-dir))))
-      (format t "~%Thank you for the participation!~%")
-      run)))
+                       (type-of e)
+                       e
+                       (truename test-run-dir))))
+  (format t "~%Thank you for the participation!~%"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Database
