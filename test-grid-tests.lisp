@@ -23,12 +23,12 @@
        (eq :fail (test-grid::aggregated-status :fail))
        (eq :no-resource (test-grid::aggregated-status :no-resource))
        (eq :fail (test-grid::aggregated-status '(:failed-tests ("a") :known-to-fail ("b"))))
-       (eq :fail (test-grid::aggregated-status '(:failed-tests () :known-to-fail ("b"))))
+       (eq :unexpected-ok (test-grid::aggregated-status '(:failed-tests () :known-to-fail ("b"))))
        (eq :fail (test-grid::aggregated-status '(:failed-tests ("a") :known-to-fail ())))
        (eq :known-fail (test-grid::aggregated-status '(:failed-tests ("a") :known-to-fail ("a"))))
        (eq :ok (test-grid::aggregated-status '(:failed-tests () :known-to-fail ())))))
 
 ; to run the tests: 
-(and (test-aggregated-status)
-     (test-rt-api))
+(and (test-rt-api)
+     (test-aggregated-status))
 ; expected to return T

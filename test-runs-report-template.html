@@ -42,6 +42,10 @@
                 <li><span class="test-status fail-status">K</span> stands for Known FAIL - test failures
                         exist, but all the failures are already known for the library developers.</li>
                 <li><span class="test-status ok-status">O</span> stands for OK</li>
+                <li><span class="test-status fail-status">U</span> stands for Unexpected OK - all the tests
+                        succeeded, but there are tests marked by the library developers as "known failure",
+                        therefore absense failures is a problem deserving to be reported to the developers
+                </li>
                 <li><span class="test-status no-resource-status">R</span> stands for No Resourse - the test suite 
                         can not be run because some required 
                         resource is absent in the environment. For example, CFFI library

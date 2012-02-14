@@ -1038,13 +1038,14 @@ to the cl-test-grid issue tracker:
 (defun aggregated-status (normalized-status)
   "Returns the test resutl as one symbol, even
 if it was an \"extended status\". Possible return
-values: :OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
+values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
   (etypecase normalized-status
     (symbol normalized-status)
     (list (destructuring-bind (&key failed-tests known-to-fail) normalized-status
-            (cond ((and (null failed-tests)
-                        (null known-to-fail))
-                   :ok)
+            (cond ((null failed-tests)
+                   (if (null known-to-fail)
+                       :ok
+                       :unexpected-ok))
                   ((set= failed-tests known-to-fail :test #'string=)
                    :known-fail)
                   (t :fail))))))
@@ -1052,6 +1053,7 @@ values: :OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 (defun single-letter-status (aggregated-status) 
   (case aggregated-status
     (:ok "O")
+    (:unexpected-ok "U")
     (:fail "F")
     (:known-fail "K")
     (:no-resource "R")
@@ -1060,7 +1062,7 @@ values: :OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 (defun status-css-class (aggregated-status) 
   (case aggregated-status
     (:ok "ok-status")
-    ((:known-fail :fail) "fail-status")
+    ((:known-fail :fail :unexpected-ok) "fail-status")
     (:no-resource "no-resource-status")
     (otherwise "")))
            
