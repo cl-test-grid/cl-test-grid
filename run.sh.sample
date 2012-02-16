@@ -41,3 +41,9 @@ echo "************************************************************************"
 
 # SBCL
 #/home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
+
+# Today test resutls submittion fails on some Lisps (e.g. CLISP) due to broken drakma.
+# To work this around, we can run another Lisp where drakma works, and submit the 
+# test results using it. The below invocation submits all the test results for the last 24
+# hours which are hasn't been submitted yet.
+#/home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load submit-last-day-results.lisp --eval "(quit)"
