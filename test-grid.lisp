@@ -737,7 +737,8 @@ data (libraries test suites output and the run results) will be saved."
     (fresh-line stream)
     (terpri stream)
     (format stream "============================================================~%")
-    (format stream "  cl-test-grid status for ~A: ~S~%" libname status)
+    (format stream "  cl-test-grid status for ~A: ~A~%" 
+            libname (print-test-status nil status))
     (format stream "============================================================~%")))
 
 (defun run-libtest (lib run-descr log-directory)
