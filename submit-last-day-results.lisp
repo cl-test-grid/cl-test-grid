@@ -10,7 +10,7 @@
 ;;;; This code depends on cl-fad for file system operations,
 ;;;; therefore we do not include it into test-grid.lisp,
 ;;;; as we don't want test-grdid.lisp to depend on anything
-;;;; than ASDF and Quicklisp.
+;;;; other than ASDF and Quicklisp.
 
 (let* ((this-file (load-time-value (or *load-truename* #.*compile-file-pathname*)))
        (this-file-dir (make-pathname :directory (pathname-directory this-file))))
