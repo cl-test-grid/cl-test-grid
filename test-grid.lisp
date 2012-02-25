@@ -1648,16 +1648,16 @@ as a parameter"
     diff-items))
 
 (defun print-quicklisp-diff (ql-new ql-old diff-items)
-  ;; separate regressions from other diffs:
-  ;; improvements and non-regressions-and-non-improvements
-  ;; (caN a diff be neither regresssion nor improvement?)
-  (let ((regressions '())
-        (other '()))
+  ;; separate result diffs into two categories:
+  ;; diffs which have regressions, and diffs which do
+  ;; not have regressions - only improvements
+  (let ((have-regressions '())
+        (improvements-only '()))
     (dolist (diff-item diff-items)
       (if (regressions (fail-list (new-status diff-item))
                        (fail-list (old-status diff-item)))
-        (push diff-item regressions)
-        (push diff-item other)))
+        (push diff-item have-regressions)
+        (push diff-item improvements-only)))
 
     (flet ((print-diff-item (diff-item)
              (let ((*print-pretty* nil))
@@ -1668,9 +1668,9 @@ as a parameter"
                        (new-status diff-item)
                        ql-old
                        (old-status diff-item)))))
-      (format t "~%~%************* Regressions *************~%")
-      (dolist (diff-item regressions)
+      (format t "~%~%************* Have Regressions *************~%")
+      (dolist (diff-item have-regressions)
         (print-diff-item diff-item))
-      (format t "~%~%************* Improvements *************~%")
-      (dolist (diff-item other)
+      (format t "~%~%************* Improvements Only *************~%")
+      (dolist (diff-item improvements-only)
         (print-diff-item diff-item)))))
