@@ -1,4 +1,4 @@
-;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: test-grid; Base: 10; indent-tabs-mode: nil; outline-minor-mode: t; coding: utf-8; show-trailing-whitespace: t -*-
+;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: test-grid; Base: 10; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 
 (defpackage #:test-grid (:use :cl))
 
@@ -18,7 +18,7 @@ status. Status is one of these values:
      test suite needs a small C library compiled to DLL. User must
      do it manually. In case the DLL is absent, the LIBTEST method
      for CFFI returns :NO-RESOURCE.
-  Extended status in the form 
+  Extended status in the form
      (:FAILED-TESTS <list of failed tests> :KNOWN-TO-FAIL <list of known failures>)
      The test names in these lists are represented as downcased strings.
 
@@ -60,7 +60,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;; LIBTEST implementations for particular libraries
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi 
+(defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
                            :cl-base64 :trivial-backtrace :puri :anaphora
                            :parenscript :trivial-garbage :iterate :metabang-bind
@@ -86,7 +86,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :alexandria)))
 
-; We keep the below hardcoded failure in case we want to test 
+; We keep the below hardcoded failure in case we want to test
 ; the ECL 11.1.1 release (until new release is out).
 ; It is commented out or uncommented depending on what
 ; ECL release we are goint to test.
@@ -105,9 +105,9 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :babel)))
-  
+
   ;; The test framework used: stefil.
-  
+
   (quicklisp:quickload :babel-tests)
 
   (let* ((*debug-io* *standard-output*)
@@ -128,17 +128,17 @@ just passed to the QUICKLISP:QUICKLOAD."
     (not failed-p)))
 
 (defmethod libtest ((library-name (eql :trivial-features)))
-  
+
   ;; The test framework used: rt.
   (require-impl "rt-api")
   (rt-api:clean)
   (asdf:clear-system :trivial-features-tests)
 
   ;; Load cffi-grovel which is used in trivial-features-tests.asd,
-  ;; but not in the asdf:defsystem macro (issue #2). 
+  ;; but not in the asdf:defsystem macro (issue #2).
   (quicklisp:quickload :cffi-grovel)
   (quicklisp:quickload :trivial-features-tests)
-  
+
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :cffi)))
@@ -168,8 +168,8 @@ just passed to the QUICKLISP:QUICKLOAD."
                               ;; todo: add the full path to the 'test' directory,
                               ;; where user can find the scripts to compile
                               ;; the test C library, to the error message.
-                              (format t 
-                                      "~& An error occurred during (quicklisp:quickload :cffi-tests):~%~A~&This means the small C library used by CFFI tests is not available (probably you haven't compiled it). The compilation script for the library may be found in the 'test' directory in the CFFI distribution.~%" 
+                              (format t
+                                      "~& An error occurred during (quicklisp:quickload :cffi-tests):~%~A~&This means the small C library used by CFFI tests is not available (probably you haven't compiled it). The compilation script for the library may be found in the 'test' directory in the CFFI distribution.~%"
                                       condition)
                               (return-from libtest :no-resource))
                             ;; resignal the condition
@@ -185,17 +185,17 @@ just passed to the QUICKLISP:QUICKLOAD."
     (format t "cl-ppcre tests fail, repeating this error huge number of times, in result~%")
     (format t "hanging for a long time and producing a huge log.")
     (return-from libtest :fail))
-    
+
   ;; The test framework used: custom.
 
-  ;; Workaround the quicklisp issue #225 - 
+  ;; Workaround the quicklisp issue #225 -
   ;; https://github.com/quicklisp/quicklisp-projects/issues/225 -
   ;; first load cl-ppcre-unicode, because otherwise
   ;; current quicklisp can not find cl-ppcre-unicode-test
   (quicklisp:quickload :cl-ppcre-unicode)
   (quicklisp:quickload :cl-ppcre-unicode-test)
 
-  ;; copy/paste from cl-ppcre-unicode.asd 
+  ;; copy/paste from cl-ppcre-unicode.asd
   (funcall (intern (symbol-name :run-all-tests) (find-package :cl-ppcre-test))
            :more-tests (intern (symbol-name :unicode-test) (find-package :cl-ppcre-test))))
 
@@ -207,7 +207,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     (format t "number of errors/failures in the log). The last log message before it hangs is:~%")
     (format t "USOCKET-TEST::WAIT-FOR-INPUT.3")
     (return-from libtest :fail))
-    
+
   ;; The test framework used: rt.
   (require-impl "rt-api")
   (rt-api:clean)
@@ -225,9 +225,9 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; (setf usocket-test::*common-lisp-net*
   ;;       (or usocket-test::*common-lisp-net*
   ;;           "74.115.254.14"))
-  
+
   (run-rt-test-suite))
-  
+
 
 (defmethod libtest ((library-name (eql :flexi-streams)))
 
@@ -235,12 +235,12 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   (quicklisp:quickload :flexi-streams-test)
 
-  ;; copy/paste from flexi-streams.asd 
+  ;; copy/paste from flexi-streams.asd
   (funcall (intern (symbol-name :run-all-tests)
                    (find-package :flexi-streams-test))))
 
 (defun run-fiveam-suite (fiveam-test-spec)
-  "Runs the specified test suite created with the FiveAM 
+  "Runs the specified test suite created with the FiveAM
 test framework. Returns T if all the tests succeeded and
 NIL otherwise. The FIVEAM-TEST-SPEC specifies the tests
 suite according to the FiveAM convention."
@@ -248,7 +248,7 @@ suite according to the FiveAM convention."
         (explain (intern (string '#:explain) :fiveam))
         (detailed-text-explainer (intern (string '#:detailed-text-explainer) :fiveam))
         (test-failure-type (intern (string '#:test-failure) :fiveam)))
-    
+
     (let ((results (funcall run fiveam-test-spec)))
       (funcall explain (make-instance detailed-text-explainer) results *standard-output*)
       (zerop (count-if (lambda (res)
@@ -265,7 +265,7 @@ suite according to the FiveAM convention."
     (return-from libtest :fail))
 
   ;; The test framework used: fiveam.
-  
+
   (quicklisp:quickload :bordeaux-threads-test)
 
   (run-fiveam-suite :bordeaux-threads))
@@ -273,14 +273,14 @@ suite according to the FiveAM convention."
 (defmethod libtest ((library-name (eql :cl-base64)))
 
   ;; The test framework used: ptester.
-  
+
   ;; Load cl-base64 first, because cl-base64-tests
   ;; is defined in cl-base64.asd which confuses
   ;; quicklisp (some versions of, see issue #1)
   (quicklisp:quickload :cl-base64)
 
   (quicklisp:quickload :cl-base64-tests)
-  
+
   (funcall (intern (symbol-name '#:do-tests)
                    (find-package '#:cl-base64-tests))))
 
@@ -310,11 +310,11 @@ if all the tests succeeded and NIL othersize."
       (let ((result (funcall run :suite suite-name)))
         (describe result *standard-output*)
         (lift-tests-ok-p result)))))
-  
+
 (defmethod libtest ((library-name (eql :trivial-backtrace)))
-  
+
   ;; The test framework used: lift.
-  
+
   (quicklisp:quickload :trivial-backtrace-test)
 
   (run-lift-tests :trivial-backtrace-test))
@@ -329,7 +329,7 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :puri)
 
   (quicklisp:quickload :puri-tests)
-  
+
   ;; copy/paste from puri.asd
   (funcall (intern (symbol-name '#:do-tests)
                    (find-package :puri-tests))))
@@ -367,7 +367,7 @@ if all the tests succeeded and NIL othersize."
   (let* ((run (intern (string '#:run) :eos))
          (test-failure-type (intern (string '#:test-failure) :eos))
          (results (append (funcall run (intern (string '#:output-tests) :ps-test))
-                          (funcall run (intern (string '#:package-system-tests) :ps-test)))))  
+                          (funcall run (intern (string '#:package-system-tests) :ps-test)))))
     (zerop (count-if (lambda (res)
                        (typep res test-failure-type))
                      results))))
@@ -385,7 +385,7 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :trivial-garbage); trivial-garbage but not trivial-garbage-tests,
                                         ; for the same reasons as explained above.
   (asdf:operate 'asdf:load-op :trivial-garbage-tests)
-  
+
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :iterate)))
@@ -401,16 +401,16 @@ if all the tests succeeded and NIL othersize."
   ;; quicklisp (some versions of, see issue #1)
   (quicklisp:quickload :iterate)
   (quicklisp:quickload :iterate-tests)
-  
+
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :metabang-bind)))
-  
+
   ;; The test framework used: lift.
-  
-  ;; metabang-bind-test includes binding syntax 
+
+  ;; metabang-bind-test includes binding syntax
   ;; for regular-expression and corresponding
-  ;; tests; but this functionality is only 
+  ;; tests; but this functionality is only
   ;; loaded if cl-ppcre is loaded first.
   ;; (this conditional loading is achieaved
   ;; with asdf-system-connections).
@@ -479,7 +479,7 @@ if all the tests succeeded and NIL othersize."
     (funcall handler prop val)))
 
 (defmacro do-plist ((key val plist &optional result) &body body)
-  `(block nil 
+  `(block nil
      (do-plist-impl ,plist (lambda (,key ,val) ,@body))
      ,result))
 
@@ -490,12 +490,12 @@ if all the tests succeeded and NIL othersize."
       ;; "compare" the values of the current property
       ;; in both plists
       (let ((val-a (getf plist-a prop))
-            (val-b (getf plist-b prop)))                    
+            (val-b (getf plist-b prop)))
         (if (funcall pred val-a val-b)
             (return t))
         ;; Ok, val-a is not less than val-b (as defined by our predicate).
-        ;; Lets check if they are equal. If the reverse comparation [val-b less val-a] 
-        ;; is also false, then they are equal, and we proceed to the next 
+        ;; Lets check if they are equal. If the reverse comparation [val-b less val-a]
+        ;; is also false, then they are equal, and we proceed to the next
         ;; property/predicate pair.
         (when (funcall pred val-b val-a)
           (return nil))))))
@@ -507,7 +507,7 @@ if all the tests succeeded and NIL othersize."
         (funcall less '(:a 2 :b "x") '(:a 2 :b "y"))
         (not (funcall less '(:a 3 :b "x") '(:a 2 :b "y")))))
 
- (equalp 
+ (equalp
   (sort '((:a 1 :b "x")
           (:a 2 :b "y")
           (:a 2 :b "y")
@@ -522,7 +522,7 @@ if all the tests succeeded and NIL othersize."
 
 (defun list< (predicates l1 l2)
   "Compares two lists L1 and L2 of equal lenght,
-using for every pair of elements a corresponding predicate 
+using for every pair of elements a corresponding predicate
 from the PREDICATES list (of the same length). Returns
 T if L1 is less than (according the PREDICATES) L2.
 Othersise returns NIL."
@@ -534,8 +534,8 @@ Othersise returns NIL."
         (if (funcall pred elem1 elem2)
             t
             ;; Ok, elem1 is not less than elem2 (as defined by our predicate).
-            ;; Lets check if they are equal. If the reverse comparation [elem2 less elem1] 
-            ;; is also false, then they are equal, and we proceed to the next 
+            ;; Lets check if they are equal. If the reverse comparation [elem2 less elem1]
+            ;; is also false, then they are equal, and we proceed to the next
             ;; property/predicate pair.
             (if (funcall pred elem2 elem1)
                 nil
@@ -563,7 +563,7 @@ Examples:
              hash-table)
     keys))
 
-;; copy/paste from 
+;; copy/paste from
 ;; http://www.gigamonkeys.com/book/practical-an-mp3-browser.html
 (defmacro with-safe-io-syntax (&body body)
   `(with-standard-io-syntax
@@ -574,8 +574,8 @@ Examples:
   (with-safe-io-syntax (apply #'read args)))
 
 (defun safe-read-file (file)
-  (with-open-file (in file 
-                      :direction :input 
+  (with-open-file (in file
+                      :direction :input
                       :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                       )
     (safe-read in)))
@@ -606,7 +606,7 @@ Examples:
       data)))
 
 (defun file-byte-length (path)
-  (with-open-file (s path 
+  (with-open-file (s path
                      :direction :input
                      :element-type '(unsigned-byte 8))
     (file-length s)))
@@ -622,7 +622,7 @@ Examples:
 
 (defun prompt-for-email ()
   (format *query-io* "~&~%")
-  (format *query-io* "Please enter your email so that we know who is submitting the test results.~%") 
+  (format *query-io* "Please enter your email so that we know who is submitting the test results.~%")
   (format *query-io* "Also the email will be published in the online reports, and the library~%")
   (format *query-io* "authors can later contact you in case of questions about this test run, ~%")
   (format *query-io* "your environment, etc.~%~%")
@@ -631,7 +631,7 @@ Examples:
 
   (format *query-io* "The value you enter will be saved and reused in the future. You can change~%")
   (format *query-io* "it in the file ~A in your home directory.~%~%" +settings-file-name+)
-  
+
   (format *query-io* "email: ")
 
   (force-output *query-io*)
@@ -640,8 +640,8 @@ Examples:
 (defun get-user-email ()
   (let ((user-email nil))
     (handler-case
-        (progn 
-          (setf user-email (getf (safe-read-file (get-settings-file)) 
+        (progn
+          (setf user-email (getf (safe-read-file (get-settings-file))
                                  :user-email))
           (if (zerop (length user-email))
               (warn "Empty email is specified in the settings file ~a~%" (get-settings-file))))
@@ -674,35 +674,35 @@ Examples:
   "The preferred time format used in the cl-test-grid project."
   (multiple-value-bind (sec min hour date month year)
       (decode-universal-time universal-time 0)
-    (funcall #'format 
-             destination 
-             "~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D" 
+    (funcall #'format
+             destination
+             "~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D"
              year month date hour min sec)))
 
 (defun pretty-fmt-time (universal-time &optional destination)
   "The human-readable time format, used in reports."
   (multiple-value-bind (sec min hour date month year)
       (decode-universal-time universal-time 0)
-    (funcall #'format 
-             destination 
-             "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D" 
+    (funcall #'format
+             destination
+             "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
              year month date hour min sec)))
 
-(defun make-run-descr () 
-  "Generate a description for a test run which might be 
+(defun make-run-descr ()
+  "Generate a description for a test run which might be
 performed in the current lisp system."
   (list :lisp (asdf::implementation-identifier)
-        :lib-world (format nil "quicklisp ~A" 
+        :lib-world (format nil "quicklisp ~A"
                            (ql-dist:version (ql-dist:dist "quicklisp")))
         :time (get-universal-time)
         :run-duration :unknown
         :contact (list :email (get-user-email))))
 
 (defun name-run-directory (run-descr)
-  "Generate name for the directory where test run 
+  "Generate name for the directory where test run
 data (libraries test suites output and the run results) will be saved."
-  (format nil 
-          "~A-~A" 
+  (format nil
+          "~A-~A"
           (fmt-time (getf run-descr :time))
           (getf run-descr :lisp)))
 
@@ -710,7 +710,7 @@ data (libraries test suites output and the run results) will be saved."
   (merge-pathnames "test-runs/"
                    test-grid-config:*src-base-dir*))
 
-(defun run-directory (run-descr) 
+(defun run-directory (run-descr)
   (merge-pathnames (make-pathname
                     :directory (list :relative (name-run-directory run-descr))
                     :name      nil
@@ -739,7 +739,7 @@ data (libraries test suites output and the run results) will be saved."
     (fresh-line stream)
     (terpri stream)
     (format stream "============================================================~%")
-    (format stream "  cl-test-grid status for ~A: ~A~%" 
+    (format stream "  cl-test-grid status for ~A: ~A~%"
             libname (print-test-status nil status))
     (format stream "============================================================~%")))
 
@@ -754,14 +754,14 @@ data (libraries test suites output and the run results) will be saved."
       (let* ((orig-std-out *standard-output*)
              (*standard-output* log-stream)
              (*error-output* log-stream))
-        
+
         (format orig-std-out
                 "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
                 lib)
         (finish-output orig-std-out)
-        
+
         (print-log-header lib run-descr *standard-output*)
-        
+
         (setf status (handler-case
                          (normalize-status (libtest lib))
                        (serious-condition (condition) (progn
@@ -770,20 +770,20 @@ data (libraries test suites output and the run results) will be saved."
                                                                 condition)
                                                         :fail))))
         (print-log-footer lib status *standard-output*)))
-    
+
     (list :libname lib
           :status status
           :log-byte-length (file-byte-length log-file)
           :test-duration (/ (- (get-internal-real-time) start-time)
                             internal-time-units-per-second))))
-  
+
 (defun run-info-file (test-run-directory)
   (merge-pathnames "test-run-info.lisp"
                    test-run-directory))
 
 (defun save-run-info (test-run directory)
   (let ((run-file (run-info-file directory)))
-    (write-to-file test-run run-file)))    
+    (write-to-file test-run run-file)))
 
 (defun gae-blobstore-dir ()
   (merge-pathnames "gae-blobstore/lisp-client/" test-grid-config:*src-base-dir*))
@@ -793,7 +793,7 @@ data (libraries test suites output and the run results) will be saved."
 (defun get-blobstore ()
   (pushnew (truename (gae-blobstore-dir)) asdf:*central-registry* :test #'equal)
   (ql:quickload '#:test-grid-gae-blobstore)
-  (funcall (intern (string '#:make-blob-store) '#:test-grid-gae-blobstore) 
+  (funcall (intern (string '#:make-blob-store) '#:test-grid-gae-blobstore)
            :base-url *gae-blobstore-base-url*))
 
 (defun submit-logs (blobstore test-run-dir)
@@ -804,10 +804,10 @@ data (libraries test suites output and the run results) will be saved."
                                       (cons libname
                                             (lib-log-file test-run-dir libname))))
                                 (run-results run-info))))
-    ;; submit files to the blobstore and receive 
+    ;; submit files to the blobstore and receive
     ;; their blobkeys in response
-    (let ((libname-to-blobkey-alist 
-           (test-grid-blobstore:submit-files blobstore 
+    (let ((libname-to-blobkey-alist
+           (test-grid-blobstore:submit-files blobstore
                                              submit-params)))
       ;; Now store the blobkeys for every library in the run-info.
       ;; Note, we destructively modify parts of the previously
@@ -817,11 +817,11 @@ data (libraries test suites output and the run results) will be saved."
                    (error "blobstore didn't returned blob key for the log of the ~A libary" lib))))
         (setf (run-results run-info)
               (mapcar #'(lambda (lib-result)
-                          (setf (getf lib-result :log-blob-key) 
+                          (setf (getf lib-result :log-blob-key)
                                 (get-blob-key (getf lib-result :libname)))
                           lib-result)
                       (run-results run-info))))
-      ;; finally, save the updated run-info with blobkeys 
+      ;; finally, save the updated run-info with blobkeys
       ;; to the file. Returns the run-info.
       (save-run-info run-info test-run-dir))))
 
@@ -841,12 +841,12 @@ data (libraries test suites output and the run results) will be saved."
     (dolist (lib libs)
       (let ((lib-result (run-libtest lib run-descr run-dir)))
         (push lib-result lib-results)))
-    (setf (getf run-descr :run-duration) 
+    (setf (getf run-descr :run-duration)
           (- (get-universal-time)
              (getf run-descr :time)))
     (let ((run (make-run run-descr lib-results)))
       (save-run-info run run-dir)
-      (format t "The test results were saved to this directory: ~%~A.~%" 
+      (format t "The test results were saved to this directory: ~%~A.~%"
               (truename run-dir))
       run-dir)))
 
@@ -854,9 +854,9 @@ data (libraries test suites output and the run results) will be saved."
   (format t "~%Submitting the test results to the server...~%")
   (handler-case (submit-results test-run-dir)
     (error (e) (format t "Error occured while uploading the test results to the server: ~A: ~A.
-Please submit manually the full content of the results directory 
+Please submit manually the full content of the results directory
    ~A
-to the cl-test-grid issue tracker: 
+to the cl-test-grid issue tracker:
    https://github.com/cl-test-grid/cl-test-grid/issues~%"
                        (type-of e)
                        e
@@ -868,8 +868,8 @@ to the cl-test-grid issue tracker:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defparameter *db* '(:version 0 :runs ()))
 
-(defvar *standard-db-file* 
-  (merge-pathnames "db.lisp" 
+(defvar *standard-db-file*
+  (merge-pathnames "db.lisp"
                    test-grid-config:*src-base-dir*))
 
 (defun add-run (run-info &optional (db *db*))
@@ -913,13 +913,13 @@ to the cl-test-grid issue tracker:
                        :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                        :if-exists :supersede
                        :if-does-not-exist :create)
-    (format out "(:version ~a~%" (getf db :version)) 
+    (format out "(:version ~a~%" (getf db :version))
     (format out " :runs (")
     (print-list-elements out (getf db :runs) "~%~8t"
                          #'(lambda (elem)
                              (let ((descr (getf elem :descr)))
                                (format out
-                                       "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact (:email ~s))~%" 
+                                       "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact (:email ~s))~%"
                                        (getf descr :lisp)
                                        (getf descr :lib-world)
                                        (getf descr :time)
@@ -943,8 +943,8 @@ to the cl-test-grid issue tracker:
     (format out "))")))
 
 (defun read-db (&optional (stream-or-path *standard-db-file*))
-  (with-open-file (in stream-or-path 
-                      :direction :input 
+  (with-open-file (in stream-or-path
+                      :direction :input
                       :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                       )
     (safe-read in)))
@@ -961,7 +961,7 @@ to the cl-test-grid issue tracker:
   "Differs from CL:REPLACE in that placeholder and value may be of different length."
   (let* ((pos (or (search placeholder template)
                   (error "Can't find the placeholder ~A in the template." placeholder))))
-    (concatenate 'string 
+    (concatenate 'string
                  (subseq template 0 pos)
                  value
                  (subseq template (+ pos (length placeholder))))))
@@ -1001,11 +1001,11 @@ to the cl-test-grid issue tracker:
             (push (make-run run-descr lib-results) runs))))
       runs)))
 
-(defvar *test-runs-report-template* 
+(defvar *test-runs-report-template*
   (merge-pathnames "test-runs-report-template.html"
                    test-grid-config:*src-base-dir*))
 
-(defun vertical-html (libname) 
+(defun vertical-html (libname)
   (let ((maybeBr "")
         (libname (string libname)))
     (with-output-to-string (out)
@@ -1013,7 +1013,7 @@ to the cl-test-grid issue tracker:
          do (princ maybeBr out)
            (princ (if (char= char #\-) #\| char) out)
            (setf maybeBr "<br/>")))))
-           
+
 ;; example:
 #|
  (string= (vertical-html "cl-abc")
@@ -1022,10 +1022,10 @@ to the cl-test-grid issue tracker:
 
 ;; todo: this should be a blobstore method, but
 ;; until we move the reporting to a separate
-;; asdf system, we don't want the dependency 
+;; asdf system, we don't want the dependency
 ;; on blobstore here.
 (defun blob-uri (blob-key)
-  (format nil "~A/blob?key=~A" 
+  (format nil "~A/blob?key=~A"
           *gae-blobstore-base-url* blob-key))
 
 (defun lib-log-local-uri (test-run lib-result)
@@ -1054,7 +1054,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
                    :known-fail)
                   (t :fail))))))
 
-(defun single-letter-status (aggregated-status) 
+(defun single-letter-status (aggregated-status)
   (case aggregated-status
     (:ok "O")
     (:unexpected-ok "U")
@@ -1063,53 +1063,53 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
     (:no-resource "R")
     (otherwise aggregated-status)))
 
-(defun status-css-class (aggregated-status) 
+(defun status-css-class (aggregated-status)
   (case aggregated-status
     (:ok "ok-status")
     ((:known-fail :fail :unexpected-ok) "fail-status")
     (:no-resource "no-resource-status")
     (otherwise "")))
-           
+
 (defun render-single-letter-status (test-run lib-test-result)
   (declare (ignore test-run))
   (if (null lib-test-result)
       "&nbsp;"
       (let ((status (aggregated-status (getf lib-test-result :status))))
-        (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>" 
+        (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>"
                 (status-css-class status)
                 (lib-log-uri lib-test-result)
                 (single-letter-status status)))))
 
-(defun test-runs-table-html (&optional 
+(defun test-runs-table-html (&optional
                              (db *db*)
                              (status-renderer 'render-single-letter-status))
   (with-output-to-string (out)
     (write-line "<table cellspacing=\"1\" class=\"tablesorter\">" out)
-    
+
     (princ "<thead><tr style=\"vertical-align: bottom;\"><th>Start Time</th><th>Lib World</th><th>Lisp</th><th>Runner</th>" out)
     (dolist (lib *all-libs*)
       (format out "<th>~A</th>" (vertical-html lib)))
     (write-line "</tr></thead>" out)
-    
+
     (write-line "<tbody>" out)
     (dolist (run (getf db :runs))
       (let ((run-descr (run-descr run))
             (lib-statuses (run-results run)))
-        (format out "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td>" 
-                (pretty-fmt-time (getf run-descr :time)) 
-                (getf run-descr :lib-world) 
+        (format out "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td>"
+                (pretty-fmt-time (getf run-descr :time))
+                (getf run-descr :lib-world)
                 (getf run-descr :lisp)
                 (getf (getf run-descr :contact) :email))
         (dolist (lib *all-libs*)
-          (format out "<td>~A</td>" 
-                  (funcall status-renderer run (find lib lib-statuses 
+          (format out "<td>~A</td>"
+                  (funcall status-renderer run (find lib lib-statuses
                                                      :key (getter :libname)))))
         (write-line "</tr>" out)))
     (write-line "</tbody>" out)
     (write-line "</table>" out)))
 
 (defun test-runs-report (&optional (db *db*))
-  (fmt-template *test-runs-report-template* 
+  (fmt-template *test-runs-report-template*
                 `(("{THE-TABLE}" . ,(test-runs-table-html db))
                   ("{TIME}" . ,(pretty-fmt-time (get-universal-time))))))
 
@@ -1135,7 +1135,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
         (funcall handler test-run lib-result))))
 
 (defmacro do-results ((test-run-var lib-result-var db) &body body)
-  `(do-results-impl ,db 
+  `(do-results-impl ,db
      #'(lambda (,test-run-var ,lib-result-var)
          ,@body)))
 
@@ -1150,19 +1150,19 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
               (gethash (list lisp lib-world libname) all-results))))
     all-results))
 
-#|    
+#|
 HTML table properties:
  - rows and cols are not equal: html tables are row-first - TR includes TDs
 
 Only the deepest level row and col fields will have corresponding
-TR and TD cells in the table data (we do not consider the table 
+TR and TD cells in the table data (we do not consider the table
 column headers now).
 
 And the TD cells are included in a TR.
 
 Algorithm sketch:
   Iterate over all row properties and their values in rows.
-  For every deepest level combination create a TR (if 
+  For every deepest level combination create a TR (if
   any values exist for this combination).
 
     Iterate over all the col properties and their values.
@@ -1198,7 +1198,7 @@ partitioning structure
 
 (defun make-fields-values-setter (fields)
   "Creates a function which destructively modifies
-the specified fields in the index key passed to it 
+the specified fields in the index key passed to it
 as a parameter"
   (let ((index-key-setters (list :lisp #'(lambda (index-key lisp)
                                            (setf (first index-key) lisp))
@@ -1283,7 +1283,7 @@ as a parameter"
            (rowspan (span helper))
            (maybe-css-class (if (> rowspan 1) "class=\"no-hover\"" "")))
       (when (not (printed helper))
-        (format out "<th rowspan=\"~A\" ~A>~A</th>" 
+        (format out "<th rowspan=\"~A\" ~A>~A</th>"
                 rowspan maybe-css-class
                 (string-downcase (car (last subaddr))))
         (setf (printed helper) t)))))
@@ -1293,13 +1293,13 @@ as a parameter"
 
 (defun print-rotated-col-header (colspan text out)
   ;; Calculate the heiht so that rotated text fits
-  ;; into it. Multiply the length of the text to 
-  ;; sine of the rotation (35 deegrees) 
+  ;; into it. Multiply the length of the text to
+  ;; sine of the rotation (35 deegrees)
   ;; and add 3 ex for sure.
   (let ((css-height (+ (ceiling (* (sin (/ (* pi 35.0) 180.0))
                                    (length text)))
-                       3)))    
-    (format out "<th colspan=\"~A\" class=\"rotated-header\" style=\"height: ~Aex\"><div>~A</div></th>" 
+                       3)))
+    (format out "<th colspan=\"~A\" class=\"rotated-header\" style=\"height: ~Aex\"><div>~A</div></th>"
             colspan css-height text)))
 
 (defun print-table-headers (row-field-count col-field-count cols out)
@@ -1321,12 +1321,12 @@ as a parameter"
               (if (and (> col-count 7)
                        ;; and the last header row:
                        (= header-row-num (1- header-row-count)))
-                  (print-rotated-col-header colspan text out)                   
+                  (print-rotated-col-header colspan text out)
                   (print-usual-col-header colspan text out)))
             (setf (printed helper) t))))
       (format out "</tr>~%"))))
 
-(defun pivot-table-html (out 
+(defun pivot-table-html (out
                          joined-index
                          row-fields row-fields-sort-predicates
                          col-fields col-fields-sort-predicates)
@@ -1344,13 +1344,13 @@ as a parameter"
         (col-comparator #'(lambda (cola colb)
                             (list< col-fields-sort-predicates
                                    cola colb))))
-    
-    (setf (values rows cols index-key-setter) 
+
+    (setf (values rows cols index-key-setter)
           (calc-rows-and-cols joined-index row-fields col-fields))
-    
+
     (setf rows (sort rows row-comparator)
           cols (sort cols col-comparator))
-    
+
     (print-table-headers (length row-fields) (length col-fields) cols out)
     (let ((row-spans (calc-spans rows))
           (index-key (make-sequence 'list (+ (length row-fields)
@@ -1361,8 +1361,8 @@ as a parameter"
         (dolist (col cols)
           (funcall index-key-setter index-key row col)
           (let ((lib-results (gethash index-key joined-index)))
-            (princ "<td>" out) 
-            (format-lib-results out lib-results) 
+            (princ "<td>" out)
+            (format-lib-results out lib-results)
             (princ "</td>" out)))
         (format out "</tr>~%"))))
   (princ "</table>" out))
@@ -1376,7 +1376,7 @@ as a parameter"
                           row-fields row-fields-sort-predicates
                           col-fields col-fields-sort-predicates)
 
-  (let ((table (with-output-to-string (str) 
+  (let ((table (with-output-to-string (str)
                  (pivot-table-html str
                                    joined-index
                                    row-fields row-fields-sort-predicates
@@ -1390,54 +1390,54 @@ as a parameter"
 (defun print-pivot-reports (db)
   (let ((joined-index (build-joined-index db))
         (reports-dir (reports-dir)))
-    (flet ((print-report (filename 
+    (flet ((print-report (filename
                           row-fields row-fields-sort-predicates
                           col-fields col-fields-sort-predicates)
              (with-open-file (out (merge-pathnames filename reports-dir)
-                                  :direction :output 
+                                  :direction :output
                                   :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                                   :if-exists :supersede
                                   :if-does-not-exist :create)
-               (pivot-report-html out 
+               (pivot-report-html out
                                   joined-index
                                   row-fields row-fields-sort-predicates
                                   col-fields col-fields-sort-predicates))))
-      
+
       (print-report "pivot_ql_lisp-lib.html"
                     '(:lib-world) (list #'string>)
                     '(:lisp :libname) (list #'string< #'string<))
       (print-report "pivot_ql_lib-lisp.html"
                     '(:lib-world) (list #'string>)
                     '(:libname :lisp) (list #'string< #'string<))
-      
+
       (print-report "pivot_lisp_lib-ql.html"
                     '(:lisp) (list #'string<)
                     '(:libname :lib-world) (list #'string< #'string>))
       (print-report "pivot_lisp_ql-lib.html"
                     '(:lisp) (list #'string<)
                     '(:lib-world :libname) (list #'string> #'string<))
-      
+
       (print-report "pivot_lib_lisp-ql.html"
                     '(:libname) (list #'string<)
                     '(:lisp :lib-world) (list #'string< #'string>))
       (print-report "pivot_lib_ql-lisp.html"
                     '(:libname) (list #'string<)
                     '(:lib-world :lisp) (list #'string> #'string<))
-      
+
       (print-report "pivot_ql-lisp_lib.html"
                     '(:lib-world :lisp) (list #'string> #'string<)
                     '(:libname) (list #'string<))
       (print-report "pivot_ql-lib_lisp.html"
                     '(:lib-world :libname) (list #'string> #'string<)
                     '(:lisp) (list #'string<))
-      
+
       (print-report "pivot_lisp-lib_ql.html"
                     '(:lisp :libname) (list #'string< #'string<)
                     '(:lib-world) (list #'string>))
       (print-report "pivot_lisp-ql_lib.html"
                     '(:lisp :lib-world) (list #'string< #'string>)
                     '(:libname) (list #'string<))
-      
+
       (print-report "pivot_lib-lisp_ql.html"
                     '(:libname :lisp) (list #'string< #'string<)
                     '(:lib-world) (list #'string>))
@@ -1446,24 +1446,24 @@ as a parameter"
                     '(:lisp) (list #'string<)))))
 
 (defun generate-reports (&optional (db *db*))
-                          
+
   (with-open-file (out (merge-pathnames "test-runs-report.html"
                                         (reports-dir))
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
     (write-sequence (test-runs-report db) out))
-  
+
   (with-open-file (out (merge-pathnames "export.csv"
                                         (reports-dir))
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
     (export-to-csv out))
-  
+
   (print-pivot-reports db))
 
-(defun reports-dir () 
+(defun reports-dir ()
   (merge-pathnames "reports-generated/"
                    test-grid-config:*src-base-dir*))
 
@@ -1522,7 +1522,7 @@ as a parameter"
                                                 failures
                                                 :test #'string=)))
 
-           (sort-fail-list (append failures 
+           (sort-fail-list (append failures
                                    (mapcar #'(lambda (unexpected-ok-test) (cons :unexpected-ok unexpected-ok-test))
                                            unexpected-oks)))))))
 (assert
@@ -1531,7 +1531,7 @@ as a parameter"
       (eq :no-resource (fail-list :no-resource))
       (equal '("a" "b") (fail-list '(:failed-tests ("a" "b"))))
       (equal '("a" "b") (fail-list '(:failed-tests ("b" "a"))))
-      (equal '("a" "b" (:unexpected-ok . "c")) 
+      (equal '("a" "b" (:unexpected-ok . "c"))
              (fail-list '(:failed-tests ("a" "b") :known-to-fail ("b" "c"))))))
 
 (defun failures-different-p (fail-list-a fail-list-b)
@@ -1564,7 +1564,7 @@ as a parameter"
 ;; Refressions returns fail list which denotes
 ;; what is wrong with new-fail-list, comparint
 ;; to old-fail-list. Result is represented
-;; by a fail list which may be a list of failures 
+;; by a fail list which may be a list of failures
 ;; or just a symbol :FAIL (but never :OK or :NO-RESOURCE).
 ;; Accepts any fail list as a parameter.
 (defun regressions (new-fail-list old-fail-list)
@@ -1589,20 +1589,20 @@ as a parameter"
           ((results-are :fail '(some)) (if (null old-fail-list) :fail nil))
           ((results-are '(some) :fail) nil)
 
-          ((results-are '(some) '(some)) 
+          ((results-are '(some) '(some))
            (sort-fail-list (set-difference new-fail-list old-fail-list :test #'equal)))
-          
+
           (t (error "Unexpected fail lists: ~S ~S" new-fail-list old-fail-list)))))
 
 (assert
  (and (equal '("a" "b") (regressions '("a" "b") '("c")))
       (equal '("a" "b") (regressions '("a" "b") '()))
       (equal '() (regressions '("a" "b") '("a" "b")))
-      
+
       (equal '() (regressions :fail :fail))
-      
+
       (equal '() (regressions '("a" "b") :fail))
-      (equal '() (regressions :fail '("a" "b")))      
+      (equal '() (regressions :fail '("a" "b")))
       (eq :fail (regressions :fail '()))))
 
 
@@ -1610,9 +1610,9 @@ as a parameter"
 ;; of the same library under the same lisp,
 ;; but in different quicklisp disto versions.
 (defclass quicklisp-diff-item ()
-  ((libname :initarg :libname :accessor libname) 
-   (lisp :initarg :lisp :accessor lisp) 
-   (new-status :initarg :new-status :accessor new-status) 
+  ((libname :initarg :libname :accessor libname)
+   (lisp :initarg :lisp :accessor lisp)
+   (new-status :initarg :new-status :accessor new-status)
    (old-status :initarg :old-status :accessor old-status)))
 
 (defun compare-quicklisps (db-index quicklisp-new quicklisp-old)
@@ -1624,14 +1624,14 @@ as a parameter"
         (setf (second key-prev) quicklisp-old)
         (let ((results (gethash key db-index))
               (results-prev (gethash key-prev db-index)))
-          
+
           ;; order our results-diff report by library name
           (setf results (sort (copy-list results)
                               (lambda (lib-result-a lib-result-b)
                                 (string< (getf lib-result-a :libname)
                                          (getf lib-result-b :libname)))))
-          
-          (dolist (lib-result results)            
+
+          (dolist (lib-result results)
             (let* ((fail-list (fail-list (getf lib-result :status)))
                    (diff-lib-results-prev (remove-if-not #'(lambda (result-prev)
                                                              (failures-different-p fail-list
@@ -1639,16 +1639,16 @@ as a parameter"
                                                          results-prev)))
               (when (not (null diff-lib-results-prev))
                 (dolist (diff-lib-result-prev diff-lib-results-prev)
-                  (push (make-instance 'quicklisp-diff-item 
+                  (push (make-instance 'quicklisp-diff-item
                                        :libname (getf lib-result :libname)
                                        :lisp (first key)
                                        :new-status (getf lib-result :status)
-                                       :old-status (getf diff-lib-result-prev :status))                      
+                                       :old-status (getf diff-lib-result-prev :status))
                         diff-items))))))))
     diff-items))
 
 (defun print-quicklisp-diff (ql-new ql-old diff-items)
-  ;; separate regressions from other diffs: 
+  ;; separate regressions from other diffs:
   ;; improvements and non-regressions-and-non-improvements
   ;; (caN a diff be neither regresssion nor improvement?)
   (let ((regressions '())

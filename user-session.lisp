@@ -1,8 +1,10 @@
+;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: test-grid; Base: 10; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+
 ;;;; User (my) session
 
 ;; In my system CLISP doesn't execute .clisprc when started
 ;; from SLIME, therefore quicklisp is not available
-#+clisp 
+#+clisp
 (load "/Users/anton/.clisprc")
 
 (pushnew "D:/cl-test-grid/" asdf:*central-registry* :test #'equal)
@@ -43,11 +45,11 @@
   nil)
 
 (progn
-  (setf run-result 
+  (setf run-result
         (submit-results #P"C:\\Users\\anton\\projects\\cl-test-grid\\test-runs\\20120214013817-abcl-1.0.1-svn-13750-13751-fasl38-solaris-x86\\"))
   nil)
 
-(setf run-result 
+(setf run-result
       (safe-read-file #P"C:\\Users\\anton\\projects\\cl-test-grid\\test-runs\\20120214011952-sbcl-1.0.54.84.mswinmt.1137-215bdc8-win-x64\\test-run-info.lisp"))
 
 (progn
@@ -78,6 +80,6 @@
 
 ;; generate fake database content to test reporting
 (setf (getf *db* :runs) (generate-fake-run-results))
-    
+
 (print-pivot-reports *db*)
 
