@@ -178,6 +178,9 @@
 ** TODO move closed TODO items to another (archive) file, so that the
    web presentation of the TODO file will be understandable 
    for the public.
+** TODO Do not allow empty contributor contact in test results. Instead
+   always ask the contributor to provide something, nickname,
+   whatever.
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
 ** TODO add more libraries
