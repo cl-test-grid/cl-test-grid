@@ -5,13 +5,20 @@
 #+clisp 
 (load "/Users/anton/.clisprc")
 
-(pushnew "D:/cl-test-grid/" asdf:*central-registry*)
+(pushnew "D:/cl-test-grid/" asdf:*central-registry* :test #'equal)
 
-(pushnew "C:/Users/anton/projects/cl-test-grid/" asdf:*central-registry*)
+(pushnew "C:/Users/anton/projects/cl-test-grid/" asdf:*central-registry* :test #'equal)
 
 (asdf:operate 'asdf:load-op :test-grid)
 
-(setf test-grid::*gae-blobstore-base-url* "http://localhost:8080")
+;; for development of GAE blob storage
+;;(setf test-grid::*gae-blobstore-base-url* "http://localhost:8080")
+
+(use-package :ql-dist)
+(available-versions (dist "quicklisp"))
+
+;;(install-dist "http://beta.quicklisp.org/dist/quicklisp/2011-08-29/distinfo.txt" :replace t)
+;;(ql:quickload :quicklisp-slime-helper)
 
 (in-package #:test-grid)
 
@@ -29,7 +36,23 @@
 (setf *db* '(:version 0 :runs ()))
 (setf *db* (read-db))
 
-(add-run run-result *db*)
+
+(progn
+  (add-run (safe-read-file "mail.lisp")
+           *db*)
+  nil)
+
+(progn
+  (setf run-result 
+        (submit-results #P"C:\\Users\\anton\\projects\\cl-test-grid\\test-runs\\20120214013817-abcl-1.0.1-svn-13750-13751-fasl38-solaris-x86\\"))
+  nil)
+
+(setf run-result 
+      (safe-read-file #P"C:\\Users\\anton\\projects\\cl-test-grid\\test-runs\\20120214011952-sbcl-1.0.54.84.mswinmt.1137-215bdc8-win-x64\\test-run-info.lisp"))
+
+(progn
+  (add-run run-result *db*)
+  nil)
 
 (save-db *db*)
 
