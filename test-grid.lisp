@@ -1,17 +1,19 @@
+;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: test-grid; Base: 10; indent-tabs-mode: nil; outline-minor-mode: t; coding: utf-8; show-trailing-whitespace: t -*-
+
 (defpackage #:test-grid (:use :cl))
 
 (in-package #:test-grid)
 
 (defgeneric libtest (library-name)
   (:documentation "Define a method for this function
-with LIBRARY-NAME eql-specialized for for every library added 
+with LIBRARY-NAME eql-specialized for for every library added
 to the test grid.
 
 The method should run test suite and return the resulting
-status. Status is one of these values: 
+status. Status is one of these values:
   :OK - all tests passed,
   :FAIL - some test failed,
-  :NO-RESOURCE - test suite can not be run because some required 
+  :NO-RESOURCE - test suite can not be run because some required
      resource is absent in the environment. For example, CFFI library
      test suite needs a small C library compiled to DLL. User must
      do it manually. In case the DLL is absent, the LIBTEST method
@@ -1126,18 +1128,27 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 
 ;; ========= Pivot Reports ==================
 
+(defun do-results-impl (db handler)
+  "Handler is a function of two arguments: TEST-RUN and LIB-RESULT"
+    (dolist (test-run (getf db :runs))
+      (dolist (lib-result (run-results test-run))
+        (funcall handler test-run lib-result))))
+
+(defmacro do-results ((test-run-var lib-result-var db) &body body)
+  `(do-results-impl ,db 
+     #'(lambda (,test-run-var ,lib-result-var)
+         ,@body)))
+
 (defun build-joined-index (db)
   (let ((all-results (make-hash-table :test 'equal)))
-    (dolist (run (getf db :runs))
+    (do-results (run lib-result db)
       (let* ((run-descr (run-descr run))
              (lisp (getf run-descr :lisp))
-             (lib-world (getf run-descr :lib-world)))
-        (dolist (lib-result (run-results run))
-          (let ((libname (getf lib-result :libname)))
-            (push lib-result
-                  (gethash (list lisp lib-world libname) all-results))))))
+             (lib-world (getf run-descr :lib-world))
+             (libname (getf lib-result :libname)))
+        (push lib-result
+              (gethash (list lisp lib-world libname) all-results))))
     all-results))
-
 
 #|    
 HTML table properties:
@@ -1456,4 +1467,210 @@ as a parameter"
   (merge-pathnames "reports-generated/"
                    test-grid-config:*src-base-dir*))
 
+;; ========= Regressions between quicklisp distro versions ==================
 
+;;; Alternative representation of a library test status.
+;;;
+;;; Fail-list is an always sorted list of failures.
+;;;
+;;; Failures [elements of this list] are strings - failed test
+;;; names; or conses in the form (:unexpected-ok . "test-name")
+;;; - names of the tests which passed successfully despite
+;;; they are known to fail.
+;;;
+;;; The sort order is so that unexpected OKs are always
+;;; at the end.
+;;;
+;;; Example:
+;;; ("test-a2" "test-b" (:unexpected-ok "test-a1"))
+;;;
+;;; Fail-list may also somtimes be a single keyword: :OK, :FAIL or :NO-RESOURCE
+
+;; Sort order for failures
+(defun fail-less (fail-a fail-b)
+  (if (stringp fail-a)
+      (if (stringp fail-b)
+          (string< fail-a fail-b)  ; "test-a" "test-b"
+          t)                       ; "test-a" (:unexpected-ok . "test-b")
+      (if (stringp fail-b)
+          nil                      ; (:unexpected-ok . "test-a") "test-b"
+          (string< (cdr fail-a)    ; (:unexpected-ok . "test-a") (:unexpected-ok . "test-b")
+                   (cdr fail-b)))))
+
+;; Helper function for fail-list creation:
+(defun sort-fail-list (fail-list)
+  "Destructively sort the FAIL-LIST"
+  (sort fail-list #'fail-less))
+
+(assert (equal '("a" "a2" "a3" "b" "b2" "b3" (:unexpected-ok . "a2.2") (:unexpected-ok . "b2.2"))
+               (sort-fail-list '("a" (:unexpected-ok . "a2.2") "b3" "b" "a2" "a3" (:unexpected-ok . "b2.2") "b2"))))
+
+;; Convert the test status from the db.lisp form:
+;;    (:failed-tests ("test-a" "test-b") :known-to-fail ("test-c"))
+;; to the fail-list form:
+;;    ("test-a" "test-b" (:unexpected-ok . "test-c"))
+(defun fail-list (lib-status)
+  (cond ((eq :ok lib-status)
+         '())
+        ((eq :fail lib-status)
+         :fail)
+        ((eq :no-resource lib-status)
+         :no-resource)
+        ((listp lib-status)
+         (let* ((failures (getf lib-status :failed-tests))
+                (unexpected-oks (set-difference (getf lib-status :known-to-fail)
+                                                failures
+                                                :test #'string=)))
+
+           (sort-fail-list (append failures 
+                                   (mapcar #'(lambda (unexpected-ok-test) (cons :unexpected-ok unexpected-ok-test))
+                                           unexpected-oks)))))))
+(assert
+ (and (equal '() (fail-list :ok))
+      (eq :fail (fail-list :fail))
+      (eq :no-resource (fail-list :no-resource))
+      (equal '("a" "b") (fail-list '(:failed-tests ("a" "b"))))
+      (equal '("a" "b") (fail-list '(:failed-tests ("b" "a"))))
+      (equal '("a" "b" (:unexpected-ok . "c")) 
+             (fail-list '(:failed-tests ("a" "b") :known-to-fail ("b" "c"))))))
+
+(defun failures-different-p (fail-list-a fail-list-b)
+  (cond ((or (eq :no-resource fail-list-a)
+             (eq :no-resource fail-list-b))
+         nil)
+        ((and (eq :fail fail-list-a)
+              (not (null fail-list-b)))
+         nil)
+        ((and (eq :fail fail-list-b)
+              (not (null fail-list-a)))
+         nil)
+        (t (not (equal fail-list-a fail-list-b)))))
+
+(assert
+ (and (not (failures-different-p :fail :fail))
+      (not (failures-different-p '() '()))
+      (not (failures-different-p :no-resource :no-resource))
+      (not (failures-different-p :fail :no-resource))
+      (not (failures-different-p :ok :no-resource))
+      (not (failures-different-p :fail '("a" "b")))
+      (not (failures-different-p '("a" "b") :fail))
+      (not (failures-different-p '("a" (:unexpected-ok . "b"))
+                                 '("a" (:unexpected-ok . "b"))))
+      (failures-different-p '("a") '("b"))
+      (failures-different-p '("a") '("a" "b"))
+      (failures-different-p '("a") '("a" (:unexpected-ok . "b")))
+      (failures-different-p :fail '())))
+
+;; Refressions returns fail list which denotes
+;; what is wrong with new-fail-list, comparint
+;; to old-fail-list. Result is represented
+;; by a fail list which may be a list of failures 
+;; or just a symbol :FAIL (but never :OK or :NO-RESOURCE).
+;; Accepts any fail list as a parameter.
+(defun regressions (new-fail-list old-fail-list)
+  (labels (;; helper functions to write
+           ;; the COND below, see how
+           ;; the RESULTS-ARE is used
+           ;; in the COND below and
+           ;; the helpers will be obvious
+           (match (spec actual-value)
+             (or (eq spec actual-value)
+                 (and (listp actual-value)
+                      (listp spec))))
+           (results-are (new old)
+             (and (match new new-fail-list)
+                  (match old old-fail-list))))
+    (cond ((or (eq :no-resource new-fail-list)
+                (eq :no-resource old-fail-list))
+           nil)
+
+          ((results-are :fail :fail) nil)
+
+          ((results-are :fail '(some)) (if (null old-fail-list) :fail nil))
+          ((results-are '(some) :fail) nil)
+
+          ((results-are '(some) '(some)) 
+           (sort-fail-list (set-difference new-fail-list old-fail-list :test #'equal)))
+          
+          (t (error "Unexpected fail lists: ~S ~S" new-fail-list old-fail-list)))))
+
+(assert
+ (and (equal '("a" "b") (regressions '("a" "b") '("c")))
+      (equal '("a" "b") (regressions '("a" "b") '()))
+      (equal '() (regressions '("a" "b") '("a" "b")))
+      
+      (equal '() (regressions :fail :fail))
+      
+      (equal '() (regressions '("a" "b") :fail))
+      (equal '() (regressions :fail '("a" "b")))      
+      (eq :fail (regressions :fail '()))))
+
+
+;; Diff item represent two results
+;; of the same library under the same lisp,
+;; but in different quicklisp disto versions.
+(defclass quicklisp-diff-item ()
+  ((libname :initarg :libname :accessor libname) 
+   (lisp :initarg :lisp :accessor lisp) 
+   (new-status :initarg :new-status :accessor new-status) 
+   (old-status :initarg :old-status :accessor old-status)))
+
+(defun compare-quicklisps (db-index quicklisp-new quicklisp-old)
+  (let ((diff-items '())
+        (new-quicklisp-keys (remove-if-not #'(lambda (key) (string= (second key) quicklisp-new))
+                                           (hash-table-keys db-index))))
+    (dolist (key new-quicklisp-keys)
+      (let ((key-prev (copy-list key)))
+        (setf (second key-prev) quicklisp-old)
+        (let ((results (gethash key db-index))
+              (results-prev (gethash key-prev db-index)))
+          
+          ;; order our results-diff report by library name
+          (setf results (sort (copy-list results)
+                              (lambda (lib-result-a lib-result-b)
+                                (string< (getf lib-result-a :libname)
+                                         (getf lib-result-b :libname)))))
+          
+          (dolist (lib-result results)            
+            (let* ((fail-list (fail-list (getf lib-result :status)))
+                   (diff-lib-results-prev (remove-if-not #'(lambda (result-prev)
+                                                             (failures-different-p fail-list
+                                                                                   (fail-list (getf result-prev :status))))
+                                                         results-prev)))
+              (when (not (null diff-lib-results-prev))
+                (dolist (diff-lib-result-prev diff-lib-results-prev)
+                  (push (make-instance 'quicklisp-diff-item 
+                                       :libname (getf lib-result :libname)
+                                       :lisp (first key)
+                                       :new-status (getf lib-result :status)
+                                       :old-status (getf diff-lib-result-prev :status))                      
+                        diff-items))))))))
+    diff-items))
+
+(defun print-quicklisp-diff (ql-new ql-old diff-items)
+  ;; separate regressions from other diffs: 
+  ;; improvements and non-regressions-and-non-improvements
+  ;; (caN a diff be neither regresssion nor improvement?)
+  (let ((regressions '())
+        (other '()))
+    (dolist (diff-item diff-items)
+      (if (regressions (fail-list (new-status diff-item))
+                       (fail-list (old-status diff-item)))
+        (push diff-item regressions)
+        (push diff-item other)))
+
+    (flet ((print-diff-item (diff-item)
+             (let ((*print-pretty* nil))
+               (format t "~a, ~a:~%~a: ~a~%~a: ~a~%~%"
+                       (string-downcase (libname diff-item))
+                       (lisp diff-item)
+                       ql-new
+                       (new-status diff-item)
+                       ql-old
+                       (old-status diff-item)))))
+      (format t "~%~%************* Regressions *************~%")
+      (dolist (diff-item regressions)
+        (print-diff-item diff-item))
+      (format t "~%~%************* Improvements *************~%")
+      (dolist (diff-item other)
+        (print-diff-item diff-item)))))

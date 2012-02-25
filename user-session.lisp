@@ -58,6 +58,13 @@
 
 (generate-reports *db*)
 
+(let ((ql-new "quicklisp 2012-02-08")
+      (ql-old "quicklisp 2012-01-07")
+      (idx (build-joined-index *db*)))
+  (print-quicklisp-diff ql-new
+                        ql-old
+                        (compare-quicklisps idx ql-new ql-old)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; developer experiments
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
