@@ -89,12 +89,12 @@ just passed to the QUICKLISP:QUICKLOAD."
 ; We keep the below hardcoded failure in case we want to test
 ; the ECL 11.1.1 release (until new release is out).
 ; It is commented out or uncommented depending on what
-; ECL release we are goint to test.
+; ECL release we are going to test.
 
-  #+ecl
-  (progn
-    (format t "ECL 11.1.1 has bug causing a stack overflow on alexandria tests. http://sourceforge.net/tracker/?func=detail&aid=3463131&group_id=30035&atid=398053~%")
-    (return-from libtest :fail))
+  ;; #+ecl
+  ;; (progn
+  ;;   (format t "ECL 11.1.1 has bug causing a stack overflow on alexandria tests. http://sourceforge.net/tracker/?func=detail&aid=3463131&group_id=30035&atid=398053~%")
+  ;;   (return-from libtest :fail))
 
   ;; The test framework used: rt.
   (require-impl "rt-api")
