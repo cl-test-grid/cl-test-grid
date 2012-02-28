@@ -783,7 +783,12 @@ data (libraries test suites output and the run results) will be saved."
 
 (defun save-run-info (test-run directory)
   (let ((run-file (run-info-file directory)))
-    (write-to-file test-run run-file)))
+    (with-open-file (out run-file
+                         :direction :output
+                         :element-type 'character ;'(unsigned-byte 8) + flexi-stream
+                         :if-exists :supersede
+                         :if-does-not-exist :create)
+      (print-test-run out test-run))))
 
 (defun gae-blobstore-dir ()
   (merge-pathnames "gae-blobstore/lisp-client/" test-grid-config:*src-base-dir*))
@@ -907,6 +912,32 @@ to the cl-test-grid issue tracker:
                   (get-output-stream-string dest)
                   nil))))))
 
+(defun print-test-run (out test-run &optional (indent 0))
+  (let ((descr (getf test-run :descr)))
+    (format out
+            "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact (:email ~s))~%"
+            (getf descr :lisp)
+            (getf descr :lib-world)
+            (getf descr :time)
+            (getf descr :run-duration)
+            (getf (getf descr :contact) :email)))
+  (format out "~v,0t:results (" indent)
+  (print-list-elements out
+                       (sort (copy-list (getf test-run :results))
+                             #'string<
+                             :key #'(lambda (lib-result)
+                                      (getf lib-result :libname)))
+                       (format nil "~~%~~~Dt" (+ indent 10))
+                       #'(lambda (lib-result)
+                           (format out
+                                   "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
+                                   (getf lib-result :libname)
+                                   (print-test-status nil (getf lib-result :status))
+                                   (getf lib-result :test-duration)
+                                   (getf lib-result :log-byte-length)
+                                   (getf lib-result :log-blob-key))))
+  (format out "))"))
+
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
   (with-open-file (out stream-or-path
                        :direction :output
@@ -915,31 +946,11 @@ to the cl-test-grid issue tracker:
                        :if-does-not-exist :create)
     (format out "(:version ~a~%" (getf db :version))
     (format out " :runs (")
-    (print-list-elements out (getf db :runs) "~%~8t"
-                         #'(lambda (elem)
-                             (let ((descr (getf elem :descr)))
-                               (format out
-                                       "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact (:email ~s))~%"
-                                       (getf descr :lisp)
-                                       (getf descr :lib-world)
-                                       (getf descr :time)
-                                       (getf descr :run-duration)
-                                       (getf (getf descr :contact) :email)))
-                             (format out "~9t:results (")
-                             (print-list-elements out
-                                                  (sort (copy-list (getf elem :results))
-                                                        #'string< :key #'(lambda (lib-result)
-                                                                           (getf lib-result :libname)))
-                                                  "~%~19t"
-                                                  #'(lambda (lib-result)
-                                                      (format out
-                                                              "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
-                                                              (getf lib-result :libname)
-                                                              (print-test-status nil (getf lib-result :status))
-                                                              (getf lib-result :test-duration)
-                                                              (getf lib-result :log-byte-length)
-                                                              (getf lib-result :log-blob-key))))
-                             (format out "))")))
+    (print-list-elements out
+                         (getf db :runs)
+                         "~%~8t"
+                         #'(lambda (test-run)
+                             (print-test-run out test-run 9)))
     (format out "))")))
 
 (defun read-db (&optional (stream-or-path *standard-db-file*))
@@ -1292,8 +1303,8 @@ as a parameter"
   (format out "<th colspan=\"~A\">~A</th>" colspan text))
 
 (defun print-rotated-col-header (colspan text out)
-  ;; Calculate the heiht so that rotated text fits
-  ;; into it. Multiply the length of the text to
+  ;; Calculate the height so that rotated text fits
+  ;; into it: multiply the length of the text to
   ;; sine of the rotation (35 deegrees)
   ;; and add 3 ex for sure.
   (let ((css-height (+ (ceiling (* (sin (/ (* pi 35.0) 180.0))
@@ -1561,13 +1572,14 @@ as a parameter"
       (failures-different-p '("a") '("a" (:unexpected-ok . "b")))
       (failures-different-p :fail '())))
 
-;; Refressions returns fail list which denotes
-;; what is wrong with new-fail-list, comparint
-;; to old-fail-list. Result is represented
-;; by a fail list which may be a list of failures
-;; or just a symbol :FAIL (but never :OK or :NO-RESOURCE).
-;; Accepts any fail list as a parameter.
+
 (defun regressions (new-fail-list old-fail-list)
+  "Returns fail list which denotes
+what is worse with new-fail-list, comparing
+to old-fail-list. Result is represented
+by a fail list which may be a list of failures
+or just a symbol :FAIL (but never :OK or :NO-RESOURCE).
+Accepts any fail list as a parameter."
   (labels (;; helper functions to write
            ;; the COND below, see how
            ;; the RESULTS-ARE is used
