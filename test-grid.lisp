@@ -921,13 +921,13 @@ to the cl-test-grid issue tracker:
             (getf descr :time)
             (getf descr :run-duration)
             (getf (getf descr :contact) :email)))
-  (format out "~v,0t:results (" indent)
+  (format out "~v,0t:results (" (1+ indent))
   (print-list-elements out
                        (sort (copy-list (getf test-run :results))
                              #'string<
                              :key #'(lambda (lib-result)
                                       (getf lib-result :libname)))
-                       (format nil "~~%~~~Dt" (+ indent 10))
+                       (format nil "~~%~~~Dt" (+ indent 11))
                        #'(lambda (lib-result)
                            (format out
                                    "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
@@ -950,7 +950,7 @@ to the cl-test-grid issue tracker:
                          (getf db :runs)
                          "~%~8t"
                          #'(lambda (test-run)
-                             (print-test-run out test-run 9)))
+                             (print-test-run out test-run 8)))
     (format out "))")))
 
 (defun read-db (&optional (stream-or-path *standard-db-file*))
@@ -1496,6 +1496,9 @@ as a parameter"
 ;;; ("test-a2" "test-b" (:unexpected-ok "test-a1"))
 ;;;
 ;;; Fail-list may also somtimes be a single keyword: :OK, :FAIL or :NO-RESOURCE
+;;;
+;;; Note that fail-list does distinguish knoww failures from unknwown failures;
+;;; all of them are represented just by stings naming failed tests.
 
 ;; Sort order for failures
 (defun fail-less (fail-a fail-b)
