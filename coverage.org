@@ -385,6 +385,8 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 
 ** ECL seems to enter debugger randomily ignoring my handler-case :investigate:
 
+** cl-base64 fails on CMUCL (and on ABCL)                          :reported:
+   Reported to Kevin Rosenberg <kevin at rosenberg.net>
 * Quicklisp 2012-02-08
 ** alexandria: 9 new unexpected failures on CLISP dui to CLISP bug  :reported:
    Reported here:
