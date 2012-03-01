@@ -1,189 +1,15 @@
-* Milestone 0
-** DONE information about test run:
-   CLOSED: [2011-12-18 Вс 01:41]
-   lisp-version-string, 
-   lib-world, 
-   author contact (get it from some settings file), 
-   date, 
-   run-duration
-** DONE organize the database file format                                :db:
-   CLOSED: [2011-12-18 Вс 01:42]
-** DONE format the DB equally on all the Lisps                           :db:
-   CLOSED: [2012-03-01 Чт 05:02]
-   so that diff shows only new records.
-   (use pprint ?)
-   4h
-** DONE better decision for library name representation.
-   CLOSED: [2011-12-18 Вс 01:42]
-     This representation is used in the:
-     - libtest method parameter (eql specialized)
-     - in the database and testrun datastructure.
-     Possible alternatives:
-     a keyword
-        good for READ (package independent),
-        good for EQL specializer
-        good for GETF when working with the database
-     a symbol from the test-grid package
-        - good for EQL specializer
-        - package dependent in READ
-        - good for GETF when working with the database
-        - adds one more (unnecessary) way to represent a library 
-          in addition the specified for ASDF and Quicklisp
-     or a downcased string
-        - needs special handling in libtest eql specialization
-        - good ro READ (package independent)
-        - needs care to work with GETF when working with the database      
-** DONE A tool to generate fake DB content to test reporting
-   CLOSED: [2011-12-18 Вс 01:42]
-** DONE simpliest reporting to overview the libraries test statuses [6/6] :report:
-   CLOSED: [2012-01-13 Пт 14:26]
-*** DONE Test Runs report: every test run as a row in a table :report:testruns:
-    CLOSED: [2012-01-13 Пт 14:26]
-     + legend or a tooltip in the report for test statuses
-     + color for statuses
-     + use the online blob URL in the report
-*** DONE A pivot -like table report of library test results, allowing :report:pivot:
-    CLOSED: [2011-12-18 Вс 01:43]
-    rows/columns to be any of quicklisp distro, lisp version
-    library name. With grouping and sorging.
-*** DONE Fix rows and columns highlight in the pivot reports   :report:pivot:
-    CLOSED: [2012-01-13 Пт 14:24]
-*** DONE CSV export of the database to use it then with spreadsheets, :report:csv:
-    CLOSED: [2011-12-18 Вс 01:57]
-     google fusion tables, etc. Initial intent
-     was to format it as a pivot for various projections 
-     (by quicklisp releases, by platform, etc).
-     But neither google docs spreadsheet, nor google fusion
-     table allow as to format results as we want
-     (the main problem, it is impossible to use
-     a custom aggregation function for pivot
-     cells, because standard aggregation functions
-     are numeric, but we want a report cell
-     to represent test result(s) for a particular
-     library, i.e. :ok, :fail, :no-resource).
-     5h
-*** DONE Test that the test-duration field value                 :report:csv:
-    CLOSED: [2011-12-28 Ср 20:20]
-     (Common Lisp rational) can be read
-     by spreadsheet software (MS/Open Offices,
-     Google Spreadsheets).     
-*** DONE an overview page with brief explanation of and links to all the reports :report:overview:
-    CLOSED: [2011-12-18 Вс 02:18]
-** DONE simple UI (command line) with guiding messages                   :ui:
-   CLOSED: [2012-01-13 Пт 14:23]
-   for the user who runs the tests. Spend as little 
-   efforts as possible on this task, to release quickly.
-   4h
-** DONE readme with explanation of the project goal and              :readme:
-   CLOSED: [2012-01-10 Вт 05:05]
-   how to use it
-   5h
-** DONE change db format                                                 :db:
-   CLOSED: [2011-12-18 Вс 01:55]
-   + test run as plist (:descr <descr> :run-results <run-results>)
-     instead of just (<descr> <run-results>)
-   + run-results as a list instead of plist; libname
-     which was a plist key is now a property of the lib-result 
-     object. It is more convenient for standard mapping functions, 
-     instead of current do-lib-results.
-** DONE add more libraries: total number of 20 libraries              :agent:
-   CLOSED: [2011-12-18 Вс 01:55]
-   is enough for the beginning.
-   Result: we have 23 libraries.
-** DONE when loading of a library or library test system              :agent:
-   CLOSED: [2011-12-18 Вс 01:55]
-   fails, ensure we have the error description in the output
-   0.5h
-** DONE The "thank you" message: where exactly to submit test results?
-   CLOSED: [2011-12-18 Вс 01:55]
-   Specify an email or issue tracker of the cl-test-grid project.
-** DONE how to store public (central) database and failed library 
-   CLOSED: [2011-12-18 Вс 01:55]
-   outputs (files).
-   An appealing way is to store it in the same git repository 
-   on github, but with the std-out files the repository will 
-   quickly grow to an unconvenient size (for new people the
-   checkout procedure will be too long to be considered
-   convenient)
-   5h
-   Solution: files are stored in Google App Engine blob store.
-** DONE More detailed output for libraries using the RT test
-   CLOSED: [2011-12-18 Вс 01:55]
-   framework. Ensure the libs with other test framework
-   are all have sufficiently detailed output too.
-** DONE Log of the BABEL tests (generated by the Stefil test          :agent:
-   CLOSED: [2011-12-18 Вс 01:55]
-   framework) does not contain information about
-   errors. Add these details.
-** DONE Some libraries (babel and cl-json) stil print messages to 
-   CLOSED: [2011-12-18 Вс 01:56]
-   console, meaning their output is not only *standard-output*
-   and *standard-error*. Fix that, all the output
-   should be in the log files, but not on console.
-** DONE run the tests on all the implementations available for us.
-   CLOSED: [2012-01-12 Чт 09:45]
-** DONE publish the reports
-   CLOSED: [2011-12-28 Ср 06:57]
-** DONE test-run-info.lisp as attachment, instead of letter body     :server:
-   CLOSED: [2011-12-29 Чт 04:53]
-** DONE Fix lisp name sorting in pivot_lib-lisp_ql.html              :report:
-   CLOSED: [2011-12-28 Ср 08:05]
-** DONE finalize the decision what command user runs
-   CLOSED: [2011-12-20 Вт 04:19]
-   to performs the tests. Describe this main command
-   in the README (in the first paragraph).
-   The solution: user runs (load "agent.lisp"); precondition: quicklisp installed.
-** DONE When the settings file is populated, inform user where     :settings:
-   CLOSED: [2011-12-31 Сб 01:59]
-   it is stored (and to be sure user understood us, ask
-   him to press Enter before continuing).
-** DONE When asking user for email, explain him more carefully     :settings:
-   CLOSED: [2012-01-12 Чт 09:45]
-   how the email will be used and ensure there is a way
-   to avoid providing email.
-** DONE ECL: recover from stack alexandria overflow and continute tests :ecl:agent:
-   CLOSED: [2012-01-11 Ср 07:21]
-** DONE ABCL: recover from cl-ppcre hung-up and continue tests   :abcl:agent:
-   CLOSED: [2012-01-11 Ср 07:21]
-** DONE Optimize horizontal space in the reports: the headers        :report:
-   CLOSED: [2011-12-31 Сб 04:58]
-   take to much space
-** DONE more abstract accessor to parts of DB info instead of
-   CLOSED: [2011-12-20 Вт 04:29]
-   getf by properties: run-descr, run-results.
-   1h
-** DONE safe-read database
-   CLOSED: [2011-12-20 Вт 04:29]
-** DONE create a project with asdf system
-   CLOSED: [2011-12-20 Вт 04:29]
-   0.5h
-** DONE DB file path based on the asdf system location
-   CLOSED: [2011-12-20 Вт 04:29]
-   0.5h
-** DONE accumulate failed library output
-   CLOSED: [2011-12-20 Вт 04:29]
-   1h
-** DONE run-libtests: redirect the library output to log file directly
-   CLOSED: [2012-01-10 Вт 05:01]
-   without caching it in memory. It is more convenient when you are 
-   watching the testing process, you can observe the file being 
-   populated with logs (because some libraries, like flexi-streams, 
-   take time about minute to finish, and if during this minute
-   nithing happens it is not user-friendly)
-* Backlog
+* Focus
+** TODO automatically find regressions between quicklisp disto versions
+** TODO test results detailed to individual tests for remaining test frameworks
 ** TODO add more libraries
-** DONE new status, :expected-failure (or better :know-failure).
-   CLOSED: [2012-03-01 Чт 05:05]
-   Also maybe :unexpected-ok.
+** TODO automate processing of library results submited by email
+* Backlog
+** TODO Filters for pivot reports
 ** TODO Test status should include separate indicator for the library compilation and loading.
 ** TODO ABCL, cffi testts: return :no-resource if JNA is not available
-** TODO move closed TODO items to another (archive) file, so that the
-   web presentation of the TODO file will be understandable 
-   for the public.
 ** TODO Do not allow empty contributor contact in test results. Instead
    always ask the contributor to provide something, nickname,
    whatever.
-** TODO automate processing of library results submited by email
 ** TODO shorten the blob keys of online library logs
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
@@ -199,8 +25,6 @@
    list of library versions in this ql version
    (like this: http://www.quicklisp.org/beta/releases.html, but
    it's only for the latest QL).
-** DONE clean up the pivot reports Lisp code       :report:pivot:codequality:
-   CLOSED: [2012-03-01 Чт 05:02]
 ** TODO an informer which may be embedded into a library    :report:informer:
    project page, with reports about the test statuses 
    for this single library on various platforms with
