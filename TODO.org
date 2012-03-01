@@ -8,7 +8,8 @@
    run-duration
 ** DONE organize the database file format                                :db:
    CLOSED: [2011-12-18 Вс 01:42]
-** TODO format the DB equally on all the Lisps                           :db:
+** DONE format the DB equally on all the Lisps                           :db:
+   CLOSED: [2012-03-01 Чт 05:02]
    so that diff shows only new records.
    (use pprint ?)
    4h
@@ -170,10 +171,11 @@
    take time about minute to finish, and if during this minute
    nithing happens it is not user-friendly)
 * Backlog
-** TODO classify all the errors and register as tickets
-** TODO new status, :expected-failure (or better :know-failure).
+** TODO add more libraries
+** DONE new status, :expected-failure (or better :know-failure).
+   CLOSED: [2012-03-01 Чт 05:05]
    Also maybe :unexpected-ok.
-** TODO Test status should include separate indicator for the library compilationa and loading.
+** TODO Test status should include separate indicator for the library compilation and loading.
 ** TODO ABCL, cffi testts: return :no-resource if JNA is not available
 ** TODO move closed TODO items to another (archive) file, so that the
    web presentation of the TODO file will be understandable 
@@ -181,9 +183,10 @@
 ** TODO Do not allow empty contributor contact in test results. Instead
    always ask the contributor to provide something, nickname,
    whatever.
+** TODO automate processing of library results submited by email
+** TODO shorten the blob keys of online library logs
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
-** TODO add more libraries
 ** TODO how to enforce rebuild when loading an ASDF system?
    Important for ECL, because ECL bytecompiler and lisp-to-c
    compiler produce incompatible .fasl files, but ASDF
@@ -196,7 +199,8 @@
    list of library versions in this ql version
    (like this: http://www.quicklisp.org/beta/releases.html, but
    it's only for the latest QL).
-** TODO clean up the pivot reports Lisp code       :report:pivot:codequality:
+** DONE clean up the pivot reports Lisp code       :report:pivot:codequality:
+   CLOSED: [2012-03-01 Чт 05:02]
 ** TODO an informer which may be embedded into a library    :report:informer:
    project page, with reports about the test statuses 
    for this single library on various platforms with
@@ -259,3 +263,5 @@
 ** TODO should we save library log to a file only if the tests failed, 
    or always? (now we save log in any case)
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
+** TODO classify all the errors and register as tickets
+   this task is likely to be abandoned
