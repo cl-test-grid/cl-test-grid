@@ -1192,7 +1192,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 ;; The pivot reports code below does not know exact form
 ;; of the index key - in what order lib-world, lisp and libname
 ;; values are specified in the key. Moreover, the pivot reports code
-;; does not know we choses only these 3 properties for the pivot table
+;; does not know we chosen only these 3 properties for the pivot table
 ;; headers - it receives the property names for row and column headers
 ;; as parameters. All that the pivot code below knows, is that the
 ;; index is a hash table where keys store field values somehow,
@@ -1264,7 +1264,7 @@ returned list is specified by FIELDS."
 ;; row addresses lib-worlds are larger groups, and for
 ;; every lib-world we enumerate library names. In another
 ;; pivot report we may want other way around: to first group
-;; data by libnames, and then subdivede these groups by
+;; data by libnames, and then subdivide these groups by
 ;; lib-worlds. In this case row addresses would be
 ;;   ("alexandria" "quickisp 2011-12-07" )
 ;;   ("alexandria" "quickisp 2012-01-03" )
@@ -1287,7 +1287,7 @@ returned list is specified by FIELDS."
 ;; Take into account the specifics of HTML tables - the
 ;; headers which group several rows or columns, will
 ;; have a single table cell with rowspan or colspan atribute
-;; set to group size.
+;; set to the number of rows/columns in the group.
 ;;
 ;; Example HTML for a pivot report with row headers
 ;; containing lib-world and libname (in that order),
@@ -1305,11 +1305,13 @@ returned list is specified by FIELDS."
 
 |#
 
-;; If we put more thatn one field into the columns, we will
-;; have similar situation with colspans. When printing table
-;; row by row, cell by cell, we need to know what will be rowspan
-;; or colspan for particular <th> cell, and whether we already
-;; printed a <th> element for the current group. Lets calculate it.
+;; If we put more than one field into the columns, we whould
+;; have similar situation with colspans.
+;;
+;; When printing table row by row, cell by cell, we need to know
+;; what will be rowspan or colspan for particular <th> cell,
+;; and whether we already printed a <th> element for the current group.
+;; Lets calculate it.
 ;;
 ;; Subaddress is a prefix of row or column address.
 ;; It represents a some level of pivot groupping.
@@ -1329,7 +1331,7 @@ returned list is specified by FIELDS."
 
 ;; Here is the main calculation. Returns
 ;; a hash table mapping subaddresses to header-print-helper objects.
-;; For the above example of pivot HTML table, the hashtable
+;; For the above example of pivot HTML table, the hashtable calculated
 ;; for rows would be:
 ;;
 ;;  ("quicklisp 2012-01-03")              -> #S(span 3 printed nil)
@@ -1370,17 +1372,17 @@ returned list is specified by FIELDS."
                 (string-downcase (car (last subaddr))))
         (setf (printed helper) t)))))
 
-;; Two alternative ways of column headers.
+;; Two alternative ways of column headers printing.
 ;;
-;; This is used when we have enought horizontal space,
+;; This is used when we have enough horizontal space:
 ;; just a usual <th> element.
 (defun print-usual-col-header (colspan text out)
   (format out "<th colspan=\"~A\">~A</th>" colspan text))
 
 ;; When we need to save horizontal space, we print
-;; column headers rotages, so the headers do not
-;; requier more than 1ex from columns width
-;; (the data cell may make the column wider,
+;; column headers rotaget, so that headers do not
+;; require more than 1 ex from columns width
+;; (the data cell may make the column wider
 ;; than 1ex of course, but the headers never
 ;; increase the column width more than needed
 ;; for the data cells).
@@ -1412,14 +1414,14 @@ returned list is specified by FIELDS."
             (let ((colspan (span helper))
                   (text (string-downcase (car (last cell-addr)))))
               ;; Heuristic to determine if we need to rotate
-              ;; the column headers:
-              ;; more than 7 columns, and it is the last
-              ;; row of column header (BTW, this is the place where
-              ;; the code might need to be adjusted if
-              ;; we start using it for pivot reports with more than
-              ;; the 3 fields - :lib-world, :libname, :lisp -
-              ;; in the headers; actually, it's not perfect even
-              ;; now).
+              ;; the column headers: more than 7 columns, and it is the
+              ;; last row of column headers.
+              ;;
+              ;; (BTW, this is the place where the code might need to
+              ;; be adjusted whould we start using it for pivot reports
+              ;; by more than the 3 fields - :lib-world, :libname, :lisp -
+              ;; in the headers; actually; actually it's not perfect even
+              ;; now)
               (if (and (> col-count 7)
                        (= header-row-num (1- header-row-count)))
                   (print-rotated-col-header colspan text out)
