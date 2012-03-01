@@ -1205,7 +1205,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 
 (defun make-fields-values-setter (fields)
   "Returns a function accepting index key
-as the first parameter, field values as the rest parameters,
+as the first parameter, list of field values the second parameters,
 and destructively modifies the index key by setting the field
 values in it. Names of fields to modify in the index key,
 and their order is specified by FIELDS."
@@ -1725,12 +1725,20 @@ Accepts any fail list as a parameter."
    (old-status :initarg :old-status :accessor old-status)))
 
 (defun compare-quicklisps (db-index quicklisp-new quicklisp-old)
-  (let ((diff-items '())
-        (new-quicklisp-keys (remove-if-not #'(lambda (key) (string= (second key) quicklisp-new))
-                                           (hash-table-keys db-index))))
+  (let* ((diff-items '())
+         (lib-world-getter* (make-fields-values-getter '(:lib-world)))
+         (lib-world-setter* (make-fields-values-setter '(:lib-world)))
+         ;; todo: use alexandria:compose
+         (lib-world-getter (lambda (index-key) (car (funcall lib-world-getter* index-key))))
+         (lib-world-setter (lambda (index-key lib-world)
+                             (funcall lib-world-setter* index-key (list lib-world))))
+         (new-quicklisp-keys (remove quicklisp-new
+                                     (hash-table-keys db-index)
+                                     :key lib-world-getter
+                                     :test (complement #'string=))))
     (dolist (key new-quicklisp-keys)
       (let ((key-prev (copy-list key)))
-        (setf (second key-prev) quicklisp-old)
+        (funcall lib-world-setter key-prev quicklisp-old)
         (let ((results (gethash key db-index))
               (results-prev (gethash key-prev db-index)))
 
