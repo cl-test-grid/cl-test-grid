@@ -36,7 +36,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setf *db* '(:version 0 :runs ()))
-(setf *db* (read-db))
+(progn
+  (setf *db* (read-db))
+  nil)
 
 
 (progn
