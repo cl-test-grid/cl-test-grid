@@ -983,7 +983,26 @@ to the cl-test-grid issue tracker:
       (setf template (replace-str template (car subst) (cdr subst))))
     template))
 
-;; -------- end of templating -------------
+;; ------ file system location for generated reports ------
+
+(defun reports-dir ()
+  (merge-pathnames "reports-generated/"
+                   test-grid-config:*src-base-dir*))
+
+(defun with-report-file-impl (filename handler-func)
+  (let ((reports-dir (reports-dir)))
+    (with-open-file (out (merge-pathnames filename reports-dir)
+                         :direction :output
+                         :element-type 'character ;'(unsigned-byte 8) + flexi-stream
+                         :if-exists :supersede
+                         :if-does-not-exist :create)
+      (funcall handler-func out))))
+
+(defmacro with-report-file ((out-stream-var filename) &body body)
+  `(with-report-file-impl ,filename #'(lambda (,out-stream-var) ,@body)))
+
+;; ------ fake test results to test templating ------
+;; (outdated because rarely used - we now have enought real data in DB)
 
 (defun generate-fake-run-results ()
   "Generate fake test run result enought to test our reports."
@@ -1012,6 +1031,7 @@ to the cl-test-grid issue tracker:
             (push (make-run run-descr lib-results) runs))))
       runs)))
 
+;; ===================== Test Runs Report ====================
 (defvar *test-runs-report-template*
   (merge-pathnames "test-runs-report-template.html"
                    test-grid-config:*src-base-dir*))
@@ -1124,6 +1144,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
                 `(("{THE-TABLE}" . ,(test-runs-table-html db))
                   ("{TIME}" . ,(pretty-fmt-time (get-universal-time))))))
 
+;; ============== CSV export ==================
 (defun export-to-csv (out &optional (db *db*))
   (format out "Lib World,Lisp,Runner,LibName,Status,TestDuration~%")
   (dolist (run (getf db :runs))
@@ -1494,85 +1515,57 @@ returned list is specified by FIELDS."
                                     ("{TIME}" . ,(pretty-fmt-time (get-universal-time)))))
                     out)))
 
-(defun print-pivot-reports (db)
-  (let ((joined-index (build-joined-index db))
-        (reports-dir (reports-dir)))
-    (flet ((print-report (filename
-                          row-fields row-fields-sort-predicates
-                          col-fields col-fields-sort-predicates)
-             (with-open-file (out (merge-pathnames filename reports-dir)
-                                  :direction :output
-                                  :element-type 'character ;'(unsigned-byte 8) + flexi-stream
-                                  :if-exists :supersede
-                                  :if-does-not-exist :create)
-               (pivot-report-html out
-                                  joined-index
-                                  row-fields row-fields-sort-predicates
-                                  col-fields col-fields-sort-predicates))))
+(defun print-pivot-reports (joined-index)
+  (flet ((print-report (filename
+                        row-fields row-fields-sort-predicates
+                        col-fields col-fields-sort-predicates)
+           (with-report-file (out filename)
+             (pivot-report-html out
+                                joined-index
+                                row-fields row-fields-sort-predicates
+                                col-fields col-fields-sort-predicates))))
 
-      (print-report "pivot_ql_lisp-lib.html"
-                    '(:lib-world) (list #'string>)
-                    '(:lisp :libname) (list #'string< #'string<))
-      (print-report "pivot_ql_lib-lisp.html"
-                    '(:lib-world) (list #'string>)
-                    '(:libname :lisp) (list #'string< #'string<))
+    (print-report "pivot_ql_lisp-lib.html"
+                  '(:lib-world) (list #'string>)
+                  '(:lisp :libname) (list #'string< #'string<))
+    (print-report "pivot_ql_lib-lisp.html"
+                  '(:lib-world) (list #'string>)
+                  '(:libname :lisp) (list #'string< #'string<))
 
-      (print-report "pivot_lisp_lib-ql.html"
-                    '(:lisp) (list #'string<)
-                    '(:libname :lib-world) (list #'string< #'string>))
-      (print-report "pivot_lisp_ql-lib.html"
-                    '(:lisp) (list #'string<)
-                    '(:lib-world :libname) (list #'string> #'string<))
+    (print-report "pivot_lisp_lib-ql.html"
+                  '(:lisp) (list #'string<)
+                  '(:libname :lib-world) (list #'string< #'string>))
+    (print-report "pivot_lisp_ql-lib.html"
+                  '(:lisp) (list #'string<)
+                  '(:lib-world :libname) (list #'string> #'string<))
 
-      (print-report "pivot_lib_lisp-ql.html"
-                    '(:libname) (list #'string<)
-                    '(:lisp :lib-world) (list #'string< #'string>))
-      (print-report "pivot_lib_ql-lisp.html"
-                    '(:libname) (list #'string<)
-                    '(:lib-world :lisp) (list #'string> #'string<))
+    (print-report "pivot_lib_lisp-ql.html"
+                  '(:libname) (list #'string<)
+                  '(:lisp :lib-world) (list #'string< #'string>))
+    (print-report "pivot_lib_ql-lisp.html"
+                  '(:libname) (list #'string<)
+                  '(:lib-world :lisp) (list #'string> #'string<))
 
-      (print-report "pivot_ql-lisp_lib.html"
-                    '(:lib-world :lisp) (list #'string> #'string<)
-                    '(:libname) (list #'string<))
-      (print-report "pivot_ql-lib_lisp.html"
-                    '(:lib-world :libname) (list #'string> #'string<)
-                    '(:lisp) (list #'string<))
+    (print-report "pivot_ql-lisp_lib.html"
+                  '(:lib-world :lisp) (list #'string> #'string<)
+                  '(:libname) (list #'string<))
+    (print-report "pivot_ql-lib_lisp.html"
+                  '(:lib-world :libname) (list #'string> #'string<)
+                  '(:lisp) (list #'string<))
 
-      (print-report "pivot_lisp-lib_ql.html"
-                    '(:lisp :libname) (list #'string< #'string<)
-                    '(:lib-world) (list #'string>))
-      (print-report "pivot_lisp-ql_lib.html"
-                    '(:lisp :lib-world) (list #'string< #'string>)
-                    '(:libname) (list #'string<))
+    (print-report "pivot_lisp-lib_ql.html"
+                  '(:lisp :libname) (list #'string< #'string<)
+                  '(:lib-world) (list #'string>))
+    (print-report "pivot_lisp-ql_lib.html"
+                  '(:lisp :lib-world) (list #'string< #'string>)
+                  '(:libname) (list #'string<))
 
-      (print-report "pivot_lib-lisp_ql.html"
-                    '(:libname :lisp) (list #'string< #'string<)
-                    '(:lib-world) (list #'string>))
-      (print-report "pivot_lib-ql_lisp.html"
-                    '(:libname :lib-world) (list #'string< #'string>)
-                    '(:lisp) (list #'string<)))))
-
-(defun generate-reports (&optional (db *db*))
-
-  (with-open-file (out (merge-pathnames "test-runs-report.html"
-                                        (reports-dir))
-                       :direction :output
-                       :if-exists :supersede
-                       :if-does-not-exist :create)
-    (write-sequence (test-runs-report db) out))
-
-  (with-open-file (out (merge-pathnames "export.csv"
-                                        (reports-dir))
-                       :direction :output
-                       :if-exists :supersede
-                       :if-does-not-exist :create)
-    (export-to-csv out))
-
-  (print-pivot-reports db))
-
-(defun reports-dir ()
-  (merge-pathnames "reports-generated/"
-                   test-grid-config:*src-base-dir*))
+    (print-report "pivot_lib-lisp_ql.html"
+                  '(:libname :lisp) (list #'string< #'string<)
+                  '(:lib-world) (list #'string>))
+    (print-report "pivot_lib-ql_lisp.html"
+                  '(:libname :lib-world) (list #'string< #'string>)
+                  '(:lisp) (list #'string<))))
 
 ;; ========= Regressions between quicklisp distro versions ==================
 
@@ -1766,7 +1759,7 @@ Accepts any fail list as a parameter."
                         diff-items))))))))
     diff-items))
 
-(defun print-quicklisp-diff (ql-new ql-old diff-items)
+(defun print-quicklisp-diff (destination ql-new ql-old diff-items)
   ;; separate result diffs into two categories:
   ;; diffs which have regressions, and diffs which do
   ;; not have regressions - only improvements
@@ -1780,16 +1773,49 @@ Accepts any fail list as a parameter."
 
     (flet ((print-diff-item (diff-item)
              (let ((*print-pretty* nil))
-               (format t "~a, ~a:~%~a: ~a~%~a: ~a~%~%"
+               (format destination "~a, ~a:~%~a: ~a~%~a: ~a~%~%"
                        (string-downcase (libname diff-item))
                        (lisp diff-item)
                        ql-new
                        (new-status diff-item)
                        ql-old
                        (old-status diff-item)))))
-      (format t "~%~%************* Have Regressions *************~%")
+      (format destination "~%~%***************************************************************************~%")
+      (format destination "* test results diff between ~A and ~A *~%" ql-new ql-old)
+      (format destination "***************************************************************************~%~%")
+      (format destination "************* Have Regressions *************~%")
       (dolist (diff-item have-regressions)
         (print-diff-item diff-item))
-      (format t "~%~%************* Improvements Only *************~%")
+      (format destination "************* Improvements Only *************~%")
       (dolist (diff-item improvements-only)
         (print-diff-item diff-item)))))
+
+(defun print-all-quicklisps-diff-report (destination joined-index)
+  (let ((quicklisps (mapcar #'car (distinct-addresses joined-index '(:lib-world)))))
+    (loop
+       for qls on (sort quicklisps #'string>)
+       do (let ((ql-new (first qls))
+                (ql-old (second qls)))
+            (when ql-old ;; not reached the end of list yet
+              (print-quicklisp-diff destination
+                                    ql-new
+                                    ql-old
+                                    (compare-quicklisps joined-index ql-new ql-old)))))))
+
+;; =========== print all the reports at once =============
+
+(defun generate-reports (&optional (db *db*))
+
+  (with-report-file (out "test-runs-report.html")
+    (write-sequence (test-runs-report db) out))
+
+  (with-report-file (out "export.csv")
+    (export-to-csv out))
+
+  (let ((joined-index (build-joined-index db)))
+
+    (print-pivot-reports joined-index)
+
+    (with-report-file (out "quicklisps-test-diff.txt")
+      (print-all-quicklisps-diff-report out joined-index))))
+
