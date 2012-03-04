@@ -260,7 +260,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 ;; values are specified in the key. Moreover, the pivot reports code
 ;; does not know we chosen only these 3 properties for the pivot table
 ;; headers - it receives the property names for row and column headers
-;; as parameters. All that the pivot code below knows, is that the
+;; as parameters. All what the pivot code below knows, is that the
 ;; index is a hash table where keys store field values somehow,
 ;; and that the hash tabble values are lists of results.
 ;;
@@ -374,21 +374,48 @@ returned list is specified by FIELDS."
 ;; If we put more than one field into the columns, we whould
 ;; have similar situation with colspans.
 ;;
-;; When printing table row by row, cell by cell, we need to know
+;; When printing the table row by row, cell by cell, we need to know
 ;; what will be rowspan or colspan for particular <th> cell,
-;; and whether we already printed a <th> element for the current group.
-;; Lets calculate it.
+;; and whether the row we are currently printing should have the 
+;; <th rowspan="Y"> element, or the TH was already printed in a
+;; previous row in the same group. (Similar for <th colspan="X"> 
+;; elements in the rolumn headers).
 ;;
-;; Subaddress is a prefix of row or column address.
-;; It represents a some level of pivot groupping.
+;; Lets precalculate some usefull information, which will allow
+;; us to make the correct decision.
+;;
+;; A helper function:
 (defun subaddrs (row-address)
+  "Subaddress is a prefix of row or column address.
+Every subaddress represents some level of pivot groupping."
   (nreverse (maplist #'reverse (reverse row-address))))
 
 (assert (equal '((1) (1 2) (1 2 3))
                (subaddrs '(1 2 3))))
 
-;; For every subaddress (group) we calculate a
-;; it's span (number of rows/columns in the group),
+;; Note, that every address of length N has
+;; N subaddresses. 
+;; E.g. (length (subaddrs '("x" "y" "z"))) == 3.
+;;
+;; And note also that every subadderss is a column 
+;; in a row header, or a row in a column header.
+;; 
+;; [     ql  ]
+;; [     lisp]
+;; [ lib     ]
+;;
+;; Here row addresses contain ony one component -
+;; lib name: ("alexandria"), ("babel"), etc.,
+;; and row headers need only one column.
+;;
+;; Column addresses contains two components:
+;; quicklisp name and lisp name: 
+;; ("quicklisp 2012-01-08" "ccl-1"),
+;; ("quicklisp 2012-01-08" "clisp-2"), 
+;; and the table column headers occupy two rows.
+
+;; For every subaddress (group) we calculate it's span 
+;; (number of rows/columns in the group),
 ;; and store a flag, whether we already printed
 ;; the <th>.
 (defstruct (header-print-helper :conc-name)
