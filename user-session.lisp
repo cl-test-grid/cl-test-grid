@@ -11,7 +11,7 @@
 
 (pushnew "C:/Users/anton/projects/cl-test-grid/" asdf:*central-registry* :test #'equal)
 
-(asdf:operate 'asdf:load-op :test-grid)
+(asdf:operate 'asdf:load-op :test-grid-reporting)
 
 ;; for development of GAE blob storage
 ;;(setf test-grid::*gae-blobstore-base-url* "http://localhost:8080")
@@ -84,4 +84,3 @@
 (setf (getf *db* :runs) (generate-fake-run-results))
 
 (print-pivot-reports *db*)
-
