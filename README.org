@@ -35,7 +35,7 @@ Collaborative testing of Common Lisp libraries.
      changes cause bugs on implementations not available
      to the author. Otherwise author may receive notification
      about the bug years after he made the change, and 
-     thus the cost of fixing the bug may be much higher tham
+     thus the cost of fixing the bug may be much higher than
      fixing it week or two after the change.
   2. The same benefit for CL implementors - when they
      release new version, run test suites of large
