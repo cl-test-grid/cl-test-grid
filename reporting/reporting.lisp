@@ -1,4 +1,7 @@
-(in-package #:test-grid)
+(defpackage #:test-grid-reporting
+  (:use :cl))
+
+(in-package #:test-grid-reporting)
 
 ;; -------------- the reporting source code directory -----------;; 
 
@@ -38,7 +41,7 @@
                  (subseq template (+ pos (length placeholder))))))
 
 (defun fmt-template (file substitutions-alist)
-  (let ((template (file-string file)))
+  (let ((template (test-grid::file-string file)))
     (dolist (subst substitutions-alist)
       (setf template (replace-str template (car subst) (cdr subst))))
     template))
@@ -67,10 +70,10 @@
                                                                   "other-user@gmail.com"
                                                                   "foo@gmail.com")))))
                 (lib-results '()))
-            (dolist (lib *all-libs*)
+            (dolist (lib test-grid::*all-libs*)
               (push (list :libname lib :status (random-status) :log-char-length 50)
                     lib-results))
-            (push (make-run run-descr lib-results) runs))))
+            (push (test-grid::make-run run-descr lib-results) runs))))
       runs)))
 
 ;; ===================== Test Runs Report ====================
@@ -99,11 +102,11 @@
 ;; on blobstore here.
 (defun blob-uri (blob-key)
   (format nil "~A/blob?key=~A"
-          *gae-blobstore-base-url* blob-key))
+          test-grid::*gae-blobstore-base-url* blob-key))
 
 (defun lib-log-local-uri (test-run lib-result)
   (format nil "file://~A~A"
-          (run-directory (run-descr test-run))
+          (test-grid::run-directory (test-grid::run-descr test-run))
           (string-downcase (getf lib-result :libname))))
 
 (defun lib-log-uri (lib-result)
@@ -123,7 +126,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
                    (if (null known-to-fail)
                        :ok
                        :unexpected-ok))
-                  ((set= failed-tests known-to-fail :test #'string=)
+                  ((test-grid::set= failed-tests known-to-fail :test #'string=)
                    :known-fail)
                   (t :fail))))))
 
@@ -154,44 +157,44 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
                 (single-letter-status status)))))
 
 (defun test-runs-table-html (&optional
-                             (db *db*)
+                             (db test-grid::*db*)
                              (status-renderer 'render-single-letter-status))
   (with-output-to-string (out)
     (write-line "<table cellspacing=\"1\" class=\"tablesorter\">" out)
 
     (princ "<thead><tr style=\"vertical-align: bottom;\"><th>Start Time</th><th>Lib World</th><th>Lisp</th><th>Runner</th>" out)
-    (dolist (lib *all-libs*)
+    (dolist (lib test-grid::*all-libs*)
       (format out "<th>~A</th>" (vertical-html lib)))
     (write-line "</tr></thead>" out)
 
     (write-line "<tbody>" out)
     (dolist (run (getf db :runs))
-      (let ((run-descr (run-descr run))
-            (lib-statuses (run-results run)))
+      (let ((run-descr (test-grid::run-descr run))
+            (lib-statuses (test-grid::run-results run)))
         (format out "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td>"
-                (pretty-fmt-time (getf run-descr :time))
+                (test-grid::pretty-fmt-time (getf run-descr :time))
                 (getf run-descr :lib-world)
                 (getf run-descr :lisp)
                 (getf (getf run-descr :contact) :email))
-        (dolist (lib *all-libs*)
+        (dolist (lib test-grid::*all-libs*)
           (format out "<td>~A</td>"
                   (funcall status-renderer run (find lib lib-statuses
-                                                     :key (getter :libname)))))
+                                                     :key (test-grid::getter :libname)))))
         (write-line "</tr>" out)))
     (write-line "</tbody>" out)
     (write-line "</table>" out)))
 
-(defun test-runs-report (&optional (db *db*))
+(defun test-runs-report (&optional (db test-grid::*db*))
   (fmt-template *test-runs-report-template*
                 `(("{THE-TABLE}" . ,(test-runs-table-html db))
-                  ("{TIME}" . ,(pretty-fmt-time (get-universal-time))))))
+                  ("{TIME}" . ,(test-grid::pretty-fmt-time (get-universal-time))))))
 
 ;; ============== CSV export ==================
-(defun export-to-csv (out &optional (db *db*))
+(defun export-to-csv (out &optional (db test-grid::*db*))
   (format out "Lib World,Lisp,Runner,LibName,Status,TestDuration~%")
   (dolist (run (getf db :runs))
-    (let ((run-descr (run-descr run)))
-      (dolist (lib-result (run-results run))
+    (let ((run-descr (test-grid::run-descr run)))
+      (dolist (lib-result (test-grid::run-results run))
         (format out "~a,~a,~a,~a,~a,~a~%"
                 (getf run-descr :lib-world)
                 (getf run-descr :lisp)
@@ -233,7 +236,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 (defun do-results-impl (db handler)
   "Handler is a function of two arguments: TEST-RUN and LIB-RESULT"
     (dolist (test-run (getf db :runs))
-      (dolist (lib-result (run-results test-run))
+      (dolist (lib-result (test-grid::run-results test-run))
         (funcall handler test-run lib-result))))
 
 (defmacro do-results ((test-run-var lib-result-var db) &body body)
@@ -244,7 +247,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 (defun build-joined-index (db)
   (let ((all-results (make-hash-table :test 'equal)))
     (do-results (run lib-result db)
-      (let* ((run-descr (run-descr run))
+      (let* ((run-descr (test-grid::run-descr run))
              (lisp (getf run-descr :lisp))
              (lib-world (getf run-descr :lib-world))
              (libname (getf lib-result :libname)))
@@ -345,7 +348,7 @@ returned list is specified by FIELDS."
                                 distinct)
                        t))
              joined-index)
-    (hash-table-keys distinct)))
+    (test-grid::hash-table-keys distinct)))
 
 ;; Take into account the specifics of HTML tables - the
 ;; headers which group several rows or columns, will
@@ -503,11 +506,11 @@ returned list is specified by FIELDS."
   (princ "<table border=\"1\" class=test-table>" out)
 
   (let* ((row-comparator #'(lambda (rowa rowb)
-                             (list< row-fields-sort-predicates
-                                    rowa rowb)))
+                             (test-grid::list< row-fields-sort-predicates
+                                               rowa rowb)))
          (col-comparator #'(lambda (cola colb)
-                             (list< col-fields-sort-predicates
-                                    cola colb)))
+                             (test-grid::list< col-fields-sort-predicates
+                                               cola colb)))
          (rows (sort (distinct-addresses joined-index row-fields)
                      row-comparator))
          (row-spans (calc-spans rows))
@@ -554,7 +557,7 @@ returned list is specified by FIELDS."
 
     (write-sequence (fmt-template *pivot-report-template*
                                   `(("{THE-TABLE}" . ,table)
-                                    ("{TIME}" . ,(pretty-fmt-time (get-universal-time)))))
+                                    ("{TIME}" . ,(test-grid::pretty-fmt-time (get-universal-time)))))
                     out)))
 
 (defun print-pivot-reports (joined-index)
@@ -808,7 +811,7 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
                              (funcall lib-world-setter* index-key (list lib-world))))
          (lisp-getter (lambda (index-key) (car (funcall lisp-getter* index-key))))
          (new-quicklisp-keys (remove quicklisp-new
-                                     (hash-table-keys db-index)
+                                     (test-grid::hash-table-keys db-index)
                                      :key lib-world-getter
                                      :test (complement #'string=))))
     (dolist (key new-quicklisp-keys)
@@ -875,7 +878,7 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
 
 ;; =========== print all the reports at once =============
 
-(defun generate-reports (&optional (db *db*))
+(defun generate-reports (&optional (db test-grid::*db*))
 
   (with-report-file (out "test-runs-report.html")
     (write-sequence (test-runs-report db) out))
