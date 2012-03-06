@@ -828,7 +828,8 @@ data (libraries test suites output and the run results) will be saved."
                       (run-results run-info))))
       ;; finally, save the updated run-info with blobkeys
       ;; to the file. Returns the run-info.
-      (save-run-info run-info test-run-dir))))
+      (save-run-info run-info test-run-dir)
+      run-info)))
 
 (defun submit-results (test-run-dir)
   (let* ((blobstore (get-blobstore))
