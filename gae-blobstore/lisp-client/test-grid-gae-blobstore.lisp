@@ -72,6 +72,7 @@
               id-pathname-alist))))
 
 (defmethod test-grid-blobstore:submit-run-info ((blobstore blobstore) run-info)
+  (assert (not (null run-info)))
   (let ((response (drakma:http-request (format nil "~A/submit-run-info" (base-url blobstore))
                                        :method :post
                                        :parameters `(("run-info" . ,(prin1-to-string run-info))))))
