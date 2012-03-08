@@ -7,7 +7,7 @@
 (asdf:defsystem #:test-grid-tests
   :version "0.1.0"
   :serial t
-  :depends-on (#:test-grid)
+  :depends-on (#:test-grid #:test-grid-reporting)
   :components ((:file "test-grid-tests")))
 
 (defpackage #:test-grid-tests-config (:export #:*src-base-dir*))
