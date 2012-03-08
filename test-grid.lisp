@@ -70,6 +70,10 @@ just passed to the QUICKLISP:QUICKLOAD."
   "All the libraries currently supported by the test-grid.")
 
 
+(defun clean-rt ()
+  (require-impl "rt-api")
+  (rt-api:clean))
+
 (defun run-rt-test-suite()
   (require-impl "rt-api")
 
@@ -104,8 +108,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;;   (return-from libtest :fail))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :alexandria-tests)
   (quicklisp:quickload :alexandria-tests)
 
@@ -137,8 +140,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :trivial-features)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :trivial-features-tests)
 
   ;; Load cffi-grovel which is used in trivial-features-tests.asd,
@@ -151,8 +153,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :cffi)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :cffi-tests)
 
   ;; CFFI tests work with a small test C library.
@@ -216,8 +217,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     (return-from libtest :fail))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :usocket-test)
 
 ;  (asdf:operate 'asdf:load-op :usocket-test :force t)
@@ -313,8 +313,7 @@ suite according to the FiveAM convention."
 (defmethod libtest ((library-name (eql :anaphora)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :anaphora-test)
   ;; anaphora-test is defined in anaphora.asd,
   ;; therefore to reload :anaphora-test
@@ -351,8 +350,7 @@ suite according to the FiveAM convention."
 (defmethod libtest ((library-name (eql :trivial-garbage)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :trivial-garbage)  ; yes, trivial-garbage but not trivial-garbage-tests,
                                         ; because the trivial-garbage-tests system is defined
                                         ; in the same trivial-garbage.asd and neither
@@ -367,8 +365,7 @@ suite according to the FiveAM convention."
 (defmethod libtest ((library-name (eql :iterate)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :iterate-tests)
   (asdf:clear-system :iterate)
 
@@ -419,8 +416,7 @@ suite according to the FiveAM convention."
 
 (defmethod libtest ((library-name (eql :cl-cont)))
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :cl-cont-test)
   (quicklisp:quickload :cl-cont-test)
   (run-rt-test-suite))
