@@ -51,7 +51,8 @@ For these known test-grid componetns REQUIRE-IMPL loads
 the implementation. Otherwise the API parameter is
 just passed to the QUICKLISP:QUICKLOAD."
   (setf api (string-downcase api))
-  (let* ((known-impls '(("rt-api" . "rt-api-impl")))
+  (let* ((known-impls '(("rt-api" . "rt-api-impl")
+                        ("lift-api" . "lift-api-impl")))
          (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
                                api)))
         (quicklisp:quickload impl-asdf-system)))
@@ -83,6 +84,12 @@ just passed to the QUICKLISP:QUICKLOAD."
 
     (list :failed-tests (mapcar #'string-downcase all-failures)
           :known-to-fail (mapcar #'string-downcase (rt-api:known-to-fail)))))
+
+(defun run-lift-test-suite (test-suite-name)
+  (require-impl "lift-api")
+  (let ((result (lift-api:run-test-suite test-suite-name)))
+    (list :failed-tests (lift-api:failed-tests result)
+          :known-to-fail (lift-api:known-to-fail test-suite-name))))
 
 (defmethod libtest ((library-name (eql :alexandria)))
 
@@ -228,7 +235,6 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   (run-rt-test-suite))
 
-
 (defmethod libtest ((library-name (eql :flexi-streams)))
 
   ;; The test framework used: custom.
@@ -284,40 +290,10 @@ suite according to the FiveAM convention."
   (funcall (intern (symbol-name '#:do-tests)
                    (find-package '#:cl-base64-tests))))
 
-(defun lift-tests-ok-p (lift-tests-result)
-  "Helper function to work with Lift test framework.
-Examines the tests result object and retuns T is all
-the tests are successull and NIL otherwise."
-  (let ((errors (intern (symbol-name '#:errors) :lift))
-        (expected-errors (intern (symbol-name '#:expected-errors) :lift))
-        (failures (intern (symbol-name '#:failures) :lift))
-        (expected-failures (intern (symbol-name '#:expected-failures) :lift)))
-    (zerop
-     (+ (length (set-difference (funcall errors lift-tests-result)
-                                (funcall expected-errors lift-tests-result)))
-        (length (set-difference (funcall failures lift-tests-result)
-                                (funcall expected-failures lift-tests-result)))))))
-
-(defun run-lift-tests (suite-name)
-  "Helper function to work with the Lift test framework.
-Runs the specified Lift test suite and returns T
-if all the tests succeeded and NIL othersize."
-  (let ((run (intern (symbol-name '#:run-tests) :lift))
-        (lift-debug-output (intern (string :*lift-debug-output*) :lift)))
-    ;; bind lift:*debug-output* to *standard-output*,
-    ;; wich is then redirected to file by run-libtests.
-    (progv (list lift-debug-output) (list *standard-output*)
-      (let ((result (funcall run :suite suite-name)))
-        (describe result *standard-output*)
-        (lift-tests-ok-p result)))))
-
 (defmethod libtest ((library-name (eql :trivial-backtrace)))
-
   ;; The test framework used: lift.
-
   (quicklisp:quickload :trivial-backtrace-test)
-
-  (run-lift-tests :trivial-backtrace-test))
+  (run-lift-test-suite :trivial-backtrace-test))
 
 (defmethod libtest ((library-name (eql :puri)))
 
@@ -417,7 +393,7 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :cl-ppcre)
   (quicklisp:quickload :metabang-bind-test)
 
-  (run-lift-tests :metabang-bind-test))
+  (run-lift-test-suite :metabang-bind-test))
 
 (defmethod libtest ((library-name (eql :cl-json)))
   ;; The test framework used: fiveam.
@@ -434,12 +410,12 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :cl-containers)))
   ;; The test framework used: lift.
   (quicklisp:quickload :cl-containers-test)
-  (run-lift-tests :cl-containers-test))
+  (run-lift-test-suite :cl-containers-test))
 
 (defmethod libtest ((library-name (eql :metatilities-base)))
   ;; The test framework used: lift.
   (quicklisp:quickload :metatilities-base-test)
-  (run-lift-tests :metatilities-base-test))
+  (run-lift-test-suite :metatilities-base-test))
 
 (defmethod libtest ((library-name (eql :cl-cont)))
   ;; The test framework used: rt.
@@ -452,17 +428,17 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :moptilities)))
   ;; The test framework used: lift.
   (quicklisp:quickload :moptilities-test)
-  (run-lift-tests :moptilities-test))
+  (run-lift-test-suite :moptilities-test))
 
 (defmethod libtest ((library-name (eql :trivial-timeout)))
   ;; The test framework used: lift.
   (quicklisp:quickload :trivial-timeout-test)
-  (run-lift-tests :trivial-timeout-test))
+  (run-lift-test-suite :trivial-timeout-test))
 
 (defmethod libtest ((library-name (eql :metatilities)))
   ;; The test framework used: lift.
   (quicklisp:quickload :metatilities-test)
-  (run-lift-tests :metatilities-test))
+  (run-lift-test-suite :metatilities-test))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
