@@ -4,8 +4,7 @@
 (in-package #:test-grid-tests)
 
 (defun test-rt-api ()
-  (test-grid::require-impl '#:rt-api)
-  (rt-api:clean)
+  (test-grid::clean-rt)
 
   (asdf:clear-system :rt-sample-test-suite)
   (asdf:operate 'asdf:load-op :rt-sample-test-suite)
@@ -19,7 +18,6 @@
                           :test #'string=))))
 
 (defun test-lift-api ()
-  (test-grid::require-impl '#:lift-api)
   (asdf:operate 'asdf:load-op :lift-sample-test-suite)
   (let ((status (test-grid::run-lift-test-suite :sample-lift-suite)))
     (and (test-grid::set= (getf status :failed-tests)
@@ -39,6 +37,15 @@
 			    "sample-lift-suite.expected-error-but-fail-test")
 			  :test #'string=))))
 
+(defun test-fiveam-api ()
+  (asdf:operate 'asdf:load-op :fiveam-sample-test-suite)
+  (let ((status (test-grid::run-fiveam-test-suite :sample-fiveam-suite)))
+    (and (test-grid::set= (getf status :failed-tests)
+			  '("fiveam-sample-test-suite.error-test"
+			    "fiveam-sample-test-suite.fail-test")
+			  :test #'string=)
+	 (null (getf status :known-to-fail)))))
+
 (defun test-aggregated-status ()
   (and (eq :ok (test-grid-reporting::aggregated-status :ok))
        (eq :fail (test-grid-reporting::aggregated-status :fail))
@@ -52,4 +59,5 @@
 ; to run the tests: 
 (assert (and (test-rt-api)
 	     (test-lift-api)
+	     (test-fiveam-api)
 	     (test-aggregated-status)))

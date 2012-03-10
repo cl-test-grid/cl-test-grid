@@ -52,7 +52,8 @@ the implementation. Otherwise the API parameter is
 just passed to the QUICKLISP:QUICKLOAD."
   (setf api (string-downcase api))
   (let* ((known-impls '(("rt-api" . "rt-api-impl")
-                        ("lift-api" . "lift-api-impl")))
+                        ("lift-api" . "lift-api-impl")
+                        ("fiveam-api" . "fiveam-api-impl")))
          (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
                                api)))
         (quicklisp:quickload impl-asdf-system)))
@@ -94,6 +95,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   (let ((result (lift-api:run-test-suite test-suite-name)))
     (list :failed-tests (lift-api:failed-tests result)
           :known-to-fail (lift-api:known-to-fail test-suite-name))))
+
+(defun run-fiveam-test-suite (test-suite-spec)
+  (require-impl "fiveam-api")
+  (let ((result (fiveam-api:run-test-suite test-suite-spec)))
+    (list :failed-tests (fiveam-api:failed-tests result)
+          :known-to-fail '())))
 
 (defmethod libtest ((library-name (eql :alexandria)))
 
@@ -245,22 +252,6 @@ just passed to the QUICKLISP:QUICKLOAD."
   (funcall (intern (symbol-name :run-all-tests)
                    (find-package :flexi-streams-test))))
 
-(defun run-fiveam-suite (fiveam-test-spec)
-  "Runs the specified test suite created with the FiveAM
-test framework. Returns T if all the tests succeeded and
-NIL otherwise. The FIVEAM-TEST-SPEC specifies the tests
-suite according to the FiveAM convention."
-  (let ((run (intern (string '#:run) :fiveam))
-        (explain (intern (string '#:explain) :fiveam))
-        (detailed-text-explainer (intern (string '#:detailed-text-explainer) :fiveam))
-        (test-failure-type (intern (string '#:test-failure) :fiveam)))
-
-    (let ((results (funcall run fiveam-test-spec)))
-      (funcall explain (make-instance detailed-text-explainer) results *standard-output*)
-      (zerop (count-if (lambda (res)
-                         (typep res test-failure-type))
-                       results)))))
-
 (defmethod libtest ((library-name (eql :bordeaux-threads)))
 
   #+cmucl
@@ -274,7 +265,7 @@ suite according to the FiveAM convention."
 
   (quicklisp:quickload :bordeaux-threads-test)
 
-  (run-fiveam-suite :bordeaux-threads))
+  (run-fiveam-test-suite :bordeaux-threads))
 
 (defmethod libtest ((library-name (eql :cl-base64)))
 
@@ -402,7 +393,7 @@ suite according to the FiveAM convention."
     (quicklisp:quickload :cl-json)
 
     (quicklisp:quickload :cl-json.test)
-    (run-fiveam-suite (intern (symbol-name '#:json) :json-test))))
+    (run-fiveam-test-suite (intern (symbol-name '#:json) :json-test))))
 
 (defmethod libtest ((library-name (eql :cl-containers)))
   ;; The test framework used: lift.
