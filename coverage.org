@@ -1,3 +1,5 @@
+;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8;  -*-
+
 * Libraries
 ** Statistics 2010-11-10
 
@@ -135,7 +137,9 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
     169 osicat
     168 parse-number
     167 cl-containers
-* CL implementations
+;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; -*-
+
+* CL implementations (outdated info)
   CLISP/Windows - OK
   SBCL/Windows - OK
   CCL/Windows - OK
@@ -195,7 +199,7 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    hash-tables).
 
 ** cffi                                                            :reported:
-   Tested only on Linux, has different number (of expected and unexpected)
+   Has different number (of expected and unexpected)
    failures on different Lisps.
    
    Reported to cffi-devel:
@@ -211,7 +215,7 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    Actual value: NIL.
 
    Reported to the weblocks google group (as cl-cont doesn't have
-   separate mailing list):
+   a separate mailing list):
    https://groups.google.com/forum/#!topic/weblocks/OyFvVsFh-Fk
 
 ** cl-json                                                 :expected_failure:
@@ -219,12 +223,18 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    to not forget to implement a feature: calling cl-json:bind
    inside of cl-json:bind (as far as I understand).
 
+   http://lists.common-lisp.net/pipermail/cl-json-devel/2011-November/000319.html
+
+   Also there is a not very critical issue with the test suite
+   and asdf:test-op - the tests run twice.
+   http://lists.common-lisp.net/pipermail/cl-json-devel/2011-November/000317.html
+
 ** cl-json on ECL                                                  :reported:
    When running tests of cl-json, the following SERIOUS-CONDITION is signaled:
    Detected access to an invalid or protected memory address.
 
    ECL bug is opened:
-   https://sourceforge.net/tracker/?func=detail&aid=3471348&group_id=30035&atid=398053
+   https://sourceforge.net/tracker/?func=detail&aid=3471348&group_id=30035&atid=398053	
 ** cl-ppcre                                                        :reported:
    Fails on Allegro
    Reported: https://github.com/edicl/cl-ppcre/issues/2
@@ -279,6 +289,10 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 ** parenscript                                                     :reported:
    Fails on Allegro. Reported to the parenscript-devel:
    http://lists.common-lisp.net/pipermail/parenscript-devel/2012-January/001076.html
+
+   According to Vladimir Sedach it's a named-readtables issue.
+   (his response in the above mail thread:
+   http://lists.common-lisp.net/pipermail/parenscript-devel/2012-January/001083.html)
 ** trivial-backtrace                                               :reported:
    Fails on CCL and SBCL because the test code tries to produce
    a division by zero error, but these lisps seem to optimize
@@ -368,36 +382,45 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
 
 
 * Quicklisp 2012-01-07
-** bordeaux-threads taests crash CMUCL                        :report_needed:
+** bordeaux-threads tests crash CMUCL		:reported:
    On CMUCL bordeaux-threads test suite traps into some active
    deadlock, produces 8 MB of '.' symbols in log, constantly runs GC
    and finally dies when heap is exhausted.
-** ECL/ASDF issue: ECL with bytecompiler and ECL with         :report_needed:
+
+   Reported here:
+   http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2012-March/000161.html	
+
+** ECL/ASDF issue: ECL with bytecompiler and ECL with :investigate:
    lisp-to-c compiler have the same 
    (asdf:implementation-identifier), in result
    the .fasl files are stored in the same location.
    But .files files from these two favors of ECL
    are not interchangable.
 
+   Actually I do not remember the details and not sure
+   anymore the problem still exists. Asked on asdf-devel,
+   was told that the lisp-to-c and bytecode compilers
+   have different extention for fasl files...
 
-** ABCL regression: 1.0.0 passes bordeaux-threads tests,      :report_needed:
+** ABCL regression: 1.0.0 passes bordeaux-threads tests, :reported:fixed:
    while 1.0.1 fails to build.
 
-** ECL seems to enter debugger randomily ignoring my handler-case :investigate:
+   ABCL ticket:
+   http://trac.common-lisp.net/armedbear/ticket/193
+
+   The ticket is closed already, will be released with ABCL 1.0.2.
 
 ** cl-base64 fails on CMUCL (and on ABCL)                          :reported:
    Reported to Kevin Rosenberg <kevin at rosenberg.net>
+** Minor ABCL issue:				:reported:
+   ASDF::IMPLEMENTATION-IDENTIFIER contains ABCL build environment identifier
+   http://trac.common-lisp.net/armedbear/ticket/192
 * Quicklisp 2012-02-08
-** alexandria: 9 new unexpected failures on CLISP dui to CLISP bug  :reported:
+** alexandria: 9 new unexpected failures on CLISP due to CLISP bug :reported:fixed:
    Reported here:
    http://lists.common-lisp.net/pipermail/alexandria-devel/2012-February/000647.html
-
-   Seems to be due to a recent (and somewhat inconsistend and to-be-removed) code present on alexandria,
-   see http://lists.common-lisp.net/pipermail/alexandria-devel/2012-February/000646.html
-   But the code is wanted to be removed not due to the bugs in CLISP, therefore
-   test-grid discovered yet unknown problem.
    
-   Turns out to be a CLISP bug (fixed after the report).
+   Turns out to be a CLISP bug (fixed after the report):
    http://sourceforge.net/tracker/?func=detail&atid=101355&aid=3487338&group_id=1355
 
 ** parenscript tests can not be loaded because the new dependency - cl-javascript :reported:
@@ -409,6 +432,6 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    Reported here:
    https://github.com/edicl/cl-unicode/issues/2
 
-** bordeaux-threads has failure on sbcl-1.0.54.45-a2bef14-macosx-x64 :reported:
+** bordeaux-threads has failure on sbcl-1.0.54.45-a2bef14-macosx-x64 :reported:   
    Reported here:
    http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2012-February/000156.html

@@ -51,7 +51,9 @@ For these known test-grid componetns REQUIRE-IMPL loads
 the implementation. Otherwise the API parameter is
 just passed to the QUICKLISP:QUICKLOAD."
   (setf api (string-downcase api))
-  (let* ((known-impls '(("rt-api" . "rt-api-impl")))
+  (let* ((known-impls '(("rt-api" . "rt-api-impl")
+                        ("lift-api" . "lift-api-impl")
+                        ("fiveam-api" . "fiveam-api-impl")))
          (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
                                api)))
         (quicklisp:quickload impl-asdf-system)))
@@ -69,6 +71,10 @@ just passed to the QUICKLISP:QUICKLOAD."
   "All the libraries currently supported by the test-grid.")
 
 
+(defun clean-rt ()
+  (require-impl "rt-api")
+  (rt-api:clean))
+
 (defun run-rt-test-suite()
   (require-impl "rt-api")
 
@@ -84,6 +90,18 @@ just passed to the QUICKLISP:QUICKLOAD."
     (list :failed-tests (mapcar #'string-downcase all-failures)
           :known-to-fail (mapcar #'string-downcase (rt-api:known-to-fail)))))
 
+(defun run-lift-test-suite (test-suite-name)
+  (require-impl "lift-api")
+  (let ((result (lift-api:run-test-suite test-suite-name)))
+    (list :failed-tests (lift-api:failed-tests result)
+          :known-to-fail (lift-api:known-to-fail test-suite-name))))
+
+(defun run-fiveam-test-suite (test-suite-spec)
+  (require-impl "fiveam-api")
+  (let ((result (fiveam-api:run-test-suite test-suite-spec)))
+    (list :failed-tests (fiveam-api:failed-tests result)
+          :known-to-fail '())))
+
 (defmethod libtest ((library-name (eql :alexandria)))
 
 ; We keep the below hardcoded failure in case we want to test
@@ -97,8 +115,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;;   (return-from libtest :fail))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :alexandria-tests)
   (quicklisp:quickload :alexandria-tests)
 
@@ -130,8 +147,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :trivial-features)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :trivial-features-tests)
 
   ;; Load cffi-grovel which is used in trivial-features-tests.asd,
@@ -144,8 +160,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :cffi)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :cffi-tests)
 
   ;; CFFI tests work with a small test C library.
@@ -209,8 +224,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     (return-from libtest :fail))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :usocket-test)
 
 ;  (asdf:operate 'asdf:load-op :usocket-test :force t)
@@ -228,7 +242,6 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   (run-rt-test-suite))
 
-
 (defmethod libtest ((library-name (eql :flexi-streams)))
 
   ;; The test framework used: custom.
@@ -238,22 +251,6 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; copy/paste from flexi-streams.asd
   (funcall (intern (symbol-name :run-all-tests)
                    (find-package :flexi-streams-test))))
-
-(defun run-fiveam-suite (fiveam-test-spec)
-  "Runs the specified test suite created with the FiveAM
-test framework. Returns T if all the tests succeeded and
-NIL otherwise. The FIVEAM-TEST-SPEC specifies the tests
-suite according to the FiveAM convention."
-  (let ((run (intern (string '#:run) :fiveam))
-        (explain (intern (string '#:explain) :fiveam))
-        (detailed-text-explainer (intern (string '#:detailed-text-explainer) :fiveam))
-        (test-failure-type (intern (string '#:test-failure) :fiveam)))
-
-    (let ((results (funcall run fiveam-test-spec)))
-      (funcall explain (make-instance detailed-text-explainer) results *standard-output*)
-      (zerop (count-if (lambda (res)
-                         (typep res test-failure-type))
-                       results)))))
 
 (defmethod libtest ((library-name (eql :bordeaux-threads)))
 
@@ -268,7 +265,7 @@ suite according to the FiveAM convention."
 
   (quicklisp:quickload :bordeaux-threads-test)
 
-  (run-fiveam-suite :bordeaux-threads))
+  (run-fiveam-test-suite :bordeaux-threads))
 
 (defmethod libtest ((library-name (eql :cl-base64)))
 
@@ -284,40 +281,10 @@ suite according to the FiveAM convention."
   (funcall (intern (symbol-name '#:do-tests)
                    (find-package '#:cl-base64-tests))))
 
-(defun lift-tests-ok-p (lift-tests-result)
-  "Helper function to work with Lift test framework.
-Examines the tests result object and retuns T is all
-the tests are successull and NIL otherwise."
-  (let ((errors (intern (symbol-name '#:errors) :lift))
-        (expected-errors (intern (symbol-name '#:expected-errors) :lift))
-        (failures (intern (symbol-name '#:failures) :lift))
-        (expected-failures (intern (symbol-name '#:expected-failures) :lift)))
-    (zerop
-     (+ (length (set-difference (funcall errors lift-tests-result)
-                                (funcall expected-errors lift-tests-result)))
-        (length (set-difference (funcall failures lift-tests-result)
-                                (funcall expected-failures lift-tests-result)))))))
-
-(defun run-lift-tests (suite-name)
-  "Helper function to work with the Lift test framework.
-Runs the specified Lift test suite and returns T
-if all the tests succeeded and NIL othersize."
-  (let ((run (intern (symbol-name '#:run-tests) :lift))
-        (lift-debug-output (intern (string :*lift-debug-output*) :lift)))
-    ;; bind lift:*debug-output* to *standard-output*,
-    ;; wich is then redirected to file by run-libtests.
-    (progv (list lift-debug-output) (list *standard-output*)
-      (let ((result (funcall run :suite suite-name)))
-        (describe result *standard-output*)
-        (lift-tests-ok-p result)))))
-
 (defmethod libtest ((library-name (eql :trivial-backtrace)))
-
   ;; The test framework used: lift.
-
   (quicklisp:quickload :trivial-backtrace-test)
-
-  (run-lift-tests :trivial-backtrace-test))
+  (run-lift-test-suite :trivial-backtrace-test))
 
 (defmethod libtest ((library-name (eql :puri)))
 
@@ -337,8 +304,7 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :anaphora)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :anaphora-test)
   ;; anaphora-test is defined in anaphora.asd,
   ;; therefore to reload :anaphora-test
@@ -375,8 +341,7 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :trivial-garbage)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :trivial-garbage)  ; yes, trivial-garbage but not trivial-garbage-tests,
                                         ; because the trivial-garbage-tests system is defined
                                         ; in the same trivial-garbage.asd and neither
@@ -391,8 +356,7 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :iterate)))
 
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :iterate-tests)
   (asdf:clear-system :iterate)
 
@@ -417,7 +381,7 @@ if all the tests succeeded and NIL othersize."
   (quicklisp:quickload :cl-ppcre)
   (quicklisp:quickload :metabang-bind-test)
 
-  (run-lift-tests :metabang-bind-test))
+  (run-lift-test-suite :metabang-bind-test))
 
 (defmethod libtest ((library-name (eql :cl-json)))
   ;; The test framework used: fiveam.
@@ -429,22 +393,21 @@ if all the tests succeeded and NIL othersize."
     (quicklisp:quickload :cl-json)
 
     (quicklisp:quickload :cl-json.test)
-    (run-fiveam-suite (intern (symbol-name '#:json) :json-test))))
+    (run-fiveam-test-suite (intern (symbol-name '#:json) :json-test))))
 
 (defmethod libtest ((library-name (eql :cl-containers)))
   ;; The test framework used: lift.
   (quicklisp:quickload :cl-containers-test)
-  (run-lift-tests :cl-containers-test))
+  (run-lift-test-suite :cl-containers-test))
 
 (defmethod libtest ((library-name (eql :metatilities-base)))
   ;; The test framework used: lift.
   (quicklisp:quickload :metatilities-base-test)
-  (run-lift-tests :metatilities-base-test))
+  (run-lift-test-suite :metatilities-base-test))
 
 (defmethod libtest ((library-name (eql :cl-cont)))
   ;; The test framework used: rt.
-  (require-impl "rt-api")
-  (rt-api:clean)
+  (clean-rt)
   (asdf:clear-system :cl-cont-test)
   (quicklisp:quickload :cl-cont-test)
   (run-rt-test-suite))
@@ -452,17 +415,17 @@ if all the tests succeeded and NIL othersize."
 (defmethod libtest ((library-name (eql :moptilities)))
   ;; The test framework used: lift.
   (quicklisp:quickload :moptilities-test)
-  (run-lift-tests :moptilities-test))
+  (run-lift-test-suite :moptilities-test))
 
 (defmethod libtest ((library-name (eql :trivial-timeout)))
   ;; The test framework used: lift.
   (quicklisp:quickload :trivial-timeout-test)
-  (run-lift-tests :trivial-timeout-test))
+  (run-lift-test-suite :trivial-timeout-test))
 
 (defmethod libtest ((library-name (eql :metatilities)))
   ;; The test framework used: lift.
   (quicklisp:quickload :metatilities-test)
-  (run-lift-tests :metatilities-test))
+  (run-lift-test-suite :metatilities-test))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
@@ -828,7 +791,8 @@ data (libraries test suites output and the run results) will be saved."
                       (run-results run-info))))
       ;; finally, save the updated run-info with blobkeys
       ;; to the file. Returns the run-info.
-      (save-run-info run-info test-run-dir))))
+      (save-run-info run-info test-run-dir)
+      run-info)))
 
 (defun submit-results (test-run-dir)
   (let* ((blobstore (get-blobstore))
