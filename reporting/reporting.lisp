@@ -656,7 +656,7 @@ Every subaddress represents some level of pivot groupping."
 ;;; Example:
 ;;; ("test-a2" "test-b" (:unexpected-ok "test-a1"))
 ;;;
-;;; Note that fail-list does distinguish knoww failures from unknwown failures;
+;;; Note that fail-list does not distinguish known failures from unknwown failures;
 ;;; all of them are represented just by stings naming failed tests.
 
 ;; Sort order for failures
@@ -757,8 +757,8 @@ Every subaddress represents some level of pivot groupping."
 
 (defun has-regressions-p (new-lib-status old-lib-status)
   "Returns true if NEW-LIB-STATUS has regressions comparing to OLD-LIB-STATUS.
-In most cases the resutls is obvious, but there is one subtle case, needed explicit
-explanation: if NEW-LIB-STATUS contanes only unexpected OKs, and OLD-LIB-STATUS
+In most cases the result is obvious, but there is one subtle case, which deserves to be 
+explained here: if NEW-LIB-STATUS contains only unexpected OKs, and OLD-LIB-STATUS
 was :OK, then HAS-REGRESSIONS-P returns false - that's how we treat :OK, even
 unexpected OKs are OKs."
   (loop for (new-typespec old-typespec result-spec) in *lib-status-regressions-rules*
