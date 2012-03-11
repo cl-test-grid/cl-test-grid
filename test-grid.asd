@@ -17,5 +17,5 @@
 (asdf:defsystem #:test-grid
   :version "0.1.0"
   :serial t
-  :depends-on (#:quicklisp #:test-grid-blobstore #:rt-api #:lift-api #:fiveam-api)
+  :depends-on (#:quicklisp #:test-grid-blobstore #:rt-api #:lift-api #:fiveam-api #:eos-api)
   :components ((:file "test-grid")))

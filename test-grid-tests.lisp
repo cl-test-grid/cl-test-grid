@@ -46,6 +46,15 @@
 			  :test #'string=)
 	 (null (getf status :known-to-fail)))))
 
+(defun test-eos-api ()
+  (asdf:operate 'asdf:load-op :eos-sample-test-suite)
+  (let ((status (test-grid::run-eos-test-suites :sample-eos-suite)))
+    (and (test-grid::set= (getf status :failed-tests)
+			  '("eos-sample-test-suite.error-test"
+			    "eos-sample-test-suite.fail-test")
+			  :test #'string=)
+	 (null (getf status :known-to-fail)))))
+
 (defun test-aggregated-status ()
   (and (eq :ok (test-grid-reporting::aggregated-status :ok))
        (eq :fail (test-grid-reporting::aggregated-status :fail))
@@ -60,4 +69,5 @@
 (assert (and (test-rt-api)
 	     (test-lift-api)
 	     (test-fiveam-api)
+	     (test-eos-api)
 	     (test-aggregated-status)))

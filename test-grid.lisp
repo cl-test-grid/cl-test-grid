@@ -53,7 +53,8 @@ just passed to the QUICKLISP:QUICKLOAD."
   (setf api (string-downcase api))
   (let* ((known-impls '(("rt-api" . "rt-api-impl")
                         ("lift-api" . "lift-api-impl")
-                        ("fiveam-api" . "fiveam-api-impl")))
+                        ("fiveam-api" . "fiveam-api-impl")
+                        ("eos-api" . "eos-api-impl")))
          (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
                                api)))
         (quicklisp:quickload impl-asdf-system)))
@@ -100,6 +101,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   (require-impl "fiveam-api")
   (let ((result (fiveam-api:run-test-suite test-suite-spec)))
     (list :failed-tests (fiveam-api:failed-tests result)
+          :known-to-fail '())))
+
+(defun run-eos-test-suites (&rest test-suite-specs)
+  (require-impl "eos-api")
+  (let ((result (apply #'eos-api:run-test-suites test-suite-specs)))
+    (list :failed-tests (eos-api:failed-tests result)
           :known-to-fail '())))
 
 (defmethod libtest ((library-name (eql :alexandria)))
@@ -328,15 +335,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; only a separate package ps-test with public
   ;; function run-tests.
 
-  ;; The test suites to run determined by looking
-  ;; into the function run-tests in the file test.lisp.
-  (let* ((run (intern (string '#:run) :eos))
-         (test-failure-type (intern (string '#:test-failure) :eos))
-         (results (append (funcall run (intern (string '#:output-tests) :ps-test))
-                          (funcall run (intern (string '#:package-system-tests) :ps-test)))))
-    (zerop (count-if (lambda (res)
-                       (typep res test-failure-type))
-                     results))))
+  ;; The test suites to run are taken from the
+  ;; the function run-tests in the file
+  ;; <parenscript sources>/t/test.lisp.
+  (run-eos-test-suites (intern (string '#:output-tests) :ps-test)
+                       (intern (string '#:package-system-tests) :ps-test)
+                       (intern (string '#:eval-tests) :ps-test)))
 
 (defmethod libtest ((library-name (eql :trivial-garbage)))
 
