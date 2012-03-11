@@ -13,5 +13,5 @@ failed in all the test sutes.")
 
 (proclfun failed-tests ((test-suite-result t)) list
   "List of failed test names. Test names are downcased strings.
-The TEST-SUITE-RESULT parameter must be a result of the RUN-TEST-SUITE
+The TEST-SUITE-RESULT parameter must be a result of the RUN-TEST-SUITES
 function.")
