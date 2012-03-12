@@ -161,6 +161,13 @@ just passed to the QUICKLISP:QUICKLOAD."
   (clean-rt)
   (asdf:clear-system :cffi-tests)
 
+  ;; Workaround for the quicklisp bug #55
+  ;; (https://github.com/quicklisp/quicklisp-client/issues/55)
+  (ql:quickload "cffi")
+  (let ((cffi-dir (make-pathname :name nil :type nil :defaults (ql-dist:find-asdf-system-file "cffi"))))
+    (pushnew cffi-dir asdf:*central-registry* :test #'equal))
+  ;; now (ql:quickload "cffi-tests") will work
+
   ;; CFFI tests work with a small test C library.
   ;; The user is expected to compile the library manually.
   ;; If the library is not available, CFFI tests
