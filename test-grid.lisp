@@ -54,7 +54,8 @@ just passed to the QUICKLISP:QUICKLOAD."
   (let* ((known-impls '(("rt-api" . "rt-api-impl")
                         ("lift-api" . "lift-api-impl")
                         ("fiveam-api" . "fiveam-api-impl")
-                        ("eos-api" . "eos-api-impl")))
+                        ("eos-api" . "eos-api-impl")
+                        ("stefil-api" . "stefil-api-impl")))
          (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
                                api)))
         (quicklisp:quickload impl-asdf-system)))
@@ -109,6 +110,12 @@ just passed to the QUICKLISP:QUICKLOAD."
     (list :failed-tests (eos-api:failed-tests result)
           :known-to-fail '())))
 
+(defun run-stefil-test-suite (test-suite-spec)
+  (require-impl "stefil-api")
+  (let ((result (stefil-api:run-test-suite test-suite-spec)))
+    (list :failed-tests (stefil-api:failed-tests result)
+          :known-to-fail '())))
+
 (defmethod libtest ((library-name (eql :alexandria)))
 
 ; We keep the below hardcoded failure in case we want to test
@@ -133,23 +140,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: stefil.
 
   (quicklisp:quickload :babel-tests)
-
-  (let* ((*debug-io* *standard-output*)
-         (result (funcall (intern (string '#:run) '#:babel-tests)))
-         (failures (funcall (intern (string '#:failure-descriptions-of) '#:hu.dwim.stefil)
-                            result))
-         (failed-p (> (length failures) 0)))
-
-    (when failed-p
-      (format t "~&~%-------------------------------------------------------------------------------------------------~%")
-      (format t "The test result details (printed by cl-test-grid in addition to the standard Stefil output above)~%")
-      (format t "~%(DESCRIBE RESULT):~%")
-      (describe result)
-      (format t "~&~%Individual failures:~%")
-      (map 'nil
-           (lambda (descr) (format t "~A~%" descr))
-           failures))
-    (not failed-p)))
+  (run-stefil-test-suite (intern (string '#:babel-tests) '#:babel-tests)))
 
 (defmethod libtest ((library-name (eql :trivial-features)))
 

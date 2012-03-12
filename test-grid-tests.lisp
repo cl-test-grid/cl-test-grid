@@ -55,6 +55,19 @@
 			  :test #'string=)
 	 (null (getf status :known-to-fail)))))
 
+(defun test-stefil-api ()
+  (asdf:operate 'asdf:load-op :stefil-sample-test-suite)
+  (let ((status (test-grid::run-stefil-test-suite (intern (string '#:sample-stefil-suite) 
+                                                          '#:stefil-sample-test-suite))))
+    (and (test-grid::set= (getf status :failed-tests)
+                          '("sample-stefil-suite.one-fail-test" 
+                            "sample-stefil-suite.two-fails-test"
+                            "sample-stefil-suite.error-test"
+                            "sample-stefil-suite.all-fails-expected-test"
+                            "sample-stefil-suite.not-all-fails-expected-test")
+                          :test #'string=)
+         (null (getf status :known-to-fail)))))
+
 (defun test-aggregated-status ()
   (and (eq :ok (test-grid-reporting::aggregated-status :ok))
        (eq :fail (test-grid-reporting::aggregated-status :fail))
@@ -70,4 +83,5 @@
 	     (test-lift-api)
 	     (test-fiveam-api)
 	     (test-eos-api)
+             (test-stefil-api)
 	     (test-aggregated-status)))
