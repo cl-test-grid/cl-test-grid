@@ -7,6 +7,8 @@
 ** TODO Filters for pivot reports
 ** TODO Test status should include separate indicator for the library compilation and loading.
 ** TODO ABCL, cffi testts: return :no-resource if JNA is not available
+** TODO Yellow color for known-fail and unexpected-ok aggregated statuses
+** TODO cffi tests: return :no-resource if C compilation fails on linux
 ** TODO Do not allow empty contributor contact in test results. Instead
    always ask the contributor to provide something, nickname,
    whatever.
