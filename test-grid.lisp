@@ -179,7 +179,7 @@ just passed to the QUICKLISP:QUICKLOAD."
                             ;; be some other error which prevents
                             ;; even CFFI system to load,
                             ;; and therefore CFFI package may be
-                            ;; abset. That's why use use ignore-errors
+                            ;; absent. That's why use use ignore-errors
                             ;; when looking for a symbol in the CFFI
                             ;; packge.
                             (when (eq (type-of condition)
