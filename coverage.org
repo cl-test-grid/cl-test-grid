@@ -137,7 +137,6 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
     169 osicat
     168 parse-number
     167 cl-containers
-;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; -*-
 
 * CL implementations (outdated info)
   CLISP/Windows - OK
