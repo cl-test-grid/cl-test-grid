@@ -12,12 +12,14 @@
 (pushnew "C:/Users/anton/projects/cl-test-grid/" asdf:*central-registry* :test #'equal)
 
 (asdf:operate 'asdf:load-op :test-grid-reporting)
+(asdf:operate 'asdf:load-op :test-grid-tests)
 
 ;; for development of GAE blob storage
 ;;(setf test-grid::*gae-blobstore-base-url* "http://localhost:8080")
 
 (use-package :ql-dist)
 (available-versions (dist "quicklisp"))
+(ql:update-dist "quicklisp")
 
 ;;(install-dist "http://beta.quicklisp.org/dist/quicklisp/2011-08-29/distinfo.txt" :replace t)
 ;;(ql:quickload :quicklisp-slime-helper)
@@ -60,7 +62,8 @@
 
 (save-db *db*)
 
-(generate-reports *db*)
+(test-grid-reporting::generate-reports *db*)
+
 
 (let ((ql-new "quicklisp 2012-02-08")
       (ql-old "quicklisp 2012-01-07")
@@ -72,6 +75,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; developer experiments
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; print list of CFFI failed tests, and for every failure
+;; specify the Lisp implementations where it occurs.
+(let ((cffi-failures (make-hash-table :test #'equal)))
+  (test-grid-reporting::do-results (test-run lib-result test-grid::*db*)
+    (when (and (string= "quicklisp 2012-02-08" (getf (getf test-run :descr) :lib-world))
+               (eq :cffi (getf lib-result :libname)))
+      (let ((status (getf lib-result :status)))
+        (when (consp status)
+          (dolist (failure (getf status :failed-tests))
+            (pushnew (getf (getf test-run :descr) :lisp)
+                     (gethash failure cffi-failures)
+                     :test #'string=))))))
+
+  (dolist (failure (sort (test-grid::hash-table-keys cffi-failures) #'string<))
+    (format t "~S => ~S~%" failure (sort (gethash failure cffi-failures) #'string<))))
 
 ;; sort test runs in the database according to some criteria
 (setf (getf *db* :runs)
