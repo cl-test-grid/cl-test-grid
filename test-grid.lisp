@@ -70,7 +70,7 @@ just passed to the QUICKLISP:QUICKLOAD."
                            :parenscript :trivial-garbage :iterate :metabang-bind
                            :cl-json :cl-containers :metatilities-base :cl-cont
                            :moptilities :trivial-timeout :metatilities
-                           :named-readtables)
+                           :named-readtables :arnesi :local-time :s-xml)
   "All the libraries currently supported by the test-grid.")
 
 
@@ -289,7 +289,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :cl-fad)))
 
-  ;; The test framework used: custom.
+  ;; The test framework used: cl:assert.
 
   (quicklisp:quickload :cl-fad)
   (load
@@ -456,6 +456,33 @@ just passed to the QUICKLISP:QUICKLOAD."
   (list :failed-tests (funcall (intern (symbol-name '#:pending-tests)
                                        '#:named-readtables-test))
         :known-to-fail nil))
+
+(defmethod libtest ((library-name (eql :arnesi)))
+  ;; test framework used: FiveAM
+  (quicklisp:quickload :arnesi)
+  (quicklisp:quickload :arnesi.test)
+  (run-fiveam-test-suite :it.bese.arnesi))
+
+(defmethod libtest ((library-name (eql :local-time)))
+  ;; test framework used: Stefil
+  (quicklisp:quickload :local-time.test)
+  (run-stefil-test-suite (intern (string '#:test) '#:local-time.test)))
+
+(defmethod libtest ((library-name (eql :s-xml)))
+  ;; test framework used: cl:assert
+
+  (quicklisp:quickload :s-xml)
+
+  ;; s-xml test suite uses cl:assert, and all
+  ;; the assertsions are top level, i.e. executed
+  ;; immediatelly during system load
+  (handler-case
+      (progn
+        (asdf:operate 'asdf:load-op :s-xml.test)
+        :ok)
+    (error (e)
+      (format t "s-xml test suite failed with error: ~A" e)
+      :fail)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
