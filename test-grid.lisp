@@ -69,7 +69,8 @@ just passed to the QUICKLISP:QUICKLOAD."
                            :cl-base64 :cl-fad :trivial-backtrace :puri :anaphora
                            :parenscript :trivial-garbage :iterate :metabang-bind
                            :cl-json :cl-containers :metatilities-base :cl-cont
-                           :moptilities :trivial-timeout :metatilities)
+                           :moptilities :trivial-timeout :metatilities
+                           :named-readtables)
   "All the libraries currently supported by the test-grid.")
 
 
@@ -299,8 +300,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; I.e. any test faifures are signaled as errors.
   (handler-case
       (progn
-        (funcall (intern (symbol-name '#:test)
-                         (find-package '#:cl-fad-test)))
+        (funcall (intern (symbol-name '#:test) '#:cl-fad-test))
         :ok)
     (error (e)
       (format t "cl-fad test suite failed with error: ~A" e)
@@ -448,6 +448,14 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: lift.
   (quicklisp:quickload :metatilities-test)
   (run-lift-test-suite :metatilities-test))
+
+(defmethod libtest ((library-name (eql :named-readtables)))
+  ;; test framework used: customized RT
+  (quicklisp:quickload :named-readtables-test)
+  (funcall (intern (symbol-name '#:do-tests) '#:named-readtables-test))
+  (list :failed-tests (funcall (intern (symbol-name '#:pending-tests)
+                                       '#:named-readtables-test))
+        :known-to-fail nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
