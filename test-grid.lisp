@@ -66,7 +66,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi
                            :cl-ppcre :usocket :flexi-streams :bordeaux-threads
-                           :cl-base64 :trivial-backtrace :puri :anaphora
+                           :cl-base64 :cl-fad :trivial-backtrace :puri :anaphora
                            :parenscript :trivial-garbage :iterate :metabang-bind
                            :cl-json :cl-containers :metatilities-base :cl-cont
                            :moptilities :trivial-timeout :metatilities)
@@ -285,6 +285,26 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   (funcall (intern (symbol-name '#:do-tests)
                    (find-package '#:cl-base64-tests))))
+
+(defmethod libtest ((library-name (eql :cl-fad)))
+
+  ;; The test framework used: custom.
+
+  (quicklisp:quickload :cl-fad)
+  (load
+   (asdf:system-relative-pathname (asdf:find-system :cl-fad)
+                                  "test.lisp"))
+
+  ;; cl-fad test suite uses cl:assert.
+  ;; I.e. any test faifures are signaled as errors.
+  (handler-case
+      (progn
+        (funcall (intern (symbol-name '#:test)
+                         (find-package '#:cl-fad-test)))
+        :ok)
+    (error (e)
+      (format t "cl-fad test suite failed with error: ~A" e)
+      :fail)))
 
 (defmethod libtest ((library-name (eql :trivial-backtrace)))
   ;; The test framework used: lift.
