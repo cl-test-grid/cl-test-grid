@@ -70,7 +70,7 @@ just passed to the QUICKLISP:QUICKLOAD."
                            :parenscript :trivial-garbage :iterate :metabang-bind
                            :cl-json :cl-containers :metatilities-base :cl-cont
                            :moptilities :trivial-timeout :metatilities
-                           :named-readtables :arnesi :local-time :s-xml)
+                           :named-readtables :arnesi :local-time :s-xml :iolib)
   "All the libraries currently supported by the test-grid.")
 
 
@@ -483,6 +483,16 @@ just passed to the QUICKLISP:QUICKLOAD."
     (error (e)
       (format t "s-xml test suite failed with error: ~A" e)
       :fail)))
+
+(defmethod libtest ((library-name (eql :iolib)))
+  ;; test framework used: FiveAM
+
+  (cond ((intersection '(:windows :win32 :win) *features*)
+         (format t "IOLib is not implemented for Windows.")
+         :no-resource)
+        (t
+         (quicklisp:quickload :iolib-tests)
+         (run-fiveam-test-suite :iolib))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
