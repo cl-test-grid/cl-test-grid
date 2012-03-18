@@ -551,8 +551,20 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :yason)))
   ;; test framework used: unit-test
+
+  ;; Handle package name conflict between cl-json
+  ;; and yason: the package of cl-json is named :json,
+  ;; the package of yason is named :yason, but has
+  ;; :json as a nickname.
+
+  ;; Temporary rename the :json package if it's loaded
+  (when (and (find-package :json)
+             ;; make sure it's found not by a nickname
+             (string= :json (package-name :json)))
+    (rename-package :json :json-temp-uinuque-name))
+
   (quicklisp:quickload :yason)
-  ;; it doesn't provide ASDF system for tests,
+  ;; it doesn't provide an ASDF system for tests,
   ;; load the test framework manually, and then
   ;; the test.lisp file.
   (quicklisp:quickload :unit-test)
@@ -560,6 +572,13 @@ just passed to the QUICKLISP:QUICKLOAD."
          (yason-test-file (merge-pathnames "test.lisp" yason-dir)))
     (format t "loading ~A~%" yason-test-file)
     (load yason-test-file))
+
+  ;; remove nicknames from the :yason package
+  (rename-package :yason :yason nil)
+  ;; rename :json back to it's original name
+  (when (find-package :json-temp-uinuque-name)
+    (rename-package :json-temp-uinuque-name :json))
+
   ;; nor run the tests. It returns a boolean
   (funcall (read-from-string "unit-test:run-all-tests") :unit :yason))
 
