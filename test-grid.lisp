@@ -64,15 +64,16 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;; LIBTEST implementations for particular libraries
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *all-libs* '(:alexandria    :babel           :trivial-features  :cffi
-                           :cl-ppcre      :usocket         :flexi-streams     :bordeaux-threads
-                           :cl-base64     :cl-fad          :trivial-backtrace :puri
-                           :anaphora      :parenscript     :trivial-garbage   :iterate :metabang-bind
-                           :cl-json       :cl-containers   :metatilities-base :cl-cont
-                           :moptilities   :trivial-timeout :metatilities      :named-readtables
-                           :arnesi        :local-time      :s-xml             :iolib
-                           :cl-oauth      :cl-routes       :cl-unicode        :fiveam
-                           :trivial-utf-8 :yason)
+(defparameter *all-libs*
+  '(:alexandria    :babel           :trivial-features  :cffi
+    :cl-ppcre      :usocket         :flexi-streams     :bordeaux-threads
+    :cl-base64     :cl-fad          :trivial-backtrace :puri
+    :anaphora      :parenscript     :trivial-garbage   :iterate :metabang-bind
+    :cl-json       :cl-containers   :metatilities-base :cl-cont
+    :moptilities   :trivial-timeout :metatilities      :named-readtables
+    :arnesi        :local-time      :s-xml             :iolib
+    :cl-oauth      :cl-routes       :cl-unicode        :fiveam
+    :trivial-utf-8 :yason           :cl-annot)
   "All the libraries currently supported by the test-grid.")
 
 
@@ -579,8 +580,49 @@ just passed to the QUICKLISP:QUICKLOAD."
   (when (find-package :json-temp-uinuque-name)
     (rename-package :json-temp-uinuque-name :json))
 
-  ;; nor run the tests. It returns a boolean
+  ;; now run the tests. It returns a boolean
   (funcall (read-from-string "unit-test:run-all-tests") :unit :yason))
+
+(defmethod libtest ((library-name (eql :cl-annot)))
+
+  ;; test framework used: cl-test-more
+
+  ;; cl-annot-test runs tests during the
+  ;; load time, and produces text output in
+  ;; the TAP (Test Anhything Protocol),
+  ;; and does not produce any other programmatical
+  ;; value.
+  ;;
+  ;; We will intercept the test output, and
+  ;; interpret it accordint to the TAP
+  ;; format (we limit this by just
+  ;; looking for strings starting with "not ok"
+  ;; in the output).
+
+  ;; Interesepting cl-test-more TAP output
+  (quicklisp:quickload :cl-test-more)
+
+  (let ((test-output-buf (make-string-output-stream)))
+    (progv
+        (list (read-from-string "cl-test-more:*test-result-output*"))
+        (list (make-broadcast-stream (symbol-value (read-from-string "cl-test-more:*test-result-output*"))
+                                     test-output-buf))
+      ;; ensure it is reloaded, even if it was already loaded before
+      (asdf:clear-system :cl-annot)
+      (asdf:clear-system :cl-annot-test)
+      (quicklisp:quickload :cl-annot-test))
+
+    ;; Now look for a strting starting from "not ok"
+    ;; in the test output
+    (with-input-from-string (test-output (get-output-stream-string test-output-buf))
+      (do ((line (read-line test-output nil) (read-line test-output nil)))
+          ((null line))
+        (when (starts-with line "not ok")
+          (format t "---------------------------------------------------------------------------~%")
+          (format t "cl-annot test suite has a test failure, the firt TAP output failure string:~%~A"
+                  line)
+          (return-from libtest :fail))))
+    :ok))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
@@ -588,6 +630,11 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defun set= (set-a set-b &key (test #'eql) key)
   (null (set-exclusive-or set-a set-b :test test :key key)))
+
+(defun starts-with (str prefix &key (test #'char=))
+  (let ((mismatch (mismatch str prefix :test test)))
+    (or (null mismatch)
+        (>= mismatch (length prefix)))))
 
 (defun do-plist-impl (plist handler)
   (do* ((cur-pos plist (cddr cur-pos))
