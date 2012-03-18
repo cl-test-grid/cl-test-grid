@@ -73,7 +73,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :moptilities   :trivial-timeout :metatilities      :named-readtables
     :arnesi        :local-time      :s-xml             :iolib
     :cl-oauth      :cl-routes       :cl-unicode        :fiveam
-    :trivial-utf-8 :yason           :cl-annot)
+    :trivial-utf-8 :yason           :cl-annot          :cl-openid)
   "All the libraries currently supported by the test-grid.")
 
 
@@ -623,6 +623,12 @@ just passed to the QUICKLISP:QUICKLOAD."
                   line)
           (return-from libtest :fail))))
     :ok))
+
+(defmethod libtest ((library-name (eql :cl-openid)))
+  ;; test framework used: FiveAM
+  (ql:quickload :cl-openid)
+  (ql:quickload :cl-openid.test)
+  (run-fiveam-test-suite :cl-openid))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
