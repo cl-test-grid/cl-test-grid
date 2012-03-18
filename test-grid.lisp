@@ -64,13 +64,15 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;; LIBTEST implementations for particular libraries
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter *all-libs* '(:alexandria :babel :trivial-features :cffi
-                           :cl-ppcre :usocket :flexi-streams :bordeaux-threads
-                           :cl-base64 :cl-fad :trivial-backtrace :puri :anaphora
-                           :parenscript :trivial-garbage :iterate :metabang-bind
-                           :cl-json :cl-containers :metatilities-base :cl-cont
-                           :moptilities :trivial-timeout :metatilities
-                           :named-readtables :arnesi :local-time :s-xml :iolib)
+(defparameter *all-libs* '(:alexandria    :babel           :trivial-features  :cffi
+                           :cl-ppcre      :usocket         :flexi-streams     :bordeaux-threads
+                           :cl-base64     :cl-fad          :trivial-backtrace :puri
+                           :anaphora      :parenscript     :trivial-garbage   :iterate :metabang-bind
+                           :cl-json       :cl-containers   :metatilities-base :cl-cont
+                           :moptilities   :trivial-timeout :metatilities      :named-readtables
+                           :arnesi        :local-time      :s-xml             :iolib
+                           :cl-oauth      :cl-routes       :cl-unicode        :fiveam
+                           :trivial-utf-8 :yason)
   "All the libraries currently supported by the test-grid.")
 
 
@@ -164,7 +166,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   ;; Workaround for the quicklisp bug #55
   ;; (https://github.com/quicklisp/quicklisp-client/issues/55)
-  (ql:quickload "cffi")
+  (ql:quickload :cffi)
   (let ((cffi-dir (make-pathname :name nil :type nil :defaults (ql-dist:find-asdf-system-file "cffi"))))
     (pushnew cffi-dir asdf:*central-registry* :test #'equal))
   ;; now (ql:quickload "cffi-tests") will work
@@ -475,10 +477,10 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   ;; s-xml test suite uses cl:assert, and all
   ;; the assertsions are top level, i.e. executed
-  ;; immediatelly during system load
+  ;; immediatelly during the system load
   (handler-case
       (progn
-        (asdf:operate 'asdf:load-op :s-xml.test)
+        (asdf:operate 'asdf:load-op :s-xml.test :force t)
         :ok)
     (error (e)
       (format t "s-xml test suite failed with error: ~A" e)
@@ -493,6 +495,73 @@ just passed to the QUICKLISP:QUICKLOAD."
         (t
          (quicklisp:quickload :iolib-tests)
          (run-fiveam-test-suite :iolib))))
+
+(defmethod libtest ((library-name (eql :cl-oauth)))
+  ;; test framework used: FiveAM
+
+  (quicklisp:quickload :cl-oauth)
+
+  ;; the code is based on the method
+  ;; (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :cl-oauth))))
+  ;; from the cl-oauth sources
+
+(let ((request-adapter-symbol (intern (symbol-name '#:*request-adapter*) :cl-oauth))
+      (init-test-request-adapter-symbol (intern (symbol-name '#:init-test-request-adapter) :oauth-test))
+      (oauth-test-suite-symbol (intern (symbol-name '#:oauth) :oauth-test)))
+
+  (let ((original-request-adapter (symbol-value request-adapter-symbol)))
+    (unwind-protect
+         (progn
+           (funcall init-test-request-adapter-symbol)
+           (run-fiveam-test-suite oauth-test-suite-symbol))
+      (setf (symbol-value request-adapter-symbol) original-request-adapter)))))
+
+(defmethod libtest ((library-name (eql :cl-routes)))
+  ;; The test framework used: lift.
+  (quicklisp:quickload :routes)
+  (quicklisp:quickload :routes-test)
+                       ;; good way to refre symbols, thanks cl-routes
+  (run-lift-test-suite (read-from-string "routes.test::routes-test")))
+
+(defmethod libtest ((library-name (eql :cl-unicode)))
+  ;; The test framework used: custom.
+  (quicklisp:quickload :cl-unicode-test)
+  (funcall (read-from-string "cl-unicode-test:run-all-tests")))
+
+(defmethod libtest ((library-name (eql :fiveam)))
+  ;; test framework used: FiveAM
+  (quicklisp:quickload :fiveam)
+  (run-fiveam-test-suite :it.bese.fiveam))
+
+(defmethod libtest ((library-name (eql :trivial-utf-8)))
+  ;; test framework used: cl:assert
+
+  (quicklisp:quickload :trivial-utf-8)
+
+  ;; trivial-utf-8-tests test suite uses cl:assert, and all
+  ;; the assertsions are top level, i.e. executed
+  ;; immediatelly during the system load
+  (handler-case
+      (progn
+        (asdf:operate 'asdf:load-op :trivial-utf-8-tests :force t)
+        :ok)
+    (error (e)
+      (format t "trivial-utf-8 test suite failed with error: ~A" e)
+      :fail)))
+
+(defmethod libtest ((library-name (eql :yason)))
+  ;; test framework used: unit-test
+  (quicklisp:quickload :yason)
+  ;; it doesn't provide ASDF system for tests,
+  ;; load the test framework manually, and then
+  ;; the test.lisp file.
+  (quicklisp:quickload :unit-test)
+  (let* ((yason-dir (make-pathname :name nil :type nil :defaults (ql-dist:find-asdf-system-file "yason")))
+         (yason-test-file (merge-pathnames "test.lisp" yason-dir)))
+    (format t "loading ~A~%" yason-test-file)
+    (load yason-test-file))
+  ;; nor run the tests. It returns a boolean
+  (funcall (read-from-string "unit-test:run-all-tests") :unit :yason))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
