@@ -65,15 +65,16 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *all-libs*
-  '(:alexandria    :babel           :trivial-features  :cffi
-    :cl-ppcre      :usocket         :flexi-streams     :bordeaux-threads
-    :cl-base64     :cl-fad          :trivial-backtrace :puri
-    :anaphora      :parenscript     :trivial-garbage   :iterate :metabang-bind
-    :cl-json       :cl-containers   :metatilities-base :cl-cont
-    :moptilities   :trivial-timeout :metatilities      :named-readtables
-    :arnesi        :local-time      :s-xml             :iolib
-    :cl-oauth      :cl-routes       :cl-unicode        :fiveam
-    :trivial-utf-8 :yason           :cl-annot          :cl-openid)
+  '(:alexandria     :babel               :trivial-features  :cffi
+    :cl-ppcre       :usocket             :flexi-streams     :bordeaux-threads
+    :cl-base64      :cl-fad              :trivial-backtrace :puri
+    :anaphora       :parenscript         :trivial-garbage   :iterate :metabang-bind
+    :cl-json        :cl-containers       :metatilities-base :cl-cont
+    :moptilities    :trivial-timeout     :metatilities      :named-readtables
+    :arnesi         :local-time          :s-xml             :iolib
+    :cl-oauth       :cl-routes           :cl-unicode        :fiveam
+    :trivial-utf-8  :yason               :cl-annot          :cl-openid
+    :split-sequence :cl-closure-template :cl-interpol       :lift)
   "All the libraries currently supported by the test-grid.")
 
 
@@ -629,6 +630,26 @@ just passed to the QUICKLISP:QUICKLOAD."
   (ql:quickload :cl-openid)
   (ql:quickload :cl-openid.test)
   (run-fiveam-test-suite :cl-openid))
+
+(defmethod libtest ((library-name (eql :split-sequence)))
+  ;; test framework used: FiveAM
+  (ql:quickload :split-sequence-tests)
+  (run-fiveam-test-suite :split-sequence))
+
+(defmethod libtest ((library-name (eql :cl-closure-template)))
+  ;; The test framework used: lift.
+  (ql:quickload :closure-template-test)
+  (run-lift-test-suite (read-from-string "closure-template.test::closure-template-test")))
+
+(defmethod libtest ((library-name (eql :cl-interpol)))
+  ;; The test framework used: custom.
+  (ql:quickload :cl-interpol-test)
+  (funcall (read-from-string "cl-interpol-test:run-all-tests")))
+
+(defmethod libtest ((library-name (eql :lift)))
+  ;; The test framework used: lift.
+  (ql:quickload :lift-test)
+  (run-lift-test-suite (read-from-string "lift-test::lift-test")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
