@@ -144,8 +144,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (let ((test-output-buf (make-string-output-stream)))
     (progv
         (list (read-from-string "cl-test-more:*test-result-output*"))
-        (list (make-broadcast-stream (symbol-value (read-from-string "cl-test-more:*test-result-output*"))
-                                     test-output-buf))
+        (list (make-broadcast-stream *standard-output* test-output-buf))
       (funcall runner-function))
 
     ;; Now look for a strting starting from "not ok"
