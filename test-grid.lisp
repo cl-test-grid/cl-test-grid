@@ -494,6 +494,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :named-readtables)))
   ;; test framework used: customized RT
+  (quicklisp:quickload :named-readtables)
   (quicklisp:quickload :named-readtables-test)
   (funcall (intern (symbol-name '#:do-tests) '#:named-readtables-test))
   (list :failed-tests (funcall (intern (symbol-name '#:pending-tests)
@@ -569,6 +570,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :cl-unicode)))
   ;; The test framework used: custom.
+  (quicklisp:quickload :cl-unicode)
   (quicklisp:quickload :cl-unicode-test)
   (funcall (read-from-string "cl-unicode-test:run-all-tests")))
 
@@ -643,21 +645,25 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :split-sequence)))
   ;; test framework used: FiveAM
+  (ql:quickload :split-sequence)
   (ql:quickload :split-sequence-tests)
   (run-fiveam-test-suite :split-sequence))
 
 (defmethod libtest ((library-name (eql :cl-closure-template)))
   ;; The test framework used: lift.
+  (ql:quickload :closure-template)
   (ql:quickload :closure-template-test)
   (run-lift-test-suite (read-from-string "closure-template.test::closure-template-test")))
 
 (defmethod libtest ((library-name (eql :cl-interpol)))
   ;; The test framework used: custom.
+  (ql:quickload :cl-interpol)
   (ql:quickload :cl-interpol-test)
   (funcall (read-from-string "cl-interpol-test:run-all-tests")))
 
 (defmethod libtest ((library-name (eql :lift)))
   ;; The test framework used: lift.
+  (ql:quickload :lift)
   (ql:quickload :lift-test)
   (run-lift-test-suite (read-from-string "lift-test::lift-test")))
 
@@ -667,26 +673,31 @@ just passed to the QUICKLISP:QUICKLOAD."
          (format t "trivial-shell is not implemented for Windows.~%")
          :no-resource)
         (t
+         (ql:quickload :trivial-shell)
          (ql:quickload :trivial-shell-test)
          (run-lift-test-suite (read-from-string "trivial-shell-test::trivial-shell-test")))))
 
 (defmethod libtest ((library-name (eql :let-plus)))
   ;; The test framework used: lift.
+  (ql:quickload :let-plus)
   (ql:quickload :let-plus-tests)
   (run-lift-test-suite (read-from-string "let-plus-tests::let-plus-tests")))
 
 (defmethod libtest ((library-name (eql :data-sift)))
   ;; The test framework used: lift.
+  (ql:quickload :data-sift)
   (ql:quickload :data-sift-test)
   (run-lift-test-suite (read-from-string "data-sift.test::data-sift-test")))
 
 (defmethod libtest ((library-name (eql :cl-num-utils)))
   ;; The test framework used: lift.
+  (ql:quickload :cl-num-utils)
   (ql:quickload :cl-num-utils-tests)
   (run-lift-test-suite (read-from-string "cl-num-utils-tests::cl-num-utils-tests")))
 
 (defmethod libtest ((library-name (eql :ieee-floats)))
   ;; test framework used: FiveAM
+  (ql:quickload :ieee-floats)
   (ql:quickload :ieee-floats-tests)
   (run-fiveam-test-suite :ieee-floats))
 
@@ -694,10 +705,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; test framework used: cl-test-more
   (running-cl-test-more-suite "cl-project"
                               #'(lambda ()
+                                  (ql:quickload :cl-project)
                                   (ql:quickload :cl-project-test))))
 
 (defmethod libtest ((library-name (eql :trivial-http)))
   ;; The test framework used: lift.
+  (ql:quickload :trivial-http)
   (ql:quickload :trivial-http-test)
   (run-lift-test-suite :trivial-http-test))
 
