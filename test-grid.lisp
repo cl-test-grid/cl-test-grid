@@ -74,7 +74,9 @@ just passed to the QUICKLISP:QUICKLOAD."
     :arnesi         :local-time          :s-xml             :iolib
     :cl-oauth       :cl-routes           :cl-unicode        :fiveam
     :trivial-utf-8  :yason               :cl-annot          :cl-openid
-    :split-sequence :cl-closure-template :cl-interpol       :lift)
+    :split-sequence :cl-closure-template :cl-interpol       :lift
+    :trivial-shell  :let-plus            :data-sift         :cl-num-utils
+    :ieee-floats)
   "All the libraries currently supported by the test-grid.")
 
 
@@ -488,11 +490,14 @@ just passed to the QUICKLISP:QUICKLOAD."
       (format t "s-xml test suite failed with error: ~A" e)
       :fail)))
 
+(defun is-windows ()
+  (intersection '(:windows :win32 :win) *features*))
+
 (defmethod libtest ((library-name (eql :iolib)))
   ;; test framework used: FiveAM
 
-  (cond ((intersection '(:windows :win32 :win) *features*)
-         (format t "IOLib is not implemented for Windows.")
+  (cond ((is-windows)
+         (format t "IOLib is not implemented for Windows.~%")
          :no-resource)
         (t
          (quicklisp:quickload :iolib-tests)
@@ -650,6 +655,30 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: lift.
   (ql:quickload :lift-test)
   (run-lift-test-suite (read-from-string "lift-test::lift-test")))
+
+(defmethod libtest ((library-name (eql :trivial-shell)))
+  ;; The test framework used: lift.
+  (cond ((is-windows)
+         (format t "trivial-shell is not implemented for Windows.~%")
+         :no-resource)
+        (t
+         (ql:quickload :trivial-shell-test)
+         (run-lift-test-suite (read-from-string "trivial-shell-test::trivial-shell-test")))))
+
+(defmethod libtest ((library-name (eql :let-plus)))
+  ;; The test framework used: lift.
+  (ql:quickload :let-plus-tests)
+  (run-lift-test-suite (read-from-string "let-plus-tests::let-plus-tests")))
+
+(defmethod libtest ((library-name (eql :data-sift)))
+  ;; The test framework used: lift.
+  (ql:quickload :data-sift-test)
+  (run-lift-test-suite (read-from-string "data-sift.test::data-sift-test")))
+
+(defmethod libtest ((library-name (eql :cl-num-utils)))
+  ;; The test framework used: lift.
+  (ql:quickload :cl-num-utils-tests)
+  (run-lift-test-suite (read-from-string "cl-num-utils-tests::cl-num-utils-tests")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
