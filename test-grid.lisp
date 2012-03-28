@@ -65,20 +65,20 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *all-libs*
-  '(:alexandria     :babel               :trivial-features  :cffi
-    :cl-ppcre       :usocket             :flexi-streams     :bordeaux-threads
-    :cl-base64      :cl-fad              :trivial-backtrace :puri
-    :anaphora       :parenscript         :trivial-garbage   :iterate :metabang-bind
-    :cl-json        :cl-containers       :metatilities-base :cl-cont
-    :moptilities    :trivial-timeout     :metatilities      :named-readtables
-    :arnesi         :local-time          :s-xml             :iolib
-    :cl-oauth       :cl-routes           :cl-unicode        :fiveam
-    :trivial-utf-8  :yason               :cl-annot          :cl-openid
-    :split-sequence :cl-closure-template :cl-interpol       :lift
-    :trivial-shell  :let-plus            :data-sift         :cl-num-utils
-    :ieee-floats)
+  '(:alexandria       :babel               :trivial-features    :cffi
+    :cl-ppcre         :usocket             :flexi-streams       :bordeaux-threads
+    :cl-base64        :cl-fad              :trivial-backtrace   :puri
+    :anaphora         :parenscript         :trivial-garbage     :iterate
+    :metabang-bind    :cl-json             :cl-containers       :metatilities-base
+    :cl-cont          :moptilities         :trivial-timeout     :metatilities
+    :named-readtables :arnesi              :local-time          :s-xml
+    :iolib            :cl-oauth            :cl-routes           :cl-unicode
+    :fiveam           :trivial-utf-8       :yason               :cl-annot
+    :cl-openid        :split-sequence      :cl-closure-template :cl-interpol
+    :lift             :trivial-shell       :let-plus            :data-sift
+    :cl-num-utils     :ieee-floats         :cl-project          :trivial-http
+    :cl-store)
   "All the libraries currently supported by the test-grid.")
-
 
 (defun clean-rt ()
   (require-impl "rt-api")
@@ -122,6 +122,43 @@ just passed to the QUICKLISP:QUICKLOAD."
   (let ((result (stefil-api:run-test-suite test-suite-spec)))
     (list :failed-tests (stefil-api:failed-tests result)
           :known-to-fail '())))
+
+(defun running-cl-test-more-suite (project-name runner-function)
+  ;; cl-test-more test suites usually run tests the
+  ;; load time.
+  ;;
+  ;; cl-test-more produces text output in
+  ;; the TAP (Test Anhything Protocol),
+  ;; and does not produce any other programmaticaly
+  ;; inspectable value.
+  ;;
+  ;; We will intercept the test output, and
+  ;; interpret it according to the TAP
+  ;; format (we limit this by just
+  ;; looking for strings starting with "not ok"
+  ;; in the output).
+
+  ;; Intersepting cl-test-more TAP output
+  (quicklisp:quickload :cl-test-more)
+
+  (let ((test-output-buf (make-string-output-stream)))
+    (progv
+        (list (read-from-string "cl-test-more:*test-result-output*"))
+        (list (make-broadcast-stream (symbol-value (read-from-string "cl-test-more:*test-result-output*"))
+                                     test-output-buf))
+      (funcall runner-function))
+
+    ;; Now look for a strting starting from "not ok"
+    ;; in the test output
+    (with-input-from-string (test-output (get-output-stream-string test-output-buf))
+      (do ((line (read-line test-output nil) (read-line test-output nil)))
+          ((null line))
+        (when (starts-with line "not ok")
+          (format t "---------------------------------------------------------------------------~%")
+          (format t "~A test suite has a test failure; the first TAP output failure string:~%~A"
+                  project-name line)
+          (return-from running-cl-test-more-suite :fail))))
+    :ok))
 
 (defmethod libtest ((library-name (eql :alexandria)))
 
@@ -590,45 +627,13 @@ just passed to the QUICKLISP:QUICKLOAD."
   (funcall (read-from-string "unit-test:run-all-tests") :unit :yason))
 
 (defmethod libtest ((library-name (eql :cl-annot)))
-
   ;; test framework used: cl-test-more
-
-  ;; cl-annot-test runs tests during the
-  ;; load time, and produces text output in
-  ;; the TAP (Test Anhything Protocol),
-  ;; and does not produce any other programmatical
-  ;; value.
-  ;;
-  ;; We will intercept the test output, and
-  ;; interpret it accordint to the TAP
-  ;; format (we limit this by just
-  ;; looking for strings starting with "not ok"
-  ;; in the output).
-
-  ;; Interesepting cl-test-more TAP output
-  (quicklisp:quickload :cl-test-more)
-
-  (let ((test-output-buf (make-string-output-stream)))
-    (progv
-        (list (read-from-string "cl-test-more:*test-result-output*"))
-        (list (make-broadcast-stream (symbol-value (read-from-string "cl-test-more:*test-result-output*"))
-                                     test-output-buf))
-      ;; ensure it is reloaded, even if it was already loaded before
-      (asdf:clear-system :cl-annot)
-      (asdf:clear-system :cl-annot-test)
-      (quicklisp:quickload :cl-annot-test))
-
-    ;; Now look for a strting starting from "not ok"
-    ;; in the test output
-    (with-input-from-string (test-output (get-output-stream-string test-output-buf))
-      (do ((line (read-line test-output nil) (read-line test-output nil)))
-          ((null line))
-        (when (starts-with line "not ok")
-          (format t "---------------------------------------------------------------------------~%")
-          (format t "cl-annot test suite has a test failure, the firt TAP output failure string:~%~A"
-                  line)
-          (return-from libtest :fail))))
-    :ok))
+  (running-cl-test-more-suite "cl-annot"
+                              #'(lambda ()
+                                  ;; ensure it is reloaded, even if it was already loaded before
+                                  (asdf:clear-system :cl-annot)
+                                  (asdf:clear-system :cl-annot-test)
+                                  (quicklisp:quickload :cl-annot-test))))
 
 (defmethod libtest ((library-name (eql :cl-openid)))
   ;; test framework used: FiveAM
@@ -679,6 +684,33 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: lift.
   (ql:quickload :cl-num-utils-tests)
   (run-lift-test-suite (read-from-string "cl-num-utils-tests::cl-num-utils-tests")))
+
+(defmethod libtest ((library-name (eql :ieee-floats)))
+  ;; test framework used: FiveAM
+  (ql:quickload :ieee-floats-tests)
+  (run-fiveam-test-suite :ieee-floats))
+
+(defmethod libtest ((library-name (eql :cl-project)))
+  ;; test framework used: cl-test-more
+  (running-cl-test-more-suite "cl-project"
+                              #'(lambda ()
+                                  (ql:quickload :cl-project-test))))
+
+(defmethod libtest ((library-name (eql :trivial-http)))
+  ;; The test framework used: lift.
+  (ql:quickload :trivial-http-test)
+  (run-lift-test-suite :trivial-http-test))
+
+(defmethod libtest ((library-name (eql :cl-store)))
+
+  ;; The test framework used: rt.
+  (clean-rt)
+  (asdf:clear-system :cl-store)
+  (asdf:clear-system :cl-store-tests)
+
+  (ql:quickload :cl-store-tests)
+
+  (run-rt-test-suite))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
