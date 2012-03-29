@@ -75,9 +75,8 @@ just passed to the QUICKLISP:QUICKLOAD."
     :iolib            :cl-oauth            :cl-routes           :cl-unicode
     :fiveam           :trivial-utf-8       :yason               :cl-annot
     :cl-openid        :split-sequence      :cl-closure-template :cl-interpol
-    :lift             :trivial-shell       :let-plus            :data-sift
-    :cl-num-utils     :ieee-floats         :cl-project          :trivial-http
-    :cl-store)
+    :trivial-shell    :let-plus            :data-sift           :cl-num-utils
+    :ieee-floats      :cl-project          :trivial-http        :cl-store)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -660,11 +659,14 @@ just passed to the QUICKLISP:QUICKLOAD."
   (ql:quickload :cl-interpol-test)
   (funcall (read-from-string "cl-interpol-test:run-all-tests")))
 
-(defmethod libtest ((library-name (eql :lift)))
-  ;; The test framework used: lift.
-  (ql:quickload :lift)
-  (ql:quickload :lift-test)
-  (run-lift-test-suite (read-from-string "lift-test::lift-test")))
+;; Decided not to add Lift now. 
+;; See coverage.org for details.
+;;
+;; (defmethod libtest ((library-name (eql :lift)))
+;;   ;; The test framework used: lift.
+;;   (ql:quickload :lift)
+;;   (ql:quickload :lift-test)
+;;   (run-lift-test-suite (read-from-string "lift-test::lift-test")))
 
 (defmethod libtest ((library-name (eql :trivial-shell)))
   ;; The test framework used: lift.
