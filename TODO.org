@@ -1,14 +1,28 @@
 * Focus
-** TODO automatically find regressions between quicklisp disto versions
-** TODO test results detailed to individual tests for remaining test frameworks
+** DONE automatically find regressions between quicklisp disto versions
+   CLOSED: [2012-03-17 Сб 22:45]
+** DONE test results detailed to individual tests for remaining test frameworks
+   CLOSED: [2012-03-17 Сб 22:45]
 ** TODO add more libraries
 ** TODO automate processing of library results submited by email
 * Backlog
+** TODO code coverage: SBCL provides sb-cover. Integrate it somehow
+        and publish in the reports.
+        How?
+        - extend the lib-result object with one more field, percentage 
+          of the covered lines?
+        - separate report?
+        - or just output the information into the log?
+** TODO osicat: automate the :no-resource condition
 ** TODO Filters for pivot reports
 ** TODO Test status should include separate indicator for the library compilation and loading.
 ** TODO ABCL, cffi testts: return :no-resource if JNA is not available
 ** TODO Yellow color for known-fail and unexpected-ok aggregated statuses
 ** TODO cffi tests: return :no-resource if C compilation fails on linux
+** TODO cl-fad and flexi-streams use c:\tmp as a temporary directory
+   on Windows; it's not very good. Maybe try to provide them
+   with a temporary directory inside of the cl-test-grid working
+   dir?
 ** TODO Do not allow empty contributor contact in test results. Instead
    always ask the contributor to provide something, nickname,
    whatever.
@@ -50,7 +64,7 @@
    compiler output, etc), so that cl-test-grid messages to the user
    are better visible.
 ** TODO save all the output to a log, so that the tests may be run in background
-** TODO Limit log file size (how?).
+** TODO Limit library output file size (how?).
 ** TODO a way to specify lib-wold as a quicklisp version with some 
    library versions overriden (checkout this particular 
    libraries from the scm), so that library author can quickly 
