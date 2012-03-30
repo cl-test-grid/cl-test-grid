@@ -65,18 +65,21 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *all-libs*
-  '(:alexandria       :babel               :trivial-features    :cffi
-    :cl-ppcre         :usocket             :flexi-streams       :bordeaux-threads
-    :cl-base64        :cl-fad              :trivial-backtrace   :puri
-    :anaphora         :parenscript         :trivial-garbage     :iterate
-    :metabang-bind    :cl-json             :cl-containers       :metatilities-base
-    :cl-cont          :moptilities         :trivial-timeout     :metatilities
-    :named-readtables :arnesi              :local-time          :s-xml
-    :iolib            :cl-oauth            :cl-routes           :cl-unicode
-    :fiveam           :trivial-utf-8       :yason               :cl-annot
-    :cl-openid        :split-sequence      :cl-closure-template :cl-interpol
-    :trivial-shell    :let-plus            :data-sift           :cl-num-utils
-    :ieee-floats      :cl-project          :trivial-http        :cl-store)
+  '(:alexandria            :babel          :trivial-features    :cffi
+    :cl-ppcre              :usocket        :flexi-streams       :bordeaux-threads
+    :cl-base64             :cl-fad         :trivial-backtrace   :puri
+    :anaphora              :parenscript    :trivial-garbage     :iterate
+    :metabang-bind         :cl-json        :cl-containers       :metatilities-base
+    :cl-cont               :moptilities    :trivial-timeout     :metatilities
+    :named-readtables      :arnesi         :local-time          :s-xml
+    :iolib                 :cl-oauth       :cl-routes           :cl-unicode
+    :fiveam                :trivial-utf-8  :yason               :cl-annot
+    :cl-openid             :split-sequence :cl-closure-template :cl-interpol
+    :trivial-shell         :let-plus       :data-sift           :cl-num-utils
+    :ieee-floats           :cl-project     :trivial-http        :cl-store
+    :hu.dwim.stefil        :kmrcl          :cxml-stp            :hu.dwim.walker
+    :hu.dwim.defclass-star :bknr.datastore :yaclml              :com.google.base
+    :external-program)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt ()
@@ -157,6 +160,25 @@ just passed to the QUICKLISP:QUICKLOAD."
                   project-name line)
           (return-from running-cl-test-more-suite :fail))))
     :ok))
+
+(defun combine-extended-libresult (libresult-a libresult-b)
+  (list :failed-tests (union (getf libresult-a :failed-tests)
+                             (getf libresult-b :failed-tests)
+                             :test #'string=)
+        :known-to-fail (union (getf libresult-a :known-to-fail)
+                              (getf libresult-b :known-to-fail)
+                              :test #'string=)))
+
+(assert (let ((combined (combine-extended-libresult '(:failed-tests ("a" "b")
+                                                      :known-to-fail ("c"))
+                                                    '(:failed-tests ("a2" "c2")
+                                                      :known-to-fail ("b2")))))
+          (and (set= '("a" "b" "a2" "c2")
+                     (getf combined :failed-tests)
+                     :test #'string=)
+               (set= '("c" "b2")
+                     (getf combined :known-to-fail)
+                     :test #'string=))))
 
 (defmethod libtest ((library-name (eql :alexandria)))
 
@@ -659,7 +681,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (ql:quickload :cl-interpol-test)
   (funcall (read-from-string "cl-interpol-test:run-all-tests")))
 
-;; Decided not to add Lift now. 
+;; Decided not to add Lift now.
 ;; See coverage.org for details.
 ;;
 ;; (defmethod libtest ((library-name (eql :lift)))
@@ -725,6 +747,86 @@ just passed to the QUICKLISP:QUICKLOAD."
   (ql:quickload :cl-store-tests)
 
   (run-rt-test-suite))
+
+(defmethod libtest ((library-name (eql :hu.dwim.stefil)))
+  ;; The test framework used: stefil.
+
+  (ql:quickload :hu.dwim.stefil.test)
+  (run-stefil-test-suite (read-from-string "hu.dwim.stefil.test::test")))
+
+(defmethod libtest ((library-name (eql  :kmrcl)))
+
+  ;; The test framework used: rt.
+  (clean-rt)
+  (asdf:clear-system :kmrcl-tests)
+
+  (ql:quickload :kmrcl-tests)
+
+  (run-rt-test-suite))
+
+(defmethod libtest ((library-name (eql :cxml-stp)))
+
+  ;; The test framework used: rt.
+  (clean-rt)
+  (asdf:clear-system :cxml-stp)
+  (asdf:clear-system :cxml-stp-test)
+
+  (ql:quickload :cxml-stp)
+  (ql:quickload :cxml-stp-test)
+
+  (run-rt-test-suite))
+
+(defmethod libtest ((library-name (eql :hu.dwim.walker)))
+  ;; The test framework used: stefil.
+  (ql:quickload :hu.dwim.walker.test)
+  (run-stefil-test-suite (read-from-string "hu.dwim.walker.test::test")))
+
+(defmethod libtest ((library-name (eql :hu.dwim.defclass-star)))
+  ;; The test framework used: stefil.
+  (ql:quickload :hu.dwim.defclass-star.test)
+  (run-stefil-test-suite (read-from-string "hu.dwim.defclass-star.test::test")))
+
+(defmethod libtest ((library-name (eql :bknr.datastore)))
+  ;; test framework used: FiveAM
+  (ql:quickload :bknr.datastore)
+  (ql:quickload :bknr.datastore.test)
+  (run-fiveam-test-suite :bknr.datastore))
+
+(defmethod libtest ((library-name (eql :yaclml)))
+  ;; test framework used: FiveAM
+  (ql:quickload :yaclml)
+  (ql:quickload :yaclml.test)
+  (run-fiveam-test-suite :it.bese.yaclml))
+
+(defmethod libtest ((library-name (eql :com.google.base)))
+  ;; The test framework used: stefil.
+  (ql:quickload :com.google.base-test)
+  (run-stefil-test-suite (read-from-string "com.google.base-test::test-base")))
+
+(defmethod libtest ((library-name (eql :external-program)))
+  ;; test framework used: FiveAM
+  (when (is-windows)
+    (format t "The external-program test suite uses unix shell commands, like cd, which, and therefor can not be tested on Windows.")
+    (return-from libtest :no-resource))
+  (ql:quickload :external-program)
+  (ql:quickload :external-program-test)
+  (run-fiveam-test-suite (read-from-string "external-program-tests::tests")))
+
+;; see coverage.org for details why weblocks is not included into the test grid
+;;
+;; (defmethod libtest ((library-name (eql :weblocks)))
+;;   ;; The test framework used: lift.
+;;
+;;   (when (find-package :yason)
+;;     (warn "Deleting package :yason and ASDF system :yason because weblocks depends on cl-json and cl-json has a package name conflict with yason (cl-json main package name is :json, and yason has nickname :json")
+;;     (delete-package :yason)
+;;     (asdf:clear-system :yason))
+;;
+;;   (ql:quickload :weblocks-test)
+;;   (ql:quickload :weblocks-store-test)
+;;
+;;   (combine-extended-libresult (run-lift-test-suite :weblocks-suite)
+;;                               (run-lift-test-suite :store-suite)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Utils
