@@ -1,0 +1,306 @@
+;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+
+* Quicklisp 2011-12-03
+
+  From 23 libraries, 9 libries pass tests on all the lisps:
+  cl-base64, cl-containers, cl-ppcre, metatilities, metatilities-base,
+  parenscript, puri, trivial-features, trivial-garbage.
+
+  Other libraries fail on some or on all Lisps. Often is not a
+  bug in the library itself, but bug in tests.
+
+  Details:
+** alexandria                                              :expected_failure:
+   Fails on CLISP, but all the failures are "expected failures":
+
+   3 out of 208 total tests failed: ALEXANDRIA-TESTS::COPY-HASH-TABLE.1, 
+       ALEXANDRIA-TESTS::ALIST-HASH-TABLE.1, 
+       ALEXANDRIA-TESTS::PLIST-HASH-TABLE.1.
+   No unexpected failures.
+
+   I am not sure how to understand the term "expected failure",
+   does it mean the library does not function property
+   on the given lisp implementation and it's a kown issue,
+   or just that the given implementation can not test 
+   the functionality properly; or something else.
+** anaphora                                                        :reported:
+   Fails on windows implementations due to bug in tests:
+
+   Test ANAPHORA-TEST::SCOND.3 failed
+   Form: (ANAPHORA:SCOND
+            ((SYMBOL-VALUE '*DEFAULT-PATHNAME-DEFAULTS*)
+             (LET ((ANAPHORA-TEST::TMP ANAPHORA:IT))
+               (UNWIND-PROTECT (PROGN (SETF ANAPHORA:IT (TRUENAME "/tmp/")) 
+                                                        (NAMESTRING *DEFAULT-PATHNAME-DEFAULTS*)) 
+                   (SETF ANAPHORA:IT ANAPHORA-TEST::TMP)))))
+   Expected value: "/tmp/"
+   Actual value: "c:/tmp/".
+
+   Reported to the anaphora-devel:
+   http://lists.common-lisp.net/pipermail/anaphora-devel/2011-December/000542.html
+   
+** babel                                                           :reported:
+   Different number of failures/errors of unknown nature 
+   on different Lisps (8, 9 or 5).
+
+   Reported to bable-devel:
+   http://lists.common-lisp.net/pipermail/babel-devel/2011-December/000121.html   
+** bordeaux-threads                                            :correct_fail:
+   Fails on CLISP with error  "There is no thread support in this instance..."
+   That's correct, CLISP does not support threads in official builds
+   (threading is considered "experimental" due to absense of thread-safe
+   hash-tables).
+
+** cffi                                                            :reported:
+   Has different number (of expected and unexpected)
+   failures on different Lisps.
+   
+   Reported to cffi-devel:
+   http://lists.common-lisp.net/pipermail/cffi-devel/2011-December/003644.html
+** cl-cont                                                         :reported:
+   1 test fails on CLISP:
+   Test CL-CONT-TEST::DOCUMENTATION-SYMBOL-LOOKUP failed
+   Form: 
+     (PROGN (FMAKUNBOUND 'CL-CONT-TEST::DOC-TEST-FUN) (CL-CONT:DEFUN/CC CL-CONT-TEST::DOC-TEST-FUN NIL "foo" T)
+       (SETF (DOCUMENTATION 'CL-CONT-TEST::DOC-TEST-FUN 'FUNCTION) "bar")
+       (EQUAL (DOCUMENTATION 'CL-CONT-TEST::DOC-TEST-FUN 'FUNCTION) "bar"))
+   Expected value: T
+   Actual value: NIL.
+
+   Reported to the weblocks google group (as cl-cont doesn't have
+   a separate mailing list):
+   https://groups.google.com/forum/#!topic/weblocks/OyFvVsFh-Fk
+
+** cl-json                                                 :expected_failure:
+   One "expected" failure. The developers keep this failing test
+   to not forget to implement a feature: calling cl-json:bind
+   inside of cl-json:bind (as far as I understand).
+
+   http://lists.common-lisp.net/pipermail/cl-json-devel/2011-November/000319.html
+
+   Also there is a not very critical issue with the test suite
+   and asdf:test-op - the tests run twice.
+   http://lists.common-lisp.net/pipermail/cl-json-devel/2011-November/000317.html
+
+** cl-json on ECL                                                  :reported:
+   When running tests of cl-json, the following SERIOUS-CONDITION is signaled:
+   Detected access to an invalid or protected memory address.
+
+   ECL bug is opened:
+   https://sourceforge.net/tracker/?func=detail&aid=3471348&group_id=30035&atid=398053	
+** cl-ppcre                                                        :reported:
+   Fails on Allegro
+   Reported: https://github.com/edicl/cl-ppcre/issues/2
+** flexi-streams                                                   :reported:
+   Fails on SBCL with message "0 is not of type (MEMBER NIL T)".
+   Most likely it's a bug in tests.
+   Reported to the flexi-streams-devel mailing list:
+   http://lists.common-lisp.net/pipermail/flexi-streams-devel/2011-October/000275.html
+   Registered aslo in the issue tracker:
+   https://github.com/edicl/flexi-streams/issues/2
+** iterate                                                         :reported:
+   One test fails on all the lisps:
+
+   Test ITERATE.TEST::BUG/WALK.2 failed
+   Form: (ITERATE:ITER
+           (RETURN
+            (IF (ODDP 1)
+                (PROGN)
+                'ITERATE.TEST::EVEN)))
+   Expected value: NIL
+   Actual value: ITERATE.TEST::EVEN.
+
+   Probably a bug in tests.
+
+   Reported to iterate-devel:
+   http://lists.common-lisp.net/pipermail/iterate-devel/2011-December/000686.html
+** metabang-bind                                                   :reported:
+   Fails on CLISP with error:
+
+   [package metabang-bind-test].....Unhandled ERROR is signaled: 
+   FUNCALL: undefined function #:BINDING-GENERATOR267598
+
+   Reported to Gary King (the author) by email.
+
+** moptilities                                                     :reported:
+
+   Fails differently on different Lisps.
+
+   For example CLISP does not implement FUNCTION-ARGLIST, and 
+   on CCL and SBCL FUNCTION-ARGLIST returns different value
+   than expected by moptilities tests: 
+   (&KEY :A :B) vs (&KEY A B) on CCL and
+   (&KEY A (B 2)) vs (&KEY A B) on SBCL, and similar erros.
+
+   Also SBCL inserts special class SB-PCL::SLOT-OBJECT
+   into the class precedence list of usuall classes, but
+   moptilities tests expect only STANDARD-OBJECT and T
+   here.
+
+   Reported to Gary King (the author) by email.
+
+** parenscript                                                     :reported:
+   Fails on Allegro. Reported to the parenscript-devel:
+   http://lists.common-lisp.net/pipermail/parenscript-devel/2012-January/001076.html
+
+   According to Vladimir Sedach it's a named-readtables issue.
+   (his response in the above mail thread:
+   http://lists.common-lisp.net/pipermail/parenscript-devel/2012-January/001083.html)
+** trivial-backtrace                                               :reported:
+   Fails on CCL and SBCL because the test code tries to produce
+   a division by zero error, but these lisps seem to optimize
+   out the division experession as a dead code, therefore the
+   error does not occur at all and the test does not generate
+   the stacktrace.
+
+   Reported to Gary King (the author) by email.
+
+** trivial-timeout                                                 :reported:
+   The same error on all the lisps:
+
+   ERROR : trivial-timeout-test : test-1
+   Condition : <: NIL is not a real number
+   During       : TESTING
+   Code         : 
+   ((MULTIPLE-VALUE-BIND (RESULT MEASURES CONDITION)
+        (HANDLER-CASE (WHILE-MEASURING (SECONDS) (WITH-TIMEOUT (0.5) (SLEEP 1.0)))
+                      (ERROR (C) (DECLARE (IGNORE C))))
+      (DECLARE (IGNORE RESULT))
+      (ENSURE (< (FIRST MEASURES) 0.75) :REPORT "timeout worked")
+      (ENSURE (AND CONDITION (TYPEP CONDITION 'TIMEOUT-ERROR))
+              :REPORT
+              "Received timeout error")))
+  
+
+   Looks like (< (FIRST MEASURES) 0.75) signals this error.
+
+   Reported to Gary King (the author) by email.
+
+** usocket                                                         :reported:
+   Different failures on different lisps.
+
+   Reported to usocket-devel:
+   http://lists.common-lisp.net/pipermail/usocket-devel/2011-December/000719.html
+** usocket hangs on ABCL                                      :report_needed:
+   Usocket hangs on ABCL. The last log message is
+   USOCKET-TEST::WAIT-FOR-INPUT.3
+** parenscript on ABCL: OutOfMemory: PermGen                  :report_needed:
+   Running java with -XX:MaxPermSize=256m fixes the OutOfMenory, but
+   fails with some other error.
+
+   The OutOfMemory failure log:
+
+   ; in (EVAL-WHEN (:COMPILE-TOPLEVEL) ...)
+   
+   ; Caught SIMPLE-STYLE-WARNING:
+   ;     EDITOR-HINTS.NAMED-READTABLES has not been ported to
+   Armed Bear Common Lisp. We fall back to a portable implementation
+   of readtable iterators. This implementation has to grovel through
+   all available characters. On Unicode-aware implementations this may
+   come with some costs.
+   
+   ; Caught SIMPLE-WARNING:
+   ;   COMPILE-FILE warned while performing #<ASDF:COMPILE-OP (:VERBOSE NIL) {DF8CC93}> on #<ASDF::NAMED-READTABLES-SOURCE-FILE "named-readtables" "cruft">.
+   
+   ..........
+   [package parenscript]
+   ; Caught SIMPLE-STYLE-WARNING:
+   ;   Overwriting already existing readtable #<org.armedbear.lisp.Readtable@68f0d4e7>.
+   
+   .............................
+   [package ps-js-symbols]...........................
+   [package ps-dom1-symbols].........................
+   [package ps-dom2-symbols].........................
+   [package ps-window-wd-symbols]....................
+   [package ps-dom-nonstandard-symbols]..............
+   [package ps-dhtml-symbols]........................
+   [package ps-js]...................................
+   [package ps-test].......
+   ; Compilation unit finished
+   ;   Caught 1 WARNING condition
+   ;   Caught 2 STYLE-WARNING conditions
+   
+   Unhandled SERIOUS-CONDITION is signaled: Out of memory PermGen space
+
+** lift on ECL                                                     :reported:
+   Lift is a test framework used 6 from the 23 libriaries we test
+   now: cl-containers, metabang-bind, metatilities, metatilities-base,
+   moptilities, trivial-timeout.
+
+   It can't not be compiled by ECL because it uses non-standard
+   order of clauses in LOOP.
+
+   Reported to lift-devel: 
+   http://lists.common-lisp.net/pipermail/lift-devel/2012-January/000137.html
+
+* Quicklisp 2012-01-07
+** bordeaux-threads tests crash CMUCL		:reported:
+   On CMUCL bordeaux-threads test suite traps into some active
+   deadlock, produces 8 MB of '.' symbols in log, constantly runs GC
+   and finally dies when heap is exhausted.
+
+   Reported here:
+   http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2012-March/000161.html	
+
+** ECL/ASDF issue: ECL with bytecompiler and ECL with :investigate:
+   lisp-to-c compiler have the same
+   (asdf:implementation-identifier), in result
+   the .fasl files are stored in the same location.
+   But .files files from these two favors of ECL
+   are not interchangable.
+
+   Actually I do not remember the details and not sure
+   anymore the problem still exists. Asked on asdf-devel,
+   was told that the lisp-to-c and bytecode compilers
+   have different extention for fasl files...
+
+** ABCL regression: 1.0.0 passes bordeaux-threads tests, :reported:fixed:
+   while 1.0.1 fails to build.
+
+   ABCL ticket:
+   http://trac.common-lisp.net/armedbear/ticket/193
+
+   The ticket is closed already, will be released with ABCL 1.0.2.
+
+** cl-base64 fails on CMUCL (and on ABCL)                          :reported:
+   Reported to Kevin Rosenberg <kevin at rosenberg.net>
+** Minor ABCL issue:				:reported:
+   ASDF::IMPLEMENTATION-IDENTIFIER contains ABCL build environment identifier
+   http://trac.common-lisp.net/armedbear/ticket/192
+* Quicklisp 2012-02-08
+** alexandria: 9 new unexpected failures on CLISP due to CLISP bug :reported:fixed:
+   Reported here:
+   http://lists.common-lisp.net/pipermail/alexandria-devel/2012-February/000647.html
+   
+   Turns out to be a CLISP bug (fixed after the report):
+   http://sourceforge.net/tracker/?func=detail&atid=101355&aid=3487338&group_id=1355
+
+** parenscript tests can not be loaded because the new dependency - cl-javascript :reported:
+   can not be loaded on CLISP.
+   Reported here:
+   https://github.com/akapav/js/issues/12
+** cl-ppcre fails due to cl-unicode bug, if the first Lisp the cl-unicode  :reported:
+   was run on is CLISP.
+   Reported here:
+   https://github.com/edicl/cl-unicode/issues/2
+
+** bordeaux-threads has failure on sbcl-1.0.54.45-a2bef14-macosx-x64 :reported
+   Reported here:
+   http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2012-February/000156.html
+* Quicklisp 2012-03-07
+** cl-javascript doesn't build on ECL due to non-standard LOOP     :reported:
+   (discovered via parenscript, which depends on cl-javascript)
+   
+   Reported: https://github.com/akapav/js/issues/13
+** alexandria doesn't build on ECL, due to non-standard LOOP       :reported:
+   Non standard LOOP in the copy-stream method.
+
+   Reported: http://lists.common-lisp.net/pipermail/alexandria-devel/2012-March/000655.html
+
+** parenscript started to fail on CLISP 2.49 unix                  :reported:
+   Not sure it's a regression, because the test suite which fails
+   was not present in the parenscript version in the
+   previous quicklisp release. 
+
+   Reported to parenscript-devel:
+   http://lists.common-lisp.net/pipermail/parenscript-devel/2012-March/001104.html
