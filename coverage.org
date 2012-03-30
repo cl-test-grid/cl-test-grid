@@ -1,4 +1,4 @@
-;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8;  -*-
+;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 
 * Libraries
 ** Statistics 2010-11-10
@@ -9,134 +9,237 @@ http://blog.quicklisp.org/2010/11/project-download-statistics.html
 
 colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30).
 
-    714 + alexandria
-    596 + babel
-    520 + trivial-features
-    503 + cffi
-    450 + cl-ppcre
-    423 - trivial-gray-streams
-    404 + usocket
-    403 + flexi-streams
-    398 + bordeaux-threads
-    393 - slime
-    386 - cl+ssl (thre is a test.lisp, but it's not automated, and no (asdf:operate (op asdf:test-op) ...)
-    371 - chunga
-    370 + cl-base64
-    361 - cl-fad
-    339 - md5
-    327 - quicklisp-slime-helper
-    323 + trivial-backtrace
-    321 - rfc2388 (there is a test.lisp, but there is no asdf:test-op, and the code in test.lisp 
-                   doesn't return fail/ok status, it jsut prints something to the console)
-    317 - hunchentoot (there are tests and asdf:test-op, but I am affrait it might take
-                       lot of work to automate it: test-op starts server and doesn't
-                       stop; I am also afraid it might hang sometimes; implementation
-                       would also require checking for single-threaded lisps
-                       (by hunchentoot::*supports-threadss-p* ?)
-                       and returning :no-resource. Leave hunchentoot for a later
-                       stage)
-    293 - salza2
-    289 + puri
-    285 - closer-mop (no asdf:test-op. there is a folder "test" with some file jeffs-code.lisp,
-                      but it's a code to reproduce some particular issue. It does not seem
-                      to be intended for automated regression testing of closer-mop)
-    225 + anaphora
-    224 + parenscript
-    221 - cl-who
-    207 + trivial-garbage
-    201 + iterate
-    193 - cl-vectors
-    190 - zpng
-    177 - asdf-system-connections
-    174 - zpb-ttf
-    173 + uffi But the test suite is non trivial (for example, it defines asdf:compile-op 
-               for C files using make). Probably that's why quickisp does not
-               make the uffi-tests.asd availabel for ql:quickload. A study is needed about 
-               how to include this system, therefore I avoid it for now.
-    173 + metabang-bind
-    170 - split-sequence
-    164 - vecto (there is a test.lisp, but it's not automated, intended for manual run and eye-testing of the resulting images)
-    163 + cl-json
-    162 + cl-containers
-    161 + metatilities-base
-    159 - fare-utils
-    156 + weblocks (do these tests start hunchentoot? seems no, it creates mock objects for request, response, etc.)
-          Unfortunately, as of today, (quicklisp:quickload :weblock-test) doesn't work,
-          bacause the test suite does not compile.
-          https://github.com/quicklisp/quicklisp-projects/issues/232
-    156 - fare-matcher (no test-op, but there is fare-matcher-test.asd with one test defined using stefil)
-    148 - drakma
-    144 + cl-cont
-    143 - closure-common
-    140 + moptilities
-    138 - f-underscore
-    137 + trivial-timeout
-    136 + metatilities
-    135 + clsql (big test suite, requires database server(s). Runs the tests 
-                 tests on the DB servers you specified in the configiration. 
-                 Therefore we need to think how to represent results - we can't
-                 just collect results under the same name "clsql", because 
-                 different agents might have tested different servers.
-                 Conclusion: very useful test suite to include into 
-                 our test set, but we will do it later).
-    133 + cxml (But testing it requires manual preparation of test data:
-                checkout the XML test suite from w3.org CVS repostory,
-                patch it, build with ant. Conclusion: desirable to fix
-                improve the situation, e.g. by providing ready
-                to use test data files in a .tar archive
-                and downloading it using quicklisp' http utility).
+    714 + alexandria 2010-11-10
+    498 + arnesi 2012-03-07 (added to test grid, although
+                             it doesn't compile on my SBCL
+                             and CLISP on Windows)
+    225 + anaphora 2010-11-10
+    177 - asdf-system-connections 2010-11-10
+    596 + babel 2010-11-10
+    78  +2 bknr.datastore 2012-03-07 (although the main test suite of
+                                      bknr-datastore is alread added to
+                                      the test grid, there is another
+                                      small test suite in this project,
+                                      :bknr.skip-list.test. It uses
+                                      lisp-unit test framweorks, and
+                                      will be added to test grid after
+                                      lisp-unit api will be implemeted.
+                                      Also, bknr.datastore does not
+                                      support all the lisp compilers,
+                                      it would be good to return
+                                      :no-resource on unsupported
+                                      compilers).
+    398 + bordeaux-threads 2010-11-10
+    503 + cffi 2010-11-10
+    371 - chunga 2010-11-10
+    386 - cl+ssl 2010-11-10 (there is a test.lisp, but it's not automated, and no (asdf:operate (op asdf:test-op) ...)
+    207 + cl-annot 2012-03-07
+    370 + cl-base64 2010-11-10
+    237 - cl-cairo2 2012-03-07
+    193 + cl-closure-template 2012-03-07
+    144 + cl-cont 2010-11-10
+    162 + cl-containers 2010-11-10
+    138 +2 cl-csv 2012-03-07 (lisp-unit support in cl-test-grid is necessary)
+    361 + cl-fad 2010-11-10 (very simple test suite: a file test.lisp
+                             with a single function "test"
+                             which uses cl:assert for test conditions)
+    163 + cl-json 2010-11-10
+    182 + cl-interpol 2012-03-07
+    86  +2 cl-libxml2 2012-03-07 (depends on a foreign library)
+    78  +2 cl-mysql 2012-03-07 (depends on libmysql dll, and requires
+                                a running mySql server)
+    151 + cl-num-utils 2012-03-07
+    308 + cl-oauth 2012-03-07
+    506 - cl-opengl 2012-03-07
+    450 + cl-ppcre 2010-11-10
+    123 + cl-project 2012-03-07
+    300 + cl-routes 2012-03-07
+    120 +2 cl-sqlite 2012-03-07 (depends on a foreign library: sqllite dll)
+    114 + cl-store 2012-03-07
+    277 + cl-unicode 2012-03-07
+    193 - cl-vectors 2010-11-10
+    221 - cl-who 2010-11-10
+    279 + clack 2012-03-07 (Has a test suite, but it's not obvious how to run in
+                            in cl-test-grid: it start hunchentoot, and hangs;
+                            it is composed from several test suites of different
+                            subcomponents; Conclusion: I will not
+                            add it now - complex for me. It would be
+                            easier for clack author to do)
+    285 - closer-mop 2010-11-10 (no asdf:test-op. there is a folder "test" with some file jeffs-code.lisp,
+                                 but it's a code to reproduce some particular issue. It does not seem
+                                 to be intended for automated regression testing of closer-mop)
+    318 - closure-common 2010-11-10
+    135 + clsql 2010-11-10 (big test suite, requires database server(s). Runs the tests
+                            tests on the DB servers you specified in the configiration.
+                            Therefore we need to think how to represent results - we can't
+                            just collect results under the same name "clsql", because
+                            different agents might have tested different servers.
+                            Conclusion: very useful test suite to include into
+                            our test set, but we will do it later).
+    549 - clx 2012-03-07
+    123 +2 commonqt 2012-03-07 (requires Qt libraries, gcc + make / msvs)
+    143 - closure-common 2012-03-07
+    77  + com.google.base 2012-03-07
+    133 +2 cxml 2010-11-10 (Testing it requires manual preparation of test data:
+                            checkout the XML test suite from w3.org CVS repostory,
+                            patch it, build with ant. Conclusion: desirable to fix
+                            improve the situation, e.g. by providing ready
+                            to use test data files in a .tar archive
+                            and downloading it using quicklisp' http utility).
 
-** Statistics 2011-12-05
-   1950 alexandria
-   1203 slime
-   1126 cl+ssl
-   1033 babel
-    936 usocket
-    907 trivial-features
-    904 rfc2388
-    902 bordeaux-threads
-    899 hunchentoot
-    889 cffi
-    849 trivial-garbage
-    828 closer-mop
-    820 trivial-gray-streams
-    789 cl-ppcre
-    703 flexi-streams
-    665 cl-fad
-    620 iterate
-    612 cl-base64
-    591 quicklisp-slime-helper
-    579 chunga
-    499 puri
-    488 md5
-    480 trivial-backtrace
-    470 drakma
-    426 split-sequence
-    412 metatilities-base
-    365 anaphora
-    340 cl-who
-    327 fare-utils
-    313 salza2
-    297 cl-json
-    292 metabang-bind
-    280 uffi
-    273 named-readtables
-    257 clsql
-    242 parenscript
-    237 zpb-ttf
-    230 asdf-system-connections
-    227 zpng
-    210 postmodern
-    208 fare-matcher
-    201 cl-vectors
-    200 ironclad
-    196 vecto
-    190 cl-opengl
-    189 clx
-    182 arnesi
-    169 osicat
-    168 parse-number
-    167 cl-containers
+    153 + data-sift 2012-03-07
+    148 - drakma 2010-11-10
+    234 +2 elephant 2012-03-07 (Not trivial to test, involves C compiler, running database
+                                instances, user-provided configuration. Postponed.)
+    72  + external-program 2012-03-07
+    76  +2 f2cl 2012-03-07 (This system - a Fortran to Common Lisp translator
+                            - seems to have a test suite... but it is
+                            not conventional. A lot of asdf systms, and
+                            no test framwork supported at the moment
+                            by test grid is used)
+    138 - f-underscore 2010-11-10
+    268 + fiveam 2012-03-07
+    156 +2 fare-matcher 2010-11-10 (no test-op, but there is fare-matcher-test.asd
+                                    with one test defined using stefil)
+    159 - fare-utils 2010-11-10
+    403 + flexi-streams 2010-11-10
+    151 +2 gbbopen 2012-03-07 (Needs investigation.
+                               The points:
+                               - I am not sure how to detect test failures,
+                                 although form the sources it seems like
+                                 cerror function is used to signal failures;
+                               - what is the right way to run tests - there
+                                 is no asdf:test-op, but some infor in the readme;
+                                 I did differently that specified in the readme,
+                                 just did (asdf:operate 'asdf:load-op "gbbopen-test"),
+                                 and the tests run
+                               - There are several test systems, at least:
+                                 gbbopen-test, portable-sockets-test, portable-threads-test;
+                                 I don't know if all these are self-contained, fully automated tests.
+                                 gbbopen-test completed without any erros on my SBCL on Windows,
+                                 but portable-sockets-test hangs after the message on console:
+                                 Performing passive-socket and connection tests on 9876...
+                               - The tests should be run "in a fresh environment", i.e.
+                                 to run the tests again, lisp should be restarted.
+                                 I am not sure if it's a problem for cl-test-grid.
+                                 So far, all the test suites might be run more than once,
+                                 although when the contributors run tests, the test running
+                                 process is organized so, that all the test sutes are run only
+                                 once per lisp process execution.)
+    317 - hunchentoot 2010-11-10 (there are tests and asdf:test-op, but I am affrait it might take
+                                  lot of work to automate it: test-op starts server and doesn't
+                                  stop; I am also afraid it might hang sometimes; implementation
+                                  would also require checking for single-threaded lisps
+                                  (by hunchentoot::*supports-threadss-p* ?)
+                                  and returning :no-resource. Leave hunchentoot for a later
+                                  stage)
+    221 - hu.dwim.asdf 2012-03-07
+    85  + hu.dwim.defclass-star 2012-03-07
+    108 + hu.dwim.stefil 2012-03-07
+    88  + hu.dwim.walker 2012-03-07
+    123 +2 hu.dwim.syntax-sugar 2012-03-07 (the source file source\\unicode\\package.lisp
+                                            can not be compiled on my SBCL windows, because
+                                            the default external format :cp-1251 can not read
+                                            this file)
+    151 + ieee-floats 2012-03-07
+    312 + iolib 2012-03-07 (as iolib is not implemented for windows, on windows it just
+                            returns a hardcoded :no-resource; on other platforms
+                            runs the tests suite)
+    201 + iterate 2010-11-10
+    97  + kmrcl 2012-03-07
+    158 + let-plus 2012-03-07
+    176 +2 lift 2012-03-07 (needs at least some care: now the test
+                            sute creates a directory "test-results" full of files,
+                            and does not cleans it up. Also it prints output
+                            to console (and not into the log file I redirected
+                            the *standard-output* and *error-output* to)
+    334 + linedit 2012-03-07
+    258 - lisp-unit 2012-03-07 (there is a file internal-tests.lisp, but
+                                it doesn't seem to be prepared to
+                                be run by someone else except for
+                                the lisp-unit developers)
+    293 - lispbuilder 2012-03-07 (It's a collection of projects, many of which
+                                  are forks of original projects; some have
+                                  test suites, but build on custom
+                                  test frameworks (yacc, regex, clawk),
+                                  and use different packages than the original
+                                  projects. I would be glad if someone
+                                  provide cl-test-grid adapater for
+                                  lispbuilder projects; but I myself
+                                  will continue now with more easy
+                                  to test projects)
+    433 + local-time 2012-03-07
+    93  +2 lla 2012-03-07 (depends on a foreign library, which may be absent)
+    542 + ironclad 2012-03-07 (the test suite is broken - doesn't even compile.
+                               But it's easy to fix, opened a ticket:
+                               https://github.com/froydnj/ironclad/issues/11
+                               After it will be fixed I will add ironclad
+                               tests to the test-grid)
+    205 - manifest 2012-03-07
+    240 +2 mcclim 2012-03-07 (There are some tests, but I don't know
+                              how automated they are. Anyway, this
+                              test suite is too complex for me to add,
+                              some mcclim developer would be in a
+                              better pisition.)
+    339 - md5 2010-11-10
+    173 + metabang-bind 2010-11-10
+    136 + metatilities 2010-11-10
+    161 + metatilities-base 2010-11-10
+    207 - monkeylib-pathnames 2012-03-07
+    83  - monkeylib-test-framework 2012-03-07
+    140 + moptilities 2010-11-10
+    677 + named-readtables 2012-03-07 (strange thing: it contains a copy of RT
+                                       test framework, but in it's own package
+                                       named-readtables-test)
+    317 +2 osicat 2012-03-07 (has test suite, but has difficult :no-resource
+                              condition - cffi-groveler involved)
+    334 - parse-number 2012-03-07 (there is a test.lisp and it's easy to run,
+                                   but there is no way to retrieve test
+                                   results programmatically)
+    224 + parenscript 2010-11-10
+    286 +2 postmodern 2012-03-07 (but requires a running PostgreSQL server
+    70  +2 protobuf 2012-03-07 (Has test suite, but Quicklisp and ASDF
+                                signal "Component "protobuf-test" not found."
+                                error. Also, probably this sistem requires
+                                some configuration, at least protobuf.asd
+                                defines several variables which shoudl be
+                                set by user, according to the comments)
+    289 + puri 2010-11-10
+    296 - restas 2012-03-07
+    327 - quicklisp-slime-helper 2010-11-10
+    431 - quickproject 2012-03-07
+    321 - rfc2388 2010-11-10 (there is a test.lisp, but there is no asdf:test-op, and the code in test.lisp
+                              doesn't return fail/ok status, it jsut prints something to the console)
+    293 - salza2 2010-11-10
+    393 - slime 2010-11-10
+    170 + split-sequence 2012-03-07
+    203 +2 static-vectors 2012-03-07 (non trivial to setup - involves cffi-grovel)
+    317 + s-xml 2012-03-07
+    248 - toot 2012-03-07 (the test.lisp file is not an automated suite, but
+                           a code to start the server and create
+                           several request handlers, to be tested manually
+                           [as far as I understand])
+    323 + trivial-backtrace 2010-11-10
+    520 + trivial-features 2010-11-10
+    207 + trivial-garbage 2010-11-10
+    423 - trivial-gray-streams 2010-11-10
+    116 + trivial-http 2012-03-07
+    173 + trivial-shell 2012-03-07
+    137 + trivial-timeout 2010-11-10
+    261 + trivial-utf-8 2012-03-07
+    173 +2 uffi 2010-11-10 (But the test suite is non trivial (for example, it defines asdf:compile-op
+                            for C files using make). Probably that's why quickisp does not
+                            make the uffi-tests.asd availabel for ql:quickload. A study is needed about
+                            how to include this system, therefore I avoid it for now.
+    404 + usocket 2010-11-10
+    164 - vecto 2010-11-10 (there is a test.lisp, but it's not automated, intended for manual run and eye-testing of the resulting images)
+    156 +2 weblocks 2012-03-07 (judging by the erros signalled
+                                "The variable HUNCHENTOOT:*ACCEPTOR* is unbound."
+                                needs hunchentoot to be started)
+    78  + yaclml 2012-03-07
+    237 + yason 2012-03-07
+    190 - zpng 2010-11-10
+    174 - zpb-ttf 2010-11-10
 
 * CL implementations (outdated info)
   CLISP/Windows - OK
@@ -152,7 +255,7 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
   cl-base64, cl-containers, cl-ppcre, metatilities, metatilities-base,
   parenscript, puri, trivial-features, trivial-garbage.
 
-  Other libraries fail on some or on all Lisps. Often is not a 
+  Other libraries fail on some or on all Lisps. Often is not a
   bug in the library itself, but bug in tests.
 
   Details:
@@ -379,7 +482,6 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    Reported to lift-devel: 
    http://lists.common-lisp.net/pipermail/lift-devel/2012-January/000137.html
 
-
 * Quicklisp 2012-01-07
 ** bordeaux-threads tests crash CMUCL		:reported:
    On CMUCL bordeaux-threads test suite traps into some active
@@ -390,7 +492,7 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2012-March/000161.html	
 
 ** ECL/ASDF issue: ECL with bytecompiler and ECL with :investigate:
-   lisp-to-c compiler have the same 
+   lisp-to-c compiler have the same
    (asdf:implementation-identifier), in result
    the .fasl files are stored in the same location.
    But .files files from these two favors of ECL
@@ -431,10 +533,10 @@ colunmns: download count, has common-lisp test suite (as of quicklisp 2011-07-30
    Reported here:
    https://github.com/edicl/cl-unicode/issues/2
 
-** bordeaux-threads has failure on sbcl-1.0.54.45-a2bef14-macosx-x64 :reported:   
+** bordeaux-threads has failure on sbcl-1.0.54.45-a2bef14-macosx-x64 :reported
    Reported here:
    http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2012-February/000156.html
-* Quicklisp 2012-03-07                                             
+* Quicklisp 2012-03-07
 ** cl-javascript doesn't build on ECL due to non-standard LOOP     :reported:
    (discovered via parenscript, which depends on cl-javascript)
    
