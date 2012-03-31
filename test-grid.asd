@@ -18,4 +18,5 @@
   :version "0.2.1"
   :serial t
   :depends-on (#:quicklisp #:test-grid-blobstore #:rt-api #:lift-api #:fiveam-api #:eos-api #:stefil-api)
-  :components ((:file "test-grid")))
+  :components ((:file "utils")
+               (:file "test-grid")))
