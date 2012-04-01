@@ -1,3 +1,5 @@
+;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: test-grid; Base: 10; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+
 (defpackage #:test-grid-reporting
   (:use :cl))
 
@@ -76,6 +78,12 @@
             (push (test-grid::make-run run-descr lib-results) runs))))
       runs)))
 
+;; ------ a lib result with a reference to it's test run ------
+
+(defclass joined-lib-result ()
+  ((test-run :initarg :test-run :accessor test-run)
+   (lib-result :initarg :lib-result :accessor lib-result)))
+
 ;; ===================== Test Runs Report ====================
 (defvar *test-runs-report-template*
   (merge-pathnames "test-runs-report-template.html"
@@ -104,16 +112,23 @@
   (format nil "~A/blob?key=~A"
           test-grid::*gae-blobstore-base-url* blob-key))
 
-(defun lib-log-local-uri (test-run lib-result)
+(defun lib-log-local-uri (joined-lib-result)
   (format nil "file://~A~A"
-          (test-grid::run-directory (test-grid::run-descr test-run))
-          (string-downcase (getf lib-result :libname))))
+          (test-grid::run-directory (test-grid::run-descr (test-run joined-lib-result)))
+          (string-downcase (getf (lib-result joined-lib-result) :libname))))
 
-(defun lib-log-uri (lib-result)
-  (let ((blob-key (getf lib-result :log-blob-key)))
+(defun no-blob-key-js-alert (&rest unused-args)
+  (declare (ignore unused-args))
+  "javascript:alert('The blobstore key is not specified, seems like the library log was not submitted to the online storage')")
+
+;(defparameter *no-blob-key-printer* 'no-blob-key-js-alert)
+(defparameter *no-blob-key-printer* 'lib-log-local-uri)
+
+(defun lib-log-uri (joined-lib-result)
+  (let ((blob-key (getf (lib-result joined-lib-result) :log-blob-key)))
     (if blob-key
         (blob-uri blob-key)
-        "javascript:alert('The blobstore key is not specified, seems like the library log was not submitted to the online storage')")))
+        (funcall *no-blob-key-printer* joined-lib-result))))
 
 (defun aggregated-status (normalized-status)
   "Returns the test resutl as one symbol, even
@@ -147,13 +162,12 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
     (otherwise "")))
 
 (defun render-single-letter-status (test-run lib-test-result)
-  (declare (ignore test-run))
   (if (null lib-test-result)
       "&nbsp;"
       (let ((status (aggregated-status (getf lib-test-result :status))))
         (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>"
                 (status-css-class status)
-                (lib-log-uri lib-test-result)
+                (lib-log-uri (make-instance 'joined-lib-result :lib-result lib-test-result :test-run test-run))
                 (single-letter-status status)))))
 
 (defun test-runs-table-html (&optional
@@ -233,6 +247,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 ;; ("clisp-win-1" "quicklisp 2" "flexi-streams") -> (<test results>)
 ;; ...
 ;;
+
 (defun do-results-impl (db handler)
   "Handler is a function of two arguments: TEST-RUN and LIB-RESULT"
     (dolist (test-run (getf db :runs))
@@ -251,7 +266,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
              (lisp (getf run-descr :lisp))
              (lib-world (getf run-descr :lib-world))
              (libname (getf lib-result :libname)))
-        (push lib-result
+        (push (make-instance 'joined-lib-result :lib-result lib-result :test-run run)
               (gethash (list lisp lib-world libname) all-results))))
     all-results))
 
@@ -446,11 +461,11 @@ Every subaddress represents some level of pivot groupping."
     helpers))
 
 ;; This is how we print data in table data cells.
-(defun format-lib-results (out lib-results)
-  (dolist (lib-result lib-results)
-    (let ((status (aggregated-status (getf lib-result :status))))
+(defun format-lib-results (out joined-lib-results)
+  (dolist (joined-lib-result joined-lib-results)
+    (let ((status (aggregated-status (getf (lib-result joined-lib-result) :status))))
       (format out "<a href=\"~a\" class=\"test-status ~a\">~a</a> "
-              (lib-log-uri lib-result)
+              (lib-log-uri joined-lib-result)
               (status-css-class status)
               (string-downcase status)))))
 
@@ -513,8 +528,8 @@ Every subaddress represents some level of pivot groupping."
               ;; (BTW, this is the place where the code might need to
               ;; be adjusted whould we start using it for pivot reports
               ;; by more than the 3 fields - :lib-world, :libname, :lisp -
-              ;; in the headers; actually; actually it's not perfect even
-              ;; now)
+              ;; in the headers; actually the solution isn't perfect even
+              ;; for the current 3 fields case)
               (if (and (> col-count 7)
                        (= header-row-num (1- header-row-count)))
                   (print-rotated-col-header colspan text out)
@@ -849,20 +864,20 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
 
           ;; order our results-diff report by library name
           (setf results (sort (copy-list results)
-                              (lambda (lib-result-a lib-result-b)
-                                (string< (getf lib-result-a :libname)
-                                         (getf lib-result-b :libname)))))
+                              (lambda (joined-lib-result-a joined-lib-result-b)
+                                (string< (getf (lib-result joined-lib-result-a) :libname)
+                                         (getf (lib-result joined-lib-result-b) :libname)))))
 
-          (dolist (lib-result results)
-            (let ((status (getf lib-result :status)))
-              (dolist (lib-result-prev results-prev)
-                (let ((status-prev (getf lib-result-prev :status)))
+          (dolist (joined-lib-result results)
+            (let ((status (getf (lib-result joined-lib-result) :status)))
+              (dolist (joined-lib-result-prev results-prev)
+                (let ((status-prev (getf (lib-result joined-lib-result-prev) :status)))
                   (flet ((make-diff-item ()
                            (make-instance 'quicklisp-diff-item
-                                       :libname (getf lib-result :libname)
-                                       :lisp (funcall lisp-getter key)
-                                       :new-status status
-                                       :old-status status-prev)))
+                                          :libname (getf (lib-result joined-lib-result) :libname)
+                                          :lisp (funcall lisp-getter key)
+                                          :new-status status
+                                          :old-status status-prev)))
                     (cond ((has-regressions-p status status-prev)
                            (push (make-diff-item)
                                  (have-regressions diff)))
