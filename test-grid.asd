@@ -15,7 +15,7 @@
             :test #'equal)
 
 (asdf:defsystem #:test-grid
-  :version "0.2.1"
+  :version "0.3.1"
   :serial t
   :depends-on (#:quicklisp #:test-grid-blobstore #:rt-api #:lift-api #:fiveam-api #:eos-api #:stefil-api)
   :components ((:file "utils")
