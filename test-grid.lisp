@@ -618,17 +618,6 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :yason)))
   ;; test framework used: unit-test
 
-  ;; Handle package name conflict between cl-json
-  ;; and yason: the package of cl-json is named :json,
-  ;; the package of yason is named :yason, but has
-  ;; :json as a nickname.
-
-  ;; Temporary rename the :json package if it's loaded
-  (when (and (find-package :json)
-             ;; make sure it's found not by a nickname
-             (string= :json (package-name :json)))
-    (rename-package :json :json-temp-uinuque-name))
-
   (quicklisp:quickload :yason)
   ;; it doesn't provide an ASDF system for tests,
   ;; load the test framework manually, and then
@@ -638,12 +627,6 @@ just passed to the QUICKLISP:QUICKLOAD."
          (yason-test-file (merge-pathnames "test.lisp" yason-dir)))
     (format t "loading ~A~%" yason-test-file)
     (load yason-test-file))
-
-  ;; remove nicknames from the :yason package
-  (rename-package :yason :yason nil)
-  ;; rename :json back to it's original name
-  (when (find-package :json-temp-uinuque-name)
-    (rename-package :json-temp-uinuque-name :json))
 
   ;; now run the tests. It returns a boolean
   (funcall (read-from-string "unit-test:run-all-tests") :unit :yason))
@@ -1056,14 +1039,70 @@ data (libraries test suites output and the run results) will be saved."
     (format t "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.~%")
     run-info))
 
+;;; Some effort to prevent interference between different libraries.
+;;;
+;;; The libraries interfere at least via package names/nicknames.
+;;; For example, cl-json and yason: the package of cl-json is
+;;; named :json,; the package of yason is named :yason, but has
+;;; json as a nickname.
+
+(defun list-all-asdf-systems ()
+  (let ((result nil))
+    (asdf:map-systems #'(lambda (system)
+                          (push (asdf:component-name system)
+                                result)))
+    result))
+
+(defun capture-lisp-state ()
+  (list :packages (list-all-packages)
+        :asdf-systems (list-all-asdf-systems)
+        :features (copy-list *features*)))
+
+(defun restore-lisp-state (lisp-state)
+  ;; restoring packages
+  (let* ((cur-packages (list-all-packages))
+         (packages-to-delete (set-difference cur-packages
+                                             (getf lisp-state :packages))))
+    (every #'(lambda (package)
+               ;; switch to this package before deleting it,
+               ;; to avoid SBCL package locks
+               (let ((*package* package))
+                 ;; Now, if there are other packages which use the
+                 ;; package we are deleting, then delete-package signals
+                 ;; a correctable package-error condition.
+                 ;; We will invoke the 'continue restart, which results
+                 ;; in unuse-package for that package.
+                 ;; (Note, "correctable error" strictly speaking does
+                 ;; not necessary mean the restart will be named 'continue,
+                 ;; but we don't see better solution than to try the 'continue
+                 ;; restart
+                 (handler-bind ((package-error #'(lambda (package-error)
+                                                   (when (find-restart 'continue package-error)
+                                                     (continue)))))
+                   (delete-package package))))
+           packages-to-delete))
+
+  ;; restoring ASDF systems
+  (let* ((cur-asdf-systems (list-all-asdf-systems))
+         (systems-to-delete (set-difference cur-asdf-systems
+                                            (getf lisp-state :asdf-systems))))
+    (every #'asdf:clear-system systems-to-delete))
+
+  ;; restoring features
+  (setf *features* (copy-list (getf lisp-state :features)))
+
+  lisp-state)
+
 (defun run-libtests (&optional (libs *all-libs*))
-  (let* ((run-descr (make-run-descr))
+  (let* ((lisp-state (capture-lisp-state))
+         (run-descr (make-run-descr))
          (run-dir (run-directory run-descr))
          (lib-results))
     (ensure-directories-exist run-dir)
     (dolist (lib libs)
       (let ((lib-result (run-libtest lib run-descr run-dir)))
-        (push lib-result lib-results)))
+        (push lib-result lib-results)
+        (restore-lisp-state lisp-state)))
     (setf (getf run-descr :run-duration)
           (- (get-universal-time)
              (getf run-descr :time)))
