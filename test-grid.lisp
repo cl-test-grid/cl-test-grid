@@ -1056,7 +1056,8 @@ data (libraries test suites output and the run results) will be saved."
 (defun capture-lisp-state ()
   (list :packages (list-all-packages)
         :asdf-systems (list-all-asdf-systems)
-        :features (copy-list *features*)))
+        :features (copy-list *features*)
+        :readtable (copy-readtable)))
 
 (defun restore-lisp-state (lisp-state)
   ;; restoring packages
@@ -1090,6 +1091,9 @@ data (libraries test suites output and the run results) will be saved."
 
   ;; restoring features
   (setf *features* (copy-list (getf lisp-state :features)))
+
+  ;; restoring readtable
+  (setf *readtable* (copy-readtable (getf lisp-state :readtable)))
 
   lisp-state)
 
