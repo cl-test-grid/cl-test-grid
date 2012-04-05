@@ -677,6 +677,17 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-lift-test-suite (read-from-string "closure-template.test::closure-template-test")))
 
 (defmethod libtest ((library-name (eql :cl-interpol)))
+  #+abcl
+  (progn
+    (format t "~&We do not run cl-interpol tests on ABCL, but just report a hardcoded failure,~%")
+    (format t "because as of ABCL 1.0.1 cl-interpol crashes ABCL by ~%")
+    (format t "\"java.lang.OutOfMemoryError: Java heap space\" and before that~%")
+    (format t "produces megabytes of logs containing the error message:~%")
+    (format t "   got an unexpected error: The value #<FLEXI-STREAMS:FLEXI-INPUT-STREAM {56E7A30E}> is not of type STREAM.~%")
+    (format t "Increasing JVM heap size does not help - it just takes longer and produces more~%")
+    (format t "logs, crashing finally with OutOfMemory anyway.~%")
+    (return-from libtest :fail))
+
   ;; The test framework used: custom.
   (ql:quickload :cl-interpol)
   (ql:quickload :cl-interpol-test)
