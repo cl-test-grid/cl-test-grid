@@ -29,6 +29,10 @@ import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobKey;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+
 @SuppressWarnings("serial")
 public class Upload extends HttpServlet {
 
@@ -36,6 +40,8 @@ public class Upload extends HttpServlet {
 
   private BlobstoreService blobstoreService =
     BlobstoreServiceFactory.getBlobstoreService();
+
+  private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws
@@ -58,7 +64,16 @@ public class Upload extends HttpServlet {
     while (names.hasNext()) {
         String blobName = names.next();
         BlobKey blobKey = blobs.get(blobName);
-        resp.getWriter().println(" (\"" + blobName + "\" . \"" + blobKey.getKeyString() + "\")");
+
+        // Instead of returning the BlobKey string, which is of 162 character long,
+        // return a shorter key. 
+        // We acheave this by creating a datastore Entity storing the original BlobKey,
+        // and returning the Entity numeric ID to the client as the blob key.
+        Entity shortKeyEntity = new Entity("ShortKey");
+        shortKeyEntity.setProperty("blobKey", blobKey);
+        datastore.put(shortKeyEntity); 
+
+        resp.getWriter().println(" (\"" + blobName + "\" . \"" + shortKeyEntity.getKey().getId() + "\")");
     }
 
     resp.getWriter().println(")");
