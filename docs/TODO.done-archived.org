@@ -182,3 +182,14 @@
    Also maybe :unexpected-ok.
 ** DONE clean up the pivot reports Lisp code       :report:pivot:codequality:
    CLOSED: [2012-03-01 Чт 05:02]
+* Milestone 0.3.1
+** DONE automatically find regressions between quicklisp disto versions
+   CLOSED: [2012-03-17 Ð¡Ð± 22:45]
+** DONE test results detailed to individual tests for remaining test frameworks
+   CLOSED: [2012-03-17 Ð¡Ð± 22:45]
+** DONE add more libraries
+   CLOSED: [2012-04-06 Пт 04:43]
+   Added 34 libraries, the total number now is 57.
+** DONE shorten the blob keys of online library logs
+   CLOSED: [2012-04-06 Пт 04:46]
+

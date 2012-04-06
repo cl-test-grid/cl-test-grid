@@ -1,11 +1,4 @@
 * Current Focus
-** DONE automatically find regressions between quicklisp disto versions
-   CLOSED: [2012-03-17 Ð¡Ð± 22:45]
-** DONE test results detailed to individual tests for remaining test frameworks
-   CLOSED: [2012-03-17 Ð¡Ð± 22:45]
-** DONE add more libraries
-   CLOSED: [2012-04-06 Пт 04:43]
-   Added 34 libraries, the total number now is 57.
 ** TODO run tests with the newly added libraries on the quicklisp 2012-03-07,
    so that we can compare their results with the new quicklisp release 
    when it is out.
@@ -14,9 +7,6 @@
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
 * Reports Improve 1
-** DONE shorten the blob keys of online library logs
-   CLOSED: [2012-04-06 Пт 04:46]
-
 ** TODO floating report table headers, to that when we scroll, :report:pivot:
    headers are always visible and we always see what lisp/libary/lib-worls
    corresponds to the current table cell.
