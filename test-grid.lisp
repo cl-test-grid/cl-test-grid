@@ -1009,13 +1009,33 @@ data (libraries test suites output and the run results) will be saved."
 
         (print-log-header lib run-descr *standard-output*)
 
-        (setf status (handler-case
-                         (normalize-status (libtest lib))
-                       (serious-condition (condition) (progn
-                                                        (format t
-                                                                "~&Unhandled SERIOUS-CONDITION is signaled: ~A~%"
-                                                                condition)
-                                                        :fail))))
+        (setf status
+              ;; We should never allow the test suite to enter debugger.
+              ;; If the test suite tries to enter debugger, then something
+              ;; is wrong, we just record failure.
+              (restart-case
+                  (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
+                                             (format t
+                                                     "The test suite calls invoke-debugger with condition of type ~A: ~A.~%"
+                                                     (type-of conditions)
+                                                     condition)
+                                             (invoke-restart 'fail-the-test-suite-because-of-debugger))))
+                    ;; Even despite we prevent entering the interactive debugger,
+                    ;; we capture all the SERIOURS-CONDITIONS signalled by test suite,
+                    ;; because we don't want our caller (the code calling RUN-LIBTEST),
+                    ;; to see the test suite errors as errors signalled by RUN-LIBTEST.
+                    (handler-case
+                        (normalize-status (libtest lib))
+                      (serious-condition (condition) (progn
+                                                       (format t
+                                                               "~&Unhandled SERIOUS-CONDIDION of type ~A is signaled: ~A~%"
+                                                               (type-of condition)
+                                                               condition)
+                                                       :fail))))
+                (fail-the-test-suite-because-of-debugger ()
+                  (format t "The test suite stopped because of the debugger invocation. Returning :FAIL.")
+                  :fail)))
+
         (print-log-footer lib status *standard-output*)))
 
     (list :libname lib
