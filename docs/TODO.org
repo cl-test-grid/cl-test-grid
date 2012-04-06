@@ -6,8 +6,30 @@
 ** DONE add more libraries
    CLOSED: [2012-04-06 Пт 04:43]
    Added 34 libraries, the total number now is 57.
+** TODO run tests with the newly added libraries on the quicklisp 2012-03-07,
+   so that we can compare their results with the new quicklisp release 
+   when it is out.
 ** TODO automate processing of library results submited by email
+* Reports Improve 1
+** DONE shorten the blob keys of online library logs
+   CLOSED: [2012-04-06 Пт 04:46]
+
+** TODO floating report table headers, to that when we scroll, :report:pivot:
+   headers are always visible and we always see what lisp/libary/lib-worls
+   corresponds to the current table cell.
+** TODO Yellow color for known-fail and unexpected-ok aggregated statuses
+* Reports Improve 2
+** TODO Filters for pivot reports
 * Backlog
+** TODO a way to specify lib-wold as a quicklisp version with some 
+   library versions overriden (checkout this particular 
+   libraries from the scm), so that library author can quickly 
+   get test result for his changes (fixes)  in scm. 
+   An implementation idea to consider: almost every scm allows 
+   to download asnapshot via http, so the quicklisp http machinery may
+   be reused here, whithout running a shell command for 
+   checkout.
+   24h
 ** TODO code coverage: SBCL provides sb-cover. Integrate it somehow
         and publish in the reports.
         How?
@@ -16,10 +38,8 @@
         - separate report?
         - or just output the information into the log?
 ** TODO osicat: automate the :no-resource condition
-** TODO Filters for pivot reports
 ** TODO Test status should include separate indicator for the library compilation and loading.
 ** TODO ABCL, cffi tests: return :no-resource if JNA is not available
-** TODO Yellow color for known-fail and unexpected-ok aggregated statuses
 ** TODO cffi tests: return :no-resource if C compilation fails on linux
 ** TODO cl-fad and flexi-streams use c:\tmp as a temporary directory
    on Windows; it's not very good. Maybe try to provide them
@@ -28,7 +48,6 @@
 ** TODO Do not allow empty contributor contact in test results. Instead
    always ask the contributor to provide something, nickname,
    whatever.
-** TODO shorten the blob keys of online library logs
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
 ** TODO how to enforce rebuild when loading an ASDF system?
@@ -36,9 +55,6 @@
    compiler produce incompatible .fasl files, but ASDF
    stores the files in the same location, because both
    flavors of ECL have the same (asdf:immplementation-identifier).
-** TODO floating report table headers, to that when we scroll, :report:pivot:
-   headers are always visible and we always see what lisp/libary/lib-worls
-   corresponds to the current table cell.
 ** TODO quicklisp distro version in report headers may be a link to 
    list of library versions in this ql version
    (like this: http://www.quicklisp.org/beta/releases.html, but
@@ -67,15 +83,6 @@
    are better visible.
 ** TODO save all the output to a log, so that the tests may be run in background
 ** TODO Limit library output file size (how?).
-** TODO a way to specify lib-wold as a quicklisp version with some 
-   library versions overriden (checkout this particular 
-   libraries from the scm), so that library author can quickly 
-   get test result for his changes (fixes)  in scm. 
-   An implementation idea to consider: almost every scm allows 
-   to download asnapshot via http, so the quicklisp http machinery may
-   be reused here, whithout running a shell command for 
-   checkout.
-   24h
 ** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO finalize the terminology we use in the code
    to refer our main data: 
