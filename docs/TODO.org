@@ -1,9 +1,11 @@
 * Focus
 ** DONE automatically find regressions between quicklisp disto versions
-   CLOSED: [2012-03-17 Сб 22:45]
+   CLOSED: [2012-03-17 Ð¡Ð± 22:45]
 ** DONE test results detailed to individual tests for remaining test frameworks
-   CLOSED: [2012-03-17 Сб 22:45]
-** TODO add more libraries
+   CLOSED: [2012-03-17 Ð¡Ð± 22:45]
+** DONE add more libraries
+   CLOSED: [2012-04-06 Пт 04:43]
+   Added 34 libraries, the total number now is 57.
 ** TODO automate processing of library results submited by email
 * Backlog
 ** TODO code coverage: SBCL provides sb-cover. Integrate it somehow
@@ -16,7 +18,7 @@
 ** TODO osicat: automate the :no-resource condition
 ** TODO Filters for pivot reports
 ** TODO Test status should include separate indicator for the library compilation and loading.
-** TODO ABCL, cffi testts: return :no-resource if JNA is not available
+** TODO ABCL, cffi tests: return :no-resource if JNA is not available
 ** TODO Yellow color for known-fail and unexpected-ok aggregated statuses
 ** TODO cffi tests: return :no-resource if C compilation fails on linux
 ** TODO cl-fad and flexi-streams use c:\tmp as a temporary directory
