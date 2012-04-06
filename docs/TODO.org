@@ -7,9 +7,9 @@
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
 * Reports Improve 1
-** TODO floating report table headers, to that when we scroll, :report:pivot:
-   headers are always visible and we always see what lisp/libary/lib-worls
-   corresponds to the current table cell.
+** TODO floating report table headers, so that when we scroll,  :report:pivot:
+   headers are always visible and we always see what lisp/libary/lib-world
+   corresponds to the table cell we are interested in.
 ** TODO Yellow color for known-fail and unexpected-ok aggregated statuses
 * Reports Improve 2
 ** TODO Filters for pivot reports
