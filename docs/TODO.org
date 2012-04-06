@@ -1,4 +1,4 @@
-* Focus
+* Current Focus
 ** DONE automatically find regressions between quicklisp disto versions
    CLOSED: [2012-03-17 Ð¡Ð± 22:45]
 ** DONE test results detailed to individual tests for remaining test frameworks
@@ -10,6 +10,9 @@
    so that we can compare their results with the new quicklisp release 
    when it is out.
 ** TODO automate processing of library results submited by email
+** TODO collect the test results for the next quicklisp release (2012-04-xx)
+** TODO update README.org to reflect the current status and priorities (in
+   other words, reflect the changes during the last month)
 * Reports Improve 1
 ** DONE shorten the blob keys of online library logs
    CLOSED: [2012-04-06 Пт 04:46]
