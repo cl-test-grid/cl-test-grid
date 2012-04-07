@@ -82,24 +82,24 @@ just passed to the QUICKLISP:QUICKLOAD."
     :external-program)
   "All the libraries currently supported by the test-grid.")
 
-(defun clean-rt ()
+(defun clean-rt (&optional (rt-package :rtest))
   (require-impl "rt-api")
-  (rt-api:clean))
+  (rt-api:clean rt-package))
 
-(defun run-rt-test-suite()
+(defun run-rt-test-suite(&optional (rt-package :rtest))
   (require-impl "rt-api")
 
   (let (non-compiled-failures all-failures)
 
-    (rt-api:do-tests :compiled-p nil)
-    (setf non-compiled-failures (rt-api:failed-tests))
+    (rt-api:do-tests :compiled-p nil :rt-package rt-package)
+    (setf non-compiled-failures (rt-api:failed-tests rt-package))
 
-    (rt-api:do-tests :compiled-p t)
+    (rt-api:do-tests :compiled-p t :rt-package rt-package)
     (setf all-failures (union non-compiled-failures
-                              (rt-api:failed-tests)))
+                              (rt-api:failed-tests rt-package)))
 
     (list :failed-tests (mapcar #'string-downcase all-failures)
-          :known-to-fail (mapcar #'string-downcase (rt-api:known-to-fail)))))
+          :known-to-fail (mapcar #'string-downcase (rt-api:known-to-fail rt-package)))))
 
 (defun run-lift-test-suite (test-suite-name)
   (require-impl "lift-api")
@@ -193,11 +193,11 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;;   (return-from libtest :fail))
 
   ;; The test framework used: rt.
-  (clean-rt)
+  (clean-rt #+sbcl :sb-rt #-sbcl :rtest)
   (asdf:clear-system :alexandria-tests)
   (quicklisp:quickload :alexandria-tests)
 
-  (run-rt-test-suite))
+  (run-rt-test-suite #+sbcl :sb-rt #-sbcl :rtest))
 
 (defmethod libtest ((library-name (eql :babel)))
 
@@ -441,7 +441,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :iterate)))
 
   ;; The test framework used: rt.
-  (clean-rt)
+  (clean-rt #+sbcl :sb-rt #-sbcl :rtest)
   (asdf:clear-system :iterate-tests)
   (asdf:clear-system :iterate)
 
@@ -451,7 +451,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (quicklisp:quickload :iterate)
   (quicklisp:quickload :iterate-tests)
 
-  (run-rt-test-suite))
+  (run-rt-test-suite #+sbcl :sb-rt #-sbcl :rtest))
 
 (defmethod libtest ((library-name (eql :metabang-bind)))
 
@@ -514,12 +514,15 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :named-readtables)))
   ;; test framework used: customized RT
+  (clean-rt :named-readtables-test)
+
+  (asdf:clear-system :named-readtables)
+  (asdf:clear-system :named-readtables-test)
+
   (quicklisp:quickload :named-readtables)
   (quicklisp:quickload :named-readtables-test)
-  (funcall (intern (symbol-name '#:do-tests) '#:named-readtables-test))
-  (list :failed-tests (funcall (intern (symbol-name '#:pending-tests)
-                                       '#:named-readtables-test))
-        :known-to-fail nil))
+
+  (run-rt-test-suite :named-readtables-test))
 
 (defmethod libtest ((library-name (eql :arnesi)))
   ;; test framework used: FiveAM
@@ -1015,9 +1018,10 @@ data (libraries test suites output and the run results) will be saved."
               ;; is wrong, we just record failure.
               (restart-case
                   (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
+                                             (declare (ignore me-or-my-encapsulation))
                                              (format t
                                                      "The test suite calls invoke-debugger with condition of type ~A: ~A.~%"
-                                                     (type-of conditions)
+                                                     (type-of condition)
                                                      condition)
                                              (invoke-restart 'fail-the-test-suite-because-of-debugger))))
                     ;; Even despite we prevent entering the interactive debugger,

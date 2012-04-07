@@ -7,5 +7,5 @@
 (asdf:defsystem #:rt-api-impl
   :version "0.1.0"
   :serial t
-  :depends-on (#:rt-api #:rt)
+  :depends-on (#:rt-api)
   :components ((:file "rt-api-impl")))

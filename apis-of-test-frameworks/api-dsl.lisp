@@ -52,7 +52,8 @@
 ;; presense or correctness (being compilable, and loadable).
 ;;
 ;; This macro hasn't been tested extensively yet. In particular 
-;; the code for &key arguments and such is not tested.
+;; the code for mixng &key with &rest or with &allow-other-keys
+;; arguments and such is not tested.
 (defmacro proclfun (name lambda-list return-type &body documentation)
   (let* ((key-seen-p nil)
          (arg-types (mapcar #'(lambda (arg-spec)
@@ -61,11 +62,56 @@
                                       ((member arg-spec '(&optional &rest &allow-other-keys))
                                        arg-spec)
                                       (t (if key-seen-p 
-                                             arg-spec 
-                                             (second arg-spec)))))
+                                             (etypecase (first arg-spec)
+                                               ;; no default value: &key (:a integer) -> (:a integer)
+                                               (symbol arg-spec)
+                                               ;; with default value: &key ((:a integer) 0) -> (:a integer)
+                                               (cons (first arg-spec)))
+                                             (etypecase (first arg-spec)
+                                               ;; no default value: &optional (a integer) -> integer
+                                               (symbol (second arg-spec))
+                                               ;; with default value: &optional((a integer) 0) -> integer
+                                               (cons (second (first arg-spec))))))))
                             lambda-list)))
     `(progn
        ;; todo: use ,name only once
        (proclaim '(ftype (function ,arg-types ,return-type) ,name))
        (setf (documentation ',name 'function) ,@documentation)
        ',name)))
+
+#|
+More examples:
+
+;; just a function with parameters
+(proclfun plus ((a number) (b number)) number
+  "Returns the sum of two numbers")
+
+(defun plus (a b)
+  (+ a b))
+
+;; the same function, but with optional parameters
+(proclfun plus (&optional (a number) (b number)) number
+  "Returns the sum of two numbers")
+
+(defun plus (&optional a b)
+  (+ a b))
+
+;; the same, but the optioanal parameter have default values
+(proclfun plus (&optional ((a number) 0) ((b number) 0)) number
+  "Returns the sum of two numbers")
+
+(defun plus (&optional (a 0) (b 0))
+  (+ a b))
+
+;; now with key parameters
+(proclfun plus (&key (:a number) (:b number)) number
+  "Returns the sum of two numbers")
+
+;; the same, but the key parameters have default values
+(proclfun plus (&key ((:a number) 0) ((:b number) 0)) number
+  "Returns the sum of two numbers")
+
+(defun plus (&key (a 0) (b 0))
+  (+ a b))
+
+|#
