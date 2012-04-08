@@ -841,6 +841,13 @@ just passed to the QUICKLISP:QUICKLOAD."
   (when (is-windows)
     (format t "The external-program test suite uses unix shell commands, like cd, which, and therefor can not be tested on Windows.")
     (return-from libtest :no-resource))
+
+  #+ecl
+  (progn
+    (format t "external-program test suite hangs on ECL (as of ecl-11.1.1-606449eb-linux-x86, Quicklisp 2012-03-07 (external-program-20111001-git)~%")
+    (format t "Returning hardcoded :FAIL~%")
+    (return-from libtest :fail))
+
   (ql:quickload :external-program)
   (ql:quickload :external-program-test)
   (run-fiveam-test-suite (read-from-string "external-program-tests::tests")))
