@@ -15,6 +15,13 @@
 ** TODO Filters for pivot reports
 * Backlog
 ** TODO install multithreaded CLISP and run tests on it
+** TODO add CCL revision to the version string (I have impression
+   that CCL versions checked out at different time from the official release SVN
+   svn co http://svn.clozure.com/publicsvn/openmcl/release/1.8/darwinx86/ccl
+   may be different. I.e. despite it is called "release 1.8", the mainteiners
+   commit fixes there, and the version string we use now - "ccl-1.8-f95-linux-x86",
+   does not reflect this. In other words, our version string does not
+   identify CCL uniquly.
 ** TODO a way to specify lib-wold as a quicklisp version with some 
    library versions overriden (checkout this particular 
    libraries from the scm), so that library author can quickly 
