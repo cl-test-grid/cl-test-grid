@@ -14,6 +14,7 @@
 * Reports Improve 2
 ** TODO Filters for pivot reports
 * Backlog
+** TODO install multithreaded CLISP and run tests on it
 ** TODO a way to specify lib-wold as a quicklisp version with some 
    library versions overriden (checkout this particular 
    libraries from the scm), so that library author can quickly 
