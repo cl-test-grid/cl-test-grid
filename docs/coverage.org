@@ -2,14 +2,14 @@
 
 # Information about test suites of CL libraries.
 #
-# colunmns: 
-#  - test suite state: may be one of: 
-#      '-' means no test suite, 
+# colunmns:
+#  - test suite state: may be one of:
+#      '-' means no test suite,
 #      '+' means test suite added to test grid
-#      '+' test suite exists, but adding it to test
+#      '+2' test suite exists, but adding it to test
 #          grid will teke some effors. It is not
-#          added, but may be added later.
-#  - project name (the items are sorted by project name, 
+#          added now, but may be added later.
+#  - project name (the items are sorted by project name,
 #                  although the sorging was performed
 #                  manually when adding the projects
 #                  one by one and may be not precise)
@@ -17,7 +17,7 @@
 #    was reviewed
 #  - Optional description of the issues with the test
 #    suite (in parentesis, may span onver several lines)
-# 
+#
 
 + alexandria 2010-11-10
 + arnesi 2012-03-07 (added to test grid, although
@@ -152,9 +152,9 @@
                                     the default external format :cp-1251 can not read
                                     this file)
 + ieee-floats 2012-03-07
-+ iolib 2012-03-07 (as iolib is not implemented for windows, on windows it just
-                    returns a hardcoded :no-resource; on other platforms
-                    runs the tests suite)
++2 iolib 2012-03-07 (Requies a echo server to run run. Hangs on CCL.
+                     As iolib is not implemented for windows,
+                     on windows we need to return a hardcoded :no-resource;)
 + iterate 2010-11-10
 + kmrcl 2012-03-07
 + let-plus 2012-03-07

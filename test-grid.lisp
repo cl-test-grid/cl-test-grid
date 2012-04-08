@@ -65,21 +65,20 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *all-libs*
-  '(:alexandria            :babel          :trivial-features    :cffi
-    :cl-ppcre              :usocket        :flexi-streams       :bordeaux-threads
-    :cl-base64             :cl-fad         :trivial-backtrace   :puri
-    :anaphora              :parenscript    :trivial-garbage     :iterate
-    :metabang-bind         :cl-json        :cl-containers       :metatilities-base
-    :cl-cont               :moptilities    :trivial-timeout     :metatilities
-    :named-readtables      :arnesi         :local-time          :s-xml
-    :iolib                 :cl-oauth       :cl-routes           :cl-unicode
-    :fiveam                :trivial-utf-8  :yason               :cl-annot
-    :cl-openid             :split-sequence :cl-closure-template :cl-interpol
-    :trivial-shell         :let-plus       :data-sift           :cl-num-utils
-    :ieee-floats           :cl-project     :trivial-http        :cl-store
-    :hu.dwim.stefil        :kmrcl          :cxml-stp            :hu.dwim.walker
-    :hu.dwim.defclass-star :bknr.datastore :yaclml              :com.google.base
-    :external-program)
+  '(:alexandria            :babel               :trivial-features    :cffi
+    :cl-ppcre              :usocket             :flexi-streams       :bordeaux-threads
+    :cl-base64             :cl-fad              :trivial-backtrace   :puri
+    :anaphora              :parenscript         :trivial-garbage     :iterate
+    :metabang-bind         :cl-json             :cl-containers       :metatilities-base
+    :cl-cont               :moptilities         :trivial-timeout     :metatilities
+    :named-readtables      :arnesi              :local-time          :s-xml
+    :cl-oauth              :cl-routes           :cl-unicode          :fiveam
+    :trivial-utf-8         :yason               :cl-annot            :cl-openid
+    :split-sequence        :cl-closure-template :cl-interpol         :trivial-shell
+    :let-plus              :data-sift           :cl-num-utils        :ieee-floats
+    :cl-project            :trivial-http        :cl-store            :hu.dwim.stefil
+    :kmrcl                 :cxml-stp            :hu.dwim.walker      :hu.dwim.defclass-star
+    :bknr.datastore        :yaclml              :com.google.base    :external-program)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -554,15 +553,17 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defun is-windows ()
   (intersection '(:windows :win32 :win) *features*))
 
-(defmethod libtest ((library-name (eql :iolib)))
-  ;; test framework used: FiveAM
-
-  (cond ((is-windows)
-         (format t "IOLib is not implemented for Windows.~%")
-         :no-resource)
-        (t
-         (quicklisp:quickload :iolib-tests)
-         (run-fiveam-test-suite :iolib))))
+;; See coverage.org for more info why IO lib is not added.
+;;
+;; (defmethod libtest ((library-name (eql :iolib)))
+;;   ;; test framework used: FiveAM
+;;
+;;   (cond ((is-windows)
+;;          (format t "IOLib is not implemented for Windows.~%")
+;;          :no-resource)
+;;         (t
+;;          (quicklisp:quickload :iolib-tests)
+;;          (run-fiveam-test-suite :iolib))))
 
 (defmethod libtest ((library-name (eql :cl-oauth)))
   ;; test framework used: FiveAM
