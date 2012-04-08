@@ -1,0 +1,19 @@
+This directory contains:
+
+test-systems - list of all the ASDF systems in Quicklisp
+             with a word "test" in the system name; 
+             ordered by the project download count.
+detect-test-systems.lisp - the lisp code which
+                        generated the test-systems file
+quicklisp-download-statistics-2012.txt - quiclisp download statistics
+coverage.org - information about the libraries already reviewed:
+             whether it is added to test grid, and if not added - why
+             (no test suite, needs manual configuration, hangs, etc.)
+             The libraries are ordered in alphabetical order.
+
+TODO.org - Notes about what needs to be done in the project.
+         Ordered approximatelly by priority (descending)
+TODO.done-archived.org - Done TODO items.
+
+issues-found.org - Information about all the bug reports
+                 I submitted based on the test-grid resutls.
