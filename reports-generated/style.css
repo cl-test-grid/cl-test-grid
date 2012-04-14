@@ -7,6 +7,10 @@
     color: red;
 }
 
+.warn-fail-status {
+    color: orange;
+}
+
 .no-resource-status {
     color: #7A7A7A;
 }

@@ -5,7 +5,7 @@
 
 (in-package #:test-grid-reporting)
 
-;; -------------- the reporting source code directory -----------;; 
+;; -------------- the reporting source code directory -----------;;
 
 (defun src-dir ()
   (merge-pathnames "reporting/"
@@ -157,7 +157,8 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 (defun status-css-class (aggregated-status)
   (case aggregated-status
     (:ok "ok-status")
-    ((:known-fail :fail :unexpected-ok) "fail-status")
+   ((:unexpected-ok :known-fail) "warn-fail-status")
+    (:fail  "fail-status")
     (:no-resource "no-resource-status")
     (otherwise "")))
 
@@ -488,7 +489,7 @@ Every subaddress represents some level of pivot groupping."
   (format out "<th colspan=\"~A\">~A</th>" colspan text))
 
 ;; When we need to save horizontal space, we print
-;; column headers rotaget, so that headers do not
+;; column headers rotated, so that headers do not
 ;; require more than 1 ex from columns width
 ;; (the data cell may make the column wider
 ;; than 1ex of course, but the headers never
