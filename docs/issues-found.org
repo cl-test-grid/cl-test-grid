@@ -230,7 +230,7 @@
    It can't not be compiled by ECL because it uses non-standard
    order of clauses in LOOP.
 
-   Reported to lift-devel: 
+   Reported to lift-devel:
    http://lists.common-lisp.net/pipermail/lift-devel/2012-January/000137.html
 
 * Quicklisp 2012-01-07
@@ -290,7 +290,7 @@
 * Quicklisp 2012-03-07
 ** cl-javascript doesn't build on ECL due to non-standard LOOP     :reported:
    (discovered via parenscript, which depends on cl-javascript)
-   
+
    Reported: https://github.com/akapav/js/issues/13
 ** alexandria doesn't build on ECL, due to non-standard LOOP       :reported:
    Non standard LOOP in the copy-stream method.
