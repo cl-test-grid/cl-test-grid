@@ -279,7 +279,7 @@
    can not be loaded on CLISP.
    Reported here:
    https://github.com/akapav/js/issues/12
-** cl-ppcre fails due to cl-unicode bug, if the first Lisp the cl-unicode  :reported:
+** cl-ppcre fails due to cl-unicode bug, if the first Lisp the cl-unicode :reported:fixed:
    was run on is CLISP.
    Reported here:
    https://github.com/edicl/cl-unicode/issues/2
