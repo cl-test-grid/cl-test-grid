@@ -1,19 +1,20 @@
 * Current Focus
-** TODO run tests with the newly added libraries on the quicklisp 2012-03-07,
-   so that we can compare their results with the new quicklisp release 
-   when it is out.
 ** TODO automate processing of library results submited by email
-** TODO collect the test results for the next quicklisp release (2012-04-xx)
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
-* Reports Improve 1
-** TODO floating report table headers, so that when we scroll,  :report:pivot:
-   headers are always visible and we always see what lisp/libary/lib-world
-   corresponds to the table cell we are interested in.
-** TODO Yellow color for known-fail and unexpected-ok aggregated statuses
+* Current focus: Test result for Quicklisp 2012-03, 2012-04
+** DONE run tests with the newly added libraries on the quicklisp 2012-03-07,
+   CLOSED: [2012-04-22 Вс 04:13]
+   so that we can compare their results with the new quicklisp release 
+   when it is out.
+** DONE collect the test results for the next quicklisp release (2012-04-xx)
+   CLOSED: [2012-04-22 Вс 04:13]
+** TODO analyze the failures of Quicklisp 2012-04.
 * Reports Improve 2
 ** TODO Filters for pivot reports
 * Backlog
+** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
+   to improve the page performance and load time.
 ** TODO install multithreaded CLISP and run tests on it
 ** TODO add CCL revision to the version string (I have impression
    that CCL versions checked out at different time from the official release SVN
