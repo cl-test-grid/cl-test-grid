@@ -1,8 +1,4 @@
-* Current Focus
-** TODO automate processing of library results submited by email
-** TODO update README.org to reflect the current status and priorities (in
-   other words, reflect the changes during the last month)
-* Current focus: Test result for Quicklisp 2012-03, 2012-04
+* Current: Test result for Quicklisp 2012-03, 2012-04
 ** DONE run tests with the newly added libraries on the quicklisp 2012-03-07,
    CLOSED: [2012-04-22 Вс 04:13]
    so that we can compare their results with the new quicklisp release 
@@ -10,11 +6,21 @@
 ** DONE collect the test results for the next quicklisp release (2012-04-xx)
    CLOSED: [2012-04-22 Вс 04:13]
 ** TODO analyze the failures of Quicklisp 2012-04.
+* Current: 
+** TODO an informer which may be embedded into a library    :report:informer:
+   project page, with reports about the test statuses 
+   for this single library on various platforms with
+   various quicklisp versions
+** TODO automate processing of library results submited by email
+** TODO update README.org to reflect the current status and priorities (in
+   other words, reflect the changes during the last month)
+* Test Running Robustness
+** TODO run each test suite in a separate process
 * Reports Improve 2
 ** TODO Filters for pivot reports
-* Backlog
 ** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
    to improve the page performance and load time.
+* Backlog
 ** TODO install multithreaded CLISP and run tests on it
 ** TODO add CCL revision to the version string (I have impression
    that CCL versions checked out at different time from the official release SVN
@@ -61,10 +67,6 @@
    list of library versions in this ql version
    (like this: http://www.quicklisp.org/beta/releases.html, but
    it's only for the latest QL).
-** TODO an informer which may be embedded into a library    :report:informer:
-   project page, with reports about the test statuses 
-   for this single library on various platforms with
-   various quicklisp versions
 ** TODO report overview: change "represents every test run as a separate row"  :report:overview:
    to
    "represents every <tt>test-grid:run-tests</tt> as a separate row"
