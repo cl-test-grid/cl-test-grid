@@ -30,12 +30,19 @@
     margin: 5;
     white-space: nowrap;
     font-weight: bold;
+    border-collapse: collapse;
+}
+
+.test-table th {
+    background: white;
 }
 
 .test-table td, .test-table th {
     padding-left: 2px;
     padding-right: 2px;
     border-color: black;
+    border-width: 1px;
+    border-style: solid;
 }
 
 th.rotated-header {
@@ -64,7 +71,7 @@ th.rotated-header {
 
 /* Table highlighting */
 
-.hover { 
+th.hover, .hover { 
     background-color: #f2f2f2; 
 }
 

@@ -512,6 +512,7 @@ Every subaddress represents some level of pivot groupping."
         (header-row-count col-field-count))
     (dotimes (i (+ row-field-count col-count))
       (princ "<colgroup/>" out))
+    (format out "<thead>~%")
     (dotimes (header-row-num header-row-count)
       (princ "<tr class=\"header-row\">" out)
       (dotimes (row-header row-field-count)
@@ -536,7 +537,8 @@ Every subaddress represents some level of pivot groupping."
                   (print-rotated-col-header colspan text out)
                   (print-usual-col-header colspan text out)))
             (setf (printed helper) t))))
-      (format out "</tr>~%"))))
+      (format out "</tr>~%"))
+    (format out "</thead>~%")))
 
 (defun pivot-table-html (out
                          joined-index
