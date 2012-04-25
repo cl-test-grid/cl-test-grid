@@ -864,13 +864,6 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
         (funcall lib-world-setter key-prev quicklisp-old)
         (let ((results (gethash key db-index))
               (results-prev (gethash key-prev db-index)))
-
-          ;; order our results-diff report by library name
-          (setf results (sort (copy-list results)
-                              (lambda (joined-lib-result-a joined-lib-result-b)
-                                (string< (getf (lib-result joined-lib-result-a) :libname)
-                                         (getf (lib-result joined-lib-result-b) :libname)))))
-
           (dolist (joined-lib-result results)
             (let ((status (getf (lib-result joined-lib-result) :status)))
               (dolist (joined-lib-result-prev results-prev)
@@ -887,6 +880,11 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
                           ((has-regressions-p status-prev status)
                            (push (make-diff-item)
                                  (improvements-only diff))))))))))))
+    ;; order our results-diff report by library name
+    (setf (have-regressions diff)
+          (sort (have-regressions diff) #'string< :key #'libname))
+    (setf (improvements-only diff)
+          (sort (improvements-only diff) #'string< :key #'libname))
     diff))
 
 (defun print-quicklisp-diff (destination ql-new ql-old quicklisp-diff)
