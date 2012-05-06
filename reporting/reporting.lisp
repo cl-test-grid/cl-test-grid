@@ -84,6 +84,9 @@
   ((test-run :initarg :test-run :accessor test-run)
    (lib-result :initarg :lib-result :accessor lib-result)))
 
+(defun status (joined-lib-result)
+  (getf (lib-result joined-lib-result) :status))
+
 ;; ===================== Test Runs Report ====================
 (defvar *test-runs-report-template*
   (merge-pathnames "test-runs-report-template.html"
@@ -717,7 +720,7 @@ Every subaddress represents some level of pivot groupping."
              (fail-list '(:failed-tests ("a" "b") :known-to-fail ("b" "c"))))))
 
 (defparameter *lib-status-regressions-rules*
-  `( ;new type             ;old type     ; do the new-result has regressions comparing to old-status?
+  `( ;new type              ;old type    ; do the new-result has regressions comparing to old-status?
     (()                     t            nil)
     (:ok                    t            nil)
     (:no-resource           t            nil)
@@ -820,8 +823,14 @@ unexpected OKs are OKs."
 (defclass quicklisp-diff-item ()
   ((libname :initarg :libname :accessor libname)
    (lisp :initarg :lisp :accessor lisp)
-   (new-status :initarg :new-status :accessor new-status)
-   (old-status :initarg :old-status :accessor old-status)))
+   (new-result :initarg :new-result :accessor new-result)
+   (old-result :initarg :old-result :accessor old-result)))
+
+(defun new-status (quicklisp-diff-item)
+  (status (new-result quicklisp-diff-item)))
+
+(defun old-status (quicklisp-diff-item)
+  (status (old-result quicklisp-diff-item)))
 
 ;; Diff of two quicklisp distro versions.
 (defclass quicklisp-diff ()
@@ -872,8 +881,8 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
                            (make-instance 'quicklisp-diff-item
                                           :libname (getf (lib-result joined-lib-result) :libname)
                                           :lisp (funcall lisp-getter key)
-                                          :new-status status
-                                          :old-status status-prev)))
+                                          :new-result joined-lib-result
+                                          :old-result joined-lib-result-prev)))
                     (cond ((has-regressions-p status status-prev)
                            (push (make-diff-item)
                                  (have-regressions diff)))
@@ -890,13 +899,17 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
 (defun print-quicklisp-diff (destination ql-new ql-old quicklisp-diff)
   (flet ((print-diff-item (diff-item)
            (let ((*print-pretty* nil))
-             (format destination "~a, ~a:~%~a: ~a~%~a: ~a~%~%"
+             (format destination "~a, ~a:~%~a: <a class=\"~a\" href=\"~a\">~a</a>~%~a: <a class=\"~A\" href=\"~a\">~a</a>~%~%"
                      (string-downcase (libname diff-item))
                      (lisp diff-item)
                      ql-new
-                     (new-status diff-item)
+                     (status-css-class (aggregated-status (status (new-result diff-item))))
+                     (lib-log-uri (new-result diff-item))
+                     (status (new-result diff-item))
                      ql-old
-                     (old-status diff-item)))))
+                     (status-css-class (aggregated-status (status (old-result diff-item))))
+                     (lib-log-uri (old-result diff-item))
+                     (status (old-result diff-item))))))
     (format destination "~%~%***************************************************************************~%")
     (format destination "* test results diff between ~A and ~A *~%" ql-new ql-old)
     (format destination "***************************************************************************~%~%")
@@ -908,6 +921,11 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
       (print-diff-item diff-item))))
 
 (defun print-all-quicklisps-diff-report (destination joined-index)
+  (format destination "<html><head>~%")
+  (format destination "  <title>Quicklisps Diff - CL Test Grid</title>~%")
+  (format destination "  <link href=\"style.css\" rel=\"stylesheet\"/><head>~%")
+  (format destination "<head>~%")
+  (format destination "<body><pre>~%")
   (let ((quicklisps (mapcar #'car (distinct-addresses joined-index '(:lib-world)))))
     (loop
        for qls on (sort quicklisps #'string>)
@@ -917,7 +935,9 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
               (print-quicklisp-diff destination
                                     ql-new
                                     ql-old
-                                    (compare-quicklisps joined-index ql-new ql-old)))))))
+                                    (compare-quicklisps joined-index ql-new ql-old))))))
+  (format destination "</pre></body>~%")
+  (format destination "</html>~%"))
 
 ;; =========== print all the reports at once =============
 
@@ -933,6 +953,6 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
 
     (print-pivot-reports joined-index)
 
-    (with-report-file (out "quicklisps-test-diff.txt")
+    (with-report-file (out "quicklisps-test-diff.html")
       (print-all-quicklisps-diff-report out joined-index))))
 
