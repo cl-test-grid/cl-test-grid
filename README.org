@@ -3,8 +3,8 @@
 
 *** [[http://common-lisp.net/project/cl-test-grid/][Test Results]]
 *** Reported Issues
-***** [[https://bugs.launchpad.net/common-lisp][Launchpad Issue Tracker]]
-***** [[https://github.com/cl-test-grid/cl-test-grid/blob/master/docs/issues-found.org][Old Issue Registry]]
+[[https://bugs.launchpad.net/common-lisp][Launchpad Issue Tracker]].
+[[https://github.com/cl-test-grid/cl-test-grid/blob/master/docs/issues-found.org][Old Issue Registry]].
 
 * The Goal
   Improve stability of the Common Lisp ecosystem
