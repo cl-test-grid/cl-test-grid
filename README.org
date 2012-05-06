@@ -1,5 +1,8 @@
 Collaborative testing of Common Lisp libraries.
 
+[[http://common-lisp.net/project/cl-test-grid/][Test Results]]
+Issues Reported: [[https://bugs.launchpad.net/common-lisp][Launchpad Issue Tracker]] ([[docs/issues-found.org][Old Issue Registry]])
+
 (This README file is a work-in-progress)
 
 * The Goal
@@ -76,8 +79,7 @@ Collaborative testing of Common Lisp libraries.
   status (OK/FAIL) in any report refers to the library test logs 
   with the failure details.
 
-  Currently we have considered the top 50 of 
-  [[http://blog.quicklisp.org/2010/11/project-download-statistics.html][most often quicklisp-downloaded libraries]]. 23 of these libraries
+  We have considered 113 libraries. 56 of these libraries
   have appropriate test suites (fully automated, no user interaction is needed)
   and are added to the cl-test-grid.
 
