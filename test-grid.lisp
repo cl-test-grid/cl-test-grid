@@ -486,7 +486,19 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :metatilities-base)))
   ;; The test framework used: lift.
-  (quicklisp:quickload :metatilities-base-test)
+
+  ;; Instead of just doing
+  ;;  (quicklisp:quickload :metatilities-base-test)
+  ;; we need to workarount quicklisp issue
+  ;; https://github.com/quicklisp/quicklisp-client/issues/58.
+  (ql:quickload "metatilities-base")
+  (let* ((lib-dir (make-pathname :name nil
+                                 :type nil
+                                 :defaults (ql-dist:find-asdf-system-file "metatilities-base")))
+         (asdf:*central-registry* (cons lib-dir asdf:*central-registry*)))
+    (ql:quickload "metatilities-base-test"))
+
+  ;; now run the tests
   (run-lift-test-suite :metatilities-base-test))
 
 (defmethod libtest ((library-name (eql :cl-cont)))
