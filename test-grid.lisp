@@ -569,21 +569,19 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; test framework used: FiveAM
 
   (quicklisp:quickload :cl-oauth)
+  (quicklisp:quickload :cl-oauth.tests)
 
   ;; the code is based on the method
   ;; (defmethod asdf:perform ((o asdf:test-op) (c (eql (asdf:find-system :cl-oauth))))
   ;; from the cl-oauth sources
 
-(let ((request-adapter-symbol (intern (symbol-name '#:*request-adapter*) :cl-oauth))
-      (init-test-request-adapter-symbol (intern (symbol-name '#:init-test-request-adapter) :oauth-test))
-      (oauth-test-suite-symbol (intern (symbol-name '#:oauth) :oauth-test)))
-
-  (let ((original-request-adapter (symbol-value request-adapter-symbol)))
+  (let ((original-request-adapter (symbol-value (read-from-string "cl-oauth:*request-adapter*"))))
     (unwind-protect
          (progn
-           (funcall init-test-request-adapter-symbol)
-           (run-fiveam-test-suite oauth-test-suite-symbol))
-      (setf (symbol-value request-adapter-symbol) original-request-adapter)))))
+           (funcall (read-from-string "oauth-test::init-test-request-adapter"))
+           (run-fiveam-test-suite (read-from-string "oauth-test::oauth")))
+      (setf (symbol-value (read-from-string "cl-oauth:*request-adapter*"))
+            original-request-adapter))))
 
 (defmethod libtest ((library-name (eql :cl-routes)))
   ;; The test framework used: lift.
