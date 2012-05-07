@@ -2,7 +2,7 @@
   (This README file is a work-in-progress)
 
 *** [[http://common-lisp.net/project/cl-test-grid/][Test Results]]
-*** Reported Issues: [[https://bugs.launchpad.net/common-lisp][launchpad issue tracker]]; [[https://github.com/cl-test-grid/cl-test-grid/blob/master/docs/issues-found.org][old issue registry]].
+*** Reported Issues: [[https://bugs.launchpad.net/common-lisp][launchpad issue tracker]]; (old issue registry: docs/issues-found.org).
 
 * The Goal
   Improve stability of the Common Lisp ecosystem
