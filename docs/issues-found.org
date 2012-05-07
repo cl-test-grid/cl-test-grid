@@ -304,3 +304,33 @@
 
    Reported to parenscript-devel:
    http://lists.common-lisp.net/pipermail/parenscript-devel/2012-March/001104.html
+* The issues below this are registered at https://bugs.launchpad.net/common-lisp
+* Quicklisp 2012-04-07
+** external-program: various test failures on various lisps
+** external-program : the test sutie hangs on ECL
+** alexandria: test failures on ACL and CMUCL
+   More info: https://bugs.launchpad.net/common-lisp/+bug/984467
+** cl-cont: regression on CLISP: documentation-defun, documentation-setf
+** cl-cont: regression on CMUCL: tagbody-7
+** cl-oauth: Can not be loaded: There is no package named "OAUTH-TEST" .
+   Not a bug. Happened because new version of cl-oauth (cl-oauth-20120407-git)
+   introduces a separate ASDF system :cl-oauth.tests (in contranst to
+   the old version - cl-oauth-20120305-git - where tests are in the
+   main ASDF system cl-oauth). Fixed by adjusting
+   (defmethod libtest ((library-name (eql :cl-oauth)))
+   according to the new version.
+** iterate: regression on ACL linux 64: handler-bind.1
+** iterate: regression on SBCL 1.0.54: bug/walk.2
+** metatilities-base-test can not be build on SBCL and can not be loaded by Quicklisp 2012-04-07
+   Unhandled SERIOUS-CONDIDION of type SYSTEM-NOT-FOUND is signaled: System "metatilities-base-test" not found
+   metatilities-base-20120407-git
+
+   https://github.com/gwkkwg/metatilities-base/issues/2
+   https://github.com/quicklisp/quicklisp-client/issues/58
+
+** trivial-shell, regression on CCL: trivial-shell-test.test-1
+   Reported:
+   https://github.com/gwkkwg/trivial-shell/issues/4
+** Usocket: regression on ECL 11.1.1
+   Not reporting, as this is ECL version is old,
+   and newer ECL doesn't have regressions.
