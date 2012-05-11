@@ -37,6 +37,20 @@
 ;;; admin tasks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(asdf:operate 'asdf:load-op :test-grid-admin)
+(test-grid-admin:import-test-result-emails "some secret password")
+;; Now review git diff db.lisp.
+;;
+;; Generate and review reports if necessary before commit:
+(test-grid-reporting::generate-reports *db*)
+;;
+;; Commit db.lisp with the commit message printed
+;; by IMPROT-TEST-RESULT-EMAILS to the standrard output.
+;;
+;; After than we can delete the emails:
+(test-grid-admin:delete-imported-emails "some secret password")
+
+;;; Old code for manual import of test results
 (setf *db* '(:version 0 :runs ()))
 (progn
   (setf *db* (read-db))
@@ -62,15 +76,8 @@
 
 (save-db *db*)
 
-(test-grid-reporting::generate-reports *db*)
 
 
-(let ((ql-new "quicklisp 2012-02-08")
-      (ql-old "quicklisp 2012-01-07")
-      (idx (build-joined-index *db*)))
-  (print-quicklisp-diff ql-new
-                        ql-old
-                        (compare-quicklisps idx ql-new ql-old)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; developer experiments
