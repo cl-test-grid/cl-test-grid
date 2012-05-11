@@ -42,7 +42,7 @@
 ;; Now review git diff db.lisp.
 ;;
 ;; Generate and review reports if necessary before commit:
-(test-grid-reporting::generate-reports *db*)
+(test-grid-reporting::generate-reports (test-grid::read-db))
 ;;
 ;; Commit db.lisp with the commit message printed
 ;; by IMPROT-TEST-RESULT-EMAILS to the standrard output.
