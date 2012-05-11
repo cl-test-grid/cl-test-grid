@@ -160,7 +160,7 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 (defun status-css-class (aggregated-status)
   (case aggregated-status
     (:ok "ok-status")
-   ((:unexpected-ok :known-fail) "warn-fail-status")
+   ((:unexpected-ok :known-fail) "warn-status")
     (:fail  "fail-status")
     (:no-resource "no-resource-status")
     (otherwise "")))
@@ -471,7 +471,7 @@ Every subaddress represents some level of pivot groupping."
       (format out "<a href=\"~a\" class=\"test-status ~a\">~a</a> "
               (lib-log-uri joined-lib-result)
               (status-css-class status)
-              (string-downcase status)))))
+              (single-letter-status status)))))
 
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))

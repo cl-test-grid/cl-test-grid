@@ -60,6 +60,24 @@
               }
         }
 
+        function setupStatusTooltips() {
+            $('.fail-status').attr('title', 'Fail');
+            $('.ok-status').attr('title', 'OK');
+            $('.no-resource-status').attr('title', 'No Resource');
+            var warns = $('.warn-status');
+            for (var i = 0; i < warns.length; i++) {
+                var $warn = $(warns[i]);
+                var text = $warn.text()
+                if (text === 'U') {
+                    $warn.attr('title', 'Unexpected OK');
+                } else if (text === 'K') {
+                    $warn.attr('title', 'Known Fail');
+                } else {
+                    throw new Error('Unknown status letter: ' + text);
+                }
+            }
+        }
+
         $(document).ready(function () {
 
             var $table = $("table");
@@ -67,6 +85,8 @@
             $table.thead();
             // highlight the row and column when mouse moves
             var highlighter = new Highlighter($table);
+
+            setupStatusTooltips();
         });
 
     </script>
