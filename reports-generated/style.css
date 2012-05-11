@@ -1,6 +1,7 @@
 /* Results */
 
 .test-status {
+    font-family: monospace;
 }
 
 .fail-status {
