@@ -33,7 +33,7 @@
                                     :password password)
     (dolist (msg-num (pop-message-nums-by-uids conn uids))
       (cl-pop:delete-pop-message conn msg-num)))
-  t)
+  (length uids))
 
 (defun save-letter-uids (letter-ids work-dir)
   (test-grid::write-to-file letter-ids (merge-pathnames "letter-uids.txt" work-dir))
