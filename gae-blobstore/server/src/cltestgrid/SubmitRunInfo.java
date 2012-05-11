@@ -78,6 +78,8 @@ public class SubmitRunInfo extends HttpServlet {
       msg.setFrom(new InternetAddress("cl.test.grid@gmail.com", "cl-test-grid GAE server"));
       msg.addRecipient(Message.RecipientType.TO,
                        new InternetAddress("avodonosov@yandex.ru", "Anton Vodonosov"));
+      msg.addRecipient(Message.RecipientType.TO,
+                       new InternetAddress("cl-test-grid@yandex.ru", "cl-test-grid results inbox"));
       msg.setSubject("[cl-test-grid] [test run submitted]");
 
       Multipart multipart = new MimeMultipart();
