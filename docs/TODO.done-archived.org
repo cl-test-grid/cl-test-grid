@@ -202,10 +202,3 @@
 ** DONE Yellow color for known-fail and unexpected-ok aggregated statuses
    CLOSED: [2012-04-22 Вс 04:14]
 
-* Test result for Quicklisp 2012-03, 2012-04
-** DONE run tests with the newly added libraries on the quicklisp 2012-03-07,
-   CLOSED: [2012-04-22 Вс 04:13]
-   so that we can compare their results with the new quicklisp release 
-   when it is out.
-** DONE collect the test results for the next quicklisp release (2012-04-xx)
-   CLOSED: [2012-04-22 Вс 04:13]
