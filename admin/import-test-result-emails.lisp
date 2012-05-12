@@ -35,9 +35,9 @@
       (cl-pop:delete-pop-message conn msg-num)))
   (length uids))
 
-(defun save-letter-uids (letter-ids work-dir)
-  (test-grid::write-to-file letter-ids (merge-pathnames "letter-uids.txt" work-dir))
-  letter-ids)
+(defun save-letter-uids (letter-uids work-dir)
+  (test-grid::write-to-file letter-uids (merge-pathnames "letter-uids.txt" work-dir))
+  letter-uids)
 
 (defun read-letter-uids (work-dir)
   (test-grid::safe-read-file (merge-pathnames "letter-uids.txt" work-dir)))
@@ -49,16 +49,18 @@
     (write-sequence str stream)))
 
 (defun get-attachment (multipart-mime)
+  ;; we expect the email to be a multipart mime
+  ;; message, and the test results are in the first
+  ;; (and the only) attachment.
   (let* ((mime-parts (cl-mime:content multipart-mime))
          (attachment-part (second mime-parts)))
     (cl-base64:base64-string-to-string (cl-mime:content attachment-part))))
 
-;Gets attachments from all messages in mailbox and shows some information about saved attachments
-;path and first line (maxsize = 150char)
-;also creates a file with id that saved letters
 (defun get-all-attachments (host username password work-dir)
-  "Saves attachments of all the messages in the specified
-POP3 mailbox as files and returns the list of these files."
+  "Saves test-results delivered as email attachments in the specified
+POP3 mailbox as files on local file system, and returns the list of
+these files. UIDs of all the processed POP3 messages are persisted 
+using SAVE-LETTER-UIDS function."
   (let ((attachment-files '())
         (message-uids '()))
     (flet ((attachment-str (pop-connection msg-num)
@@ -80,11 +82,17 @@ POP3 mailbox as files and returns the list of these files."
     (save-letter-uids message-uids work-dir)
     attachment-files))
 
-;;; Helper for commit message and for email replies.
+;;; Helper to produce a commit message for the imported test results.
+;;;
+;;; Example commit message:
+;;; Test results for quicklisp1 and lisp1, lisp2. Contributed by person1. 
+;;; Test results for quicklisp2 and lisp1. Contributed by person1.
+;;; Test results for quicklisp1 and lisp2. Contributed by person2.
 ;;; 
-;;; Breakdown the test resuls by contributors, then for every contributor
-;;; by quicklisps, and then, for evenry contributor-quicklisp, store
-;;; list of common lisp implementations.
+;;; This means we breakdown the test resuls by contributors, 
+;;; then for every contributor by quicklisps, and then, 
+;;; for evenry contributor-quicklisp, store list of common
+;;; lisp implementations.
 
 (defun make-submittions-info-table ()
   (make-hash-table :test 'equal))
@@ -148,14 +156,13 @@ the procedure."
                               (getf descr :lib-world)
                               (getf descr :lisp))))
     (test-grid::save-db db)
-    (print-commit-message submittions-info)))
+    (print-commit-message submittions-info)
+    (length attachment-files)))
 
 (defun delete-imported-emails (mailbox-password)
   "Deletes the test result emails processed by
-IMPORT-TEST-RESULT-EMAILS."
+the last invocation of IMPORT-TEST-RESULT-EMAILS
+from the POP3 mailbox."
   (del-messages-by-uids *host* *user* mailbox-password 
                         (read-letter-uids *work-dir*)))
-
-
-
 
