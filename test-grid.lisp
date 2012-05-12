@@ -1043,14 +1043,14 @@ data (libraries test suites output and the run results) will be saved."
                                                      condition)
                                              (invoke-restart 'fail-the-test-suite-because-of-debugger))))
                     ;; Even despite we prevent entering the interactive debugger,
-                    ;; we capture all the SERIOURS-CONDITIONS signalled by test suite,
+                    ;; we capture all the SERIOUS-CONDITIONS signalled by test suite,
                     ;; because we don't want our caller (the code calling RUN-LIBTEST),
                     ;; to see the test suite errors as errors signalled by RUN-LIBTEST.
                     (handler-case
                         (normalize-status (libtest lib))
                       (serious-condition (condition) (progn
                                                        (format t
-                                                               "~&Unhandled SERIOUS-CONDIDION of type ~A is signaled: ~A~%"
+                                                               "~&Unhandled SERIOUS-CONDITION of type ~A is signaled: ~A~%"
                                                                (type-of condition)
                                                                condition)
                                                        :fail))))
