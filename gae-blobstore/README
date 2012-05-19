@@ -1,0 +1,11 @@
+The server part of CL Test Grid, running on Google App Engine,
+and a lisp client for its HTTP interface.
+
+It provides:
+- Online storage of the library test logs;
+- Submit point of the test run results lisp data
+  (and forwarting them to the admin by email).
+
+The serers side is implemented on Java (just
+few lines; maybe sometime we will be able
+to use ABCL for instead).
