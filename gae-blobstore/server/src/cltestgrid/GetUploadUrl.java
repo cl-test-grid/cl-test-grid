@@ -36,7 +36,7 @@ public class GetUploadUrl extends HttpServlet {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) 
     throws IOException, ServletException 
   {
-    resp.setContentType("text/html; charset=utf-8");
+    resp.setContentType("text/plain; charset=utf-8");
 
     String uploadURL = blobstoreService.createUploadUrl("/upload");
     resp.getWriter().print(uploadURL);
