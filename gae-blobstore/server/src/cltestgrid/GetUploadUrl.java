@@ -29,6 +29,8 @@ import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 @SuppressWarnings("serial")
 public class GetUploadUrl extends HttpServlet {
 
+  private static final Logger logger = Logger.getLogger(GetUploadUrl.class.getName());
+
   private BlobstoreService blobstoreService =
     BlobstoreServiceFactory.getBlobstoreService();
 
@@ -39,6 +41,8 @@ public class GetUploadUrl extends HttpServlet {
     resp.setContentType("text/plain; charset=utf-8");
 
     String uploadURL = blobstoreService.createUploadUrl("/upload");
+    logger.info("returning new uploadURL: " + uploadURL);
+
     resp.getWriter().print(uploadURL);
   }
 }
