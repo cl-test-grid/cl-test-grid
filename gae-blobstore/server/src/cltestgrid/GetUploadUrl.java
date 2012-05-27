@@ -40,6 +40,10 @@ public class GetUploadUrl extends HttpServlet {
   {
     resp.setContentType("text/plain; charset=utf-8");
 
+    resp.setHeader("Pragma", "no-cache");
+    resp.setHeader("Expires", "Fri, 01 Jan 1990 00:00:00 GMT");
+    resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+
     String uploadURL = blobstoreService.createUploadUrl("/upload");
     logger.info("returning new uploadURL: " + uploadURL);
 
