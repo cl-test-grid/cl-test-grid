@@ -88,7 +88,7 @@ a warning message, followed by the end of the file."
          ;; we need to perform a separate request to our servlet, which will
          ;; generate an URL where we can upload files.
          (upload-url (drakma:http-request (format nil "~A/upload-url" (base-url blobstore))
-                                          :content-type "text/text"))
+                                          :content-type "text/plain"))
 
          ;; Now prepare POST parameters for the main submit request,
          ;; according the drakma API for file posting.
