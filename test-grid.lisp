@@ -1123,9 +1123,9 @@ data (libraries test suites output and the run results) will be saved."
 (defun submit-results (test-run-dir)
   (let* ((blobstore (get-blobstore))
          (run-info (submit-logs blobstore test-run-dir)))
-    (format t "The log files are submitted. Submitting the test run info...~%")
-    (test-grid-blobstore:submit-run-info blobstore run-info)
-    (format t "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.~%")
+    (format t "The log files are submitted; (not submitting test-run-info.lisp in this version - dubugging for issue #8).~%")
+;;    (test-grid-blobstore:submit-run-info blobstore run-info)
+;;    (format t "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.~%")
     run-info))
 
 (defun run-libtests (&optional (libs *all-libs*))

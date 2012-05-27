@@ -39,8 +39,8 @@ has a blobstore key for the library log."
 
     (dolist (test-dir (cl-fad:list-directory (test-grid::test-output-base-dir)))
       (let ((dir-name (file-namestring (cl-fad:pathname-as-file test-dir))))
-        (when (and (string> dir-name hour-ago-str)
-                   (not (submitted-p test-dir)))
+        (when t ;(and (string> dir-name hour-ago-str)
+                ;     (not (submitted-p test-dir)))
           (format t "submitting ~A~%" test-dir)
           (test-grid::submit-results test-dir)
           (incf submit-count))))
