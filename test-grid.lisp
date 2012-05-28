@@ -906,19 +906,20 @@ just passed to the QUICKLISP:QUICKLOAD."
   (string-trim " " (read-line *query-io*)))
 
 (defun get-user-email ()
-  (let ((user-email nil))
-    (handler-case
-        (progn
-          (setf user-email (getf (safe-read-file (get-settings-file))
-                                 :user-email))
-          (if (zerop (length user-email))
-              (warn "Empty email is specified in the settings file ~a~%" (get-settings-file))))
-      (file-error ()
-        (progn
-          (setf user-email (prompt-for-email))
-          (write-to-file (list :user-email user-email)
-                         (get-settings-file)))))
-    user-email))
+;;  (let ((user-email nil))
+;;    (handler-case
+;;        (progn
+;;          (setf user-email (getf (safe-read-file (get-settings-file))
+;;                                 :user-email))
+;;          (if (zerop (length user-email))
+;;              (warn "Empty email is specified in the settings file ~a~%" (get-settings-file))))
+;;      (file-error ()
+;;        (progn
+;;          (setf user-email (prompt-for-email))
+;;          (write-to-file (list :user-email user-email)
+;;                         (get-settings-file)))))
+;;    user-email)
+    "doesnt-matter-as-we-just-want-to-reproduce-abcl-crash")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
