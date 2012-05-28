@@ -18,9 +18,8 @@
                           (declare (ignore err))
                           (when (find-restart 'quicklisp-quickstart::load-setup)
                             (invoke-restart 'quicklisp-quickstart::load-setup)))))
-  (quicklisp-quickstart:install :path (merge-pathnames "quicklisp/"
+  (quicklisp-quickstart:install :path (merge-pathnames "../work-dir/agent/quicklisp/"
                                                        *this-file-dir*)))
 
 (quicklisp:update-client :prompt nil)
 (quicklisp:update-all-dists :prompt nil)
-

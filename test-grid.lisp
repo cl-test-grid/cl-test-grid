@@ -880,47 +880,6 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;                               (run-lift-test-suite :store-suite)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Settings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defparameter +settings-file-name+ "cl-test-grid-settings.lisp")
-
-(defun get-settings-file()
-  (merge-pathnames (user-homedir-pathname) +settings-file-name+))
-
-(defun prompt-for-email ()
-  (format *query-io* "~&~%")
-  (format *query-io* "Please enter your email so that we know who is submitting the test results.~%")
-  (format *query-io* "Also the email will be published in the online reports, and the library~%")
-  (format *query-io* "authors can later contact you in case of questions about this test run, ~%")
-  (format *query-io* "your environment, etc.~%~%")
-
-  (format *query-io* "If you are strongly opposed to publishing you email, please type e.g. some nickname or just \"none\".~%~%")
-
-  (format *query-io* "The value you enter will be saved and reused in the future. You can change~%")
-  (format *query-io* "it in the file ~A in your home directory.~%~%" +settings-file-name+)
-
-  (format *query-io* "email: ")
-
-  (force-output *query-io*)
-  (string-trim " " (read-line *query-io*)))
-
-(defun get-user-email ()
-  (let ((user-email nil))
-    (handler-case
-        (progn
-          (setf user-email (getf (safe-read-file (get-settings-file))
-                                 :user-email))
-          (if (zerop (length user-email))
-              (warn "Empty email is specified in the settings file ~a~%" (get-settings-file))))
-      (file-error ()
-        (progn
-          (setf user-email (prompt-for-email))
-          (write-to-file (list :user-email user-email)
-                         (get-settings-file)))))
-    user-email))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test Runs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -956,7 +915,7 @@ just passed to the QUICKLISP:QUICKLOAD."
              "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
              year month date hour min sec)))
 
-(defun make-run-descr ()
+(defun make-run-descr (user-email)
   "Generate a description for a test run which might be
 performed in the current lisp system."
   (list :lisp (asdf::implementation-identifier)
@@ -964,7 +923,7 @@ performed in the current lisp system."
                            (ql-dist:version (ql-dist:dist "quicklisp")))
         :time (get-universal-time)
         :run-duration :unknown
-        :contact (list :email (get-user-email))))
+        :contact (list :email user-email)))
 
 (defun name-run-directory (run-descr)
   "Generate name for the directory where test run
@@ -974,16 +933,16 @@ data (libraries test suites output and the run results) will be saved."
           (fmt-time (getf run-descr :time))
           (getf run-descr :lisp)))
 
-(defun test-output-base-dir ()
+(defun default-test-output-base-dir ()
   (merge-pathnames "test-runs/"
                    test-grid-config:*src-base-dir*))
 
-(defun run-directory (run-descr)
+(defun run-directory (run-descr &optional (base-dir (default-test-output-base-dir)))
   (merge-pathnames (make-pathname
                     :directory (list :relative (name-run-directory run-descr))
                     :name      nil
                     :type      nil)
-                   (test-output-base-dir)))
+                   base-dir))
 
 (defun lib-log-file (test-run-directory lib-name)
   (merge-pathnames (string-downcase lib-name)
@@ -1128,9 +1087,12 @@ data (libraries test suites output and the run results) will be saved."
     (format t "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.~%")
     run-info))
 
-(defun run-libtests (&optional (libs *all-libs*))
-  (let* ((run-descr (make-run-descr))
-         (run-dir (run-directory run-descr))
+(defun run-libtests (&key
+                     (libs *all-libs*)
+                     (output-base-dir (default-test-output-base-dir))
+                     (user-email (error "user-email is required")))
+  (let* ((run-descr (make-run-descr user-email))
+         (run-dir (run-directory run-descr output-base-dir))
          (lib-results))
     (ensure-directories-exist run-dir)
     (dolist (lib libs)
