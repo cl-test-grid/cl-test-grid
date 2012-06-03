@@ -2,6 +2,11 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
+;;;; Persistable agent state. Readable/writtable by
+;;;; standard lisp functions. Keeps track which libraries this agent
+;;;; have already tested on particular lib-worlds and
+;;;; lisp implementations.
+
 (defpackage #:test-grid-agent-state
   (:nicknames #:agent-state)
   (:export #:make-state
@@ -11,10 +16,6 @@
 (in-package #:test-grid-agent-state)
 
 #|
-Persistable agent state. Readable/writtable by
-standard lisp functions. Keeps track which libraries this agent
-have already tested on particular lib-worlds and
-lisp implementations.
 
 All the information is stored as a list of records;
 each record is a list 3 elements: (<lib-world> <lisp> <library>)
