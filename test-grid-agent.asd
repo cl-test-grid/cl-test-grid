@@ -8,6 +8,7 @@
   :version "0.3.1"
   :serial t
   :depends-on (#:test-grid 
+               #:alexandria
                #:external-program
                #:trivial-features
                #:cl-fad
@@ -17,5 +18,6 @@
       :serial t
       :components
       ((:file "package")
-       (:file "lisp-impls")
+       (:file "lisp-exe")
+       (:file "persistable-state")
        (:file "agent")))))
