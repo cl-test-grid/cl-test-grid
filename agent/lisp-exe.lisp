@@ -1,6 +1,6 @@
-;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8;  -*-
-;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
-;;; See LICENSE for details.
+;;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
+;;;; See LICENSE for details.
 
 (in-package #:test-grid-agent)
 
