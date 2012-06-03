@@ -15,9 +15,7 @@
 (defparameter *ecl-old* (make-instance 'ecl :exe-path "C:\\Users\\anton\\unpacked\\ecl\\ecl-11.1.1\\bin\\ecl.exe"))
 (defparameter *acl* (make-instance 'acl :exe-path "C:\\Program Files (x86)\\acl82express\\alisp.exe"))
 
-(setf ;;(lisp-exes *agent*) (list *abcl* *clisp* *ccl-1.8-x86* *ccl-1.8-x86-64* *ccl-1.7-x86* *ccl-1.7-x86-64* *sbcl* *ecl* *ecl-old* *acl*)
-      (lisp-exes *agent*) (list *abcl* *clisp* *ccl-1.8-x86* *ccl-1.8-x86-64* *ccl-1.7-x86* *ccl-1.7-x86-64* *sbcl* *acl*)
-;;      (lisp-exes *agent*) (list *ccl-1.8-x86*)
+(setf (lisp-exes *agent*) (list *abcl* *clisp* *ccl-1.8-x86* *ccl-1.8-x86-64* *ccl-1.7-x86* *ccl-1.7-x86-64* *sbcl* *ecl* *ecl-old* *acl*)
       (preferred-lisp-exe *agent*) *ccl-1.8-x86*
 
       ;; Please enter your email so that we know who is submitting the test results.
@@ -26,6 +24,6 @@
       ;; your environment, etc.
       ;; 
       ;; If you are strongly opposed to publishing you email, please type e.g. 
-      ;; some nickname or just \"none\".
+      ;; just some nickname.
       (user-email *agent*) "avodonosov@yandex.ru")
 
