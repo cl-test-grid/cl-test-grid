@@ -45,11 +45,13 @@ on clisp, while for sbcl we've only tested alexandria and babel.
 
 This :DONE feature not only compresses the repsentation
 and makes it more readable; we also don't want to return
-to old quicklisp distors after we tested them, event 
-we add more libraries to test-grid, which were not
-tested on the old quicklisps (this mode simplifies life
-while we are tuning test-grid; later we will probably
-swith to more flexible mode and collect test results
+to old quicklisp distors after we tested them, even
+if we add more libraries to test-grid later, which were not
+tested on the old quicklisps. This mode is simpler for us
+while we are tuning test-grid; we jsut run tests on the latest
+quicklisp as it is out, and never go back in time even if
+new libraries are added. Later we will probably swith to a
+more flexible mode and collect test results for newly added libraries
 from old quicklisp distros).
 
 |#
