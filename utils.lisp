@@ -156,3 +156,38 @@ Examples:
                      :element-type '(unsigned-byte 8))
     (file-length s)))
 
+;;; split a list into sublists by n elements,
+;;; e.g. (a b c d e) by 3 => (a b c) (d e)
+(defclass list-splitter ()
+  ((remainder :type list
+              :accessor remainder
+              :initarg :list
+              :initform (error ":list is required"))))
+
+(defun next (list-splitter &optional (n 1))
+  (let ((result nil))
+    (dotimes (i n)
+      (when (null (remainder list-splitter))
+        (return-from next (nreverse result)))
+      (push (car (remainder list-splitter)) result)
+      (setf (remainder list-splitter)
+            (cdr (remainder list-splitter))))
+    (nreverse result)))
+
+(let ((ls (make-instance 'list-splitter :list '(1 2 3))))
+  (assert (equal '(1 2) (next ls 2)))
+  (assert (equal '(3) (next ls 2)))
+  (assert (equal nil (next ls 2))))
+
+(defun split-list (list n)
+  (let ((splitter (make-instance 'list-splitter :list list))
+        (result nil))
+    (loop
+       (let ((sub (next splitter n)))
+         (when (null sub)
+           (return (nreverse result)))
+         (push sub result)))))
+
+(assert (equal '((1 2 3) (4 5))
+               (split-list '(1 2 3 4 5) 3)))
+

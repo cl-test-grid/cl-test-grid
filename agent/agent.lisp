@@ -19,7 +19,8 @@
    (persistent-state :type list :accessor persistent-state)
    ;; list of lisp-exe-ex corresponging to the lisp-exes
    (lisps :type list :accessor lisps)
-   (preferred-lisp :type lisp-exe-ex :accessor preferred-lisp)))
+   (preferred-lisp :type lisp-exe-ex :accessor preferred-lisp)
+   (blobstore :accessor blobstore)))
 
 (defmethod (setf lisp-exes) :after (new-lisp-exes (agent agent))
   (setf (lisps agent)
@@ -54,15 +55,23 @@
 (defun ensure-list (arg)
   (if (listp arg) arg (list arg)))
 
-(defun mark-tested (agent &optional lib-world lisp libname-or-list)
-  (let ((libnames (ensure-list libname-or-list)))
-    (dolist (libname libnames)
-      (setf (persistent-state agent)
-            (agent-state:mark-done (persistent-state agent)
-                                   lib-world
-                                   lisp
-                                   libname)))
-    (save-state (persistent-state agent))))
+(defun mark-tested (agent lib-world &optional lisp libname-or-list)
+  (flet ((mark (lib-world lisp &optional libname)
+           (setf (persistent-state agent)
+                 (agent-state:mark-done (persistent-state agent)
+                                        lib-world
+                                        lisp
+                                        libname))))
+    (if libname-or-list
+        ;; some libraries specified, do loop
+        (let ((libnames (ensure-list libname-or-list)))
+          (dolist (libname libnames)
+            (mark lib-world lisp libname)))
+        ;; libraries are omitted (only lib-world and maybe lisp are specified);
+        ;; the above loop will do nothing in this case, therfoer
+        ;; we need a separate IF branch
+        (mark lib-world lisp)))
+  (save-state (persistent-state agent)))
 
 ;;; File system roots:
 (defun work-dir ()
@@ -183,39 +192,6 @@
       (when (probe-file response-file)
         (delete-file response-file)))))
 
-(defmacro with-response-file ((file-var) &body body)
-  `(with-response-file-impl (lambda (,file-var) ,@body)))
-
-;;; Primary functions of test-grid agent
-(defun run-tests-in-separate-process (agent lisp-exe test-suites)
-  "Runs the specified test suites in a separate process
-and returns the directory where the test results are saved."
-  (with-response-file (response-file)
-    (let* ((code `(progn
-                    (load ,(workdir-file "quicklisp/setup.lisp"))
-                    (load ,(src-file "proc-run-libtests.lisp"))
-                    (cl-user::run-with-response-to-file (quote ,test-suites)
-                                                        ,(test-output-base-dir)
-                                                        ,(user-email agent)
-                                                        ,response-file))))
-      (log:info "preparing to start separate lisp process with code: ~S" code)
-      (run-lisp-process lisp-exe code))))
-
-(defun update-testing-quicklisp (lisp-exe)
-  (log:info "Ensuring the quicklisp used to download the libraries being tested is updated to the recent version...")
-  (let ((quicklisp-version
-         (with-response-file (response-file)
-           (run-lisp-process lisp-exe
-                             `(progn
-                                (load ,(truename (src-file "proc-update-quicklisp.lisp")))
-                                (with-open-file (cl-user::out ,response-file
-                                                              :direction :output
-                                                              :if-exists :supersede
-                                                              :if-does-not-exist :create)
-                                  (pprint (cl-user::do-quicklisp-update) cl-user::out)))))))
-    (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
-    quicklisp-version))
-
 (defparameter *agent* nil
   "The AGENT instance. This variable is provided in order
 to make the agent accessible from the user-edited config
@@ -259,41 +235,6 @@ file cl-test-grid-config.lisp.")
     (log:info "~A OK" lisp))
   (log:info "All the external lisps passed the configuration check OK")
   t)
-
-;;; split a list into sublists by n elements,
-;;; e.g. (a b c d e) by 3 => (a b c) (d e)
-(defclass list-splitter ()
-  ((remainder :type list
-              :accessor remainder
-              :initarg :list
-              :initform (error ":list is required"))))
-
-(defun next (list-splitter &optional (n 1))
-  (let ((result nil))
-    (dotimes (i n)
-      (when (null (remainder list-splitter))
-        (return-from next (nreverse result)))
-      (push (car (remainder list-splitter)) result)
-      (setf (remainder list-splitter)
-            (cdr (remainder list-splitter))))
-    (nreverse result)))
-
-(let ((ls (make-instance 'list-splitter :list '(1 2 3))))
-  (assert (equal '(1 2) (next ls 2)))
-  (assert (equal '(3) (next ls 2)))
-  (assert (equal nil (next ls 2))))
-
-(defun split-list (list n)
-  (let ((splitter (make-instance 'list-splitter :list list))
-        (result nil))
-    (loop
-       (let ((sub (next splitter n)))
-         (when (null sub)
-           (return (nreverse result)))
-         (push sub result)))))
-
-(assert (equal '((1 2 3) (4 5))
-               (split-list '(1 2 3 4 5) 3)))
 
 (defun lisp-name (lisp-exe)
   (let ((ql-setup-file (workdir-file "quicklisp/setup.lisp")))
@@ -377,30 +318,28 @@ the PREDICATE."
                 (mapcar #'implementation-identifier done-lisps)))
     (dolist (lisp pending-lisps)
       (log:info "Running tests for ~A" (implementation-identifier lisp))
-      (divide-into test-grid::*all-libs* (lambda (libname)
-                                           (tested-p agent
-                                                     lib-world
-                                                     (implementation-identifier lisp)
-                                                     libname))
-          (done-libs pending-libs)
-        (when done-libs
-          (log:info "Skipping the libraries already tested on ~A and ~A: ~S"
-                    lib-world
-                    (implementation-identifier lisp)
-                    done-libs))
-        (dolist (lib-block (split-list pending-libs 8))
-          (log:info "libraries block to test in a single process: ~S" lib-block)
-          (let ((results-dir (run-tests-in-separate-process agent lisp lib-block)))
-            (test-grid::submit-results results-dir)
-            (mark-tested agent lib-world lisp lib-block)
-            (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
-        (mark-tested agent lib-world (implementation-identifier lisp))))
-    (mark-tested agent lib-world)))
+      (let ((results-dir (perform-test-run lib-world
+                                           lisp
+                                           '(:alexandria :babel) ; temporary! instead of test-grid::*all-libs*
+                                           (test-output-base-dir)
+                                           (user-email agent))))
+        (submit-test-run (blobstore agent) results-dir)
+        (mark-tested agent lib-world (implementation-identifier lisp))
+        (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore))
+      (mark-tested agent lib-world (implementation-identifier lisp))))
+
+  ;; do not mark the whole lib-world as :done, because I am experimenting with different lisps
+  ;; and want them to run tests next time when agent is started
+  ;;(mark-tested agent lib-world)
+  )
 
 (defun load-agent ()
   (let ((agent (make-instance 'agent)))
     (load-config agent)
-    (setf (persistent-state agent) (load-state))
+    (setf (persistent-state agent) (load-state)
+          (blobstore agent)
+          ;; during development of GAE blob storage :base-url may be "http://localhost:8080"
+          (test-grid-gae-blobstore:make-blob-store :base-url "http://cl-test-grid.appspot.com"))
     agent))
 
 (defun main ()
