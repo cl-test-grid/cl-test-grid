@@ -320,7 +320,7 @@ the PREDICATE."
       (log:info "Running tests for ~A" (implementation-identifier lisp))
       (let ((results-dir (perform-test-run lib-world
                                            lisp
-                                           '(:alexandria :babel) ; temporary! instead of test-grid::*all-libs*
+                                           test-grid::*all-libs*
                                            (test-output-base-dir)
                                            (user-email agent))))
         (submit-test-run (blobstore agent) results-dir)
