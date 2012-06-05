@@ -2,6 +2,8 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
+;;;; This file is loaded into a child lisp process to performa a test run using test-grid::run-libtests.
+
 (in-package :cl-user)
 
 (let* ((this-file (load-time-value (or *load-truename* #.*compile-file-pathname*)))

@@ -4,10 +4,10 @@
 
 (in-package #:test-grid-agent)
 
-(defclass agent () 
+(defclass agent ()
    ;; The list of lisp-exe's to run tests on.
   ((lisp-exes :type list :accessor lisp-exes :initform nil)
-   ;; The lisp-exe considered as more reliable on this OS, 
+   ;; The lisp-exe considered as more reliable on this OS,
    ;; and supporting more libraries. Used run various small
    ;; lisp programs like quicklisp update.
    (preferred-lisp-exe :type (or null lisp-exe) :accessor preferred-lisp-exe :initform nil)
@@ -23,7 +23,7 @@
 
 (defmethod (setf lisp-exes) :after (new-lisp-exes (agent agent))
   (setf (lisps agent)
-        (mapcar (lambda (lisp-exe) 
+        (mapcar (lambda (lisp-exe)
                   (make-instance 'lisp-exe-ex :exe lisp-exe))
                 new-lisp-exes)))
 
@@ -58,8 +58,8 @@
   (let ((libnames (ensure-list libname-or-list)))
     (dolist (libname libnames)
       (setf (persistent-state agent)
-            (agent-state:mark-done (persistent-state agent) 
-                                   lib-world 
+            (agent-state:mark-done (persistent-state agent)
+                                   lib-world
                                    lisp
                                    libname)))
     (save-state (persistent-state agent))))
@@ -89,10 +89,11 @@
   (merge-pathnames "logs/agent.log"
                    (work-dir)))
 
+;; File relative to the work-dir
 (defun workdir-file (relative-path)
   (merge-pathnames relative-path (work-dir)))
 
-;;; File relative to the src-dir
+;; File relative to the src-dir
 (defun src-file (file-name)
   (merge-pathnames file-name (src-dir)))
 
@@ -120,13 +121,13 @@
 ;; TODO:
 ;; * Level 1 beta
 ;; + test runs in work-dir/agent/test-runs
-;; - configuration: configure list of lisps, user email. 
+;; - configuration: configure list of lisps, user email.
 ;; - configuration: test-config procedcure (try to run all the lisps configured)
 ;; - configuration: contributor email as a configurabel agent propery,
 ;;   instead of cl-test-grid-settings.lisp
 ;; - delete test run data after the results have been submitted
 ;; * Level 1 stable
-;; + full path to files: setup, test-run-process, response-file
+;; + full path to files: setup, proc-run-libtests, response-file
 ;; - timeout
 ;; - check status of the quicklisp update process
 ;; - Prevent lisp entering debugger.
@@ -134,7 +135,7 @@
 ;;   differently: ECL exits with status 1, CCL enters debugger
 ;;   and hangs.
 ;; - When signalling absense of the config file, provide
-;;   a fully commented example config file so that user can easily 
+;;   a fully commented example config file so that user can easily
 ;;   fix it.
 ;; - In the config file, should user work in the test-grid-agent
 ;;   package, or in cl-user package and use a public API of
@@ -150,11 +151,11 @@
 ;; - temp file naming: ensure unique [probably specify random-state]
 ;; * Level 2
 ;; - do we need node-id (or agent-id)? should it be
-;;   meaningfull string provided by user, or an 
+;;   meaningfull string provided by user, or an
 ;;   automatically generated one? Note, this value is different
 ;;   from the contributor email, because one contributor
 ;;   may have more than one machine.
-;; * Very stable 
+;; * Very stable
 ;; - ECL needs C compiler, how to ensure it is available (can we specify
 ;;   it explicitly when configurin lisp-exe for ECL or assume
 ;;   it is available in path)?
@@ -164,7 +165,7 @@
 ;;   (or rename it to ~/cl-test-grid-settings.lisp.unused?)
 ;; * Pretty/convenience
 ;; - persistence.lisp format - sort and newline for every record
-;; - cl-test-grid-config.lisp should work via public API, 
+;; - cl-test-grid-config.lisp should work via public API,
 ;;   instead of working directly inside of the test-grid package.
 
 ;;; When we run lisp code in an external lisp process,
@@ -192,7 +193,7 @@ and returns the directory where the test results are saved."
   (with-response-file (response-file)
     (let* ((code `(progn
                     (load ,(workdir-file "quicklisp/setup.lisp"))
-                    (load ,(src-file "test-run-process.lisp"))
+                    (load ,(src-file "proc-run-libtests.lisp"))
                     (cl-user::run-with-response-to-file (quote ,test-suites)
                                                         ,(test-output-base-dir)
                                                         ,(user-email agent)
@@ -205,8 +206,8 @@ and returns the directory where the test results are saved."
   (let ((quicklisp-version
          (with-response-file (response-file)
            (run-lisp-process lisp-exe
-                             `(progn 
-                                (load ,(truename (src-file "ensure-quicklisp-updated.lisp")))
+                             `(progn
+                                (load ,(truename (src-file "proc-update-quicklisp.lisp")))
                                 (with-open-file (cl-user::out ,response-file
                                                               :direction :output
                                                               :if-exists :supersede
@@ -231,7 +232,7 @@ file cl-test-grid-config.lisp.")
 ;;; Configuration check functions
 (defun lisp-process-echo (lisp-exe str-to-echo)
   (with-response-file (response-file)
-    (run-lisp-process lisp-exe 
+    (run-lisp-process lisp-exe
                       `(with-open-file (cl-user::out ,response-file
                                             :direction :output
                                             :if-exists :supersede
@@ -240,7 +241,7 @@ file cl-test-grid-config.lisp.")
 
 (defun check-lisp (lisp-exe)
   (let* ((echo-string "abcs *() { /d e11 ")
-         (response (lisp-process-echo lisp-exe echo-string)))    
+         (response (lisp-process-echo lisp-exe echo-string)))
     (when (not (string= echo-string response))
       (error "Lisp ~A returned string ~S while we exected ~S."
              lisp-exe response echo-string))))
@@ -262,7 +263,7 @@ file cl-test-grid-config.lisp.")
 ;;; split a list into sublists by n elements,
 ;;; e.g. (a b c d e) by 3 => (a b c) (d e)
 (defclass list-splitter ()
-  ((remainder :type list 
+  ((remainder :type list
               :accessor remainder
               :initarg :list
               :initform (error ":list is required"))))
@@ -285,7 +286,7 @@ file cl-test-grid-config.lisp.")
 (defun split-list (list n)
   (let ((splitter (make-instance 'list-splitter :list list))
         (result nil))
-    (loop 
+    (loop
        (let ((sub (next splitter n)))
          (when (null sub)
            (return (nreverse result)))
@@ -299,7 +300,7 @@ file cl-test-grid-config.lisp.")
     (when (not (probe-file ql-setup-file))
       (error "Can not determine lisp implemntation name until quicklisp is installed - we need ASDF installed together with quicklisp to evaluate (asdf::implementation-identifier)."))
     (with-response-file (response-file)
-      (run-lisp-process lisp-exe 
+      (run-lisp-process lisp-exe
                         `(load ,(truename (src-file "proc-common.lisp")))
                         ;; can only do after quicklisp is installed
                         `(load ,(truename ql-setup-file))
@@ -308,10 +309,10 @@ file cl-test-grid-config.lisp.")
                                                 ;; because if agent is run on say CCL,
                                                 ;; then ASDF:IMPLEMENTATION-IDENTIFIER
                                                 ;; is exported from ASDF. But if the
-                                                ;; child process is CLISP, on it 
+                                                ;; child process is CLISP, on it
                                                 ;; the symbol is not exported, and
                                                 ;; it can't read it.
-                                                (funcall (read-from-string 
+                                                (funcall (read-from-string
                                                           "asdf::implementation-identifier")))))))
 
 (defclass lisp-exe-ex ()
@@ -364,18 +365,18 @@ the PREDICATE."
   (when (tested-p agent lib-world)
     (log:info "~A is already fully tested. Skipping." lib-world)
     (return-from run-tests))
-  
+
   (divide-into (lisps agent) (lambda (lisp)
                                (tested-p agent
                                          lib-world
                                          (implementation-identifier lisp)))
-      (done-lisps pending-lisps)    
+      (done-lisps pending-lisps)
     (when done-lisps
       (log:info "Skipping the lisps already tested on ~A: ~S"
                 lib-world
                 (mapcar #'implementation-identifier done-lisps)))
     (dolist (lisp pending-lisps)
-      (log:info "Running tests for ~A" (implementation-identifier lisp))  
+      (log:info "Running tests for ~A" (implementation-identifier lisp))
       (divide-into test-grid::*all-libs* (lambda (libname)
                                            (tested-p agent
                                                      lib-world
@@ -409,7 +410,7 @@ the PREDICATE."
     (let ((quicklisp-version (update-testing-quicklisp (preferred-lisp *agent*))))
       (run-tests *agent* (format nil "quicklisp ~A" quicklisp-version)))))
 
-(main)
+;(main)
 ;(update-testing-quicklisp *ccl-18-32*)
 
 ;;(run-tests-in-separate-process *acl* (list :babel))

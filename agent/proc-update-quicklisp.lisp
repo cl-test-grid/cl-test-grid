@@ -1,9 +1,9 @@
-;;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8;  -*-
+;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 ;;;;
 ;;;; This file is loaded by agent into a separate lisp process
-;;;; it starts to update quicklisp.
+;;;; to update quicklisp.
 
 (defparameter *this-file* (load-time-value (or *load-truename* #.*compile-file-pathname*)))
 (defparameter *this-file-dir* (make-pathname :directory (pathname-directory *this-file*)))
