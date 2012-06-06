@@ -14,5 +14,5 @@
 
   (pushnew this-file-dir asdf:*central-registry* :test #'equal))
 
-(asdf:operate 'asdf:load-op :test-grid-agent)
+(ql:quickload :test-grid-agent)
 (test-grid-agent::main)
