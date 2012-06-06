@@ -9,20 +9,22 @@
   (:documentation "Starts lisp process, executes the specified forms
 and exits the process."))
 
-;; excaping of parameters passed to 
+;; excaping of parameters passed to
 ;; external-program:run is not required
 ;; by the external-program specification,
 ;; but sometimes necessary due to implementations
 ;; bugs, like http://trac.clozure.com/ccl/ticket/858.
 (defun escape-process-parameter (param-str)
-  (with-output-to-string (s)
-    (princ #\" s)
-    (loop for ch across param-str
-         do (progn
-              (when (member ch '(#\" #\\) :test #'char=)
-                (princ #\\ s))
-              (princ ch s)))
-    (princ #\" s)))
+  (if (member :windows *features* :test #'eq)
+      (with-output-to-string (s)
+        (princ #\" s)
+        (loop for ch across param-str
+           do (progn
+                (when (member ch '(#\" #\\) :test #'char=)
+                  (princ #\\ s))
+                (princ ch s)))
+        (princ #\" s))
+      param-str))
 
 ;; small wrapper around external-program:run
 (defun exec (program-path argument-strings)
