@@ -11,7 +11,7 @@
 (defparameter *ccl-1.8-x86* (make-instance 'ccl :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl.exe"))
 (defparameter *ccl-1.8-x86-64* (make-instance 'ccl :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl64.exe"))
 (defparameter *sbcl* (make-instance 'sbcl :exe-path "sbcl"))
-(defparameter *cmucl* (make-instance 'sbcl :exe-path "/opt/cmucl-20c/bin/lisp"))
+(defparameter *cmucl* (make-instance 'cmucl :exe-path "/opt/cmucl-20c/bin/lisp"))
 (defparameter *ecl* (make-instance 'ecl :exe-path "C:\\Users\\anton\\projects\\ecl\\bin\\ecl.exe"))
 (defparameter *ecl-old* (make-instance 'ecl :exe-path "C:\\Users\\anton\\unpacked\\ecl\\ecl-11.1.1\\bin\\ecl.exe"))
 (defparameter *acl* (make-instance 'acl :exe-path "C:\\Program Files (x86)\\acl82express\\alisp.exe"))
