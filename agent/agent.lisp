@@ -177,20 +177,20 @@
 ;; - cl-test-grid-config.lisp should work via public API,
 ;;   instead of working directly inside of the test-grid package.
 
-;;; When we run lisp code in an external lisp process,
-;;; and want to return some value form that process.
-;;; We use a temporary file where the external process
-;;; stores the response and we READ that response
-;;; from the file.
-(defun with-response-file-impl (body-func)
-  (let* ((response-file-name (format nil
-                                     "response~A.lisp"
-                                     (random #.(1- (expt 2 64)))))
-         (response-file (workdir-file response-file-name)))
-    (unwind-protect (progn (funcall body-func response-file)
-                           (test-grid::safe-read-file response-file))
-      (when (probe-file response-file)
-        (delete-file response-file)))))
+(defun update-testing-quicklisp (lisp-exe)
+  (log:info "Ensuring the quicklisp used to download the libraries being tested is updated to the recent version...")
+  (let ((quicklisp-version
+         (with-response-file (response-file)
+           (run-lisp-process lisp-exe
+                             `(progn
+                                (load ,(truename (src-file "proc-update-quicklisp.lisp")))
+                                (with-open-file (cl-user::out ,response-file
+                                                              :direction :output
+                                                              :if-exists :supersede
+                                                              :if-does-not-exist :create)
+                                  (pprint (cl-user::do-quicklisp-update) cl-user::out)))))))
+    (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
+    quicklisp-version))
 
 (defparameter *agent* nil
   "The AGENT instance. This variable is provided in order
