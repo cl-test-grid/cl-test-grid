@@ -94,6 +94,14 @@ and exits the process."))
           ,@(prepend-each "--eval" (mapcar #'code-str forms))
           "--eval" "(sb-ext:quit)")))
 
+(defclass cmucl (single-exe-lisp-exe) ())
+(defmethod run-lisp-process ((lisp-exe sbcl) &rest forms)
+  (exec (exe-path lisp-exe)
+        `("-noinit"
+          "-nositeinit"
+          ,@(prepend-each "-eval" (mapcar #'code-str forms))
+          "-eval" "(quit)")))
+
 (defclass ecl (single-exe-lisp-exe) ())
 (defmethod run-lisp-process ((lisp-exe ecl) &rest forms)
   (exec (exe-path lisp-exe)
