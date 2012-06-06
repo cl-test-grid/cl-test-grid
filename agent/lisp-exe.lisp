@@ -15,7 +15,8 @@ and exits the process."))
 ;; but sometimes necessary due to implementations
 ;; bugs, like http://trac.clozure.com/ccl/ticket/858.
 (defun escape-process-parameter (param-str)
-  (if (member :windows *features* :test #'eq)
+  (if (or (member :windows *features* :test #'eq)
+          (find #\Space param-str))
       (with-output-to-string (s)
         (princ #\" s)
         (loop for ch across param-str
