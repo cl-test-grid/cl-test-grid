@@ -78,7 +78,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :let-plus              :data-sift           :cl-num-utils        :ieee-floats
     :cl-project            :trivial-http        :cl-store            :hu.dwim.stefil
     :kmrcl                 :cxml-stp            :hu.dwim.walker      :hu.dwim.defclass-star
-    :bknr.datastore        :yaclml              :com.google.base    :external-program)
+    :bknr.datastore        :yaclml              :com.google.base     :external-program)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
