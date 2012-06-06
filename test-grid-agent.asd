@@ -20,7 +20,8 @@
                #:external-program
                #:trivial-features
                #:cl-fad
-               #:log4cl)
+               #:log4cl
+               #:fare-memoization)
   :components 
     ((:module "agent"
       :serial t

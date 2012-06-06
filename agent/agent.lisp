@@ -6,30 +6,18 @@
 
 (defclass agent ()
    ;; The list of lisp-exe's to run tests on.
-  ((lisp-exes :type list :accessor lisp-exes :initform nil)
+  ((lisps :type list :accessor lisps :initform nil)
    ;; The lisp-exe considered as more reliable on this OS,
    ;; and supporting more libraries. Used run various small
    ;; lisp programs like quicklisp update.
-   (preferred-lisp-exe :type (or null lisp-exe) :accessor preferred-lisp-exe :initform nil)
+   (preferred-lisp :type (or null lisp-exe) :accessor preferred-lisp :initform nil)
    (user-email :type (or null string) :accessor user-email :initform nil)
    ;; ------ package private ------
    ;; todo: make private (i.e. export other symbols form the package
    ;; but not export private symbol). cl-test-grid-config.lisp
    ;; should work via the exported symbols.
    (persistent-state :type list :accessor persistent-state)
-   ;; list of lisp-exe-ex corresponging to the lisp-exes
-   (lisps :type list :accessor lisps)
-   (preferred-lisp :type lisp-exe-ex :accessor preferred-lisp)
    (blobstore :accessor blobstore)))
-
-(defmethod (setf lisp-exes) :after (new-lisp-exes (agent agent))
-  (setf (lisps agent)
-        (mapcar (lambda (lisp-exe)
-                  (make-instance 'lisp-exe-ex :exe lisp-exe))
-                new-lisp-exes)))
-
-(defmethod (setf preferred-lisp-exe) :after (new-lisp-exe (agent agent))
-  (setf (preferred-lisp agent) (make-instance 'lisp-exe-ex :exe new-lisp-exe)))
 
 ;;; High level presistence functions
 
@@ -236,7 +224,7 @@ file cl-test-grid-config.lisp.")
   (log:info "All the external lisps passed the configuration check OK")
   t)
 
-(defun lisp-name (lisp-exe)
+(defun implementation-identifier (lisp-exe)
   (let ((ql-setup-file (workdir-file "quicklisp/setup.lisp")))
     (when (not (probe-file ql-setup-file))
       (error "Can not determine lisp implemntation name until quicklisp is installed - we need ASDF installed together with quicklisp to evaluate (asdf::implementation-identifier)."))
@@ -255,23 +243,8 @@ file cl-test-grid-config.lisp.")
                                                 ;; it can't read it.
                                                 (funcall (read-from-string
                                                           "asdf::implementation-identifier")))))))
-
-(defclass lisp-exe-ex ()
-  ((exe :type lisp-exe :accessor exe :initarg :exe :initform (error ":exe is a required argument"))
-   (implementation-identifier :type (or null string) :initarg :name :initform nil))
-  (:documentation "Wraps lisp-exe and stores (cached) attributes needed by agent."))
-
-;; For convinience, define a method for run-lisp-process on
-;; lisp-exe-ex
-(defmethod run-lisp-process ((lisp-exe-ex lisp-exe-ex) &rest forms)
-  (apply #'run-lisp-process (exe lisp-exe-ex) forms))
-
-(defun implementation-identifier (lisp-exe-ex)
-  (with-slots (implementation-identifier) lisp-exe-ex
-    (when (not implementation-identifier)
-      (setf implementation-identifier
-            (lisp-name lisp-exe-ex)))
-    implementation-identifier))
+;; note: not thread-safe
+(fare-memoization:memoize 'implementation-identifier)
 
 (defun divide (list predicate)
   "Returns two lists, the first with elements satisfying

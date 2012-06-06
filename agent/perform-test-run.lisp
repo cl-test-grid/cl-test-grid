@@ -76,15 +76,15 @@ data (libraries test suites output and the run results) will be saved."
       (log:info "preparing to start separate lisp process with code: ~S" code)
       (run-lisp-process lisp-exe code))))
 
-(defun perform-test-run (lib-world lisp-exe-ex libs output-base-dir user-email)
+(defun perform-test-run (lib-world lisp-exe libs output-base-dir user-email)
   (let* ((run-descr (make-run-descr lib-world
-                                    (implementation-identifier lisp-exe-ex)
+                                    (implementation-identifier lisp-exe)
                                     user-email))
          (run-dir (run-directory run-descr output-base-dir))
          (lib-results))
     (ensure-directories-exist run-dir)
     (dolist (lib libs)
-      (let ((lib-result (proc-run-libtest (exe lisp-exe-ex) lib run-descr (lib-log-file run-dir lib))))
+      (let ((lib-result (proc-run-libtest lisp-exe lib run-descr (lib-log-file run-dir lib))))
         (push lib-result lib-results)))
     (setf (getf run-descr :run-duration)
           (- (get-universal-time)
@@ -142,4 +142,3 @@ to the cl-test-grid issue tracker:
                        (type-of e)
                        e
                        (truename test-run-dir)))))
-

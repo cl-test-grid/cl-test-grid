@@ -15,8 +15,8 @@
 (defparameter *ecl-old* (make-instance 'ecl :exe-path "C:\\Users\\anton\\unpacked\\ecl\\ecl-11.1.1\\bin\\ecl.exe"))
 (defparameter *acl* (make-instance 'acl :exe-path "C:\\Program Files (x86)\\acl82express\\alisp.exe"))
 
-(setf (lisp-exes *agent*) (list *abcl* *clisp* *ccl-1.8-x86* *ccl-1.8-x86-64* *ccl-1.7-x86* *ccl-1.7-x86-64* *sbcl* *ecl* *ecl-old* *acl*)
-      (preferred-lisp-exe *agent*) *ccl-1.8-x86*
+(setf (lisps *agent*) (list *abcl* *clisp* *ccl-1.8-x86* *ccl-1.8-x86-64* *ccl-1.7-x86* *ccl-1.7-x86-64* *sbcl* *ecl* *ecl-old* *acl*)
+      (preferred-lisp *agent*) *ccl-1.8-x86*
 
       ;; Please enter your email so that we know who is submitting the test results.
       ;; Also the email will be published in the online reports, and the library
