@@ -95,7 +95,7 @@ and exits the process."))
           "--eval" "(sb-ext:quit)")))
 
 (defclass cmucl (single-exe-lisp-exe) ())
-(defmethod run-lisp-process ((lisp-exe sbcl) &rest forms)
+(defmethod run-lisp-process ((lisp-exe cmucl) &rest forms)
   (exec (exe-path lisp-exe)
         `("-noinit"
           "-nositeinit"
