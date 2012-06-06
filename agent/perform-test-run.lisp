@@ -54,7 +54,13 @@ data (libraries test suites output and the run results) will be saved."
       (test-grid::print-test-run out test-run))))
 
 (defun lib-log-file (test-run-directory lib-name)
-  (merge-pathnames (string-downcase lib-name)
+  (merge-pathnames (substitute #\- #\.
+                               ;; Substitute dods by hypens because CCL
+                               ;; prepends the > symbol before dots (at lieas on windows)
+                               ;; for example: hu.dwim.stefil => hu>.dwim.stefil.
+                               ;; When we pass such a pathname to another lisps,
+                               ;; they can't handle it.
+                               (string-downcase lib-name))
                    test-run-directory))
 
 (defun proc-run-libtest (lisp-exe libname run-descr logfile)
