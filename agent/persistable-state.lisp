@@ -8,6 +8,7 @@
 ;;;; lisp implementations.
 
 (defpackage #:test-grid-agent-state
+  (:use #:cl)
   (:nicknames #:agent-state)
   (:export #:make-state
            #:done-p
