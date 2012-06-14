@@ -1,4 +1,6 @@
-;;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+
+
+;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
@@ -8,6 +10,9 @@
 (defgeneric run-lisp-process (lisp-exe &rest forms)
   (:documentation "Starts lisp process, executes the specified forms
 and exits the process."))
+
+
+(defgeneric start-lisp-process (lisp-exe &rest forms))
 
 ;; excaping of parameters passed to
 ;; external-program:run is not required
@@ -33,15 +38,35 @@ and exits the process."))
     (log:info "running command: ~A ~{~A~^ ~}" program-path args)
     (external-program:run program-path args)))
 
+;; small wrapper around external-program:start
+(defun start (program-path argument-strings)
+  (let ((args (mapcar #'escape-process-parameter argument-strings)))
+    (log:info "starting command: ~A ~{~A~^ ~}" program-path args)
+    (external-program:start program-path args :input t)))
+
+;;; default implementation of start-lisp-process
+(defgeneric make-command-line (lisp-exe from-strings)
+ (:documentation "Returns a list of strings. The first string is the
+command, the rest strings are the command arguments."))
+
+(defun code-str (lisp-code)
+  "Formats lisp code so that it can be read back by lisp reader."
+  (prin1-to-string lisp-code))
+
+(defmethod start-lisp-process ((lisp-exe lisp-exe) &rest forms)
+  (let ((command-line (make-command-line lisp-exe (mapcar #'code-str forms))))
+    (start (first command-line) (rest command-line))))
+
+(defmethod run-lisp-process ((lisp-exe lisp-exe) &rest forms)
+  (let ((command-line (make-command-line lisp-exe (mapcar #'code-str forms))))
+    (exec (first command-line) (rest command-line))))
+
+;;; lisp-exe classes for particlar lisps
 (defclass single-exe-lisp-exe (lisp-exe)
   ((exe-path :type string
              :accessor exe-path
              :initarg :exe-path
              :initform (error "exe-path must be specified"))))
-
-(defun code-str (lisp-code)
-  "Formats lisp code so that it can be read back by lisp reader."
-  (prin1-to-string lisp-code))
 
 (defun prepend-each (prepend-what list)
   (mapcan (lambda (elem) (list prepend-what elem))
@@ -51,20 +76,20 @@ and exits the process."))
                '("--eval" 1 "--eval" 2)))
 
 (defclass clisp (single-exe-lisp-exe) ())
-(defmethod run-lisp-process ((lisp-exe clisp) &rest forms)
-  (exec (exe-path lisp-exe)
+(defmethod make-command-line ((lisp-exe clisp) form-strings)
+  (cons (exe-path lisp-exe)
         `("-norc"
           "-m" "100MB"
-          ,@(prepend-each "-x" (mapcar #'code-str forms)))))
+          ,@(prepend-each "-x" form-strings))))
 
 (defclass ccl (single-exe-lisp-exe) ())
-(defmethod run-lisp-process ((lisp-exe ccl) &rest forms)
-  (exec (exe-path lisp-exe)
+(defmethod make-command-line ((lisp-exe ccl) form-strings)
+  (cons (exe-path lisp-exe)
         `("--no-init"
-          ,@(prepend-each "--eval" (mapcar #'code-str forms))
+          ,@(prepend-each "--eval" form-strings)
           "--eval" "(ccl:quit)")))
 
-(defclass abcl (lisp-exe) 
+(defclass abcl (lisp-exe)
   ((java-exe-path :type string
                   :accessor java-exe-path
                   :initarg :java-exe-path
@@ -74,39 +99,39 @@ and exits the process."))
                   :initarg :abcl-jar-path
                   :initform (error "abcl-jar-path must be specified"))))
 
-(defmethod run-lisp-process ((lisp-exe abcl) &rest forms)
-  (exec (java-exe-path lisp-exe)
+(defmethod make-command-line ((lisp-exe abcl) form-strings)
+  (cons (java-exe-path lisp-exe)
         `("-XX:MaxPermSize=256m"
           "-jar"
           ,(abcl-jar-path lisp-exe)
           "--noinit"
           "--nosystem"
           "--batch"
-          ,@(prepend-each "--eval" (mapcar #'code-str forms)))))
+          ,@(prepend-each "--eval" form-strings))))
 
 (defclass sbcl (single-exe-lisp-exe) ())
-(defmethod run-lisp-process ((lisp-exe sbcl) &rest forms)
-  (exec (exe-path lisp-exe)
+(defmethod make-command-line ((lisp-exe sbcl) form-strings)
+  (cons (exe-path lisp-exe)
         `("--noinform"
           "--end-runtime-options"
           "--no-sysinit"
           "--no-userinit"
-          ,@(prepend-each "--eval" (mapcar #'code-str forms))
+          ,@(prepend-each "--eval" form-strings)
           "--eval" "(sb-ext:quit)")))
 
 (defclass cmucl (single-exe-lisp-exe) ())
-(defmethod run-lisp-process ((lisp-exe cmucl) &rest forms)
-  (exec (exe-path lisp-exe)
+(defmethod make-command-line ((lisp-exe cmucl) form-strings)
+  (cons (exe-path lisp-exe)
         `("-noinit"
           "-nositeinit"
-          ,@(prepend-each "-eval" (mapcar #'code-str forms))
+          ,@(prepend-each "-eval" form-strings)
           "-eval" "(quit)")))
 
 (defclass ecl (single-exe-lisp-exe) ())
-(defmethod run-lisp-process ((lisp-exe ecl) &rest forms)
-  (exec (exe-path lisp-exe)
+(defmethod make-command-line ((lisp-exe ecl) form-strings)
+  (cons (exe-path lisp-exe)
         `("-norc"
-          ,@(prepend-each "-eval" (mapcar #'code-str forms))
+          ,@(prepend-each "-eval" form-strings)
           "-eval" "(ext:quit)")))
 
 (defclass acl (single-exe-lisp-exe) ())
@@ -114,7 +139,7 @@ and exits the process."))
 ;; escapes parameters for the -ee option of Allegro,
 ;; as described here:
 ;; http://www.franz.com/support/documentation/6.2/doc/startup.htm#spec-ee-note
-;; 
+;;
 ;; Why we need this: because on Windows, even if we include
 ;; the parameter into quotas, and escape the inner qoutas
 ;; by \, Allegro recevies the full command line including
@@ -129,26 +154,94 @@ and exits the process."))
               (format s "%~(~2,'0x~)" (char-code char))
               (princ char s)))))
 
-(defmethod run-lisp-process ((lisp-exe acl) &rest forms)
+(defmethod make-command-line ((lisp-exe acl) form-strings)
   ;; docs: http://www.franz.com/support/documentation/6.2/doc/startup.htm#command-line-args-1
-  (exec (exe-path lisp-exe)
+  (cons (exe-path lisp-exe)
         `(#+windows "+c" ;; no console window
           #+windows "+B" ;; no splash screen
           "-qq" ;; don't read any initialization files
           "-batch"
-          ,@(prepend-each "-ee" (mapcar (alexandria:compose #'escape-process-parameter-for-allegro 
-                                                            #'code-str)
-                                        forms))
+          ,@(prepend-each "-ee" (mapcar #'escape-process-parameter-for-allegro
+                                        form-strings))
           "-ee" "(excl:exit 0)")))
 
 ;; Lispwork is not tested as I don't have a license,
 ;; and the free personal edition doesn't have
 ;; a command line executable, only GUI.
 (defclass lispworks (single-exe-lisp-exe) ())
-(defmethod run-lisp-process ((lisp-exe lispworks) &rest forms)
+(defmethod make-command-line ((lisp-exe lispworks) form-strings)
+  (log:warn "lisp-exe for lispworks hasn't been tested, may fail; creating command line for lispworks...")
   ;; docs: http://www.lispworks.com/documentation/lw60/LW/html/lw-484.htm
-  (exec (exe-path lisp-exe)
+  (cons (exe-path lisp-exe)
         `("-init" "-"     ;; don't read
           "-siteinit" "-" ;; any initialization files
-          ,@(prepend-each "-eval" (mapcar #'code-str forms))
+          ,@(prepend-each "-eval" form-strings)
           "-eval" "(lispworks:quit)")))
+
+;;; Timeouts: waiting for the process and killing the process tree on timeout
+
+(define-condition lisp-process-timeout (condition) ())
+
+(defun wait (seconds lisp-process)
+  "If the process is not finished upot the SECONDS timeout
+signal LISP-PROCESS-TIMEOUT conditios and exit (the process
+remains running)."
+  (let ((end-time (+ seconds (get-universal-time))))
+    (loop
+       (when (not (eq :running
+                      (external-program:process-status lisp-process)))
+         (return (external-program:process-status lisp-process)))
+       (when (< end-time (get-universal-time))
+         (signal 'lisp-process-timeout)
+         (return))
+       (sleep 1))))
+
+(defun try-to-kill-process-tree (lisp-process)
+  (log:info "Trying to kill the process tree of ~A" lisp-process)
+  (if (member :windows *features*)
+      (windows-kill-process-tree lisp-process)
+      ;; does non-windows always mean unix-like? :)
+      (unix-kill-process-tree lisp-process)))
+
+(defun windows-kill-process-tree (lisp-process)
+  (let ((process-id
+         ;; on CCL external-program:process-id returns process handle
+         ;; instead of process id. See http://trac.clozure.com/ccl/ticket/983.
+         #+ccl (#_GetProcessId (external-program:process-id lisp-process))
+         ;; we haven't tested on other lisps, but hope it will be the process id
+         #-ccl (external-program:process-id p)))
+    (multiple-value-bind (status exit-code)
+        (exec "taskkill" (list "/F" "/T" "/PID" (prin1-to-string process-id)))
+      (when (not (and (eq :exited status)
+                      (= 0 exit-code)))
+        (log:warn "The result of taskkill unitilty is ~A, ~A for process ID ~A. Probably the process tree is not killed"
+                  status exit-code process-id)))))
+
+(defun unix-kill-process-tree (lisp-process)
+  ;; On unix killing the whole tree is less important,
+  ;; because one of the main motivations for killing
+  ;; tree is that always starts two processes on
+  ;; windows: clisp.exe and it's child performing the
+  ;; real work - lisp.exe. On unix-like systems
+  ;; lisp.exe is started using execv which replaces
+  ;; the parent process by child process, so CLISP
+  ;; is runnin in a single process.
+  ;;
+  ;; Still, killing the process tree is desirable,
+  ;; in case the test suite starts some other programs
+  ;; (as external-program teste sute, which runs some
+  ;; shell commands). Implementing the process tree
+  ;; kill on unix is in our TODO.
+  (log:warn "Killing the process tree for non-windows platforms is not implemented yet. Just killing the process.")
+  (external-program:signal-process lisp-process 9))
+
+(defun run-with-timeout (timeout-seconds lisp-exe &rest forms)
+  "Runs the lisp process. If the process fails to complete during the specified TIMEOUT,
+kills the lisp process and it's possible child processes and signals LISP-PROCESS-TIMEOUT
+condition and returns NIL."
+  (let ((p (apply #'start-lisp-process lisp-exe forms)))
+    (handler-case (wait timeout-seconds p)
+      (lisp-process-timeout (c)
+        (log:warn "Lisp process ~A ~S exceeded the timeout of ~A seconds. Trying to kill the process and it's possible child processes" lisp-exe forms timeout-seconds)
+        (try-to-kill-process-tree p)
+        (signal c)))))

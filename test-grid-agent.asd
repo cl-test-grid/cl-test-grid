@@ -31,4 +31,5 @@
        (:file "with-response-file")
        (:file "perform-test-run")
        (:file "persistable-state")
+       (:file "fake-blobstore")
        (:file "agent")))))

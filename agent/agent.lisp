@@ -56,8 +56,8 @@
           (dolist (libname libnames)
             (mark lib-world lisp libname)))
         ;; libraries are omitted (only lib-world and maybe lisp are specified);
-        ;; the above loop will do nothing in this case, therfoer
-        ;; we need a separate IF branch
+        ;; the above loop will not call MARK at all in this case, therfore
+        ;; we need a separate IF branch to ensure we saved the information
         (mark lib-world lisp)))
   (save-state (persistent-state agent)))
 

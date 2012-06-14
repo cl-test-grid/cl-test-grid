@@ -915,8 +915,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     (format stream "============================================================~%")))
 
 (defun run-libtest (lib run-descr log-file)
-  (let (status
-        (start-time (get-internal-real-time)))
+  (let (status)
     (with-open-file (log-stream log-file
                                 :direction :output
                                 :if-exists :overwrite
@@ -961,12 +960,7 @@ just passed to the QUICKLISP:QUICKLOAD."
                   :fail)))
 
         (print-log-footer lib status *standard-output*)))
-
-    (list :libname lib
-          :status status
-          :log-byte-length (file-byte-length log-file)
-          :test-duration (/ (- (get-internal-real-time) start-time)
-                            internal-time-units-per-second))))
+    status))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Database

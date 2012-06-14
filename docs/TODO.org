@@ -16,6 +16,19 @@
    other words, reflect the changes during the last month)
 * Test Running Robustness
 ** TODO run each test suite in a separate process
+** TODO kill process tree on unix in case the test suite exceeded timeout
+   Currenlty we only kill the lisp process, but not it's children.
+   Some test suites may start other programs, and it makes sense
+   to kill the testsuite child process too. Implementation hint:
+   the most portable API on unix to find out child processes,
+   as it seems to be, is the ps program. We will need to
+   implement a shell script killtree.sh <pid> which uses
+   ps to find all descendents and kill the. Portable format
+   of ps arguments should be used.
+** TODO move test-grid::print-log-footer to the test-grid-agent package,
+   and call it only form the agent process, not from the child, test suite
+   running, process.
+** TODO consider what test sute timeout value is the best (30 mins currently)
 * Reports Improve 2
 ** TODO Filters for pivot reports
 ** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 

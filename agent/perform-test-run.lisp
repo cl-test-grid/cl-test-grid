@@ -55,26 +55,50 @@ data (libraries test suites output and the run results) will be saved."
 
 (defun lib-log-file (test-run-directory lib-name)
   (merge-pathnames (substitute #\- #\.
-                               ;; Substitute dods by hypens because CCL
-                               ;; prepends the > symbol before dots (at lieas on windows)
+                               ;; Substitute dots by hypens because CCL
+                               ;; prepends the > symbol before dots (at least on windows);
                                ;; for example: hu.dwim.stefil => hu>.dwim.stefil.
                                ;; When we pass such a pathname to another lisps,
                                ;; they can't handle it.
                                (string-downcase lib-name))
                    test-run-directory))
 
+(defparameter +libtest-timeout-seconds+ #.(* 30 60) ;; half an hour
+  "Maximum number of seconds we give each library test suite
+to complete. After this time we consider the test suite
+as hung, kill the lisp process and record a :FAIL
+as the library test result.")
+
 (defun proc-run-libtest (lisp-exe libname run-descr logfile)
-  "Runs test-grid::run-libtest in a separate process and returns result."
-  (with-response-file (response-file)
-    (let* ((code `(progn
-                    (load ,(workdir-file "quicklisp/setup.lisp"))
-                    (load ,(src-file "proc-run-libtest.lisp"))
-                    (cl-user::run-libtest-with-response-to-file ,libname
-                                                                (quote ,run-descr)
-                                                                ,logfile
-                                                                ,response-file))))
-      (log:info "preparing to start separate lisp process with code: ~S" code)
-      (run-lisp-process lisp-exe code))))
+  "Runs test-grid::run-libtest in a separate process and returns the result."
+  (let ((start-time (get-internal-real-time))
+        (status (handler-case
+                    (with-response-file (response-file)
+                      (let* ((code `(progn
+                                      (load ,(workdir-file "quicklisp/setup.lisp"))
+                                      (load ,(src-file "proc-run-libtest.lisp"))
+                                      (cl-user::run-libtest-with-response-to-file ,libname
+                                                                                  (quote ,run-descr)
+                                                                                  ,logfile
+                                                                                  ,response-file))))
+                        (log:info "preparing to start separate lisp process with code: ~S" code)
+                        (run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
+                  (lisp-process-timeout ()
+                    (with-open-file (out logfile
+                                         :direction :output
+                                         :if-does-not-exist :create
+                                         :if-exists :append)
+                      (format out "~%The ~A test suite hasn't finished in ~A seconds.~%"
+                              libname +libtest-timeout-seconds+)
+                      (format out "We consider the test suite as hung; the test suite lisp process is killed.~%")
+                      (test-grid::print-log-footer libname :fail out))
+                    :fail))))
+    (log:info "The ~A test suite status: ~S" libname status)
+    (list :libname libname
+          :status status
+          :log-byte-length (test-grid::file-byte-length logfile)
+          :test-duration (/ (- (get-internal-real-time) start-time)
+                            internal-time-units-per-second))))
 
 (defun perform-test-run (lib-world lisp-exe libs output-base-dir user-email)
   (let* ((run-descr (make-run-descr lib-world

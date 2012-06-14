@@ -5,10 +5,10 @@
 (in-package #:test-grid-agent)
 
 ;;; When we run lisp code in an external lisp process,
-;;; and want to return some value form that process.
-;;; We use a temporary file where the external process
-;;; stores the response and we READ that response
-;;; from the file.
+;;; and want to return some value form that process,
+;;; we use a temporary file where the external process
+;;; stores the response. We then READ the response
+;;; from that file.
 (defun with-response-file-impl (body-func)
   (let* ((response-file-name (format nil
                                      "response~A.lisp"

@@ -1,6 +1,6 @@
-;;;; This file should be placed into homepage of the OS user running cl-test-grid agent.
-;;;; When this file is loaded, current package is test-grid. 
-;;;; The agent to be configured is available as test-grid:*agent*.
+;;;; This file should be placed into homedir of the OS user running cl-test-grid agent.
+;;;; When this file is loaded, current package is test-grid-agent. 
+;;;; The agent to be configured is available as test-grid-agent::*agent*.
 
 (defparameter *abcl* (make-instance 'abcl 
                                     :java-exe-path "java" 
@@ -19,12 +19,12 @@
 (setf (lisps *agent*) (list *abcl* *clisp* *ccl-1.8-x86* *ccl-1.8-x86-64* *ccl-1.7-x86* *ccl-1.7-x86-64* *sbcl* *ecl* *ecl-old* *acl*)
       (preferred-lisp *agent*) *ccl-1.8-x86*
 
-      ;; Please enter your email so that we know who is submitting the test results.
+      ;; Please provide your email so that we know who is submitting the test results.
       ;; Also the email will be published in the online reports, and the library
       ;; authors can later contact you in case of questions about this test run,
       ;; your environment, etc.
       ;; 
-      ;; If you are strongly opposed to publishing you email, please type e.g. 
+      ;; If you are strongly opposed to publishing you email, please provide 
       ;; just some nickname.
       (user-email *agent*) "avodonosov@yandex.ru")
 

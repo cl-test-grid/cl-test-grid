@@ -143,7 +143,7 @@ from old quicklisp distros).
   (assert (done-p state "quicklisp 2012-05-01" "sbcl-1-win" :alexandria)))
 
 (defun mark-done (state quicklisp &optional lisp library)
-  "Caution! Returns new sate destructively build from old state."
+  "Caution! Returns new state destructively build from the old STATE."
   (let* ((new-record (list quicklisp (or lisp :done) (or library :done)))
          ;; first delete all records specifying subsets of what
          ;; is specified by the new-record
