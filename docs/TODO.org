@@ -11,11 +11,16 @@
    project page, with reports about the test statuses 
    for this single library on various platforms with
    various quicklisp versions
-** TODO automate processing of library results submited by email
+** DONE automate processing of library results submited by email
+   CLOSED: [2012-06-15 Пт 01:46]
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
 * Test Running Robustness
-** TODO run each test suite in a separate process
+** DONE run each test suite in a separate process
+   CLOSED: [2012-06-15 Пт 01:44]
+** TODO enforce the source code recompilation on every test run
+   by configuring asdf:output-translations to a temporary 
+   subdirectory in the test-run directory
 ** TODO kill process tree on unix in case the test suite exceeded timeout
    Currenlty we only kill the lisp process, but not it's children.
    Some test suites may start other programs, and it makes sense
