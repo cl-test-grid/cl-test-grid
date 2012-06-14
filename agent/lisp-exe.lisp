@@ -1,18 +1,95 @@
-
-
-;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+;;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
-(in-package #:test-grid-agent)
+;;;; This package provides means to run lisp code in separate
+;;;; process for various Common Lisp implementatons. The API
+;;;; serves only the minimal needs sufficient for test-grid agent.
+;;;; We do not try to formulate generic API sutable for 3rd party
+;;;; projects (although useful implementation pieces may probably
+;;;; be found in this package would someone need similar functionality).
 
-(defclass lisp-exe () ())
+;;;
+;;; Interface
+;;;
+
+(defpackage #:lisp-exe
+  (:use #:cl)
+  (:export #:lisp-exe ;; the base class for a CL implementation executable
+
+           ;; lisp-exe classes for particular CL implementations
+           ;; which we know how to run
+           #:clisp
+           #:ccl
+           #:abcl
+           #:sbcl
+           #:cmucl
+           #:acl
+           #:ecl
+           #:lispworks
+
+           ;; the main function of interest for test-grid agent
+           #:run-with-timeout
+
+            ;; deprecated function, consider run-with-timeout where possible
+           #:run-lisp-process
+           ))
+
+
+(in-package #:lisp-exe)
+
 (defgeneric run-lisp-process (lisp-exe &rest forms)
   (:documentation "Starts lisp process, executes the specified forms
-and exits the process."))
+and exits the process. What happens in case of errors in forms (syntax or runtime errors),
+entering debugger and other problems is not specified. For example some lisps
+just exit in case debugger is entered in batch mode, other lisps really
+enter interactive debugger and hang waiting for input. It is responsibility
+of the lisp code in FORMS to provide proper handling of such situations.
+This function is deprecated because it does not allow to handle
+hanging code. Consider RUN-WITH-TIMEOUT where possible."))
+
+(defgeneric run-with-timeout (timeout-seconds lisp-exe &rest forms)
+  (:documentation "Like RUN-LISP-PROCESS, but if the lisp porcess
+does not finish in the specified TIMEOUT-SECONDS, the process
+is killed together with it's possible child processes, a
+LISP-PROCESS-TIMEOUT condition is signalled and returns NIL."))
+
+(define-condition lisp-process-timeout (condition) ()) ;; should it inherit from ERROR?
+
+(defclass lisp-exe () ())
+
+;;; lisp-exe classes for particlar lisps
+(defclass single-exe-lisp-exe (lisp-exe)
+  ((exe-path :type string
+             :accessor exe-path
+             :initarg :exe-path
+             :initform (error "exe-path must be specified"))))
+
+(defclass clisp (single-exe-lisp-exe) ())
+(defclass ccl (single-exe-lisp-exe) ())
+(defclass abcl (lisp-exe)
+  ((java-exe-path :type string
+                  :accessor java-exe-path
+                  :initarg :java-exe-path
+                  :initform (error "java-exe-path must be specified"))
+   (abcl-jar-path :type string
+                  :accessor abcl-jar-path
+                  :initarg :abcl-jar-path
+                  :initform (error "abcl-jar-path must be specified"))))
+
+(defclass sbcl (single-exe-lisp-exe) ())
+(defclass cmucl (single-exe-lisp-exe) ())
+(defclass ecl (single-exe-lisp-exe) ())
+(defclass acl (single-exe-lisp-exe) ())
+;; Lispwork is not tested as I don't have a license,
+;; and the free personal edition doesn't have
+;; a command line executable, only GUI.
+(defclass lispworks (single-exe-lisp-exe) ())
 
 
-(defgeneric start-lisp-process (lisp-exe &rest forms))
+;;;
+;;; Implementation
+;;;
 
 ;; excaping of parameters passed to
 ;; external-program:run is not required
@@ -44,6 +121,8 @@ and exits the process."))
     (log:info "starting command: ~A ~{~A~^ ~}" program-path args)
     (external-program:start program-path args :input t)))
 
+(defgeneric start-lisp-process (lisp-exe &rest forms))
+
 ;;; default implementation of start-lisp-process
 (defgeneric make-command-line (lisp-exe from-strings)
  (:documentation "Returns a list of strings. The first string is the
@@ -61,13 +140,6 @@ command, the rest strings are the command arguments."))
   (let ((command-line (make-command-line lisp-exe (mapcar #'code-str forms))))
     (exec (first command-line) (rest command-line))))
 
-;;; lisp-exe classes for particlar lisps
-(defclass single-exe-lisp-exe (lisp-exe)
-  ((exe-path :type string
-             :accessor exe-path
-             :initarg :exe-path
-             :initform (error "exe-path must be specified"))))
-
 (defun prepend-each (prepend-what list)
   (mapcan (lambda (elem) (list prepend-what elem))
           list))
@@ -75,29 +147,17 @@ command, the rest strings are the command arguments."))
 (assert (equal (prepend-each "--eval" '(1 2))
                '("--eval" 1 "--eval" 2)))
 
-(defclass clisp (single-exe-lisp-exe) ())
 (defmethod make-command-line ((lisp-exe clisp) form-strings)
   (cons (exe-path lisp-exe)
         `("-norc"
           "-m" "100MB"
           ,@(prepend-each "-x" form-strings))))
 
-(defclass ccl (single-exe-lisp-exe) ())
 (defmethod make-command-line ((lisp-exe ccl) form-strings)
   (cons (exe-path lisp-exe)
         `("--no-init"
           ,@(prepend-each "--eval" form-strings)
           "--eval" "(ccl:quit)")))
-
-(defclass abcl (lisp-exe)
-  ((java-exe-path :type string
-                  :accessor java-exe-path
-                  :initarg :java-exe-path
-                  :initform (error "java-exe-path must be specified"))
-   (abcl-jar-path :type string
-                  :accessor abcl-jar-path
-                  :initarg :abcl-jar-path
-                  :initform (error "abcl-jar-path must be specified"))))
 
 (defmethod make-command-line ((lisp-exe abcl) form-strings)
   (cons (java-exe-path lisp-exe)
@@ -109,7 +169,6 @@ command, the rest strings are the command arguments."))
           "--batch"
           ,@(prepend-each "--eval" form-strings))))
 
-(defclass sbcl (single-exe-lisp-exe) ())
 (defmethod make-command-line ((lisp-exe sbcl) form-strings)
   (cons (exe-path lisp-exe)
         `("--noinform"
@@ -119,7 +178,6 @@ command, the rest strings are the command arguments."))
           ,@(prepend-each "--eval" form-strings)
           "--eval" "(sb-ext:quit)")))
 
-(defclass cmucl (single-exe-lisp-exe) ())
 (defmethod make-command-line ((lisp-exe cmucl) form-strings)
   (cons (exe-path lisp-exe)
         `("-noinit"
@@ -127,14 +185,11 @@ command, the rest strings are the command arguments."))
           ,@(prepend-each "-eval" form-strings)
           "-eval" "(quit)")))
 
-(defclass ecl (single-exe-lisp-exe) ())
 (defmethod make-command-line ((lisp-exe ecl) form-strings)
   (cons (exe-path lisp-exe)
         `("-norc"
           ,@(prepend-each "-eval" form-strings)
           "-eval" "(ext:quit)")))
-
-(defclass acl (single-exe-lisp-exe) ())
 
 ;; escapes parameters for the -ee option of Allegro,
 ;; as described here:
@@ -165,10 +220,6 @@ command, the rest strings are the command arguments."))
                                         form-strings))
           "-ee" "(excl:exit 0)")))
 
-;; Lispwork is not tested as I don't have a license,
-;; and the free personal edition doesn't have
-;; a command line executable, only GUI.
-(defclass lispworks (single-exe-lisp-exe) ())
 (defmethod make-command-line ((lisp-exe lispworks) form-strings)
   (log:warn "lisp-exe for lispworks hasn't been tested, may fail; creating command line for lispworks...")
   ;; docs: http://www.lispworks.com/documentation/lw60/LW/html/lw-484.htm
@@ -179,8 +230,6 @@ command, the rest strings are the command arguments."))
           "-eval" "(lispworks:quit)")))
 
 ;;; Timeouts: waiting for the process and killing the process tree on timeout
-
-(define-condition lisp-process-timeout (condition) ())
 
 (defun wait (seconds lisp-process)
   "If the process is not finished upot the SECONDS timeout
@@ -235,10 +284,7 @@ remains running)."
   (log:warn "Killing the process tree for non-windows platforms is not implemented yet. Just killing the process.")
   (external-program:signal-process lisp-process 9))
 
-(defun run-with-timeout (timeout-seconds lisp-exe &rest forms)
-  "Runs the lisp process. If the process fails to complete during the specified TIMEOUT,
-kills the lisp process and it's possible child processes and signals LISP-PROCESS-TIMEOUT
-condition and returns NIL."
+(defmethod run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (let ((p (apply #'start-lisp-process lisp-exe forms)))
     (handler-case (wait timeout-seconds p)
       (lisp-process-timeout (c)

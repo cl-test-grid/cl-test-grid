@@ -82,8 +82,8 @@ as the library test result.")
                                                                                   ,logfile
                                                                                   ,response-file))))
                         (log:info "preparing to start separate lisp process with code: ~S" code)
-                        (run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
-                  (lisp-process-timeout ()
+                        (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
+                  (lisp-exe::lisp-process-timeout ()
                     (with-open-file (out logfile
                                          :direction :output
                                          :if-does-not-exist :create

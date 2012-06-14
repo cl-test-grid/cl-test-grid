@@ -169,14 +169,14 @@
   (log:info "Ensuring the quicklisp used to download the libraries being tested is updated to the recent version...")
   (let ((quicklisp-version
          (with-response-file (response-file)
-           (run-lisp-process lisp-exe
-                             `(progn
-                                (load ,(truename (src-file "proc-update-quicklisp.lisp")))
-                                (with-open-file (cl-user::out ,response-file
-                                                              :direction :output
-                                                              :if-exists :supersede
-                                                              :if-does-not-exist :create)
-                                  (pprint (cl-user::do-quicklisp-update) cl-user::out)))))))
+           (lisp-exe:run-lisp-process lisp-exe
+                                      `(progn
+                                         (load ,(truename (src-file "proc-update-quicklisp.lisp")))
+                                         (with-open-file (cl-user::out ,response-file
+                                                                       :direction :output
+                                                                       :if-exists :supersede
+                                                                       :if-does-not-exist :create)
+                                           (pprint (cl-user::do-quicklisp-update) cl-user::out)))))))
     (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
     quicklisp-version))
 
@@ -196,12 +196,12 @@ file cl-test-grid-config.lisp.")
 ;;; Configuration check functions
 (defun lisp-process-echo (lisp-exe str-to-echo)
   (with-response-file (response-file)
-    (run-lisp-process lisp-exe
-                      `(with-open-file (cl-user::out ,response-file
-                                            :direction :output
-                                            :if-exists :supersede
-                                            :if-does-not-exist :create)
-                         (pprint ,str-to-echo cl-user::out)))))
+    (lisp-exe:run-lisp-process lisp-exe
+                               `(with-open-file (cl-user::out ,response-file
+                                                              :direction :output
+                                                              :if-exists :supersede
+                                                              :if-does-not-exist :create)
+                                  (pprint ,str-to-echo cl-user::out)))))
 
 (defun check-lisp (lisp-exe)
   (let* ((echo-string "abcs *() { /d e11 ")
@@ -229,20 +229,20 @@ file cl-test-grid-config.lisp.")
     (when (not (probe-file ql-setup-file))
       (error "Can not determine lisp implemntation name until quicklisp is installed - we need ASDF installed together with quicklisp to evaluate (asdf::implementation-identifier)."))
     (with-response-file (response-file)
-      (run-lisp-process lisp-exe
-                        `(load ,(truename (src-file "proc-common.lisp")))
-                        ;; can only do after quicklisp is installed
-                        `(load ,(truename ql-setup-file))
-                        `(cl-user::set-response ,response-file
-                                                ;; read from string is necessary
-                                                ;; because if agent is run on say CCL,
-                                                ;; then ASDF:IMPLEMENTATION-IDENTIFIER
-                                                ;; is exported from ASDF. But if the
-                                                ;; child process is CLISP, on it
-                                                ;; the symbol is not exported, and
-                                                ;; it can't read it.
-                                                (funcall (read-from-string
-                                                          "asdf::implementation-identifier")))))))
+      (lisp-exe:run-lisp-process lisp-exe
+                                 `(load ,(truename (src-file "proc-common.lisp")))
+                                 ;; can only do after quicklisp is installed
+                                 `(load ,(truename ql-setup-file))
+                                 `(cl-user::set-response ,response-file
+                                                         ;; read from string is necessary
+                                                         ;; because if agent is run on say CCL,
+                                                         ;; then ASDF:IMPLEMENTATION-IDENTIFIER
+                                                         ;; is exported from ASDF. But if the
+                                                         ;; child process is CLISP, on it
+                                                         ;; the symbol is not exported, and
+                                                         ;; it can't read it.
+                                                         (funcall (read-from-string
+                                                                   "asdf::implementation-identifier")))))))
 ;; note: not thread-safe
 (fare-memoization:memoize 'implementation-identifier)
 

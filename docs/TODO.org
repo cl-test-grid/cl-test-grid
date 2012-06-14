@@ -29,6 +29,7 @@
    and call it only form the agent process, not from the child, test suite
    running, process.
 ** TODO consider what test sute timeout value is the best (30 mins currently)
+** TODO should the lisp-process-timeout condition inherit from serous-condition, error, or just condition?
 * Reports Improve 2
 ** TODO Filters for pivot reports
 ** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
