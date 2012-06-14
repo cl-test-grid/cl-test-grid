@@ -43,16 +43,21 @@
 and exits the process. What happens in case of errors in forms (syntax or runtime errors),
 entering debugger and other problems is not specified. For example some lisps
 just exit in case debugger is entered in batch mode, other lisps really
-enter interactive debugger and hang waiting for input. It is responsibility
-of the lisp code in FORMS to provide proper handling of such situations.
+enter interactive debugger and hang waiting for input. The function doesn't
+even allow to test exit status of the process. It is responsibility
+of the lisp code in FORMS to provide handling of problematic situations
+and deliver response to the parent process (e.g. by storing the result
+value in a temporary file - if the temporary file is absent the parent
+knows something is wrong).
+
 This function is deprecated because it does not allow to handle
-hanging code. Consider RUN-WITH-TIMEOUT where possible."))
+hanging lisp processes. Consider RUN-WITH-TIMEOUT where possible."))
 
 (defgeneric run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (:documentation "Like RUN-LISP-PROCESS, but if the lisp porcess
 does not finish in the specified TIMEOUT-SECONDS, the process
 is killed together with it's possible child processes, a
-LISP-PROCESS-TIMEOUT condition is signalled and returns NIL."))
+LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL."))
 
 (define-condition lisp-process-timeout (condition) ()) ;; should it inherit from ERROR?
 
