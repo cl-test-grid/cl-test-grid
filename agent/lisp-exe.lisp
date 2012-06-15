@@ -261,9 +261,11 @@ remains running)."
   (let ((process-id
          ;; on CCL external-program:process-id returns process handle
          ;; instead of process id. See http://trac.clozure.com/ccl/ticket/983.
-         #+ccl (#_GetProcessId (external-program:process-id lisp-process))
+         #+(and ccl windows)
+         (#_GetProcessId (external-program:process-id lisp-process))
          ;; we haven't tested on other lisps, but hope it will be the process id
-         #-ccl (external-program:process-id p)))
+         #-(and ccl windows)
+         (external-program:process-id p)))
     (multiple-value-bind (status exit-code)
         (exec "taskkill" (list "/F" "/T" "/PID" (prin1-to-string process-id)))
       (when (not (and (eq :exited status)
