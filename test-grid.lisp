@@ -770,6 +770,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (asdf:clear-system :cl-store)
   (asdf:clear-system :cl-store-tests)
 
+  (ql:quickload :cl-store)
   (ql:quickload :cl-store-tests)
 
   (run-rt-test-suite))
