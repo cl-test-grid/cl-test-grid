@@ -69,7 +69,7 @@ to complete. After this time we consider the test suite
 as hung, kill the lisp process and record a :FAIL
 as the library test result.")
 
-(defun proc-run-libtest (lisp-exe libname run-descr logfile)
+(defun proc-run-libtest (lisp-exe libname run-descr logfile asdf-output-dir)
   "Runs test-grid::run-libtest in a separate process and returns the result."
   (let ((start-time (get-internal-real-time))
         (status (handler-case
@@ -80,6 +80,7 @@ as the library test result.")
                                       (cl-user::run-libtest-with-response-to-file ,libname
                                                                                   (quote ,run-descr)
                                                                                   ,logfile
+                                                                                  ,asdf-output-dir
                                                                                   ,response-file))))
                         (log:info "preparing to start separate lisp process with code: ~S" code)
                         (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
@@ -105,10 +106,11 @@ as the library test result.")
                                     (implementation-identifier lisp-exe)
                                     user-email))
          (run-dir (run-directory run-descr output-base-dir))
+         (asdf-output-dir (merge-pathnames "asdf-output/" run-dir))
          (lib-results))
     (ensure-directories-exist run-dir)
     (dolist (lib libs)
-      (let ((lib-result (proc-run-libtest lisp-exe lib run-descr (lib-log-file run-dir lib))))
+      (let ((lib-result (proc-run-libtest lisp-exe lib run-descr (lib-log-file run-dir lib) asdf-output-dir)))
         (push lib-result lib-results)))
     (setf (getf run-descr :run-duration)
           (- (get-universal-time)
@@ -116,6 +118,8 @@ as the library test result.")
     (let ((run (make-run run-descr lib-results)))
       (save-run-info run run-dir)
       (log:info "The test results were saved to: ~%~A." (truename run-dir))
+      (when (not (cl-fad:directory-exists-p asdf-output-dir))
+        (log:warn "The ASDF output directroy specified for the test run does not exist; seems like the test run was not using our asdf-output-translations and we have no guarantee all the sourcess were freshly recompiled: ~S" asdf-output-dir))
       run-dir)))
 
 (defun submit-logs (blobstore test-run-dir)

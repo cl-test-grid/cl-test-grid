@@ -18,7 +18,22 @@
 
 (ql:quickload :test-grid)
 
-(defun run-libtest-with-response-to-file (libname run-descr logfile response-file)
+(defun run-libtest-with-response-to-file (libname
+                                          run-descr
+                                          logfile
+                                          asdf-output-root-dir
+                                          response-file)
+  (let ((asdf-output-wild-pathname
+         (merge-pathnames (make-pathname :directory '(:relative :wild-inferiors)
+                                         :name :wild
+                                         :type :wild
+                                         :version :wild)
+                          asdf-output-root-dir)))
+    (format t "asdf-output-wild-pathname: ~S~%" asdf-output-wild-pathname)
+    (asdf:initialize-output-translations `(:output-translations
+                                           :ignore-inherited-configuration
+                                           (T ,asdf-output-wild-pathname))))
+  (format t "asdf::*output-translations*: ~S~%" asdf::*output-translations*)
+
   (let ((lib-result (test-grid::run-libtest libname run-descr logfile)))
     (set-response response-file lib-result)))
-
