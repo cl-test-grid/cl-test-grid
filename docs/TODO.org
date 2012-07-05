@@ -21,6 +21,10 @@
 ** TODO enforce the source code recompilation on every test run
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
+** TODO error handling in the main process - during a test run and in other situations
+   For example, after testing some library, the output file with library
+   status is not found. Record :FAIL and proceed to further libraries.
+   How to handle error during test results submission?
 ** TODO kill process tree on unix in case the test suite exceeded timeout
    Currenlty we only kill the lisp process, but not it's children.
    Some test suites may start other programs, and it makes sense
