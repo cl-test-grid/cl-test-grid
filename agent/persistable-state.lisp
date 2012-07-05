@@ -52,7 +52,7 @@ if we add more libraries to test-grid later, which were not
 tested on the old quicklisps. This mode is simpler for us
 while we are tuning test-grid; we jsut run tests on the latest
 quicklisp as it is out, and never go back in time even if
-new libraries are added. Later we will probably swith to a
+new libraries are added. Later we will probably switch to a
 more flexible mode and collect test results for newly added libraries
 from old quicklisp distros).
 
