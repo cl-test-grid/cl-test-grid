@@ -14,3 +14,10 @@
                        :if-exists :supersede
                        :if-does-not-exist :create)
     (pprint value out)))
+
+(defun private-quicklisp-dir ()
+  (let* ((this-file #.(or *load-truename* *compile-file-truename*))
+         (parent-dir (make-pathname :directory (butlast (pathname-directory this-file))
+                                    :host (pathname-host this-file)
+                                    :device (pathname-device this-file))))
+    (merge-pathnames #P"work-dir/agent/quicklisp/" parent-dir)))
