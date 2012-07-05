@@ -563,7 +563,7 @@ just passed to the QUICKLISP:QUICKLOAD."
       :fail)))
 
 (defun is-windows ()
-  (intersection '(:windows :win32 :win) *features*))
+  (member :asdf-windows *features* :test #'eq))
 
 ;; See coverage.org for more info why IO lib is not added.
 ;;
