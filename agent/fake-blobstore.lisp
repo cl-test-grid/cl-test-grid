@@ -4,7 +4,7 @@
 
 ;;;
 ;;; Fake implementation of test-grid-blobstore API;
-;;; may be used for testing when we don't want really
+;;; may be used for testing when we don't want to really
 ;;; upload test results to server
 ;;;
 
