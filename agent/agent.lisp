@@ -276,7 +276,7 @@ the PREDICATE."
 
 ;;; Main program
 
-(defun run-tests (agent lib-world &optional (libs test-grid::*all-libs*))
+(defun run-tests (agent lib-world)
   (when (tested-p agent lib-world)
     (log:info "~A is already fully tested. Skipping." lib-world)
     (return-from run-tests))
@@ -294,13 +294,12 @@ the PREDICATE."
       (log:info "Running tests for ~A" (implementation-identifier lisp))
       (let ((results-dir (perform-test-run lib-world
                                            lisp
-                                           libs
+                                           test-grid::*all-libs*
                                            (test-output-base-dir)
                                            (user-email agent))))
         (submit-test-run (blobstore agent) results-dir)
         (mark-tested agent lib-world (implementation-identifier lisp))
-;        (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)
-        )
+        (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore))
       (mark-tested agent lib-world (implementation-identifier lisp))))
 
   ;; do not mark the whole lib-world as :done, because I am experimenting with different lisps
