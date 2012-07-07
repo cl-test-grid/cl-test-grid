@@ -75,7 +75,6 @@ as the library test result.")
         (status (handler-case
                     (with-response-file (response-file)
                       (let* ((code `(progn
-                                      (load ,(workdir-file "quicklisp/asdf.lisp"))
                                       (load ,(workdir-file "quicklisp/setup.lisp"))
                                       (load ,(src-file "proc-run-libtest.lisp"))
                                       (cl-user::run-libtest-with-response-to-file ,libname
