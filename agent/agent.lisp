@@ -171,6 +171,7 @@
          (with-response-file (response-file)
            (lisp-exe:run-lisp-process lisp-exe
                                       `(progn
+                                         (load ,(truename (src-file "proc-common.lisp")))
                                          (load ,(truename (src-file "proc-update-quicklisp.lisp")))
                                          (with-open-file (cl-user::out ,response-file
                                                                        :direction :output
@@ -275,7 +276,7 @@ the PREDICATE."
 
 ;;; Main program
 
-(defun run-tests (agent lib-world)
+(defun run-tests (agent lib-world &optional (libs test-grid::*all-libs*))
   (when (tested-p agent lib-world)
     (log:info "~A is already fully tested. Skipping." lib-world)
     (return-from run-tests))
@@ -293,12 +294,13 @@ the PREDICATE."
       (log:info "Running tests for ~A" (implementation-identifier lisp))
       (let ((results-dir (perform-test-run lib-world
                                            lisp
-                                           test-grid::*all-libs*
+                                           libs
                                            (test-output-base-dir)
                                            (user-email agent))))
         (submit-test-run (blobstore agent) results-dir)
         (mark-tested agent lib-world (implementation-identifier lisp))
-        (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore))
+;        (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)
+        )
       (mark-tested agent lib-world (implementation-identifier lisp))))
 
   ;; do not mark the whole lib-world as :done, because I am experimenting with different lisps
