@@ -152,21 +152,10 @@ as the library test result.")
       (save-run-info run-info test-run-dir)
       run-info)))
 
-(defun submit-results (blobstore test-run-dir)
+(defun submit-test-run-results (blobstore test-run-dir)
+  (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
   (let* ((run-info (submit-logs blobstore test-run-dir)))
     (log:info "The log files are submitted. Submitting the test run info...")
     (test-grid-blobstore:submit-run-info blobstore run-info)
     (log:info "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.")
     run-info))
-
-(defun submit-test-run (blobstore test-run-dir)
-  (log:info "~%Submitting the test results to the server...")
-  (handler-case (submit-results blobstore test-run-dir)
-    (error (e) (log:error "Error occured while uploading the test results to the server: ~A: ~A.
-You can submit manually the full content of the results directory
-   ~A
-to the cl-test-grid issue tracker:
-   https://github.com/cl-test-grid/cl-test-grid/issues~%"
-                       (type-of e)
-                       e
-                       (truename test-run-dir)))))

@@ -16,15 +16,24 @@
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
 * Test Running Robustness
+** TODO Agent: when test results upload failed, do not mark this lisp as tested in persistence.
+** TODO Agent: retry when test results upload failed.
 ** DONE run each test suite in a separate process
    CLOSED: [2012-06-15 Пт 01:44]
-** TODO enforce the source code recompilation on every test run
+** DONE enforce the libraries source code recompilation on every test run
+   CLOSED: [2012-07-09 Пн 16:54]
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
+** TODO recompile cl-test-grid sources at every agetn run?
+   As currently ASDf doesn't rebuild depending libraries
+   when the libraries they depend on changed (add 
+   links to this TODO item when Internet connection
+   will be up)
 ** TODO error handling in the main process - during a test run and in other situations
    For example, after testing some library, the output file with library
    status is not found. Record :FAIL and proceed to further libraries.
    How to handle error during test results submission?
+** TODO backtrace of errors
 ** TODO kill process tree on unix in case the test suite exceeded timeout
    Currenlty we only kill the lisp process, but not it's children.
    Some test suites may start other programs, and it makes sense
@@ -37,7 +46,7 @@
 ** TODO move test-grid::print-log-footer to the test-grid-agent package,
    and call it only form the agent process, not from the child, test suite
    running, process.
-** TODO consider what test sute timeout value is the best (30 mins currently)
+** TODO consider what test suite timeout value is the best (30 mins currently)
 ** TODO should the lisp-process-timeout condition inherit from serous-condition, error, or just condition?
 * Reports Improve 2
 ** TODO Filters for pivot reports

@@ -118,14 +118,14 @@
 ;; TODO:
 ;; * Level 1 beta
 ;; + test runs in work-dir/agent/test-runs
-;; - configuration: configure list of lisps, user email.
-;; - configuration: test-config procedcure (try to run all the lisps configured)
-;; - configuration: contributor email as a configurabel agent propery,
+;; + configuration: configure list of lisps, user email.
+;; + configuration: test-config procedcure (try to run all the lisps configured)
+;; + configuration: contributor email as a configurabel agent propery,
 ;;   instead of cl-test-grid-settings.lisp
-;; - delete test run data after the results have been submitted
+;; + delete test run data after the results have been submitted
 ;; * Level 1 stable
 ;; + full path to files: setup, proc-run-libtests, response-file
-;; - timeout
+;; + timeout
 ;; - check status of the quicklisp update process
 ;; - Prevent lisp entering debugger.
 ;; - Different lisps treat unhangled signals during -eval
@@ -291,16 +291,21 @@ the PREDICATE."
                 lib-world
                 (mapcar #'implementation-identifier done-lisps)))
     (dolist (lisp pending-lisps)
-      (log:info "Running tests for ~A" (implementation-identifier lisp))
-      (let ((results-dir (perform-test-run lib-world
-                                           lisp
-                                           test-grid::*all-libs*
-                                           (test-output-base-dir)
-                                           (user-email agent))))
-        (submit-test-run (blobstore agent) results-dir)
-        (mark-tested agent lib-world (implementation-identifier lisp))
-        (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore))
-      (mark-tested agent lib-world (implementation-identifier lisp))))
+      (handler-case
+          (progn
+            (log:info "Running tests for ~A" (implementation-identifier lisp))
+            (let ((results-dir (perform-test-run lib-world
+                                                 lisp
+                                                 test-grid::*all-libs*
+                                                 (test-output-base-dir)
+                                                 (user-email agent))))
+              (submit-test-run-results (blobstore agent) results-dir)
+              (mark-tested agent lib-world (implementation-identifier lisp))
+              (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore))
+            (mark-tested agent lib-world (implementation-identifier lisp)))
+        (serious-condition (e)
+          (log:error "Error during tests on ~A. Continuing for remaining lisps."
+                     (implementation-identifier lisp))))))
 
   ;; do not mark the whole lib-world as :done, because I am experimenting with different lisps
   ;; and want them to run tests next time when agent is started
