@@ -276,7 +276,7 @@ remains running)."
 (defun unix-kill-process-tree (lisp-process)
   ;; On unix killing the whole tree is less important,
   ;; because one of the main motivations for killing
-  ;; tree is that always starts two processes on
+  ;; tree is that CLISP always starts two processes on
   ;; windows: clisp.exe and it's child performing the
   ;; real work - lisp.exe. On unix-like systems
   ;; lisp.exe is started using execv which replaces
