@@ -241,7 +241,7 @@ file cl-test-grid-config.lisp.")
                                                          ;; is exported from ASDF. But if the
                                                          ;; child process is CLISP, on it
                                                          ;; the symbol is not exported, and
-                                                         ;; it can't read it.
+                                                         ;; CLISP cant read the code s-expr we pass to it.
                                                          (funcall (read-from-string
                                                                    "asdf::implementation-identifier")))))))
 ;; note: not thread-safe
@@ -327,30 +327,3 @@ the PREDICATE."
     (check-config *agent*)
     (let ((quicklisp-version (update-testing-quicklisp (preferred-lisp *agent*))))
       (run-tests *agent* (format nil "quicklisp ~A" quicklisp-version)))))
-
-;(main)
-;(update-testing-quicklisp *ccl-18-32*)
-
-;;(run-tests-in-separate-process *acl* (list :babel))
-
-
-;;  (time
-;;   (dolist (test-suite test-grid::*all-libs*)
-;;     (run-tests-in-separate-process *acl* (list test-suite))))
-
-;; ===================================
-
-;; (external-program:run "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl.exe"
-;;                       '("--no-init"
-;;                         "--load" "quicklisp/setup.lisp"
-;;                         "--load" "run-agent.lisp"
-;;                         "--eval" "\"(test-grid::run-libtests '(:babel))\""
-;;                         "--eval" "(quit)"))
-
-;; (external-program:run "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl.exe"
-;;                       '("--no-init"
-;;                         "--load" "quicklisp/setup.lisp"
-;;                         "--load" "run-agent.lisp"
-;;                         "--eval" "(test-grid::run-libtests '(:iterate))"
-;;                         "--eval" "(quit)"))
-
