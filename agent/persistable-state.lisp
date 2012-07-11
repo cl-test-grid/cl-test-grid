@@ -79,6 +79,7 @@ from old quicklisp distros).
   (or (eq elem-x :done)
       (equal elem-x elem-y)))
 
+;;; tests
 (assert (elem>= "a" "a"))
 (assert (not (elem>= "a" :done)))
 (assert (elem>= :done :done))
@@ -89,6 +90,7 @@ from old quicklisp distros).
   (or (eq elem-y :done)
       (equal elem-x elem-y)))
 
+;;; tests
 (assert (elem<= "a" "a"))
 (assert (elem<= "a" :done))
 (assert (elem<= :done :done))
@@ -102,6 +104,7 @@ from old quicklisp distros).
 (defun rec>= (x y)
   (tree-equal x y :test #'elem>=))
 
+;;; tests
 (assert (rec<= '("quicklisp 2012-03-01" "clisp-2.49-win" :alexandria)
                '("quicklisp 2012-03-01" :done :done)))
 
@@ -131,6 +134,7 @@ from old quicklisp distros).
         state
         :test #'rec<=))
 
+;; tests
 (let ((state '(("quicklisp 2012-04-01" :done :done)
                ("quicklisp 2012-05-01" "clisp-2.49-win" :done)
                ("quicklisp 2012-05-01" "sbcl-1-win" :alexandria) 
@@ -151,6 +155,7 @@ from old quicklisp distros).
     ;; and add the new-record to the state
     (cons new-record cleared-state)))
 
+;; tests
 (let ((state nil))
   (setf state (mark-done state "quicklisp 2012-05-01" "sbcl-1-win" :alexandria))
   (assert (done-p state "quicklisp 2012-05-01" "sbcl-1-win" :alexandria))
