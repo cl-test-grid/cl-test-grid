@@ -15,6 +15,8 @@
 package cltestgrid;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -54,12 +56,14 @@ public class Upload extends HttpServlet {
   public void doPost(HttpServletRequest req, HttpServletResponse resp) throws
       IOException, ServletException 
   {
-    resp.setContentType("text/html; charset=utf-8");
+    resp.setContentType("text/plain; charset=utf-8");
 
     Map<String, BlobKey> blobs = blobstoreService.getUploadedBlobs(req);
 
-    resp.getWriter().println("(");
+    StringWriter buf = new StringWriter();
+    PrintWriter out = new PrintWriter(buf);
 
+    out.println("(");
     Iterator<String> names = blobs.keySet().iterator();
     while (names.hasNext()) {
         String blobName = names.next();
@@ -73,9 +77,12 @@ public class Upload extends HttpServlet {
         shortKeyEntity.setProperty("blobKey", blobKey);
         datastore.put(shortKeyEntity); 
 
-        resp.getWriter().println(" (\"" + blobName + "\" . \"" + shortKeyEntity.getKey().getId() + "\")");
+        out.println(" (\"" + blobName + "\" . \"" + shortKeyEntity.getKey().getId() + "\")");
     }
+    out.println(")");
 
-    resp.getWriter().println(")");
+    String result = buf.toString();
+    log.info("returning blobName-blobKey map: " + result);
+    resp.getWriter().write(result);
   }
 }
