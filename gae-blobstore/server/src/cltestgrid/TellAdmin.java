@@ -1,3 +1,6 @@
+/* Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
+ * See LICENSE for details.
+ */
 package cltestgrid;
 
 import java.io.IOException;
