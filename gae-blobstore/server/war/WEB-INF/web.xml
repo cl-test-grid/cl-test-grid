@@ -41,6 +41,15 @@
     <url-pattern>/submit-run-info</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>tell-admin</servlet-name>
+    <servlet-class>cltestgrid.TellAdmin</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>tell-admin</servlet-name>
+    <url-pattern>/tell-admin</url-pattern>
+  </servlet-mapping>
+
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>all</web-resource-name>
