@@ -130,14 +130,14 @@ from old quicklisp distros).
                '("quicklisp 2012-03-01" "clisp-2.49-win" :alexandria)))
 
 (defun done-p (state lib-world &optional lisp library)
-  (find (list lib-world (or lisp :done) (or library :done)) 
+  (find (list lib-world (or lisp :done) (or library :done))
         state
         :test #'rec<=))
 
 ;; tests
 (let ((state '(("quicklisp 2012-04-01" :done :done)
                ("quicklisp 2012-05-01" "clisp-2.49-win" :done)
-               ("quicklisp 2012-05-01" "sbcl-1-win" :alexandria) 
+               ("quicklisp 2012-05-01" "sbcl-1-win" :alexandria)
                ("quicklisp 2012-05-01" "sbcl-1-win" :babel))))
   (assert (done-p state "quicklisp 2012-04-01"))
   (assert (not (done-p state "quicklisp 2012-05-01")))
