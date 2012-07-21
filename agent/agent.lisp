@@ -51,13 +51,13 @@
                                         lisp
                                         libname))))
     (if libname-or-list
-        ;; some libraries specified, do loop
+        ;; some libraries specified, loop over them
         (let ((libnames (ensure-list libname-or-list)))
           (dolist (libname libnames)
             (mark lib-world lisp libname)))
         ;; libraries are omitted (only lib-world and maybe lisp are specified);
         ;; the above loop will not call MARK at all in this case, therfore
-        ;; we need a separate IF branch to ensure we saved the information
+        ;; we need this separate IF branch to ensure we saved the information
         (mark lib-world lisp)))
   (save-state (persistent-state agent)))
 
@@ -70,9 +70,6 @@
   "File system location of test-grid-agent source code"
   (merge-pathnames "agent/"
                    test-grid-config::*src-base-dir*))
-
-(defun config-dir ()
-  (user-homedir-pathname))
 
 ;;; Working directory structure
 (defun test-output-base-dir ()
@@ -93,13 +90,6 @@
 ;; File relative to the src-dir
 (defun src-file (file-name)
   (merge-pathnames file-name (src-dir)))
-
-;;; Config file
-(defparameter +config-file-name+ "cl-test-grid-config.lisp")
-
-(defun config-file()
-  (merge-pathnames (config-dir) +config-file-name+))
-
 
 ;; sketch of the procedure to implement:
 ;; Level 1
@@ -181,19 +171,6 @@
     (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
     quicklisp-version))
 
-(defparameter *agent* nil
-  "The AGENT instance. This variable is provided in order
-to make the agent accessible from the user-edited config
-file cl-test-grid-config.lisp.")
-
-(defun load-config (agent)
-  (let ((config-file (config-file)))
-    (unless (probe-file config-file)
-      (error "Configuration file ~A is absent, can not run test-grid agent." config-file))
-    (let ((*package* (find-package '#:test-grid-agent))
-          (*agent* agent))
-      (load config-file))))
-
 ;;; Configuration check functions
 (defun lisp-process-echo (lisp-exe str-to-echo)
   (with-response-file (response-file)
@@ -214,7 +191,7 @@ file cl-test-grid-config.lisp.")
 (defun check-config (agent)
   (log:info "Checking configuration...")
   (when (zerop (length (user-email agent)))
-    (error "The user-email property of test-grid:*agent* can not be empty. Please specify your email, or at least some nickname if you are strongly opposed to publish your email."))
+    (error "The user-email property of test-grid agent can not be empty. Please specify your email, or at least some nickname if you are strongly opposed to publish your email."))
   (log:info "Checking external process functionality for the preffered lisp ~A..."
             (preferred-lisp agent))
   (check-lisp (preferred-lisp agent))
@@ -312,18 +289,17 @@ the PREDICATE."
   ;;(mark-tested agent lib-world)
   )
 
-(defun load-agent ()
-  (let ((agent (make-instance 'agent)))
-    (load-config agent)
-    (setf (persistent-state agent) (load-state)
-          (blobstore agent)
-          ;; during development of GAE blob storage :base-url may be "http://localhost:8080"
-          (test-grid-gae-blobstore:make-blob-store :base-url "http://cl-test-grid.appspot.com"))
-    agent))
-
-(defun main ()
+(defun main (agent)
   (log:config :daily (log-file))
-  (let ((*agent* (load-agent)))
-    (check-config *agent*)
-    (let ((quicklisp-version (update-testing-quicklisp (preferred-lisp *agent*))))
-      (run-tests *agent* (format nil "quicklisp ~A" quicklisp-version)))))
+  ;; finish the agent initialization
+  (setf (persistent-state agent) (load-state)
+        (blobstore agent) (test-grid-gae-blobstore:make-blob-store
+                               :base-url
+                               ;; during development of GAE blob storage
+                               ;; :base-url may be "http://localhost:8080"
+                               "http://cl-test-grid.appspot.com"))
+  (check-config agent)
+  ;; now to the work
+  (let* ((quicklisp-version (update-testing-quicklisp (preferred-lisp agent)))
+         (lib-world (format nil "quicklisp ~A" quicklisp-version)))
+    (run-tests agent lib-world)))

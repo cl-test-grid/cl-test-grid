@@ -8,43 +8,22 @@ git pull
 
 echo
 echo "************************************************************************"
-echo "Bootstrap quicklisp in a local directory and update to the recent version (if necessary)..."
-echo "************************************************************************"
-# Any Lisp may be used, use the one which works better on your plantform.
-/home/anton/ccl/ccl-1.7/lx86cl --no-init --load ensure-quicklisp-updated.lisp --eval "(quit)"
-
-echo
-echo "************************************************************************"
-echo "Running the tests (don't load the standard init files; using our local quicklisp)..."
+echo "Running the test grid agent..."
 echo "************************************************************************"
 
-# If you are running this first time, do not uncomment all the Lisps - please
-# run them one by one to check how it works.
+# Don't forget to prepare run-agent.lisp
+# based on run-agent.sample.lisp
+#
+# Use the most reliable lisp implementation you have to run agent. 
+# Below are examples for various lisps.
+# Quicklisp is required to be installed and added to the init
+# file of the lisp you use. 
 
-# ABCL
-#\path\to\abcl\abcl.sh --noinit --nosystem --batch --load quicklisp/setup.lisp --load run-agent.lisp
-
-# Allegro
-#alisp -qq -L quicklisp/setup.lisp -L run-agent.lisp
-
-# CCL
-#/home/anton/ccl/ccl-1.7/lx86cl --no-init --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
-
-# CLISP
-#clisp -norc -x '(load "quicklisp/setup.lisp") (load "run-agent.lisp")'
-
-# CMUCL
-#/opt/cmucl-20c/bin/lisp -noinit --nositeinit -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
-
-# ECL
-#ecl -norc -load quicklisp/setup.lisp -load run-agent.lisp -eval "(quit)"
-
-# SBCL (in this example in a non-default location)
+#/home/anton/ccl/ccl-1.7/lx86cl --load run-agent.lisp --eval "(quit)"
+#clisp -x (load "run-agent.lisp")'
 #export SBCL_HOME=/home/anton/sbcl/sbcl-1.0.54-x86-linux/lib/sbcl
-#/home/anton/sbcl/sbcl-1.0.54-x86-linux/bin/sbcl --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load run-agent.lisp --eval "(quit)"
-
-# Today test resutls submittion fails on some Lisps (e.g. CLISP) due to broken drakma.
-# To work this around, we can run another Lisp where drakma works, and submit the 
-# test results using it. The below invocation submits all the test results for the last 24
-# hours which hasn't been submitted yet.
-#/home/anton/sbcl/sbcl-1.0.54-x86-linux/run.sh --noinform --end-runtime-options --no-sysinit --no-userinit --load quicklisp/setup.lisp --load submit-last-day-results.lisp --eval "(quit)"
+#/home/anton/sbcl/sbcl-1.0.54-x86-linux/bin/sbcl --load run-agent.lisp --eval "(quit)"
+#\path\to\abcl\abcl.sh --batch --load run-agent.lisp
+#alisp -qq -L quicklisp/setup.lisp -L run-agent.lisp
+#/opt/cmucl-20c/bin/lisp -load run-agent.lisp -eval "(quit)"
+#ecl -load run-agent.lisp -eval "(quit)"
