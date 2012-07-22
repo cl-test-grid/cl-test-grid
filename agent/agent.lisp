@@ -311,8 +311,8 @@ the PREDICATE."
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore))
             (mark-tested agent lib-world (implementation-identifier lisp)))
         (serious-condition (e)
-          (log:error "Error during tests on ~A. Continuing for remaining lisps."
-                     (implementation-identifier lisp))))))
+          (log:error "Error during tests on ~A: ~A. Continuing for remaining lisps."
+                     (implementation-identifier lisp) e)))))
 
   ;; do not mark the whole lib-world as :done, because I am experimenting with different lisps
   ;; and want them to run tests next time when agent is started
