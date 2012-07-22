@@ -181,12 +181,42 @@
                                                               :if-does-not-exist :create)
                                   (pprint ,str-to-echo cl-user::out)))))
 
-(defun check-lisp (lisp-exe)
-  (let* ((echo-string "abcs *() { /d e11 ")
+(defgeneric check-lisp (lisp-exe)
+  (:method ((lisp-exe lisp-exe:lisp-exe))
+    (let* ((echo-string "abcs *() { /d e11 ")
          (response (lisp-process-echo lisp-exe echo-string)))
     (when (not (string= echo-string response))
       (error "Lisp ~A returned string ~S while we exected ~S."
-             lisp-exe response echo-string))))
+             lisp-exe response echo-string)))))
+
+(defmethod check-lisp ((lisp-exe lisp-exe:ecl))
+  (call-next-method)
+  (when (eq :lisp-to-c (lisp-exe:compiler lisp-exe))
+    (log:info "Checking ECL lisp-to-c compiler - it may be not working if a C compiler is absent in PATH.")
+    (let ((compile-failure-p
+           ;; We will try to compile a function and see if it is successful.
+           ;; We can not rely on the 3rd value returned by cl:compile
+           ;; because in the old ECL versions there was a bug
+           ;; that cl:compile didn't reported problems when running
+           ;; C compiler:
+           ;; https://sourceforge.net/tracker/?func=detail&atid=398053&aid=3546963&group_id=30035
+           ;; After some time, when these old ECL versions will not
+           ;; be relevant to support, we could probably change
+           ;; the implementation to check the 3rd value
+           ;; returned by cl:compile. Untill then, we rely
+           ;; on the printed representation of the compile
+           ;; function.
+           (with-response-file (response-file)
+             (lisp-exe:run-lisp-process
+              lisp-exe
+              `(load ,(truename (src-file "proc-common.lisp")))
+              '(compile (defun cl-user::-unique-name--- ()))
+              `(cl-user::set-response ,response-file
+                                      (not (string= "#<compiled-function -UNIQUE-NAME--->"
+                                                    (format nil "~A" (function cl-user::-unique-name---)))))))))
+      (when compile-failure-p
+        (error "ECL implementation ~A can not compile functions. Ensure that C compiler is available in PATH."
+               lisp-exe)))))
 
 (defun check-config (agent)
   (log:info "Checking configuration...")
@@ -202,25 +232,33 @@
   (log:info "All the external lisps passed the configuration check OK")
   t)
 
-(defun implementation-identifier (lisp-exe)
-  (let ((ql-setup-file (workdir-file "quicklisp/setup.lisp")))
-    (when (not (probe-file ql-setup-file))
-      (error "Can not determine lisp implemntation name until quicklisp is installed - we need ASDF installed together with quicklisp to evaluate (asdf::implementation-identifier)."))
-    (with-response-file (response-file)
-      (lisp-exe:run-lisp-process lisp-exe
-                                 `(load ,(truename (src-file "proc-common.lisp")))
-                                 ;; can only do after quicklisp is installed
-                                 `(load ,(truename ql-setup-file))
-                                 `(cl-user::set-response ,response-file
-                                                         ;; read from string is necessary
-                                                         ;; because if agent is run on say CCL,
-                                                         ;; then ASDF:IMPLEMENTATION-IDENTIFIER
-                                                         ;; is exported from ASDF. But if the
-                                                         ;; child process is CLISP, on it
-                                                         ;; the symbol is not exported, and
-                                                         ;; CLISP cant read the code s-expr we pass to it.
-                                                         (funcall (read-from-string
-                                                                   "asdf::implementation-identifier")))))))
+(defgeneric implementation-identifier (lisp-exe)
+  (:method ((lisp-exe lisp-exe:lisp-exe))
+    (let ((ql-setup-file (workdir-file "quicklisp/setup.lisp")))
+      (when (not (probe-file ql-setup-file))
+        (error "Can not determine lisp implemntation name until quicklisp is installed - we need ASDF installed together with quicklisp to evaluate (asdf::implementation-identifier)."))
+      (with-response-file (response-file)
+        (lisp-exe:run-lisp-process lisp-exe
+                                   `(load ,(truename (src-file "proc-common.lisp")))
+                                   ;; can only do after quicklisp is installed
+                                   `(load ,(truename ql-setup-file))
+                                   `(cl-user::set-response ,response-file
+                                                           ;; read from string is necessary
+                                                           ;; because if agent is run on say CCL,
+                                                           ;; then ASDF:IMPLEMENTATION-IDENTIFIER
+                                                           ;; is exported from ASDF. But if the
+                                                           ;; child process is CLISP, on it
+                                                           ;; the symbol is not exported, and
+                                                           ;; CLISP cant read the code s-expr we pass to it.
+                                                           (funcall (read-from-string
+                                                                     "asdf::implementation-identifier"))))))))
+(defmethod implementation-identifier ((lisp-exe lisp-exe:ecl))
+  ;; append type of compiler (bytecode or lisp-to-c)
+  ;; to the implementation identifier
+  (format nil "~A-~A"
+          (call-next-method)
+          (string-downcase (lisp-exe:compiler lisp-exe))))
+
 ;; note: not thread-safe
 (fare-memoization:memoize 'implementation-identifier)
 

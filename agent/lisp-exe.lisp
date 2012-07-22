@@ -22,10 +22,13 @@
            #:clisp
            #:ccl
            #:abcl
+           #:java-exe-path ; abcl slot accessor
+           #:abcl-jar-path ; abcl slot accessor
            #:sbcl
            #:cmucl
            #:acl
            #:ecl
+           #:compiler ; ecl slot accessor
            #:lispworks
 
            ;; the main function of interest for test-grid agent
@@ -84,9 +87,26 @@ LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL."))
 
 (defclass sbcl (single-exe-lisp-exe) ())
 (defclass cmucl (single-exe-lisp-exe) ())
-(defclass ecl (single-exe-lisp-exe) ())
+
+;; ECL provides two compilers: bytecode and lisp-to-c.
+;; What of two compilers to use should be specified
+;; explicitly as a constructor paraemter.
+;;
+;; Note, .fas files already compiled are loaded
+;; if found by cl:load, even if they are compiled
+;; by different compiler that is currently enabled.
+;; Therefore you need to preform fresh
+;; recomplilation of the code if you want to be sure
+;; you are running the code really compiled by the
+;; compiler you specified.
+(defclass ecl (single-exe-lisp-exe)
+  ((compiler :type symbol
+             :accessor compiler
+             :initarg :compiler
+             :initform (error "compiler must be either :bytecode or :lisp-to-c. Can not be NIL"))))
+
 (defclass acl (single-exe-lisp-exe) ())
-;; Lispwork is not tested as I don't have a license,
+;; Lispwork was not verified, as I don't have a license,
 ;; and the free personal edition doesn't have
 ;; a command line executable, only GUI.
 (defclass lispworks (single-exe-lisp-exe) ())
@@ -193,6 +213,13 @@ command, the rest strings are the command arguments."))
 (defmethod make-command-line ((lisp-exe ecl) form-strings)
   (cons (exe-path lisp-exe)
         `("-norc"
+          "-eval" ,(ecase (compiler lisp-exe)
+                          (:bytecode "(ext::install-bytecodes-compiler)")
+                          (:lisp-to-c "(require :cmp)"))
+          ;; we may replace (require :cmp) by (ext:intall-c-compiler),
+          ;; but it is relatevely new function and is absent in old versions
+          ;; of ECL. Also ext::install-bytecodes-compiler is not
+          ;; exported from the ext package in old ECL versions.
           ,@(prepend-each "-eval" form-strings)
           "-eval" "(ext:quit)")))
 

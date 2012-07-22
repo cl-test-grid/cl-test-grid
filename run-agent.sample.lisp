@@ -35,15 +35,26 @@
                                               :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl64.exe"))
 (defparameter *sbcl* (make-instance 'lisp-exe:sbcl :exe-path "sbcl"))
 (defparameter *cmucl* (make-instance 'lisp-exe:cmucl :exe-path "/opt/cmucl-20c/bin/lisp"))
-(defparameter *ecl* (make-instance 'lisp-exe:ecl :exe-path "C:\\Users\\anton\\projects\\ecl\\bin\\ecl.exe"))
-(defparameter *ecl-old* (make-instance 'lisp-exe:ecl :exe-path "C:\\Users\\anton\\unpacked\\ecl\\ecl-11.1.1\\bin\\ecl.exe"))
+;; ECL provides two compilers: bytecode compiler and lisp to C compiler.
+;; What compiler to test is specified explicitly as a parameter
+;; to lisp-exe:ecl constructor.
+(defparameter *ecl-bytecode* (make-instance 'lisp-exe:ecl
+                                            :exe-path "C:\\Users\\anton\\projects\\ecl\\bin\\ecl.exe"
+                                            :compiler :bytecode))
+;; Note, if you are specifying ECL to use lisp-to-c
+;; compiler, you should have a C compiler available
+;; in PATH.
+(defparameter *ecl-lisp-to-c* (make-instance 'lisp-exe:ecl
+                                             :exe-path "C:\\Users\\anton\\projects\\ecl\\bin\\ecl.exe"
+                                             :compiler :lisp-to-c))
 (defparameter *acl* (make-instance 'lisp-exe:acl :exe-path "C:\\Program Files (x86)\\acl82express\\alisp.exe"))
-
 
 (setf (test-grid-agent:lisps *agent*) (list *abcl* *clisp* *ccl-1.8-x86*
                                             *ccl-1.8-x86-64* *ccl-1.7-x86*
                                             *ccl-1.7-x86-64* *sbcl*
-                                            *ecl* *ecl-old* *acl*)
+                                            *ecl-bytecode*
+                                            *ecl-lisp-to-c*
+                                            *acl*)
 
       ;; Preferred lisp is the lisp implementation agent
       ;; uses when it need to perform some auxiliary
