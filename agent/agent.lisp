@@ -160,14 +160,9 @@
   (let ((quicklisp-version
          (with-response-file (response-file)
            (lisp-exe:run-lisp-process lisp-exe
-                                      `(progn
-                                         (load ,(truename (src-file "proc-common.lisp")))
-                                         (load ,(truename (src-file "proc-update-quicklisp.lisp")))
-                                         (with-open-file (cl-user::out ,response-file
-                                                                       :direction :output
-                                                                       :if-exists :supersede
-                                                                       :if-does-not-exist :create)
-                                           (pprint (cl-user::do-quicklisp-update) cl-user::out)))))))
+                                      `(load ,(truename (src-file "proc-common.lisp")))
+                                      `(load ,(truename (src-file "proc-update-quicklisp.lisp")))
+                                      `(cl-user::set-response ,response-file (cl-user::do-quicklisp-update))))))
     (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
     quicklisp-version))
 
@@ -175,11 +170,8 @@
 (defun lisp-process-echo (lisp-exe str-to-echo)
   (with-response-file (response-file)
     (lisp-exe:run-lisp-process lisp-exe
-                               `(with-open-file (cl-user::out ,response-file
-                                                              :direction :output
-                                                              :if-exists :supersede
-                                                              :if-does-not-exist :create)
-                                  (pprint ,str-to-echo cl-user::out)))))
+                               `(load ,(truename (src-file "proc-common.lisp")))
+                               `(cl-user::set-response ,response-file ,str-to-echo))))
 
 (defgeneric check-lisp (lisp-exe)
   (:method ((lisp-exe lisp-exe:lisp-exe))
