@@ -16,24 +16,31 @@
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
 * Test Running Robustness
-** TODO Agent: when test results upload failed, do not mark this lisp as tested in persistence.
-** TODO Agent: retry when test results upload failed.
+** TODO top level error handler in test-grid-agent:main
+   write the unhandled error stacktrace (with causes)
+   into log and exit - never enter debugger as the 
+   program should be suitable to run in background with cron.
+** TODO prevent starting of two agents (try to open a socket on a constant port)
+** TODO publish the lisp-agent - merge lisp-agent to master
+** DONE error handling in the main process - during a test run and in other situations
+   CLOSED: [2012-07-23 Пн 04:21]
+   For example, after testing some library, the output file with library
+   status is not found. Record :FAIL and proceed to further libraries.
+   How to handle error during test results submission?
+** DONE Agent: when test results upload failed, do not mark this lisp as tested in persistence.
+   CLOSED: [2012-07-10 Вт 15:47]
 ** DONE run each test suite in a separate process
    CLOSED: [2012-06-15 Пт 01:44]
 ** DONE enforce the libraries source code recompilation on every test run
    CLOSED: [2012-07-09 Пн 16:54]
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
+** TODO Agent: retry when test results upload failed.
 ** TODO recompile cl-test-grid sources at every agetn run?
    As currently ASDf doesn't rebuild depending libraries
    when the libraries they depend on changed (add 
    links to this TODO item when Internet connection
    will be up)
-** TODO error handling in the main process - during a test run and in other situations
-   For example, after testing some library, the output file with library
-   status is not found. Record :FAIL and proceed to further libraries.
-   How to handle error during test results submission?
-** TODO backtrace of errors
 ** TODO kill process tree on unix in case the test suite exceeded timeout
    Currenlty we only kill the lisp process, but not it's children.
    Some test suites may start other programs, and it makes sense
