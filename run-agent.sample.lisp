@@ -57,10 +57,11 @@
                                             *acl*)
 
       ;; Preferred lisp is the lisp implementation agent
-      ;; uses when it need to perform some auxiliary
-      ;; tasks - for example, updating quicklisp.
+      ;; uses when it needs to perform some auxiliary
+      ;; tasks requiring start of a separate lisp process -
+      ;; for example, updating quicklisp.
       ;; Almost always this is the same lisp you use
-      ;; tu execute the run-agent.lisp.
+      ;; to run the main agent process (i.e. the one running this code).
       (test-grid-agent:preferred-lisp *agent*) *ccl-1.8-x86*
 
       ;; Please provide your email so that we know who is submitting the test results.
