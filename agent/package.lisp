@@ -4,7 +4,13 @@
 
 (defpackage #:test-grid-agent
   (:use #:common-lisp)
-  (:export #:agent ;; the agent class
+  (:export
+           ;; agent public API version
+           #:+api-version+
+           #:api-compatible-p
+
+           ;; the agent class
+           #:agent
 
            ;; agent object configuration properties
            #:lisps

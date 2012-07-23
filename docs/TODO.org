@@ -6,27 +6,8 @@
    program should be suitable to run in background with cron.
 ** DONE prevent starting of two agents (try to open a socket on a constant port)
    CLOSED: [2012-07-23 Пн 22:04]
-** TODO create test-grid-agent:assert-api-version
-   Consider placing a call to this function into run-agent.sample.lisp,
-   right after loading test grid agent. That way user will
-   ensure he is configuring the agent right. On the
-   other hand, if the agent is run by cron, and this call
-   prevents the agent from starting, admin looses
-   all the contact with agent. Only email the author.
-   In other words, we can not provide automatic schema
-   evalution for the agent config. On the 3rd hand,
-   we should not change the public API without a
-   serous reason, and if we can automatically compute
-   all we need from the information already passed
-   to agent config, we should not change the API.
-   If such an automatich coputation is impossible,
-   this means the schema evaluation is impossible.
-   So, we have not so many users and can ask them
-   by email to change their config when agent
-   with new API is published.
-   API versions should distinguish backward-compatible
-   changes from backward-incompatible, i.e. will
-   have major and minor versions.
+** DONE create test-grid-agent:api-compatible-p
+   CLOSED: [2012-07-23 Пн 23:45]
 ** TODO check what lisps other than CCL can run lisp-agent
    - SBCL Windows had problems with external format (tried to pass unsupported
      argument :environemnt to SBCL process functions; then tried

@@ -34,4 +34,5 @@
        (:file "persistable-state")
        (:file "fake-blobstore")
        (:file "as-singleton-agent")
-       (:file "agent")))))
+       (:file "agent")
+       (:file "api-version")))))
