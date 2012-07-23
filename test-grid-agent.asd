@@ -21,7 +21,8 @@
                #:trivial-features
                #:cl-fad
                #:log4cl
-               #:fare-memoization)
+               #:fare-memoization
+               #:usocket)
   :components 
     ((:module "agent"
       :serial t
@@ -32,4 +33,5 @@
        (:file "perform-test-run")
        (:file "persistable-state")
        (:file "fake-blobstore")
+       (:file "as-singleton-agent")
        (:file "agent")))))

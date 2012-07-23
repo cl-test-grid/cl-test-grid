@@ -1,8 +1,11 @@
 * 0.4.0 Test Running Robustness - lisp-agent
-** TODO top level error handler in test-grid-agent:main
+** DONE top level error handler in test-grid-agent:main
+   CLOSED: [2012-07-23 Пн 20:17]
    write the unhandled error stacktrace (with causes)
    into log and exit - never enter debugger as the 
    program should be suitable to run in background with cron.
+** DONE prevent starting of two agents (try to open a socket on a constant port)
+   CLOSED: [2012-07-23 Пн 22:04]
 ** TODO create test-grid-agent:assert-api-version
    Consider placing a call to this function into run-agent.sample.lisp,
    right after loading test grid agent. That way user will
@@ -33,7 +36,6 @@
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
 ** TODO publish the lisp-agent - merge lisp-agent to master
-** TODO prevent starting of two agents (try to open a socket on a constant port)
 ** DONE error handling in the main process - during a test run and in other situations
    CLOSED: [2012-07-23 Пн 04:21]
    For example, after testing some library, the output file with library
@@ -51,10 +53,12 @@
     Will require presistence schema evolution. To postpone this
     consider implementing the feature before publishing lisp-agent.
     On the other hand, postponing publishing agent can cause
-    more harm to the project, than duplicate tests.
+    more harm to the project, than additional efforts to 
+    implements automatic persistence evolution step.
 *** Give every agent and unique ID. store the ID in the agent persistence.
 *** Admin stores a hashmap for lisps to be tested (or skipped)
-    by particular agent. This allows to distribute work
+    by particular agent in the aget sources (note, the agent
+    updates the source every time from git) This allows to distribute work
     between agents having overlaping sets of lisp implementations.
     Need a mechanizm for announcing the lisps present on
     agent (probably just add agent-id to the test run
@@ -73,31 +77,31 @@
 ** finish breaking-up the old monolitic module test-grid:
    test grid systems will consist of modules for:
    - testsuites 
-     a function libtest(libnmae) runs test suite
-     of that lib, downloading the lib from quicklisp
-     if necessary, and returns test result in unified format.
+     a function libtest(libname) runs test suite
+     of the specified library, downloading the lib from quicklisp
+     if necessary, and returns test result in a unified format.
      I.e. the module knows how to invoke the library test suite
      and has adapters for test results of various test frameworks
-     to the testgrid format.
+     to the testgrid test result format.
    - agent
      the program with can run test in child lisp processes,
-     knows which lisps contributor has on the machine,
+     knows which lisps the contributor has on the machine,
      decides when to run tests, and can upload the test
      results to the central server.
-     (small changes are required - it will receive
+     [the changes required are small - agent will receive
      some code from the current test-grid.lisp,
      for example test suite log header/footer printing.
      Maybe the test suite log will include whole lisp
      process output, from the lisp startup (now we 
      start logging bit later, right before invoking
-     the test suite)
+     the test suite)]
    - admin
      code to receive test results and add to db
-     (remain unchanged)
+     [remains unchanged]
    - reporting
-     (reamains unchanged)
+     [reamains unchanged]
    - blobstore
-     (remains unchanges)
+     [remains unchanges]
    - data 
      objects moving between other modules: test run, test results,
      printing for these objects; and the database
@@ -144,6 +148,7 @@
    and call it only form the agent process, not from the child, test suite
    running, process.
 ** TODO consider what test suite timeout value is the best (30 mins currently)
+** TODO backtrace in logs
 ** TODO should the lisp-process-timeout condition inherit from serous-condition, error, or just condition?
 
 * Backlog

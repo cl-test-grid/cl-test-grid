@@ -284,6 +284,7 @@ the PREDICATE."
 ;;; Main program
 
 (defun run-tests (agent lib-world)
+
   (when (tested-p agent lib-world)
     (log:info "~A is already fully tested. Skipping." lib-world)
     (return-from run-tests))
@@ -320,16 +321,22 @@ the PREDICATE."
   )
 
 (defun main (agent)
-  (log:config :daily (log-file))
-  ;; finish the agent initialization
-  (setf (persistent-state agent) (load-state)
-        (blobstore agent) (test-grid-gae-blobstore:make-blob-store
-                               :base-url
-                               ;; during development of GAE blob storage
-                               ;; :base-url may be "http://localhost:8080"
-                               "http://cl-test-grid.appspot.com"))
-  (check-config agent)
-  ;; now to the work
-  (let* ((quicklisp-version (update-testing-quicklisp (preferred-lisp agent)))
-         (lib-world (format nil "quicklisp ~A" quicklisp-version)))
-    (run-tests agent lib-world)))
+  (handler-case
+      (as-singleton-agent
+        (log:config :daily (log-file))
+        ;; finish the agent initialization
+        (setf (persistent-state agent) (load-state)
+              (blobstore agent) (test-grid-gae-blobstore:make-blob-store
+                                 :base-url
+                                 ;; during development of GAE blob storage
+                                 ;; :base-url may be "http://localhost:8080"
+                                 "http://cl-test-grid.appspot.com"))
+        (check-config agent)
+        ;; now to the work
+        (let* ((quicklisp-version (update-testing-quicklisp (preferred-lisp agent)))
+               (lib-world (format nil "quicklisp ~A" quicklisp-version)))
+          (run-tests agent lib-world)))
+    (serious-condition (c)
+      (log:error "Unhandled seriours-condition of type ~A: ~A"
+                 (type-of c) c))))
+
