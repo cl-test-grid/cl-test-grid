@@ -3,6 +3,24 @@
    write the unhandled error stacktrace (with causes)
    into log and exit - never enter debugger as the 
    program should be suitable to run in background with cron.
+** TODO create test-grid-agent:assert-api-version
+   Consider placing a call to this function into run-agent.sample.lisp,
+   right after loading test grid agent. That way user will
+   ensure he is configuring the agent right. On the
+   other hand, if the agent is run by cron, and this call
+   prevents the agent from starting, admin looses
+   all the contact with agent. Only email the author.
+   In other words, we can not provide automatic schema
+   evalution for the agent config. On the 3rd hand,
+   we should not change the public API without a
+   serous reason, and if we can automatically compute
+   all we need from the information already passed
+   to agent config, we should not change the API.
+   If such an automatich coputation is impossible,
+   this means the schema evaluation is impossible.
+   So, we have not so many users and can ask them
+   by email to change their config when agent
+   with new API is published.
 ** TODO check what lisps other than CCL can run lisp-agent
    - SBCL Windows had problems with external format (tried to pass unsupported
      argument :environemnt to SBCL process functions; then tried
@@ -60,6 +78,9 @@
      printing for these objects; and the database
    - utils
 
+** agent fs structure functions: make the workdir root
+   a configurable property of agent, and fs structure
+   functions shoud accept agent as a parameter.
 * 0.5.0 Reports Improve 2
 ** TODO make lisp code the main and the easiest interface to the test results:
    convenient interation, filtering and matching functions
