@@ -21,6 +21,9 @@
    So, we have not so many users and can ask them
    by email to change their config when agent
    with new API is published.
+   API versions should distinguish backward-compatible
+   changes from backward-incompatible, i.e. will
+   have major and minor versions.
 ** TODO check what lisps other than CCL can run lisp-agent
    - SBCL Windows had problems with external format (tried to pass unsupported
      argument :environemnt to SBCL process functions; then tried
@@ -44,7 +47,29 @@
    CLOSED: [2012-07-09 Пн 16:54]
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
-* 0.4.1 Code cleanup after finishing lisp-agent 
+* 0.4.1 lisp-agent identification and assigned responsibilities
+    Will require presistence schema evolution. To postpone this
+    consider implementing the feature before publishing lisp-agent.
+    On the other hand, postponing publishing agent can cause
+    more harm to the project, than duplicate tests.
+*** Give every agent and unique ID. store the ID in the agent persistence.
+*** Admin stores a hashmap for lisps to be tested (or skipped)
+    by particular agent. This allows to distribute work
+    between agents having overlaping sets of lisp implementations.
+    Need a mechanizm for announcing the lisps present on
+    agent (probably just add agent-id to the test run
+    description and consider test results as an announcement).
+    As the compilers versions are changed, probably the 
+    hashmap to store responsibility specifications should
+    contain not full lisp implementation identifier, 
+    but only generic name, like SBCL instead of SBCL 1.0.57.
+    But allow for ECL-bytecode to be distingueshed from
+    ECL-lisp-to-c. I.e. in the end we can get some kind
+    of patterns for lisp implementation identifier. And
+    the identifier will be a structured object, not just
+    a string; provably it will even contains *features*
+    of the lisp implementaion.
+* 0.4.2 Code cleanup after finishing lisp-agent 
 ** finish breaking-up the old monolitic module test-grid:
    test grid systems will consist of modules for:
    - testsuites 
@@ -84,6 +109,8 @@
 * 0.5.0 Reports Improve 2
 ** TODO make lisp code the main and the easiest interface to the test results:
    convenient interation, filtering and matching functions
+** TODO document the data format, data access functions, reporting
+   functions and utilities.
 ** TODO an informer which may be embedded into a library    :report:informer:
    project page, with reports about the test statuses 
    for this single library on various platforms with
@@ -91,6 +118,12 @@
 ** TODO Filters for pivot reports
 ** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
    to improve the page performance and load time.
+* 0.6.0 Add more test suites
+  - drakma test suite - create and ensure drakma works on all the lisps.
+    Drakma test suite is a must. HTTP client today is as vital thing
+    as file system access. It should work on all the lisps.
+    Create a test suite, the simples one - download one file
+    form common-lisp.net. And make sure it works on all the lisps.
 * lisp-agent postponed issues
 ** TODO Agent: retry when test results upload failed.
 ** TODO recompile cl-test-grid sources at every agetn run?
