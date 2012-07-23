@@ -4,8 +4,8 @@
 
 ;;;; Preventing more than one agent to run in parallel.
 ;;;; This is important, becuase the agents will
-;;;; interfere via file system, at least via
-;;;; persistence.lisp.
+;;;; interfere via working directory file system,
+;;;; at least via persistence.lisp.
 ;;;;
 ;;;; Implemented by opening a socket on a constant port.
 ;;;; If it is successful - we are the only running agent,
