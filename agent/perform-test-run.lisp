@@ -71,35 +71,52 @@ as the library test result.")
 
 (defun proc-run-libtest (lisp-exe libname run-descr logfile asdf-output-dir)
   "Runs test-grid::run-libtest in a separate process and returns the result."
-  (let ((start-time (get-internal-real-time))
-        (status (handler-case
-                    (with-response-file (response-file)
-                      (let* ((code `(progn
-                                      (load ,(workdir-file "quicklisp/setup.lisp"))
-                                      (load ,(src-file "proc-run-libtest.lisp"))
-                                      (cl-user::run-libtest-with-response-to-file ,libname
-                                                                                  (quote ,run-descr)
-                                                                                  ,logfile
-                                                                                  ,asdf-output-dir
-                                                                                  ,response-file))))
-                        (log:info "preparing to start separate lisp process with code: ~S" code)
-                        (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
-                  (lisp-exe::lisp-process-timeout ()
-                    (with-open-file (out logfile
-                                         :direction :output
-                                         :if-does-not-exist :create
-                                         :if-exists :append)
-                      (format out "~%The ~A test suite hasn't finished in ~A seconds.~%"
-                              libname +libtest-timeout-seconds+)
-                      (format out "We consider the test suite as hung; the test suite lisp process is killed.~%")
-                      (test-grid::print-log-footer libname :fail out))
-                    :fail))))
-    (log:info "The ~A test suite status: ~S" libname status)
-    (list :libname libname
-          :status status
-          :log-byte-length (test-grid::file-byte-length logfile)
-          :test-duration (/ (- (get-internal-real-time) start-time)
-                            internal-time-units-per-second))))
+  (flet ((finish-test-log-with-failure (format-control &rest format-arguments)
+           ;; Helper function to record failure status to the library
+           ;; test log if the child lisp process running
+           ;; the test suite has terminated abnormally.
+           ;; (In case of successful termination it is
+           ;; responsibility of the child process to print
+           ;; the log footer. We already have a TODO item to move
+           ;; all the log header/footer printing to the
+           ;; parent process.)
+           (with-open-file (out logfile
+                                :direction :output
+                                :if-does-not-exist :create
+                                :if-exists :append)
+             (apply #'format out format-control format-arguments)
+             (test-grid::print-log-footer libname :fail out))))
+    (let ((start-time (get-internal-real-time))
+          (status (handler-case
+                      (with-response-file (response-file)
+                        (let* ((code `(progn
+                                        (load ,(workdir-file "quicklisp/setup.lisp"))
+                                        (load ,(src-file "proc-run-libtest.lisp"))
+                                        (cl-user::run-libtest-with-response-to-file ,libname
+                                                                                    (quote ,run-descr)
+                                                                                    ,logfile
+                                                                                    ,asdf-output-dir
+                                                                                    ,response-file))))
+                          (log:info "preparing to start separate lisp process with code: ~S" code)
+                          (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
+                    (no-response (condition)
+                      (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
+                                condition)
+                      (finish-test-log-with-failure "~%Child lisp process running the ~A test suite finished without returing result test status. Looks like the lisp process has crashed. The error condition signalled: ~A"
+                                                    libname condition)
+                      :fail)
+                    (lisp-exe::lisp-process-timeout ()
+                      (log:info "Child lisp running the ~A test suite has exceeded the timeout of ~A seconds and killed."
+                                libname +libtest-timeout-seconds+)
+                      (finish-test-log-with-failure "~%The ~A test suite hasn't finished in ~A seconds.~%We consider the test suite as hung; the test suite lisp process is killed.~%"
+                                                    libname +libtest-timeout-seconds+)
+                      :fail))))
+      (log:info "The ~A test suite status: ~S" libname status)
+      (list :libname libname
+            :status status
+            :log-byte-length (test-grid::file-byte-length logfile)
+            :test-duration (/ (- (get-internal-real-time) start-time)
+                              internal-time-units-per-second)))))
 
 (defun perform-test-run (lib-world lisp-exe libs output-base-dir user-email)
   (let* ((run-descr (make-run-descr lib-world
