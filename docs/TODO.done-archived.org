@@ -194,7 +194,7 @@
    CLOSED: [2012-04-06 Пт 04:46]
 
 
-* Reports Improve 1
+* 0.3.2 Reports Improve 1
 ** DONE floating report table headers, so that when we scroll, :report:pivot:
    CLOSED: [2012-04-22 Вс 04:14]
    headers are always visible and we always see what lisp/libary/lib-world
@@ -202,3 +202,16 @@
 ** DONE Yellow color for known-fail and unexpected-ok aggregated statuses
    CLOSED: [2012-04-22 Вс 04:14]
 
+* 0.3.3 Current: 
+** DONE automate processing of library results submited by email
+   CLOSED: [2012-06-15 Пт 01:46]
+   
+* 0.3.4 Test result for Quicklisp 2012-03, 2012-04
+** DONE run tests with the newly added libraries on the quicklisp 2012-03-07,
+   CLOSED: [2012-04-22 Вс 04:13]
+   so that we can compare their results with the new quicklisp release 
+   when it is out.
+** DONE collect the test results for the next quicklisp release (2012-04-xx)
+   CLOSED: [2012-04-22 Вс 04:13]
+** DONE analyze the failures of Quicklisp 2012-04.
+   CLOSED: [2012-07-23 Пн 04:39]
