@@ -4,7 +4,7 @@ echo.
 echo ************************************************************************
 echo Updating to the recent cl-test-grid version...
 echo ************************************************************************
-rem call git pull
+call git pull
 
 echo.
 echo ************************************************************************
@@ -13,9 +13,12 @@ echo ************************************************************************
 
 rem Don't forget to prepare run-agent.lisp
 rem based on run-agent.sample.lisp
-rem
+rem 
 rem Use the most reliable lisp implementation you have to run agent. 
-rem Below are examples for various lisps.
+rem We recomment CCL - it is used during development and is known
+rem to run test grid agent without problems on Windows and Linux.
+rem
+rem Below are example parameters for various lisps.
 rem Quicklisp is required to be installed and added to the init
 rem file of the lisp you use. 
 

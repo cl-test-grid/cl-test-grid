@@ -15,7 +15,10 @@ echo "************************************************************************"
 # based on run-agent.sample.lisp
 #
 # Use the most reliable lisp implementation you have to run agent. 
-# Below are examples for various lisps.
+# We recomment CCL - it is used during development and is known
+# to run test grid agent without problems on Windows and Linux.
+#
+# Below are example parameters for various lisps.
 # Quicklisp is required to be installed and added to the init
 # file of the lisp you use. 
 
