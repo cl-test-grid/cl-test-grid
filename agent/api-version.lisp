@@ -4,7 +4,7 @@
 
 (in-package #:test-grid-agent)
 
-(defparameter +api-version+ '(2 . 0)
+(defparameter +api-version+ '(1 . 0)
   "Current version of the test-grid-agent API.")
 
 (defun major (version) (car version))
