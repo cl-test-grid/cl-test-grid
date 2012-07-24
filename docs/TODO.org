@@ -9,13 +9,16 @@
 ** DONE create test-grid-agent:api-compatible-p
    CLOSED: [2012-07-23 Пн 23:45]
 ** TODO check what lisps other than CCL can run lisp-agent
+
    - SBCL Windows had problems with external format (tried to pass unsupported
      argument :environemnt to SBCL process functions; then tried
      to use /bin/env. maybe fixed already?)
    - external-program on some lisps do not support async process invocations 
    - record all known portability proglems somewhere
-     SBCL 1.0.57 linux works
+*** results:
+     SBCL 1.0.57 linux works, but with an issue: https://github.com/7max/log4cl/issues/3
      CCL 1.8 windows/linux works
+     CLISP ?
 ** TODO remove the old test-runs directory and ~/cl-test-grid-settings.lisp
    Do it autmatically, or tell user in the email, or just ignore this issue
 ** TODO update README.org to reflect the current status and priorities (in
@@ -36,8 +39,13 @@
    CLOSED: [2012-07-09 Пн 16:54]
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
-* 0.4.1 Code cleanup after finishing lisp-agent 
-** finish breaking-up the old monolitic module test-grid:
+* 0.4.1 Install more lisps on my VPS
+* 0.4.2 Code cleanup after finishing lisp-agent 
+** TODO review test suites which have hard-coded failures
+   due to hang-ups or other problems and consider
+   removing the hardcoded failures as we now have
+   timeouts for hang-ups.
+** TODO finish breaking-up the old monolitic module test-grid:
    test grid systems will consist of modules for:
    - testsuites 
      a function libtest(libname) runs test suite
@@ -70,10 +78,11 @@
      printing for these objects; and the database
    - utils
 
-** agent fs structure functions: make the workdir root
+** TODO agent fs structure functions: make the workdir root
    a configurable property of agent, and fs structure
    functions shoud accept agent as a parameter.
 * 0.5.0 Reports Improve 2
+** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO make lisp code the main and the easiest interface to the test results:
    convenient interation, filtering and matching functions
 ** TODO document the data format, data access functions, reporting
@@ -146,6 +155,9 @@
 ** TODO temp file naming: ensure unique [probably specify random-state]
 ** TODO persistence.lisp format - sort and newline for every record
 
+* User Requests
+** TODO Juan Jose: collect build status for libraries
+** TODO Luis Oliveira: buld library heads from source control
 * Backlog
 ** TODO install multithreaded CLISP and run tests on it
 ** TODO add CCL revision to the version string (I have impression
@@ -213,7 +225,6 @@
    are better visible.
 ** TODO save all the output to a log, so that the tests may be run in background
 ** TODO Limit library output file size (how?).
-** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO finalize the terminology we use in the code
    to refer our main data: 
    - test status for a particular library
