@@ -49,46 +49,6 @@
 (defun src-file (file-name)
   (merge-pathnames file-name (src-dir)))
 
-;; TODO:
-;; * Level 1 beta
-;; + test runs in work-dir/agent/test-runs
-;; + configuration: configure list of lisps, user email.
-;; + configuration: test-config procedcure (try to run all the lisps configured)
-;; + configuration: contributor email as a configurabel agent propery,
-;;   instead of cl-test-grid-settings.lisp
-;; + delete test run data after the results have been submitted
-;; * Level 1 stable
-;; + full path to files: setup, proc-run-libtests, response-file
-;; + timeout
-;; + check status of the quicklisp update process
-;; - Prevent child lisp process entering debugger.
-;; - Different lisps treat unhangled signals during -eval
-;;   differently: ECL exits with status 1, CCL enters debugger
-;;   and hangs.
-;; - program parameters escaping is not perfect. When we
-;;   run CLISP as an external process, it can not stand
-;;   string literals with " inside.
-;; - enable/disable program parameters escapting depending on the
-;;   external-program behaviour (consider also using input stream
-;;   of the lisp process, or a temporary file)
-;; - prevent test run directory names conflict (currently they
-;;   are named by timestamp with resolution to seconds)
-;; - temp file naming: ensure unique [probably specify random-state]
-;; * Level 2
-;; - do we need node-id (or agent-id)? should it be
-;;   meaningfull string provided by user, or an
-;;   automatically generated one? Note, this value is different
-;;   from the contributor email, because one contributor
-;;   may have more than one machine.
-;; * Backward compatibility
-;; + remove the old test-runs directory
-;; - remove the old ~/cl-test-grid-settings.lisp
-;;   (or rename it to ~/cl-test-grid-settings.lisp.unused?)
-;; * Pretty/convenience
-;; - persistence.lisp format - sort and newline for every record
-;; - cl-test-grid-config.lisp should work via public API,
-;;   instead of working directly inside of the test-grid package.
-
 (defun update-testing-quicklisp (lisp-exe)
   (log:info "Ensuring the quicklisp used to download the libraries being tested is updated to the recent version...")
   (let ((quicklisp-version

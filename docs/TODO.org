@@ -14,6 +14,10 @@
      to use /bin/env. maybe fixed already?)
    - external-program on some lisps do not support async process invocations 
    - record all known portability proglems somewhere
+     SBCL 1.0.57 linux works
+     CCL 1.8 windows/linux works
+** TODO remove the old test-runs directory and ~/cl-test-grid-settings.lisp
+   Do it autmatically, or tell user in the email, or just ignore this issue
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
 ** TODO publish the lisp-agent - merge lisp-agent to master
@@ -126,6 +130,21 @@
 ** TODO consider what test suite timeout value is the best (30 mins currently)
 ** TODO backtrace in logs
 ** TODO should the lisp-process-timeout condition inherit from serous-condition, error, or just condition?
+
+** TODO Prevent child lisp process entering debugger.
+   Note, different lisps treat unhangled signals during -eval
+   differently: ECL exits with status 1, CCL enters debugger
+   and hangs.
+** TODO program parameters escaping is not perfect. When we
+   run CLISP as an external process, it can not stand
+   string literals with " inside.
+** TODO enable/disable program parameters escapting depending on the
+   external-program behaviour (consider also using input stream
+   of the lisp process, or a temporary file)
+** TODO prevent test run directory names conflict (currently they
+   are named by timestamp with resolution to seconds)
+** TODO temp file naming: ensure unique [probably specify random-state]
+** TODO persistence.lisp format - sort and newline for every record
 
 * Backlog
 ** TODO install multithreaded CLISP and run tests on it
