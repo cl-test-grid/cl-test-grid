@@ -9,13 +9,14 @@
 (defun generate-id ()
   "Generates a random ID - a 10 digits sting (digits in radix 36)."
   ;; Implementation note: often random state is initialized
-  ;; from the current time stamp as returned
+  ;; from the current timestamp as returned
   ;; by get-universal-time, i.e. with resolution
-  ;; to seconds. An as RANDOM returns deterministic
+  ;; to seconds. And as RANDOM returns deterministic
   ;; values based on the random state, the IDs returned
   ;; by the current implementation are no more
-  ;; unique than timestamps. But it's enough for
-  ;; our current needs.
+  ;; unique than timestamps, despite they are 10 digits length.
+  ;; But for our current needs this level of uniqueness
+  ;; is enough.
   (when (null *id-random-sate*)
     (setf *id-random-sate* (make-random-state t)))
   (string-upcase

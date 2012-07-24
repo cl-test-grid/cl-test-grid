@@ -5,7 +5,7 @@
 ;;;; This package provides means to run lisp code in separate
 ;;;; process for various Common Lisp implementatons. The API
 ;;;; serves only the minimal needs sufficient for test-grid agent.
-;;;; We do not try to formulate generic API sutable for 3rd party
+;;;; We do not try to formulate generic API suitable for 3rd party
 ;;;; projects (although useful implementation pieces may probably
 ;;;; be found in this package would someone need similar functionality).
 

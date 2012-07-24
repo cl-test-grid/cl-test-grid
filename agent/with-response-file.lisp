@@ -12,7 +12,7 @@
 ;;;
 ;;; The WITH-RESPONSE-FILE macro generates temporary
 ;;; file name, executes BODY, and tries to read
-;;; and object from the temporary file, and
+;;; an object from the temporary file, and
 ;;; returns the object read.
 ;;;
 ;;; In case of problem reading the response (e.g.

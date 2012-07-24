@@ -90,7 +90,7 @@
            ;; be relevant to support, we could probably change
            ;; the implementation to check the 3rd value
            ;; returned by cl:compile. Untill then, we rely
-           ;; on the printed representation of the compile
+           ;; on the printed representation of the compiled
            ;; function.
            (with-response-file (response-file)
              (lisp-exe:run-lisp-process
