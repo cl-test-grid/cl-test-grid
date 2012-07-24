@@ -13,53 +13,8 @@
    (preferred-lisp :type (or null lisp-exe) :accessor preferred-lisp :initform nil)
    (user-email :type (or null string) :accessor user-email :initform nil)
    ;; ------ package private ------
-   ;; todo: make private (i.e. export other symbols form the package
-   ;; but not export private symbol). cl-test-grid-config.lisp
-   ;; should work via the exported symbols.
-   (persistent-state :type list :accessor persistent-state)
+   (persistence :type persistence :accessor persistence)
    (blobstore :accessor blobstore)))
-
-;;; High level presistence functions
-
-(defun persistence-file ()
-  (workdir-file "persistence.lisp"))
-
-(defun load-state ()
-  (if (not (probe-file (persistence-file)))
-      (agent-state:make-state)
-      (test-grid::safe-read-file (persistence-file))))
-
-(defun save-state (state)
-  ;; todo: sort and newline for each record
-  (test-grid::write-to-file state (persistence-file)))
-
-(defun tested-p (agent lib-world &optional lisp libname)
-  (agent-state:done-p (persistent-state agent)
-                      lib-world
-                      lisp
-                      libname))
-
-;; helper function
-(defun ensure-list (arg)
-  (if (listp arg) arg (list arg)))
-
-(defun mark-tested (agent lib-world &optional lisp libname-or-list)
-  (flet ((mark (lib-world lisp &optional libname)
-           (setf (persistent-state agent)
-                 (agent-state:mark-done (persistent-state agent)
-                                        lib-world
-                                        lisp
-                                        libname))))
-    (if libname-or-list
-        ;; some libraries specified, loop over them
-        (let ((libnames (ensure-list libname-or-list)))
-          (dolist (libname libnames)
-            (mark lib-world lisp libname)))
-        ;; libraries are omitted (only lib-world and maybe lisp are specified);
-        ;; the above loop will not call MARK at all in this case, therfore
-        ;; we need this separate IF branch to ensure we saved the information
-        (mark lib-world lisp)))
-  (save-state (persistent-state agent)))
 
 ;;; File system roots:
 (defun work-dir ()
@@ -87,23 +42,12 @@
 (defun workdir-file (relative-path)
   (merge-pathnames relative-path (work-dir)))
 
+(defun persistence-file ()
+  (workdir-file "persistence.lisp"))
+
 ;; File relative to the src-dir
 (defun src-file (file-name)
   (merge-pathnames file-name (src-dir)))
-
-;; sketch of the procedure to implement:
-;; Level 1
-;; - ensure quicklisp is updated to the lates version
-;; - run the tests and upload results
-;; Level 2
-;; - ensure quicklisp is updated to the version we need to test
-;; - ask each lisp for it's name
-;; - retrieve (either from the local presistence or from server)
-;;   the list of libraries which have not beeen tested
-;;   on this quicklisp and on our lisps
-;; - run the tests and upload results (and mark the
-;;   libraries as being tested so that we do not
-;;   repeat the tests)
 
 ;; TODO:
 ;; * Level 1 beta
@@ -116,17 +60,11 @@
 ;; * Level 1 stable
 ;; + full path to files: setup, proc-run-libtests, response-file
 ;; + timeout
-;; - check status of the quicklisp update process
-;; - Prevent lisp entering debugger.
+;; + check status of the quicklisp update process
+;; - Prevent child lisp process entering debugger.
 ;; - Different lisps treat unhangled signals during -eval
 ;;   differently: ECL exits with status 1, CCL enters debugger
 ;;   and hangs.
-;; - When signalling absense of the config file, provide
-;;   a fully commented example config file so that user can easily
-;;   fix it.
-;; - In the config file, should user work in the test-grid-agent
-;;   package, or in cl-user package and use a public API of
-;;   test-grid-agent?
 ;; - program parameters escaping is not perfect. When we
 ;;   run CLISP as an external process, it can not stand
 ;;   string literals with " inside.
@@ -142,12 +80,8 @@
 ;;   automatically generated one? Note, this value is different
 ;;   from the contributor email, because one contributor
 ;;   may have more than one machine.
-;; * Very stable
-;; - ECL needs C compiler, how to ensure it is available (can we specify
-;;   it explicitly when configurin lisp-exe for ECL or assume
-;;   it is available in path)?
 ;; * Backward compatibility
-;; - remove the old test-runs directory
+;; + remove the old test-runs directory
 ;; - remove the old ~/cl-test-grid-settings.lisp
 ;;   (or rename it to ~/cl-test-grid-settings.lisp.unused?)
 ;; * Pretty/convenience
@@ -285,12 +219,8 @@ the PREDICATE."
 
 (defun run-tests (agent lib-world)
 
-  (when (tested-p agent lib-world)
-    (log:info "~A is already fully tested. Skipping." lib-world)
-    (return-from run-tests))
-
   (divide-into (lisps agent) (lambda (lisp)
-                               (tested-p agent
+                               (tested-p (persistence agent)
                                          lib-world
                                          (implementation-identifier lisp)))
       (done-lisps pending-lisps)
@@ -308,31 +238,36 @@ the PREDICATE."
                                                  (test-output-base-dir)
                                                  (user-email agent))))
               (submit-test-run-results (blobstore agent) results-dir)
-              (mark-tested agent lib-world (implementation-identifier lisp))
-              (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore))
-            (mark-tested agent lib-world (implementation-identifier lisp)))
+              (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
+              (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
         (serious-condition (e)
           (log:error "Error during tests on ~A: ~A. Continuing for remaining lisps."
-                     (implementation-identifier lisp) e)))))
+                     (implementation-identifier lisp) e))))))
 
-  ;; do not mark the whole lib-world as :done, because I am experimenting with different lisps
-  ;; and want them to run tests next time when agent is started
-  ;;(mark-tested agent lib-world)
-  )
+(defun ensure-has-id (agent)
+  (let* ((p (persistence agent))
+         (id (get-agent-id p)))
+    (if id
+        (log:info "agent-id: ~A" id)
+        (progn
+          (set-agent-id p (generate-id))
+          (log:info "Agent is asigned newly generated agent-id: ~A"
+                    (get-agent-id p))))))
 
 (defun main (agent)
   (handler-case
       (as-singleton-agent
         (log:config :daily (log-file))
         ;; finish the agent initialization
-        (setf (persistent-state agent) (load-state)
+        (setf (persistence agent) (init-persistence (persistence-file))
               (blobstore agent) (test-grid-gae-blobstore:make-blob-store
                                  :base-url
                                  ;; during development of GAE blob storage
                                  ;; :base-url may be "http://localhost:8080"
                                  "http://cl-test-grid.appspot.com"))
         (check-config agent)
-        ;; now to the work
+        (ensure-has-id agent)
+        ;; now do the work
         (let* ((quicklisp-version (update-testing-quicklisp (preferred-lisp agent)))
                (lib-world (format nil "quicklisp ~A" quicklisp-version)))
           (run-tests agent lib-world)))

@@ -17,6 +17,8 @@
 ** TODO update README.org to reflect the current status and priorities (in
    other words, reflect the changes during the last month)
 ** TODO publish the lisp-agent - merge lisp-agent to master
+** DONE Give every agent and unique ID. store the ID in the agent persistence.
+   CLOSED: [2012-07-24 Вт 03:20]
 ** DONE error handling in the main process - during a test run and in other situations
    CLOSED: [2012-07-23 Пн 04:21]
    For example, after testing some library, the output file with library
@@ -30,31 +32,7 @@
    CLOSED: [2012-07-09 Пн 16:54]
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
-* 0.4.1 lisp-agent identification and assigned responsibilities
-    Will require presistence schema evolution. To postpone this
-    consider implementing the feature before publishing lisp-agent.
-    On the other hand, postponing publishing agent can cause
-    more harm to the project, than additional efforts to 
-    implements automatic persistence evolution step.
-*** Give every agent and unique ID. store the ID in the agent persistence.
-*** Admin stores a hashmap for lisps to be tested (or skipped)
-    by particular agent in the aget sources (note, the agent
-    updates the source every time from git) This allows to distribute work
-    between agents having overlaping sets of lisp implementations.
-    Need a mechanizm for announcing the lisps present on
-    agent (probably just add agent-id to the test run
-    description and consider test results as an announcement).
-    As the compilers versions are changed, probably the 
-    hashmap to store responsibility specifications should
-    contain not full lisp implementation identifier, 
-    but only generic name, like SBCL instead of SBCL 1.0.57.
-    But allow for ECL-bytecode to be distingueshed from
-    ECL-lisp-to-c. I.e. in the end we can get some kind
-    of patterns for lisp implementation identifier. And
-    the identifier will be a structured object, not just
-    a string; provably it will even contains *features*
-    of the lisp implementaion.
-* 0.4.2 Code cleanup after finishing lisp-agent 
+* 0.4.1 Code cleanup after finishing lisp-agent 
 ** finish breaking-up the old monolitic module test-grid:
    test grid systems will consist of modules for:
    - testsuites 
@@ -110,6 +88,23 @@
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
 * lisp-agent postponed issues
+** TODO Admin stores a hashmap for lisps to be tested (or skipped)
+    by particular agent in the aget sources (note, the agent
+    updates the source every time from git) This allows to distribute work
+    between agents having overlaping sets of lisp implementations.
+    Need a mechanizm for announcing the lisps present on
+    agent (probably just add agent-id to the test run
+    description and consider test results as an announcement).
+    As the compilers versions are changed, probably the 
+    hashmap to store responsibility specifications should
+    contain not full lisp implementation identifier, 
+    but only generic name, like SBCL instead of SBCL 1.0.57.
+    But allow for ECL-bytecode to be distingueshed from
+    ECL-lisp-to-c. I.e. in the end we can get some kind
+    of patterns for lisp implementation identifier. And
+    the identifier will be a structured object, not just
+    a string; provably it will even contains *features*
+    of the lisp implementaion.
 ** TODO Agent: retry when test results upload failed.
 ** TODO recompile cl-test-grid sources at every agetn run?
    As currently ASDf doesn't rebuild depending libraries
