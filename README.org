@@ -81,7 +81,7 @@
   have appropriate test suites (fully automated, no user interaction is needed)
   and are added to the cl-test-grid.
 
-  File [[https://github.com/cl-test-grid/cl-test-grid/blob/master/run.sh.sample][run.sh.sample]] shows what parameters to use for particular
+  File [[https://github.com/cl-test-grid/cl-test-grid/blob/master/run-agent.sh.sample][run-agent.sh.sample]] shows what parameters to use for particular
   CL implementations so that it bootstraps quicklisp in a local
   directory and updates it to the recent version (if necessary),
   and then preforms test-grid::run-libtests using this local
@@ -98,11 +98,11 @@
 
    1. git clone git://github.com/cl-test-grid/cl-test-grid.git
    2. cd cl-test-grid
-   3. cp run.sh.sample run.sh; chmod +x run.sh
-   4. Edit the run.sh (edit one line - the path to your most reliable CL implementation).
+   3. cp run-agent.sh.sample run-agent.sh; chmod +x run-agent.sh
+   4. Edit the run-agent.sh (edit one line - the path to your most reliable CL implementation).
    5. cp run-agent.sample.lisp run-agent.lisp
    6. Edit the run-agent.lisp (specfify all the lisp implementations you have, and some other settings)
-   7. ./run.sh
+   7. ./run-agent.sh
 
    Next time all you need is to just start ./run.sh. It will update the 
    cl-test-grid from git, update quicklisp to the latest distro 
