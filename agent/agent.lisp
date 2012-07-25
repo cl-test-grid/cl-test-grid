@@ -4,17 +4,12 @@
 
 (in-package #:test-grid-agent)
 
-(defclass agent ()
-   ;; The list of lisp-exe's to run tests on.
-  ((lisps :type list :accessor lisps :initform nil)
-   ;; The lisp-exe considered as more reliable on this OS,
-   ;; and supporting more libraries. Used run various small
-   ;; lisp programs like quicklisp update.
-   (preferred-lisp :type (or null lisp-exe) :accessor preferred-lisp :initform nil)
-   (user-email :type (or null string) :accessor user-email :initform nil)
-   ;; ------ package private ------
-   (persistence :type persistence :accessor persistence)
+(defclass agent-impl (agent)
+  ((persistence :type persistence :accessor persistence)
    (blobstore :accessor blobstore)))
+
+(defmethod make-agent ()
+  (make-instance 'agent-impl))
 
 ;;; File system roots:
 (defun work-dir ()
@@ -214,7 +209,8 @@ the PREDICATE."
           (log:info "Agent is asigned newly generated agent-id: ~A"
                     (get-agent-id p))))))
 
-(defun main (agent)
+
+(defmethod main (agent)
   (handler-case
       (as-singleton-agent
         (log:config :daily (log-file) :immediate-flush)

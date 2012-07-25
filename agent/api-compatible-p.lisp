@@ -4,18 +4,11 @@
 
 (in-package #:test-grid-agent)
 
-(defparameter +api-version+ '(1 . 0)
-  "Current version of the test-grid-agent API.")
-
 (defun major (version) (car version))
 (defun minor (version) (cdr version))
 
-(defun api-compatible-p (version-required
-                         &optional (version-provided +api-version+))
-  "Returns true the API version VERSION-PROVIDED
-is compatible with the VERSION-REQIRED. The version are conses
-in the form (<major> . <minor>), where major and minor are
-non-negative integers, for example '(1 . 0)."
+(defmethod api-compatible-p (version-required
+                             &optional (version-provided +api-version+))
   (and (= (major version-provided) (major version-required))
        (>= (minor version-provided) (minor version-required))))
 

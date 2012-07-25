@@ -27,7 +27,7 @@ run-agent.sample.lisp for a fresh example)."
            test-grid-agent:+api-version+ api-version-required)))
 
 ;; create agent instance
-(defparameter *agent* (make-instance 'test-grid-agent:agent))
+(defparameter *agent* (test-grid-agent:make-agent))
 
 ;;; Now inform the *AGENT* about the lisp implementations
 ;;; we have on this machine.

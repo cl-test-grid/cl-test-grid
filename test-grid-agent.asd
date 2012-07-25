@@ -1,7 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8;  -*-
-;;;
 ;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
-;;;
 ;;; See LICENSE for details.
 
 ;; make the blobstore implementation available to ASDF
@@ -11,7 +9,7 @@
               :test #'equal))
 
 (asdf:defsystem #:test-grid-agent
-  :version "0.3.1"
+  :version "1.0.1"
   :serial t
   :depends-on (#:test-grid
                #:test-grid-blobstore
@@ -38,4 +36,4 @@
        (:file "as-singleton-agent")
        (:file "generate-id")
        (:file "agent")
-       (:file "api-version")))))
+       (:file "api-compatible-p")))))
