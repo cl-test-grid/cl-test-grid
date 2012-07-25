@@ -1,5 +1,5 @@
 * Collaborative testing of Common Lisp libraries.
-[[http://common-lisp.net/project/cl-test-grid/][Test Results]] | [[https://bugs.launchpad.net/common-lisp][Bugs Found]] ([[docs/issues-found.org][Old Bug Registry]]).
+[[http://common-lisp.net/project/cl-test-grid/][Test Results]] | [[https://bugs.launchpad.net/common-lisp][Bugs Found]].
 
 * The Goal
   Improve stability of the Common Lisp ecosystem
@@ -68,8 +68,8 @@
 
 * Status
   We have a lisp program called test-grid-agent. User configures
-  it with a list if CL implementations installed on
-  his machine, and test-grid-agent runs tests on these
+  it with a list of CL implementations installed on
+  his machine, and the test-grid-agent runs tests on these
   implenentations, starting each test suite in a separate lisp 
   process.
 
@@ -86,7 +86,7 @@
   user might have on his computer).
 
   The test results are uploaded to the central server and
-  published as lisp data file and as HTML reports here:
+  published as a lisp data file and as HTML reports here:
   [[http://common-lisp.net/project/cl-test-grid/]]. Clicking library test 
   status (OK/FAIL) in any report refers to the library test logs 
   with the failure details.
