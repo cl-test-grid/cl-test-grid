@@ -1,27 +1,172 @@
-* Current: Test result for Quicklisp 2012-03, 2012-04
-** DONE run tests with the newly added libraries on the quicklisp 2012-03-07,
-   CLOSED: [2012-04-22 Вс 04:13]
-   so that we can compare their results with the new quicklisp release 
-   when it is out.
-** DONE collect the test results for the next quicklisp release (2012-04-xx)
-   CLOSED: [2012-04-22 Вс 04:13]
-** TODO analyze the failures of Quicklisp 2012-04.
-* Current: 
+* 0.4.0 Test Running Robustness - lisp-agent
+** DONE top level error handler in test-grid-agent:main
+   CLOSED: [2012-07-23 Пн 20:17]
+   write the unhandled error stacktrace (with causes)
+   into log and exit - never enter debugger as the 
+   program should be suitable to run in background with cron.
+** DONE prevent starting of two agents (try to open a socket on a constant port)
+   CLOSED: [2012-07-23 Пн 22:04]
+** DONE create test-grid-agent:api-compatible-p
+   CLOSED: [2012-07-23 Пн 23:45]
+** DONE check what lisps other than CCL can run lisp-agent
+   CLOSED: [2012-07-25 Ср 19:03]
+
+** DONE update README.org to reflect the current status and priorities (in
+   CLOSED: [2012-07-25 Ср 19:06]
+   other words, reflect the changes during the last month)
+** TODO prepare the announcement for the mailing-list
+** TODO publish the lisp-agent - merge lisp-agent to master
+** TODO remove the old test-runs directory and ~/cl-test-grid-settings.lisp
+   Do it autmatically, or send email to all the contributors, or just ignore this issue
+** DONE Give every agent and unique ID. store the ID in the agent persistence.
+   CLOSED: [2012-07-24 Вт 03:20]
+** DONE error handling in the main process - during a test run and in other situations
+   CLOSED: [2012-07-23 Пн 04:21]
+   For example, after testing some library, the output file with library
+   status is not found. Record :FAIL and proceed to further libraries.
+   How to handle error during test results submission?
+** DONE Agent: when test results upload failed, do not mark this lisp as tested in persistence.
+   CLOSED: [2012-07-10 Вт 15:47]
+** DONE run each test suite in a separate process
+   CLOSED: [2012-06-15 Пт 01:44]
+** DONE enforce the libraries source code recompilation on every test run
+   CLOSED: [2012-07-09 Пн 16:54]
+   by configuring asdf:output-translations to a temporary 
+   subdirectory in the test-run directory
+* 0.4.1 Code cleanup after finishing lisp-agent 
+** TODO review test suites which have hard-coded failures
+   due to hang-ups or other problems and consider
+   removing the hardcoded failures as we now have
+   timeouts for hang-ups.
+** TODO finish breaking-up the old monolitic module test-grid:
+   test grid systems will consist of modules for:
+   - testsuites 
+     a function libtest(libname) runs test suite
+     of the specified library, downloading the lib from quicklisp
+     if necessary, and returns test result in a unified format.
+     I.e. the module knows how to invoke the library test suite
+     and has adapters for test results of various test frameworks
+     to the testgrid test result format.
+   - agent
+     the program with can run test in child lisp processes,
+     knows which lisps the contributor has on the machine,
+     decides when to run tests, and can upload the test
+     results to the central server.
+     [the changes required are small - agent will receive
+     some code from the current test-grid.lisp,
+     for example test suite log header/footer printing.
+     Maybe the test suite log will include whole lisp
+     process output, from the lisp startup (now we 
+     start logging bit later, right before invoking
+     the test suite)]
+   - admin
+     code to receive test results and add to db
+     [remains unchanged]
+   - reporting
+     [reamains unchanged]
+   - blobstore
+     [remains unchanges]
+   - data 
+     objects moving between other modules: test run, test results,
+     printing for these objects; and the database
+   - utils
+
+** TODO agent fs structure functions: make the workdir root
+   a configurable property of agent, and fs structure
+   functions shoud accept agent as a parameter.
+* 0.4.2 Install more lisps on my VPS
+* 0.5.0 Reports Improve 2
+** TODO Prevent HTML injection via test-run-info                     :report:
+** TODO make lisp code the main and the easiest interface to the test results:
+   convenient interation, filtering and matching functions
+** TODO document the data format, data access functions, reporting
+   functions and utilities.
 ** TODO an informer which may be embedded into a library    :report:informer:
    project page, with reports about the test statuses 
    for this single library on various platforms with
    various quicklisp versions
-** TODO automate processing of library results submited by email
-** TODO update README.org to reflect the current status and priorities (in
-   other words, reflect the changes during the last month)
-* Test Running Robustness
-** TODO run each test suite in a separate process
-* Reports Improve 2
 ** TODO Filters for pivot reports
 ** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
    to improve the page performance and load time.
+* 0.6.0 Add more test suites
+  - drakma test suite - create and ensure drakma works on all the lisps.
+    Drakma test suite is a must. HTTP client today is as vital thing
+    as file system access. It should work on all the lisps.
+    Create a test suite, the simples one - download one file
+    form common-lisp.net. And make sure it works on all the lisps.
+* lisp-agent postponed issues
+** TODO a parameter to the main function: limit the maximum time the agent works
+** TODO ensure the tesg-grid code is recompiled when necessary
+   The libraries being tested are recompiled at every test run.
+   It would be good to ensure test grid code is also correctly
+   recompiled.
+   - agent (the main process)
+   - test frameworks APIs (loaded into the child processes)
+   Related thread on asdf-devel:
+   http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
+** TODO Admin stores a hashmap for lisps to be tested (or skipped)
+    by particular agent in the aget sources (note, the agent
+    updates the source every time from git) This allows to distribute work
+    between agents having overlaping sets of lisp implementations.
+    Need a mechanizm for announcing the lisps present on
+    agent (probably just add agent-id to the test run
+    description and consider test results as an announcement).
+    As the compilers versions are changed, probably the 
+    hashmap to store responsibility specifications should
+    contain not full lisp implementation identifier, 
+    but only generic name, like SBCL instead of SBCL 1.0.57.
+    But allow for ECL-bytecode to be distingueshed from
+    ECL-lisp-to-c. I.e. in the end we can get some kind
+    of patterns for lisp implementation identifier. And
+    the identifier will be a structured object, not just
+    a string; provably it will even contains *features*
+    of the lisp implementaion.
+** TODO Agent: retry when test results upload failed.
+** TODO recompile cl-test-grid sources at every agetn run?
+   As currently ASDf doesn't rebuild depending libraries
+   when the libraries they depend on changed (add 
+   links to this TODO item when Internet connection
+   will be up)
+** TODO kill process tree on unix in case the test suite exceeded timeout
+   Currenlty we only kill the lisp process, but not it's children.
+   Some test suites may start other programs, and it makes sense
+   to kill the testsuite child process too. Implementation hint:
+   the most portable API on unix to find out child processes,
+   as it seems to be, is the ps program. We will need to
+   implement a shell script killtree.sh <pid> which uses
+   ps to find all descendents and kill the. Portable format
+   of ps arguments should be used.
+** TODO move test-grid::print-log-footer to the test-grid-agent package,
+   and call it only form the agent process, not from the child, test suite
+   running, process.
+** TODO consider what test suite timeout value is the best (30 mins currently)
+** TODO backtrace in logs
+** TODO should the lisp-process-timeout condition inherit from serous-condition, error, or just condition?
+
+** TODO Prevent child lisp process entering debugger.
+   Note, different lisps treat unhangled signals during -eval
+   differently: ECL exits with status 1, CCL enters debugger
+   and hangs.
+** TODO program parameters escaping is not perfect. When we
+   run CLISP as an external process, it can not stand
+   string literals with " inside.
+** TODO enable/disable program parameters escapting depending on the
+   external-program behaviour (consider also using input stream
+   of the lisp process, or a temporary file)
+** TODO prevent test run directory names conflict (currently they
+   are named by timestamp with resolution to seconds)
+** TODO temp file naming: ensure unique [probably specify random-state]
+** TODO persistence.lisp format - sort and newline for every record
+
+* User Requests
+** TODO Vladimir Sedach: test multithreaded CLISP
+** TODO Greg Pfeil: don't install quicklisp in ASDF source registry,
+   allow to customize it's location. It's easy to fix now - just
+   add a working directory property to agent and use it.
+   https://github.com/cl-test-grid/cl-test-grid/issues/5
+** TODO Juan Jose: collect build status for libraries
+** TODO Luis Oliveira: buld library heads from source control
 * Backlog
-** TODO install multithreaded CLISP and run tests on it
 ** TODO add CCL revision to the version string (I have impression
    that CCL versions checked out at different time from the official release SVN
    svn co http://svn.clozure.com/publicsvn/openmcl/release/1.8/darwinx86/ccl
@@ -87,7 +232,6 @@
    are better visible.
 ** TODO save all the output to a log, so that the tests may be run in background
 ** TODO Limit library output file size (how?).
-** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO finalize the terminology we use in the code
    to refer our main data: 
    - test status for a particular library
@@ -104,7 +248,6 @@
 ** TODO when GAE quotas (for requests, emails, anything else)
    are exceeded, recognize it and display a meaningfull
    message to the user.
-** TODO watchdog for hanging tests
 ** TODO For all the libraries which need manual configuration
    (cffi, usocket) provide guiding message to the
    user how to configure them, before running
@@ -113,8 +256,4 @@
    see their README. Distinguish the case 
    when the manual configuration hasn't been
    performed and return :no-resource status.
-** TODO should we save library log to a file only if the tests failed, 
-   or always? (now we save log in any case)
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
-** TODO classify all the errors and register as tickets
-   this task is likely to be abandoned

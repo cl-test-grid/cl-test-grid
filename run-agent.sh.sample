@@ -1,0 +1,59 @@
+#!/bin/sh
+
+echo
+echo "************************************************************************"
+echo "Updating to the recent cl-test-grid version..."
+echo "************************************************************************"
+git pull
+
+echo
+echo "************************************************************************"
+echo "Running the test grid agent..."
+echo "************************************************************************"
+
+# Don't forget to prepare run-agent.lisp
+# based on run-agent.sample.lisp
+#
+# Test grid agent depends on several libraries and 
+# not all CL implementations can run it.
+#
+# Quicklisp is required to be installed and added to the init
+# file of the lisp you use. 
+#
+# As of 2012-07-25 and quicklisp 2012-07-03
+#
+#   - CCL 1.8 windows and linux - works (recommended,
+#          because it is used for development)
+#   - SBCL 1.0.57 linux - works
+#   - SBCL windows - No (problem with external-program)
+#   - CMUCL - No.
+#          (It was cmu-20crelease-20c20c_unicode-linux-x86,
+#          the first issue encountered is with external-program:
+#          https://github.com/sellout/external-program/issues/12)
+#   - ABCL - I don't know, but at least it would take some effort.
+#          I stopped when it ABCL required JNA for CFFI (JNA is a Java 
+#          library to work with FFI). I need to learn
+#          how to make JNA available for ABCL.
+#   - ECL - No. When it starts child CCL process to updateq quicklisp, the CCL crashes.
+#          (it was ecl-12.7.1-dee2506a-win-x86).
+#   - CLISP 2.49 Windows - No.
+#          (Something seems to be wrong in external-program
+#           with passing program parameters).
+#   - other Lisps - not tested.
+#
+
+# CCL:
+#/home/anton/ccl/ccl-1.7/lx86cl --load run-agent.lisp --eval "(quit)"
+# SBCL:
+#export SBCL_HOME=/home/anton/sbcl/sbcl-1.0.54-x86-linux/lib/sbcl
+#/home/anton/sbcl/sbcl-1.0.54-x86-linux/bin/sbcl --load run-agent.lisp --eval "(quit)"
+# CLISP:
+#clisp -x (load "run-agent.lisp")'
+# ABCL:
+#/path/to/abcl/abcl.sh --batch --load run-agent.lisp
+# CMUCL:
+#/opt/cmucl-20c/bin/lisp -load run-agent.lisp -eval "(quit)"
+# ECL
+#ecl -load run-agent.lisp -eval "(quit)"
+# Allegro:
+#alisp -qq -L quicklisp/setup.lisp -L run-agent.lisp

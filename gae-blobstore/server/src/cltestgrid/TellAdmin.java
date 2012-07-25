@@ -28,7 +28,7 @@ import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
-public class SubmitRunInfo extends HttpServlet {
+public class TellAdmin extends HttpServlet {
 
   private static final Logger logger = Logger.getLogger(Upload.class.getName());
 
@@ -46,50 +46,46 @@ public class SubmitRunInfo extends HttpServlet {
     resp.setContentType("text/plain; charset=utf-8");
 
     logger.log(Level.INFO, 
-        "Handling the run-info submit from " + req.getRemoteAddr() 
+        "Handling the tell-admin submit from " + req.getRemoteAddr() 
         + "; X-AppEngine-Country: " + req.getHeader("X-AppEngine-Country"));
     
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
 
-    String runInfo = req.getParameter("run-info");
+    String subject = req.getParameter("subject");
+    String body = req.getParameter("body");
 
     try {
-      if (null == runInfo || runInfo.length() == 0) {
-        throw new Exception("The \"run-info\" parameter is missed");
+      if (null == subject || subject.length() == 0) {
+        throw new Exception("The \"subject\" parameter is missed");
+      }
+      if (null == body || body.length() == 0) {
+        throw new Exception("The \"body\" parameter is missed");
       }
 
       if (logger.isLoggable(Level.FINE)) {
-        logger.log(Level.FINE, "run-info: " + runInfo);
+        logger.log(Level.FINE, "subject: " + subject);
+        logger.log(Level.FINE, "body: " + body);
       }
 
       Message msg = new MimeMessage(session);
       msg.setFrom(new InternetAddress("cl.test.grid@gmail.com", "cl-test-grid GAE server"));
       msg.addRecipient(Message.RecipientType.TO,
                        new InternetAddress("avodonosov@yandex.ru", "Anton Vodonosov"));
-      msg.addRecipient(Message.RecipientType.TO,
-                       new InternetAddress("cl-test-grid@yandex.ru", "cl-test-grid results inbox"));
-      msg.setSubject("[cl-test-grid] [test run submitted]");
+      msg.setSubject("[cl-test-grid] " + subject);
 
       Multipart multipart = new MimeMultipart();
 
       // Set the email message text.
       MimeBodyPart messagePart = new MimeBodyPart();
-      String runInfoBeginning = runInfo.substring(0, Math.min(runInfo.length(), 300));
-      messagePart.setText("See attach. The first 300 characters:\r\n\r\n" + runInfoBeginning);
+      messagePart.setText(body);
       multipart.addBodyPart(messagePart);
-
-      // Attach the test run info.
-      MimeBodyPart attachmentPart = new MimeBodyPart();
-      attachmentPart.setFileName("test-run-info.lisp");
-      attachmentPart.setText(runInfo, "UTF-8");
-      multipart.addBodyPart(attachmentPart);
 
       msg.setContent(multipart);
     
       Transport.send(msg);
     
-      logger.log(Level.INFO, "The run-info successfully received and resend further by email.");
+      logger.log(Level.INFO, "Send message to admin successfuly.");
       resp.getWriter().println(":ok");
 
     } catch (Exception e) {

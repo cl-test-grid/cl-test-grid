@@ -13,8 +13,8 @@ references to the file in the blobstore).
 Example:
  (submit-files my-blobstore '((:flexi-streams . #P\"flexi-streams.log\")
                               (:cl-ppcre . #P\"cl-ppcre.log\")))
-  => ((:flexi-streams \"nFeUku39YtilF6s8zkXTlg\")
-      (:cl-ppcre \"nG9B8tHEquLEPhsL3t8wcA\"))
+  => ((:flexi-streams . \"nFeUku39YtilF6s8zkXTlg\")
+      (:cl-ppcre . \"nG9B8tHEquLEPhsL3t8wcA\"))
 
 The ID in the ID-PATHNAME-ALIST may be either a string or a symbol,
 and must be unique when compared case insensitively.

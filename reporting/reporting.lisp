@@ -113,7 +113,7 @@
 ;; on blobstore here.
 (defun blob-uri (blob-key)
   (format nil "~A/blob?key=~A"
-          test-grid::*gae-blobstore-base-url* blob-key))
+          "http://cl-test-grid.appspot.com" blob-key))
 
 (defun lib-log-local-uri (joined-lib-result)
   (format nil "file://~A~A"

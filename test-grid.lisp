@@ -78,7 +78,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :let-plus              :data-sift           :cl-num-utils        :ieee-floats
     :cl-project            :trivial-http        :cl-store            :hu.dwim.stefil
     :kmrcl                 :cxml-stp            :hu.dwim.walker      :hu.dwim.defclass-star
-    :bknr.datastore        :yaclml              :com.google.base    :external-program)
+    :bknr.datastore        :yaclml              :com.google.base     :external-program)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -563,7 +563,7 @@ just passed to the QUICKLISP:QUICKLOAD."
       :fail)))
 
 (defun is-windows ()
-  (intersection '(:windows :win32 :win) *features*))
+  (member :asdf-windows *features* :test #'eq))
 
 ;; See coverage.org for more info why IO lib is not added.
 ;;
@@ -770,6 +770,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (asdf:clear-system :cl-store)
   (asdf:clear-system :cl-store-tests)
 
+  (ql:quickload :cl-store)
   (ql:quickload :cl-store-tests)
 
   (run-rt-test-suite))
@@ -880,72 +881,8 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;                               (run-lift-test-suite :store-suite)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Settings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defparameter +settings-file-name+ "cl-test-grid-settings.lisp")
-
-(defun get-settings-file()
-  (merge-pathnames (user-homedir-pathname) +settings-file-name+))
-
-(defun prompt-for-email ()
-  (format *query-io* "~&~%")
-  (format *query-io* "Please enter your email so that we know who is submitting the test results.~%")
-  (format *query-io* "Also the email will be published in the online reports, and the library~%")
-  (format *query-io* "authors can later contact you in case of questions about this test run, ~%")
-  (format *query-io* "your environment, etc.~%~%")
-
-  (format *query-io* "If you are strongly opposed to publishing you email, please type e.g. some nickname or just \"none\".~%~%")
-
-  (format *query-io* "The value you enter will be saved and reused in the future. You can change~%")
-  (format *query-io* "it in the file ~A in your home directory.~%~%" +settings-file-name+)
-
-  (format *query-io* "email: ")
-
-  (force-output *query-io*)
-  (string-trim " " (read-line *query-io*)))
-
-(defun get-user-email ()
-  (let ((user-email nil))
-    (handler-case
-        (progn
-          (setf user-email (getf (safe-read-file (get-settings-file))
-                                 :user-email))
-          (if (zerop (length user-email))
-              (warn "Empty email is specified in the settings file ~a~%" (get-settings-file))))
-      (file-error ()
-        (progn
-          (setf user-email (prompt-for-email))
-          (write-to-file (list :user-email user-email)
-                         (get-settings-file)))))
-    user-email))
-
+;; run-libtest
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test Runs
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun run-descr (run)
-  "The description part of the test run."
-  (getf run :descr))
-
-(defun run-results (run)
-  "The list of test suite statuses for every library in the specified test run."
-  (getf run :results))
-
-(defun (setf run-results) (new-run-results test-run)
-  (setf (getf test-run :results) new-run-results))
-
-(defun make-run (description lib-results)
-  (list :descr description :results lib-results))
-
-(defun fmt-time (universal-time &optional destination)
-  "The preferred time format used in the cl-test-grid project."
-  (multiple-value-bind (sec min hour date month year)
-      (decode-universal-time universal-time 0)
-    (funcall #'format
-             destination
-             "~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D"
-             year month date hour min sec)))
 
 (defun pretty-fmt-time (universal-time &optional destination)
   "The human-readable time format, used in reports."
@@ -955,39 +892,6 @@ just passed to the QUICKLISP:QUICKLOAD."
              destination
              "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
              year month date hour min sec)))
-
-(defun make-run-descr ()
-  "Generate a description for a test run which might be
-performed in the current lisp system."
-  (list :lisp (asdf::implementation-identifier)
-        :lib-world (format nil "quicklisp ~A"
-                           (ql-dist:version (ql-dist:dist "quicklisp")))
-        :time (get-universal-time)
-        :run-duration :unknown
-        :contact (list :email (get-user-email))))
-
-(defun name-run-directory (run-descr)
-  "Generate name for the directory where test run
-data (libraries test suites output and the run results) will be saved."
-  (format nil
-          "~A-~A"
-          (fmt-time (getf run-descr :time))
-          (getf run-descr :lisp)))
-
-(defun test-output-base-dir ()
-  (merge-pathnames "test-runs/"
-                   test-grid-config:*src-base-dir*))
-
-(defun run-directory (run-descr)
-  (merge-pathnames (make-pathname
-                    :directory (list :relative (name-run-directory run-descr))
-                    :name      nil
-                    :type      nil)
-                   (test-output-base-dir)))
-
-(defun lib-log-file (test-run-directory lib-name)
-  (merge-pathnames (string-downcase lib-name)
-                   test-run-directory))
 
 (defun print-log-header (libname run-descr stream)
   (let ((*print-case* :downcase) (*print-pretty* nil))
@@ -1011,10 +915,8 @@ data (libraries test suites output and the run results) will be saved."
             libname (print-test-status nil status))
     (format stream "============================================================~%")))
 
-(defun run-libtest (lib run-descr log-directory)
-  (let (status
-        (log-file (lib-log-file log-directory lib))
-        (start-time (get-internal-real-time)))
+(defun run-libtest (lib run-descr log-file)
+  (let (status)
     (with-open-file (log-stream log-file
                                 :direction :output
                                 :if-exists :overwrite
@@ -1059,104 +961,7 @@ data (libraries test suites output and the run results) will be saved."
                   :fail)))
 
         (print-log-footer lib status *standard-output*)))
-
-    (list :libname lib
-          :status status
-          :log-byte-length (file-byte-length log-file)
-          :test-duration (/ (- (get-internal-real-time) start-time)
-                            internal-time-units-per-second))))
-
-(defun run-info-file (test-run-directory)
-  (merge-pathnames "test-run-info.lisp"
-                   test-run-directory))
-
-(defun save-run-info (test-run directory)
-  (let ((run-file (run-info-file directory)))
-    (with-open-file (out run-file
-                         :direction :output
-                         :element-type 'character ;'(unsigned-byte 8) + flexi-stream
-                         :if-exists :supersede
-                         :if-does-not-exist :create)
-      (print-test-run out test-run))))
-
-(defun gae-blobstore-dir ()
-  (merge-pathnames "gae-blobstore/lisp-client/" test-grid-config:*src-base-dir*))
-
-(defparameter *gae-blobstore-base-url* "http://cl-test-grid.appspot.com")
-
-(defun get-blobstore ()
-  (pushnew (truename (gae-blobstore-dir)) asdf:*central-registry* :test #'equal)
-  (ql:quickload '#:test-grid-gae-blobstore)
-  (funcall (intern (string '#:make-blob-store) '#:test-grid-gae-blobstore)
-           :base-url *gae-blobstore-base-url*))
-
-(defun submit-logs (blobstore test-run-dir)
-  (let* ((run-info (safe-read-file (run-info-file test-run-dir)))
-         ;; prepare parameters for the SUBMIT-FILES blobstore function
-         (submit-params (mapcar #'(lambda (lib-result)
-                                    (let ((libname (getf lib-result :libname)))
-                                      (cons libname
-                                            (lib-log-file test-run-dir libname))))
-                                (run-results run-info))))
-    ;; submit files to the blobstore and receive
-    ;; their blobkeys in response
-    (let ((libname-to-blobkey-alist
-           (test-grid-blobstore:submit-files blobstore
-                                             submit-params)))
-      ;; Now store the blobkeys for every library in the run-info.
-      ;; Note, we destructively modify parts of the previously
-      ;; read run-info.
-      (flet ((get-blob-key (lib)
-               (or (cdr (assoc lib libname-to-blobkey-alist))
-                   (error "blobstore didn't returned blob key for the log of the ~A libary" lib))))
-        (setf (run-results run-info)
-              (mapcar #'(lambda (lib-result)
-                          (setf (getf lib-result :log-blob-key)
-                                (get-blob-key (getf lib-result :libname)))
-                          lib-result)
-                      (run-results run-info))))
-      ;; finally, save the updated run-info with blobkeys
-      ;; to the file. Returns the run-info.
-      (save-run-info run-info test-run-dir)
-      run-info)))
-
-(defun submit-results (test-run-dir)
-  (let* ((blobstore (get-blobstore))
-         (run-info (submit-logs blobstore test-run-dir)))
-    (format t "The log files are submitted. Submitting the test run info...~%")
-    (test-grid-blobstore:submit-run-info blobstore run-info)
-    (format t "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.~%")
-    run-info))
-
-(defun run-libtests (&optional (libs *all-libs*))
-  (let* ((run-descr (make-run-descr))
-         (run-dir (run-directory run-descr))
-         (lib-results))
-    (ensure-directories-exist run-dir)
-    (dolist (lib libs)
-      (let ((lib-result (run-libtest lib run-descr run-dir)))
-        (push lib-result lib-results)))
-    (setf (getf run-descr :run-duration)
-          (- (get-universal-time)
-             (getf run-descr :time)))
-    (let ((run (make-run run-descr lib-results)))
-      (save-run-info run run-dir)
-      (format t "The test results were saved to this directory: ~%~A.~%"
-              (truename run-dir))
-      run-dir)))
-
-(defun submit-test-run (test-run-dir)
-  (format t "~%Submitting the test results to the server...~%")
-  (handler-case (submit-results test-run-dir)
-    (error (e) (format t "Error occured while uploading the test results to the server: ~A: ~A.
-Please submit manually the full content of the results directory
-   ~A
-to the cl-test-grid issue tracker:
-   https://github.com/cl-test-grid/cl-test-grid/issues~%"
-                       (type-of e)
-                       e
-                       (truename test-run-dir))))
-  (format t "~%Thank you for the participation!~%"))
+    status))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Database
@@ -1201,6 +1006,17 @@ to the cl-test-grid issue tracker:
               (if (null destination)
                   (get-output-stream-string dest)
                   nil))))))
+
+(defun run-descr (run)
+  "The description part of the test run."
+  (getf run :descr))
+
+(defun run-results (run)
+  "The list of test suite statuses for every library in the specified test run."
+  (getf run :results))
+
+(defun (setf run-results) (new-run-results test-run)
+  (setf (getf test-run :results) new-run-results))
 
 (defun print-test-run (out test-run &optional (indent 0))
   (let ((descr (getf test-run :descr)))
