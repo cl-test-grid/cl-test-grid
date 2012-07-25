@@ -122,8 +122,8 @@ LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL."))
 ;; but sometimes necessary due to implementations
 ;; bugs, like http://trac.clozure.com/ccl/ticket/858.
 (defun escape-process-parameter (param-str)
-  (if (and (member :windows *features* :test #'eq)
-           (member :ccl *features* :test #'eq))
+  (if (and (member :windows *features*)
+           (member :ccl *features*))
       (with-output-to-string (s)
         (princ #\" s)
         (loop for ch across param-str
