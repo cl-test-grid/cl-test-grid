@@ -1,7 +1,5 @@
 * Collaborative testing of Common Lisp libraries.
-[[http://common-lisp.net/project/cl-test-grid/][Test Results]] | Reported Issues: [[https://bugs.launchpad.net/common-lisp][launchpad issue tracker]]; (old issue registry: docs/issues-found.org).
-
-(Note: this README file is a work-in-progress)
+[[http://common-lisp.net/project/cl-test-grid/][Test Results]] | [[https://bugs.launchpad.net/common-lisp][Bugs Found]] ([[docs/issues-found.org][Old Bug Registry]]).
 
 * The Goal
   Improve stability of the Common Lisp ecosystem
@@ -69,26 +67,33 @@
   by providing required building blocks).
 
 * Status
-  We have function test-grid::run-libtests wich runs tests
-  of the CL libraries. Quicklisp is used to download the libraries.
+  We have a lisp program called test-grid-agent. User configures
+  it with a list if CL implementations installed on
+  his machine, and test-grid-agent runs tests on these
+  implenentations, starting each test suite in a separate lisp 
+  process.
+
+  Test-grid-agent may be run manually from command line or
+  configured as a periodical task with cron or similary service.
+  The agent remembers what lisp implementations where
+  already tested on what quicklisp distros, and
+  doesn't repeat the work it has already done.
+
+  Quicklisp is used to download the libraries to be tested 
+  (test-grid-agent bootstraps a private quicklisp installation
+  for use by the child lisp processes running testsuites;
+  therefore no interference happen with a quicklisp installation
+  user might have on his computer).
+
   The test results are uploaded to the central server and
-  published as reports here:
+  published as lisp data file and as HTML reports here:
   [[http://common-lisp.net/project/cl-test-grid/]]. Clicking library test 
   status (OK/FAIL) in any report refers to the library test logs 
   with the failure details.
-
+  
   We have considered 113 libraries. 56 of these libraries
   have appropriate test suites (fully automated, no user interaction is needed)
   and are added to the cl-test-grid.
-
-  File [[https://github.com/cl-test-grid/cl-test-grid/blob/master/run-agent.sh.sample][run-agent.sh.sample]] shows what parameters to use for particular
-  CL implementations so that it bootstraps quicklisp in a local
-  directory and updates it to the recent version (if necessary),
-  and then preforms test-grid::run-libtests using this local
-  quicklisp installation. The CL implementation parameters
-  suppress loading the standard init files of the implementaion
-  (to avoid interference with the quicklisp installation
-  user might have on his computer).
 
 * Participation
 ** Running tests
@@ -99,25 +104,29 @@
    1. git clone git://github.com/cl-test-grid/cl-test-grid.git
    2. cd cl-test-grid
    3. cp run-agent.sh.sample run-agent.sh; chmod +x run-agent.sh
-   4. Edit the run-agent.sh (edit one line - the path to your most reliable CL implementation).
+   4. Edit the run-agent.sh (edit one line).
    5. cp run-agent.sample.lisp run-agent.lisp
    6. Edit the run-agent.lisp (specfify all the lisp implementations you have, and some other settings)
    7. ./run-agent.sh
 
-   Next time all you need is to just start ./run.sh. It will update the 
-   cl-test-grid from git, update quicklisp to the latest distro 
-   (and of course run tests and upload the results).
+   Next time all you need is to just start ./run-agent.sh. It will update the 
+   cl-test-grid from git, update quicklisp to the latest distro,
+   run tests and upload the results.
+
+   Agent keeps log files in the cl-test-grid/work-dir/agent/logs,
+   where you may control what it has done.
+
+   Example crontab record to run agent at 10 o'clock every day:
+   
+       # m h  dom mon dow   command
+       0 10 * * * cd /home/testgrid/cl-test-grid2/ && ./run-agent.sh
+
+   Feel free contact us if you have any questions or difficulties
+   (see the mailing list address below).
 
    We are looking for contributors who would agree to run
-   this command periodically (ideally once a day, but even once a month
-   is OK).
-
-   If you decided to give this project a try and run tests, 
-   feel free contact us, we will be glad to assist you 
-   (actually it is even recommended, because the project
-   is in the early stage of the development and problems
-   are possible; and also we are interested to see
-   how it goes and how to make test running more convenient).
+   test-grid-agent periodically (ideally once a day, but even
+   once a month is OK).
 
 ** Discussing the project
    Feedback, discussions of the apporach and suggestesion
@@ -138,34 +147,6 @@
      also help to ensure quicklisp distro quality before 
      releasing the distro.
 
-   - Protecting from hanging tests or crashes.
-
-     All the test sutes run in a single Lisp session.
-     If some test hangs, or crases unrecoverably
-     (core dump for example), it will block other tests.
-
-     Possible solution would be to run every test 
-     as a separate process, but it would require
-     a portable way to start lisp process and making
-     it run particular lisp code. 
-
-   - Distributing the work. Currently we considered
-     only 50 libraries and 23 of them have test suites
-     appropriate to be added to the cl-test-grid.
-     Running these 23 test sutes (including download 
-     and compilation) takes 6-10 minutes on a single 
-     CL implementation.
-
-     Quicklisp today contains almost 650 libraries.
-     Based on this, we may estimate that running
-     all the test suites available in quicklisp
-     may take around 1.5 hours on a single implementation.
-     
-     This work might be distributed between several
-     contributors - everyone runs part of the tests.
-
-     [Today this feature has quite low priority]
-
    - ...
   
 ** Adding more libraries
@@ -178,11 +159,6 @@
 
    See examples for the already added libraries in the 
    [[https://github.com/cl-test-grid/cl-test-grid/blob/master/test-grid.lisp][test-grid.lisp]].
-
-   Today adding more libraries has low priority because we are
-   testing how cl-test-grid works, polishing corner cases
-   and reporting already found bugs to the libraries/CL implementation
-   mainteners. After we stabilize these libaries, we can add more.
 
 ** More
    Lot of things may be done in this project. But the project
