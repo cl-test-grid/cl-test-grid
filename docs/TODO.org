@@ -16,7 +16,7 @@
    other words, reflect the changes during the last month)
 ** TODO prepare the announcement for the mailing-list
 ** TODO publish the lisp-agent - merge lisp-agent to master
-** TODO remove the old test-runs directory and ~/cl-test-grid-settings.lisp
+** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
    Do it autmatically, or send email to all the contributors, or just ignore this issue
 ** DONE Give every agent and unique ID. store the ID in the agent persistence.
    CLOSED: [2012-07-24 Вт 03:20]
@@ -167,6 +167,7 @@
 ** TODO Juan Jose: collect build status for libraries
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
+** TODO Enable HTTP caching for library test logs (good recipe: https://developers.google.com/speed/docs/best-practices/caching)
 ** TODO add CCL revision to the version string (I have impression
    that CCL versions checked out at different time from the official release SVN
    svn co http://svn.clozure.com/publicsvn/openmcl/release/1.8/darwinx86/ccl
