@@ -8,22 +8,16 @@
    CLOSED: [2012-07-23 Пн 22:04]
 ** DONE create test-grid-agent:api-compatible-p
    CLOSED: [2012-07-23 Пн 23:45]
-** TODO check what lisps other than CCL can run lisp-agent
+** DONE check what lisps other than CCL can run lisp-agent
+   CLOSED: [2012-07-25 Ср 19:03]
 
-   - SBCL Windows had problems with external format (tried to pass unsupported
-     argument :environemnt to SBCL process functions; then tried
-     to use /bin/env. maybe fixed already?)
-   - external-program on some lisps do not support async process invocations 
-   - record all known portability proglems somewhere
-*** results:
-     SBCL 1.0.57 linux works, but with an issue: https://github.com/7max/log4cl/issues/3
-     CCL 1.8 windows/linux works
-     CLISP ?
-** TODO remove the old test-runs directory and ~/cl-test-grid-settings.lisp
-   Do it autmatically, or tell user in the email, or just ignore this issue
-** TODO update README.org to reflect the current status and priorities (in
+** DONE update README.org to reflect the current status and priorities (in
+   CLOSED: [2012-07-25 Ср 19:06]
    other words, reflect the changes during the last month)
 ** TODO publish the lisp-agent - merge lisp-agent to master
+** TODO remove the old test-runs directory and ~/cl-test-grid-settings.lisp
+   Do it autmatically, or send email to all the contributors, or just ignore this issue
+** TODO prepare the announcement for the mailing-list
 ** DONE Give every agent and unique ID. store the ID in the agent persistence.
    CLOSED: [2012-07-24 Вт 03:20]
 ** DONE error handling in the main process - during a test run and in other situations
@@ -101,6 +95,15 @@
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
 * lisp-agent postponed issues
+** TODO a parameter to the main function: limit the maximum time the agent works
+** TODO ensure the tesg-grid code is recompiled when necessary
+   The libraries being tested are recompiled at every test run.
+   It would be good to ensure test grid code is also correctly
+   recompiled.
+   - agent (the main process)
+   - test frameworks APIs (loaded into the child processes)
+   Related thread on asdf-devel:
+   http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
 ** TODO Admin stores a hashmap for lisps to be tested (or skipped)
     by particular agent in the aget sources (note, the agent
     updates the source every time from git) This allows to distribute work
@@ -156,10 +159,14 @@
 ** TODO persistence.lisp format - sort and newline for every record
 
 * User Requests
+** TODO Vladimir Sedach: test multithreaded CLISP
+** TODO Greg Pfeil: don't install quicklisp in ASDF source registry,
+   allow to customize it's location. It's easy to fix now - just
+   add a working directory property to agent and use it.
+   https://github.com/cl-test-grid/cl-test-grid/issues/5
 ** TODO Juan Jose: collect build status for libraries
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
-** TODO install multithreaded CLISP and run tests on it
 ** TODO add CCL revision to the version string (I have impression
    that CCL versions checked out at different time from the official release SVN
    svn co http://svn.clozure.com/publicsvn/openmcl/release/1.8/darwinx86/ccl
@@ -241,7 +248,6 @@
 ** TODO when GAE quotas (for requests, emails, anything else)
    are exceeded, recognize it and display a meaningfull
    message to the user.
-** TODO watchdog for hanging tests
 ** TODO For all the libraries which need manual configuration
    (cffi, usocket) provide guiding message to the
    user how to configure them, before running
@@ -250,8 +256,4 @@
    see their README. Distinguish the case 
    when the manual configuration hasn't been
    performed and return :no-resource status.
-** TODO should we save library log to a file only if the tests failed, 
-   or always? (now we save log in any case)
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
-** TODO classify all the errors and register as tickets
-   this task is likely to be abandoned
