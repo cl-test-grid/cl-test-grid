@@ -31,10 +31,10 @@ rem          (It was cmu-20crelease-20c20c_unicode-linux-x86,
 rem          the first issue encountered is with external-program:
 rem          https://github.com/sellout/external-program/issues/12)
 rem   - ABCL - I don't know, but at least it would take some effort.
-rem          I stopped when it ABCL required JNA for CFFI (JNA is a Java 
+rem          I stopped when ABCL required JNA for CFFI (JNA is a Java 
 rem          library to work with FFI). I need to learn
 rem          how to make JNA available for ABCL.
-rem   - ECL - No. When it starts child CCL process to updateq quicklisp, the CCL crashes.
+rem   - ECL - No. When it starts child CCL process to update quicklisp, the CCL crashes.
 rem          (it was ecl-12.7.1-dee2506a-win-x86).
 rem   - CLISP 2.49 Windows - No.
 rem          (Something seems to be wrong in external-program
