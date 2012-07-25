@@ -289,7 +289,7 @@ remains running)."
          ;; on CCL external-program:process-id returns process handle
          ;; instead of process id. See http://trac.clozure.com/ccl/ticket/983.
          #+(and ccl windows)
-         (#_GetProcessId (external-program:process-id lisp-process))
+         (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id lisp-process))
          ;; we haven't tested on other lisps, but hope it will be the process id
          #-(and ccl windows)
          (external-program:process-id p)))

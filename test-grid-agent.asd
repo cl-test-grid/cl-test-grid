@@ -28,6 +28,8 @@
       :serial t
       :components
       ((:file "package")
+       #+ccl
+       (:file "lisp-exe-ccl") 
        (:file "lisp-exe") 
        (:file "with-response-file")
        (:file "perform-test-run")
