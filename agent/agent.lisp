@@ -217,7 +217,7 @@ the PREDICATE."
 (defun main (agent)
   (handler-case
       (as-singleton-agent
-        (log:config :daily (log-file))
+        (log:config :daily (log-file) :immediate-flush)
         ;; finish the agent initialization
         (setf (persistence agent) (init-persistence (persistence-file))
               (blobstore agent) (test-grid-gae-blobstore:make-blob-store
