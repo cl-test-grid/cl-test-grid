@@ -14,10 +14,10 @@
 ** DONE update README.org to reflect the current status and priorities (in
    CLOSED: [2012-07-25 Ср 19:06]
    other words, reflect the changes during the last month)
+** TODO prepare the announcement for the mailing-list
 ** TODO publish the lisp-agent - merge lisp-agent to master
 ** TODO remove the old test-runs directory and ~/cl-test-grid-settings.lisp
    Do it autmatically, or send email to all the contributors, or just ignore this issue
-** TODO prepare the announcement for the mailing-list
 ** DONE Give every agent and unique ID. store the ID in the agent persistence.
    CLOSED: [2012-07-24 Вт 03:20]
 ** DONE error handling in the main process - during a test run and in other situations
@@ -33,8 +33,7 @@
    CLOSED: [2012-07-09 Пн 16:54]
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
-* 0.4.1 Install more lisps on my VPS
-* 0.4.2 Code cleanup after finishing lisp-agent 
+* 0.4.1 Code cleanup after finishing lisp-agent 
 ** TODO review test suites which have hard-coded failures
    due to hang-ups or other problems and consider
    removing the hardcoded failures as we now have
@@ -75,6 +74,7 @@
 ** TODO agent fs structure functions: make the workdir root
    a configurable property of agent, and fs structure
    functions shoud accept agent as a parameter.
+* 0.4.2 Install more lisps on my VPS
 * 0.5.0 Reports Improve 2
 ** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO make lisp code the main and the easiest interface to the test results:

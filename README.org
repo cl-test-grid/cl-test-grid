@@ -1,5 +1,5 @@
 * Collaborative testing of Common Lisp libraries.
-[[http://common-lisp.net/project/cl-test-grid/][Test Results]] | [[https://bugs.launchpad.net/common-lisp][Bugs Found]].
+[[http://common-lisp.net/project/cl-test-grid/][Test Results]] | [[https://bugs.launchpad.net/common-lisp][Bugs Found]]
 
 * The Goal
   Improve stability of the Common Lisp ecosystem
@@ -113,7 +113,7 @@
    cl-test-grid from git, update quicklisp to the latest distro,
    run tests and upload the results.
 
-   Agent keeps log files in the cl-test-grid/work-dir/agent/logs,
+   Agent keeps log files in the cl-test-grid/work-dir/agent/logs/,
    where you may control what it has done.
 
    Example crontab record to run agent at 10 o'clock every day:   
