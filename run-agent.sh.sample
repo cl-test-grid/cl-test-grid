@@ -31,10 +31,10 @@ echo "************************************************************************"
 #          the first issue encountered is with external-program:
 #          https://github.com/sellout/external-program/issues/12)
 #   - ABCL - I don't know, but at least it would take some effort.
-#          I stopped when it ABCL required JNA for CFFI (JNA is a Java 
+#          I stopped when ABCL required JNA for CFFI (JNA is a Java 
 #          library to work with FFI). I need to learn
 #          how to make JNA available for ABCL.
-#   - ECL - No. When it starts child CCL process to updateq quicklisp, the CCL crashes.
+#   - ECL - No. When it starts child CCL process to update quicklisp, the CCL crashes.
 #          (it was ecl-12.7.1-dee2506a-win-x86).
 #   - CLISP 2.49 Windows - No.
 #          (Something seems to be wrong in external-program
