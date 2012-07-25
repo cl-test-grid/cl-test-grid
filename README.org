@@ -116,10 +116,11 @@
    Agent keeps log files in the cl-test-grid/work-dir/agent/logs,
    where you may control what it has done.
 
-   Example crontab record to run agent at 10 o'clock every day:
-   
+   Example crontab record to run agent at 10 o'clock every day:   
+#+BEGIN_SRC shell
        # m h  dom mon dow   command
-       0 10 * * * cd /home/testgrid/cl-test-grid2/ && ./run-agent.sh
+       0 10 * * * cd /home/testgrid/cl-test-grid/ && ./run-agent.sh
+#+END_SRC
 
    Feel free contact us if you have any questions or difficulties
    (see the mailing list address below).
