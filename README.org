@@ -109,9 +109,14 @@
    6. Edit the run-agent.lisp (specfify all the lisp implementations you have, and some other settings)
    7. ./run-agent.sh
 
-   Next time all you need is to just start ./run-agent.sh. It will update the 
-   cl-test-grid from git, update quicklisp to the latest distro,
-   run tests and upload the results.
+   Agent starts from checking the configuraion - if it can run all the lisp
+   implementations configured. Then preforms tests if necessary,
+   uploads results and exits.
+
+   Next time all you need is to just start ./run-agent.sh. 
+
+   As you may noticed, run-agent.sh updates cl-test-grid from git
+   so that we always run the lates version.
 
    Agent keeps log files in the cl-test-grid/work-dir/agent/logs/,
    where you may control what it has done.
