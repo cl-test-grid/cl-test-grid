@@ -118,7 +118,7 @@
    6. Edit the /run-agent.lisp/ (paths to the lisp implementations agent will test, some other settings)
    7. =./run-agent.sh=
 
-   Next time all you need is to just start /./run-agent.sh/. It will update the 
+   Next time all you need is to just invoke =./run-agent.sh=. It will update the 
    =cl-test-grid= from git, run tests and upload the results.
 
    Agent keeps log files in the /cl-test-grid/work-dir/agent/logs//,
