@@ -56,4 +56,4 @@ echo "************************************************************************"
 # ECL
 #ecl -load run-agent.lisp -eval "(quit)"
 # Allegro:
-#alisp -qq -L quicklisp/setup.lisp -L run-agent.lisp
+#alisp -qq -L run-agent.lisp
