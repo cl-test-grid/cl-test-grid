@@ -20,7 +20,7 @@ rem As of 2012-07-25 and quicklisp 2012-07-03 we have
 rem the following situation:
 
 
-rem CCL - recommented as it is the development platform
+rem CCL - the recommented choice, as it is the development platform
 rem of test grid. Works on windows and linux (tested with CCL 1.8 and 1.7)
 rem
 rem C:\Users\anton\unpacked\ccl\ccl-1.8-windows\wx86cl64.exe --load run-agent.lisp --eval "(quit)"

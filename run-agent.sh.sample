@@ -20,7 +20,7 @@ echo "************************************************************************"
 # the following situation:
 
 
-# CCL - recommented as it is the development platform
+# CCL - the recommented choice, as it is the development platform
 # of test grid. Works on windows and linux (tested with CCL 1.8 and 1.7)
 #
 #/home/anton/ccl/ccl-1.8/lx86cl --load run-agent.lisp --eval "(quit)"
