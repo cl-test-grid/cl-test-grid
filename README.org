@@ -99,25 +99,27 @@
 ** Running tests
    The most appreciated way to participate.
 
-   System requirements: as of today, only two lisps are
-   known to run test-grid-agent successfully: CCL and SBCL.
-   Test-grid-agent uses number of libraries, therefore
-   we recommend to have Quicklisp installed and
-   added to the CCL or SBCL init file.
+   test-grid-agent is a lisp module which is run with
+   several parametrs.
+
+   We provide example scripts demonstrating how to
+   load, cofigure and run agent.
+
+   In our example we suggest to use [[http://www.quicklisp.org/beta/][Quicklisp]]
+   and [[http://ccl.clozure.com/][CCL]] (SBCL was also tested successfully).
 
    The first time you will need do the following:
 
    1. git clone git://github.com/cl-test-grid/cl-test-grid.git
    2. cd cl-test-grid
    3. cp run-agent.sh.sample run-agent.sh; chmod +x run-agent.sh
-   4. Edit the run-agent.sh (edit one line).
+   4. Edit the run-agent.sh (edit one line - the path to CCL).
    5. cp run-agent.sample.lisp run-agent.lisp
-   6. Edit the run-agent.lisp (specify all the lisp implementations you have, and some other settings)
+   6. Edit the run-agent.lisp (paths to the lisp implementations agent will test, some other settings)
    7. ./run-agent.sh
 
    Next time all you need is to just start ./run-agent.sh. It will update the 
-   cl-test-grid from git, update quicklisp to the latest distro,
-   run tests and upload the results.
+   cl-test-grid from git, run tests and upload the results.
 
    Agent keeps log files in the cl-test-grid/work-dir/agent/logs/,
    where you can control what it has done.

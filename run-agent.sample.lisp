@@ -3,7 +3,8 @@
 ;;;; See LICENSE for details.
 ;;;;
 ;;;; Example file for how to configure and run cl-test-grid agent.
-;;;; This file is supposed to be LOADed by:
+;;;; This file supposes that Quicklisp is available.
+;;;; Load it the file by:
 ;;;;        (load "run-agent.lisp")
 ;;;;
 
@@ -33,35 +34,30 @@ run-agent.sample.lisp for a fresh example)."
 ;;; we have on this machine.
 (defparameter *abcl* (make-instance 'lisp-exe:abcl
                                     :java-exe-path "java"
-                                    :abcl-jar-path "C:\\Users\\anton\\unpacked\\abcl\\abcl-bin-1.0.1\\abcl.jar"))
-(defparameter *clisp* (make-instance 'lisp-exe:clisp :exe-path "clisp"))
-(defparameter *ccl-1.7-x86* (make-instance 'lisp-exe:ccl
-                                           :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.7-windows\\wx86cl.exe"))
-(defparameter *ccl-1.7-x86-64* (make-instance 'lisp-exe:ccl
-                                              :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.7-windows\\wx86cl64.exe"))
+                                    :abcl-jar-path "/home/testgrid/lisps/abcl-1.0.1\\abcl.jar"))
+(defparameter *clisp* (make-instance 'lisp-exe:clisp :exe-path "/home/testgrid/lisps/clisp-2.49/clisp"))
 (defparameter *ccl-1.8-x86* (make-instance 'lisp-exe:ccl
-                                           :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl.exe"))
+                                           :exe-path "/home/testgrid/lisps/ccl-1.8/wx86cl"))
 (defparameter *ccl-1.8-x86-64* (make-instance 'lisp-exe:ccl
-                                              :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl64.exe"))
-(defparameter *sbcl* (make-instance 'lisp-exe:sbcl :exe-path "sbcl"))
-(defparameter *cmucl* (make-instance 'lisp-exe:cmucl :exe-path "/opt/cmucl-20c/bin/lisp"))
+                                              :exe-path "/home/testgrid/lisps/ccl-1.8/wx86cl64"))
+(defparameter *sbcl* (make-instance 'lisp-exe:sbcl :exe-path "/home/testgrid/lisps/sbcl-1.0.57/bin/sbcl"))
+(defparameter *cmucl* (make-instance 'lisp-exe:cmucl :exe-path "/home/testgrid/lisps/cmucl-20c/bin/lisp"))
 ;; ECL provides two compilers: bytecode compiler and lisp to C compiler.
 ;; What compiler to test is specified explicitly as a parameter
 ;; to lisp-exe:ecl constructor.
 (defparameter *ecl-bytecode* (make-instance 'lisp-exe:ecl
-                                            :exe-path "C:\\Users\\anton\\projects\\ecl\\bin\\ecl.exe"
+                                            :exe-path "/home/testgrid/lisps/ecl/bin/ecl"
                                             :compiler :bytecode))
 ;; Note, if you are specifying ECL to use lisp-to-c
 ;; compiler, you should have a C compiler available
 ;; in PATH.
 (defparameter *ecl-lisp-to-c* (make-instance 'lisp-exe:ecl
-                                             :exe-path "C:\\Users\\anton\\projects\\ecl\\bin\\ecl.exe"
+                                             :exe-path "/home/testgrid/lisps/ecl/bin/ecl"
                                              :compiler :lisp-to-c))
-(defparameter *acl* (make-instance 'lisp-exe:acl :exe-path "C:\\Program Files (x86)\\acl82express\\alisp.exe"))
+(defparameter *acl* (make-instance 'lisp-exe:acl :exe-path "/home/testgrid/lisps/acl82express/alisp"))
 
 (setf (test-grid-agent:lisps *agent*) (list *abcl* *clisp* *ccl-1.8-x86*
-                                            *ccl-1.8-x86-64* *ccl-1.7-x86*
-                                            *ccl-1.7-x86-64* *sbcl*
+                                            *ccl-1.8-x86-64* *sbcl*
                                             *ecl-bytecode*
                                             *ecl-lisp-to-c*
                                             *acl*)
