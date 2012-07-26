@@ -66,12 +66,11 @@ run-agent.sample.lisp for a fresh example)."
                                             *ecl-lisp-to-c*
                                             *acl*)
 
-      ;; Preferred lisp is the lisp implementation agent
+      ;; Preferred lisp is the lisp implementation the agent
       ;; uses when it needs to perform some auxiliary
-      ;; tasks requiring start of a separate lisp process -
-      ;; for example, updating quicklisp.
-      ;; Almost always this is the same lisp you use
-      ;; to run the main agent process (i.e. the one running this code).
+      ;; task in a separate lisp process - for example, updating quicklisp.
+      ;; Almost always this is the same lisp that runs the agent
+      ;; process itselft (i.e. the lisp which runs this script).
       (test-grid-agent:preferred-lisp *agent*) *ccl-1.8-x86*
 
       ;; Please provide your email so that we know who is submitting the test results.
@@ -85,5 +84,3 @@ run-agent.sample.lisp for a fresh example)."
 
 ;;; Ask agent to do it's work
 (test-grid-agent:main *agent*)
-
-

@@ -11,49 +11,61 @@ echo "************************************************************************"
 echo "Running the test grid agent..."
 echo "************************************************************************"
 
-# Don't forget to prepare run-agent.lisp
-# based on run-agent.sample.lisp
-#
-# Test grid agent depends on several libraries and 
-# not all CL implementations can run it.
+# Please choose ONE lisp to run the main agent process.
 #
 # Quicklisp is required to be installed and added to the init
-# file of the lisp you use. 
+# file of that lisp. 
 #
-# As of 2012-07-25 and quicklisp 2012-07-03
-#
-#   - CCL 1.8 windows and linux - works (recommended,
-#          because it is used for development)
-#   - SBCL 1.0.57 linux - works
-#   - SBCL windows - No (problem with external-program)
-#   - CMUCL - No.
-#          (It was cmu-20crelease-20c20c_unicode-linux-x86,
-#          the first issue encountered is with external-program:
-#          https://github.com/sellout/external-program/issues/12)
-#   - ABCL - I don't know, but at least it would take some effort.
-#          I stopped when ABCL required JNA for CFFI (JNA is a Java 
-#          library to work with FFI). I need to learn
-#          how to make JNA available for ABCL.
-#   - ECL - No. When it starts child CCL process to update quicklisp, the CCL crashes.
-#          (it was ecl-12.7.1-dee2506a-win-x86).
-#   - CLISP 2.49 Windows - No.
-#          (Something seems to be wrong in external-program
-#           with passing program parameters).
-#   - other Lisps - not tested.
-#
+# As of 2012-07-25 and quicklisp 2012-07-03 we have
+# the following situation:
 
-# CCL:
-#/home/anton/ccl/ccl-1.7/lx86cl --load run-agent.lisp --eval "(quit)"
-# SBCL:
+
+# CCL - recommented as it is the development platform
+# of test grid. Works on windows and linux (tested with CCL 1.8 and 1.7)
+#
+#/home/anton/ccl/ccl-1.8/lx86cl --load run-agent.lisp --eval "(quit)"
+
+
+# SBCL - works on linux (tested with SBCL 1.0.57),
+# but doesn't work on windows (problem with external-program library).
+#
 #export SBCL_HOME=/home/anton/sbcl/sbcl-1.0.54-x86-linux/lib/sbcl
 #/home/anton/sbcl/sbcl-1.0.54-x86-linux/bin/sbcl --load run-agent.lisp --eval "(quit)"
-# CLISP:
+
+
+# CLISP 2.49 Windows - Doesn't work.
+# (Something seems to be wrong in external-program
+# with passing program parameters)
+# Anyway, here are the CLISP parameters:
+#
 #clisp -x (load "run-agent.lisp")'
-# ABCL:
+
+
+# ABCL - I don't know, but at least it would take some effort.
+# I stopped when ABCL required JNA for CFFI (JNA is a Java 
+# library to work with FFI). I need to learn
+# how to make JNA available for ABCL.
+#
 #/path/to/abcl/abcl.sh --batch --load run-agent.lisp
-# CMUCL:
-#/opt/cmucl-20c/bin/lisp -load run-agent.lisp -eval "(quit)"
-# ECL
+
+
+# CMUCL - Doesn't work (tested on cmu-20crelease-20c20c_unicode-linux-x86).
+# The first issue encountered is with external-program:
+# https://github.com/sellout/external-program/issues/12)
+#
+#/opt/cmucl-20c/bin/lisp -load run-agent.lisp -eval "(quit)" 
+
+
+# ECL - Doesn't work (tested with ecl-12.7.1-dee2506a-win-x86).
+# When it starts child CCL process to update quicklisp, the CCL crashes.
+#
 #ecl -load run-agent.lisp -eval "(quit)"
-# Allegro:
+
+
+# Allegro - not tested:
+#
 #alisp -qq -L run-agent.lisp
+
+
+# other Lisps - not tested.
+

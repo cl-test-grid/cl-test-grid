@@ -120,7 +120,7 @@
    run tests and upload the results.
 
    Agent keeps log files in the cl-test-grid/work-dir/agent/logs/,
-   where you may control what it has done.
+   where you can control what it has done.
 
    Example crontab record to run agent at 10 o'clock every day:   
 #+BEGIN_SRC shell
@@ -128,7 +128,7 @@
        0 10 * * * cd /home/testgrid/cl-test-grid/ && ./run-agent.sh
 #+END_SRC
 
-   Feel free contact us if you have any questions or difficulties
+   Feel free to contact us if you have any questions or difficulties
    (see the mailing list address below).
 
    We are looking for contributors who would agree to run
