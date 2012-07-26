@@ -4,14 +4,14 @@
 * The Goal
   Improve stability of the Common Lisp ecosystem
   by performing automated tests on as wide set of 
-  envionments as possible. Environments vary
+  environments as possible. Environments vary
   mainly in 3 dimensions:
 
   1. Common Lisp implementations. They have incompatibilities,
      sometimes allowed by the standard (features specified
-     as implementation-dependent), somtimes due to bugs,
-     and sometimes in non-standartized features (threading,
-     sockets, FFI, etc.). Moreover, impementations are
+     as implementation-dependent), sometimes due to bugs,
+     and sometimes in non-standardized features (threading,
+     sockets, FFI, etc.). Moreover, implementations are
      evolving over the time, we should care about different
      versions of the same implementation.
   2. Growing number of CL libraries (which are also evolving 
@@ -53,7 +53,7 @@
   a bug in the tests themselves. 
   Reducing this gap increases the utility of automated testing.
 
-* The Implementaion Idea
+* The Implementation Idea
   Everyone can run a simple command which will run tests 
   of Common Lisp libraries and upload results to 
   the central server. 
@@ -70,11 +70,11 @@
   We have a lisp program called test-grid-agent. User configures
   it with a list of CL implementations installed on
   his machine, and the test-grid-agent runs tests on these
-  implenentations, starting each test suite in a separate lisp 
+  implementations, starting each test suite in a separate lisp 
   process.
 
   Test-grid-agent may be run manually from command line or
-  configured as a periodical task with cron or similary service.
+  configured as a periodical task with cron or similar service.
   The agent remembers what lisp implementations where
   already tested on what quicklisp distros, and
   doesn't repeat the work it has already done.
@@ -99,6 +99,12 @@
 ** Running tests
    The most appreciated way to participate.
 
+   System requirements: as of today, only two lisps are
+   known to run test-grid-agent successfully: CCL and SBCL.
+   Test-grid-agent uses number of libraries, therefore
+   we recommend to have Quicklisp installed and
+   added to the CCL or SBCL init file.
+
    The first time you will need do the following:
 
    1. git clone git://github.com/cl-test-grid/cl-test-grid.git
@@ -106,17 +112,12 @@
    3. cp run-agent.sh.sample run-agent.sh; chmod +x run-agent.sh
    4. Edit the run-agent.sh (edit one line).
    5. cp run-agent.sample.lisp run-agent.lisp
-   6. Edit the run-agent.lisp (specfify all the lisp implementations you have, and some other settings)
+   6. Edit the run-agent.lisp (specify all the lisp implementations you have, and some other settings)
    7. ./run-agent.sh
 
-   Agent starts from checking the configuraion - if it can run all the lisp
-   implementations configured. Then preforms tests if necessary,
-   uploads results and exits.
-
-   Next time all you need is to just start ./run-agent.sh. 
-
-   As you may noticed, run-agent.sh updates cl-test-grid from git
-   so that we always run the lates version.
+   Next time all you need is to just start ./run-agent.sh. It will update the 
+   cl-test-grid from git, update quicklisp to the latest distro,
+   run tests and upload the results.
 
    Agent keeps log files in the cl-test-grid/work-dir/agent/logs/,
    where you may control what it has done.
@@ -135,7 +136,7 @@
    once a month is OK).
 
 ** Discussing the project
-   Feedback, discussions of the apporach and suggestesion
+   Feedback, discussions of the approach and suggestion
    for the open problems are very welcome.
 
    Everyone interested is invited to the "mailing list" - 
@@ -160,7 +161,7 @@
    
    Look how the library tests are started in the asdf:perform method 
    for asdf:test-op defined in the library .asd file. Then use the
-   same approach to define a method test-grid::libtest eql specilized 
+   same approach to define a method test-grid::libtest eql specialized 
    for that library and send us this code. 
 
    See examples for the already added libraries in the 
