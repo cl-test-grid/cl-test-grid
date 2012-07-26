@@ -1,62 +1,14 @@
 @echo off
 
-echo.
-echo ************************************************************************
-echo Updating to the recent cl-test-grid version...
-echo ************************************************************************
+rem Updating to the recent cl-test-grid version
 call git pull
 
-echo.
-echo ************************************************************************
-echo Running the test grid agent
-echo ************************************************************************
+rem Start your run-agent.lisp script. We suppose
+rem Quicklisp is installed and added to the init
+rem file of your lisp.
 
-rem Please choose ONE lisp to run the main agent process.
-rem
-rem Quicklisp is required to be installed and added to the init
-rem file of that lisp. 
-rem
-rem As of 2012-07-25 and quicklisp 2012-07-03 we have
-rem the following situation:
+rem (EDIT THE PATH TO CCL)
+C:\Users\testgrid\lisps\ccl-1.8-windows\wx86cl64.exe --load run-agent.lisp --eval "(quit)"
+rem CCL is the recommented choice, as it is the test grid development platform.
 
-
-rem CCL - the recommented choice, as it is the development platform
-rem of test grid. Works on windows and linux (tested with CCL 1.8 and 1.7)
-rem
-rem C:\Users\anton\unpacked\ccl\ccl-1.8-windows\wx86cl64.exe --load run-agent.lisp --eval "(quit)"
-
-
-rem SBCL - works on linux (tested with SBCL 1.0.57),
-rem but doesn't work on windows (problem with external-program library).
-rem
-rem sbcl --load run-agent.lisp --eval "(quit)"
-
-
-rem CLISP 2.49 Windows - Doesn't work.
-rem (Something seems to be wrong in external-program
-rem with passing program parameters)
-rem Anyway, here are the CLISP parameters:
-rem
-rem clisp -x "(load \"run-agent.lisp\")"
-
-
-rem ABCL - I don't know, but at least it would take some effort.
-rem I stopped when ABCL required JNA for CFFI (JNA is a Java 
-rem library to work with FFI). I need to learn
-rem how to make JNA available for ABCL.
-rem
-rem call C:\Users\anton\unpacked\abcl\abcl-bin-1.0.1\abcl.bat --batch --load run-agent.lisp
-
-
-rem ECL - Doesn't work (tested with ecl-12.7.1-dee2506a-win-x86).
-rem When it starts child CCL process to update quicklisp, the CCL crashes.
-rem
-rem C:\Users\anton\projects\ecl\bin\ecl -load run-agent.lisp -eval "(quit)"
-
-
-rem Allegro - not tested:
-rem
-rem "C:\Program Files (x86)\acl82express\alisp.exe" -qq -L run-agent.lisp
-
-
-rem other Lisps - not tested.
+rem As for lisps other than CCL, see docs/agent-portability.txt.
