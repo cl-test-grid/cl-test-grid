@@ -99,7 +99,7 @@
 ** Running tests
    The most appreciated way to participate.
 
-   test-grid-agent is a lisp module which is run with
+   =test-grid-agent= is a lisp module which is run with
    several parametrs.
 
    We provide example scripts demonstrating how to
