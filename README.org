@@ -110,18 +110,18 @@
 
    The first time you will need do the following:
 
-   1. git clone git://github.com/cl-test-grid/cl-test-grid.git
-   2. cd cl-test-grid
-   3. cp run-agent.sh.sample run-agent.sh; chmod +x run-agent.sh
-   4. Edit the run-agent.sh (edit one line - the path to CCL).
-   5. cp run-agent.sample.lisp run-agent.lisp
-   6. Edit the run-agent.lisp (paths to the lisp implementations agent will test, some other settings)
-   7. ./run-agent.sh
+   1. =git clone git://github.com/cl-test-grid/cl-test-grid.git=
+   2. =cd cl-test-grid=
+   3. =cp run-agent.sh.sample run-agent.sh; chmod +x run-agent.sh=
+   4. Edit the /run-agent.sh/ (edit one line - the path to CCL).
+   5. =cp run-agent.sample.lisp run-agent.lisp=
+   6. Edit the /run-agent.lisp/ (paths to the lisp implementations agent will test, some other settings)
+   7. =./run-agent.sh=
 
-   Next time all you need is to just start ./run-agent.sh. It will update the 
-   cl-test-grid from git, run tests and upload the results.
+   Next time all you need is to just start /./run-agent.sh/. It will update the 
+   =cl-test-grid= from git, run tests and upload the results.
 
-   Agent keeps log files in the cl-test-grid/work-dir/agent/logs/,
+   Agent keeps log files in the /cl-test-grid/work-dir/agent/logs//,
    where you can control what it has done.
 
    Example crontab record to run agent at 10 o'clock every day:   
@@ -134,7 +134,7 @@
    (see the mailing list address below).
 
    We are looking for contributors who would agree to run
-   test-grid-agent periodically (ideally once a day, but even
+   =test-grid-agent= periodically (ideally once a day, but even
    once a month is OK).
 
 ** Discussing the project
