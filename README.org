@@ -119,9 +119,9 @@
 
    - =user-email= - Your email so that we know who is contributing
                the test results and can contact you. The
-               emails is also published in the test results
+               email is also published in the test results
                reports so that library authors or other interested
-               party can contact you with questions about your platform.
+               parties can contact you with questions about your platform.
                If you are strongly opposed to publish your email,
                you can specify just some nickname here.
 
