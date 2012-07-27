@@ -139,3 +139,14 @@ a warning message, followed by the end of the file."
     (when (not (eq :ok (with-input-from-string (s response)
                          (safe-read s))))
       (error "Error submitting run info to the server. Unexpected response: ~A." response))))
+
+(defmethod test-grid-blobstore:tell-admin ((blobstore blobstore) subject body)
+  (assert (not (null subject)))
+  (setf body (or body ""))
+  (let ((response (drakma:http-request (format nil "~A/tell-admin" (base-url blobstore))
+                                       :method :post
+                                       :parameters `(("subject" . ,subject)
+                                                     ("body" . ,body)))))
+    (when (not (eq :ok (with-input-from-string (s response)
+                         (safe-read s))))
+      (error "Error sending message to admin. Unexpected response: ~A." response))))

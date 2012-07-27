@@ -1,6 +1,8 @@
 (defpackage #:test-grid-blobstore
   (:use :cl)
-  (:export #:submit-files #:submit-run-info))
+  (:export #:submit-files
+           #:submit-run-info
+           #:tell-admin))
 
 (in-package #:test-grid-blobstore)
 
@@ -26,3 +28,5 @@ has a blobkey for every file.
 Signals an ERROR in case of problems."))
 
 (defgeneric submit-run-info (blobstore run-info))
+
+(defgeneric tell-admin (blobstore subject body))

@@ -13,7 +13,7 @@
 (defclass fake-blobstore () ())
 
 (defmethod test-grid-blobstore:submit-files ((blobstore fake-blobstore) id-pathname-alist)
-  (log:info "fake-blobstore.submit-files called")  
+  (log:info "fake-blobstore.submit-files called")
   ;; return random fake blob IDs for every file
   (let ((random-state (make-random-state t)))
     (mapcar (lambda (id-pathname-cons)
@@ -24,3 +24,7 @@
 (defmethod test-grid-blobstore:submit-run-info ((blobstore fake-blobstore) run-info)
   (declare (ignore run-info))
   (log:info "fake-blobstore.submit-run-info called"))
+
+(defmethod tell-admin ((blobstore fake-blobstore) subject body)
+  (declare (ignore subject body))
+  (log:info "fake-blobstore.tell-admin called"))

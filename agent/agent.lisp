@@ -209,6 +209,12 @@ the PREDICATE."
           (log:info "Agent is asigned newly generated agent-id: ~A"
                     (get-agent-id p))))))
 
+(defun say-hello-to-admin (agent)
+  (test-grid-blobstore:tell-admin b
+                                  (format nil "[agent hello] from ~A (~A)"
+                                          (get-agent-id (persistence agent))
+                                          (user-email agent))
+                                  "hello"))
 
 (defmethod main (agent)
   (handler-case
@@ -223,6 +229,7 @@ the PREDICATE."
                                  "http://cl-test-grid.appspot.com"))
         (check-config agent)
         (ensure-has-id agent)
+        (say-hello-to-admin agent)
         ;; now do the work
         (let* ((quicklisp-version (update-testing-quicklisp (preferred-lisp agent)))
                (lib-world (format nil "quicklisp ~A" quicklisp-version)))
@@ -230,4 +237,3 @@ the PREDICATE."
     (serious-condition (c)
       (log:error "Unhandled seriours-condition of type ~A: ~A"
                  (type-of c) c))))
-
