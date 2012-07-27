@@ -152,7 +152,7 @@
 
    Example crontab record to run agent at 10 o'clock every day:   
 #+BEGIN_SRC shell
-       # m h  dom mon dow   command
+       # minute hour day_of_month month day_of_week command
        0 10 * * * cd /home/testgrid/cl-test-grid/ && ./run-agent.sh
 #+END_SRC
 
