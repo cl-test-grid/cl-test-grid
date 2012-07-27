@@ -129,7 +129,7 @@
 
    In our example we suggest to use [[http://ccl.clozure.com/][CCL]] and assume you
    have [[http://www.quicklisp.org/beta/][Quicklisp]] installed and added to the CCL
-   init file. Also Git is required.
+   init file. Git is required.
 
    The first time you will need do these steps:
 
