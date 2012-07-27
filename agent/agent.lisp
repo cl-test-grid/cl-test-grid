@@ -210,7 +210,7 @@ the PREDICATE."
                     (get-agent-id p))))))
 
 (defun say-hello-to-admin (agent)
-  (test-grid-blobstore:tell-admin b
+  (test-grid-blobstore:tell-admin (blobstore agent)
                                   (format nil "[agent hello] from ~A (~A)"
                                           (get-agent-id (persistence agent))
                                           (user-email agent))
