@@ -128,18 +128,18 @@
    Function =test-grid-agent:main= runs the agent.
 
    We provide template scripts demonstrating how to
-   load, cofigure and run agent.
+   load, cofigure and run agent by a single commant.
 
-   In our example we suggest to use [[http://www.quicklisp.org/beta/][Quicklisp]]
-   and [[http://ccl.clozure.com/][CCL]] (SBCL was also tested successfully).
-   Also Git is required.
+   In our example we suggest to use [[http://ccl.clozure.com/][CCL]] and assume you
+   have [[http://www.quicklisp.org/beta/][Quicklisp]] installed and added to the CCL
+   init file. Also Git is required.
 
    The first time you will need do these steps:
 
    1. =git clone git://github.com/cl-test-grid/cl-test-grid.git=
    2. =cd cl-test-grid=
-   3. =cp [[run-agent.sh.sample]] run-agent.sh; chmod +x run-agent.sh=
-   4. =cp [[run-agent.sample.lisp]] run-agent.lisp=
+   3. =cp run-agent.sh.sample run-agent.sh; chmod +x run-agent.sh=
+   4. =cp run-agent.sample.lisp run-agent.lisp=
    5. Edit the /run-agent.sh/ (edit one line - the path to CCL).
    6. Edit the /run-agent.lisp/ (paths to the lisp implementations agent will test, some other settings)
    7. =./run-agent.sh=
