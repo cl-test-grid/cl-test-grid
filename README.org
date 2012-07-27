@@ -112,7 +112,7 @@
    - =preferred-lisp= - The lisp implementation used when
                it is necessary to perform an auxiliary task
                requiring a separte lisp process, for example
-               downloading or installing libraries to be tested.
+               downloading libraries to be tested.
                It is therefore desirable to specify here 
                a lisp implementation known to work reliable
                on your platform.
