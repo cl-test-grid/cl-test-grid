@@ -14,8 +14,10 @@
 ** DONE update README.org to reflect the current status and priorities (in
    CLOSED: [2012-07-25 Ср 19:06]
    other words, reflect the changes during the last month)
-** TODO prepare the announcement for the mailing-list
-** TODO publish the lisp-agent - merge lisp-agent to master
+** DONE prepare the announcement for the mailing-list
+   CLOSED: [2012-07-27 Пт 05:48]
+** DONE publish the lisp-agent - merge lisp-agent to master
+   CLOSED: [2012-07-27 Пт 05:48]
 ** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
    Do it autmatically, or send email to all the contributors, or just ignore this issue
 ** DONE Give every agent and unique ID. store the ID in the agent persistence.
@@ -33,6 +35,17 @@
    CLOSED: [2012-07-09 Пн 16:54]
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
+** TODO contributor monthly summary.
+   Now that test grid agent can be run by cron, sending confirmation
+   email to contributor for every test result doesn't make sense,
+   because the contributor is anaware when testing happens. But providing
+   feedback is necessary. We may send a monthly digest to contributor
+   summarizing the test results received from his agent(s). May be implemented
+   as a cron task running say at the 8th of every month (so that admin has
+   time to commit all the resutls to db.lisp and the digest
+   producer task sees them). Admin should be BCC'ed in these emails.
+   Should it be a single email for all contributors and the mailing list,
+   or each contributor should be emailed individually?
 * 0.4.1 Code cleanup after finishing lisp-agent 
 ** TODO review test suites which have hard-coded failures
    due to hang-ups or other problems and consider

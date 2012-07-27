@@ -68,22 +68,9 @@
 
 * Status
   We have a lisp program called test-grid-agent. User configures
-  it with a list of CL implementations installed on
-  his machine, and the test-grid-agent runs tests on these
-  implementations, starting each test suite in a separate lisp 
-  process.
-
-  Test-grid-agent may be run manually from command line or
-  configured as a periodical task with cron or similar service.
-  The agent remembers what lisp implementations where
-  already tested on what quicklisp distros, and
-  doesn't repeat the work it has already done.
-
-  Quicklisp is used to download the libraries to be tested 
-  (test-grid-agent bootstraps a private quicklisp installation
-  for use by the child lisp processes running testsuites;
-  therefore no interference happen with a quicklisp installation
-  user might have on his computer).
+  it with a list of CL implementations installed on his machine,
+  and the test-grid-agent runs tests of common lisp libraries
+  on these implementations.
 
   The test results are uploaded to the central server and
   published as a lisp data file and as HTML reports here:
@@ -91,9 +78,19 @@
   status (OK/FAIL) in any report refers to the library test logs 
   with the failure details.
   
-  We have considered 113 libraries. 56 of these libraries
+  We have so far considered 113 libraries. 56 of these libraries
   have appropriate test suites (fully automated, no user interaction is needed)
   and are added to the cl-test-grid.
+
+  Test-grid-agent may be run manually from command line or
+  configured as a periodical task with cron or similar service.
+  Each test suite is run in a separate lisp process
+  Quicklisp is used to download the libraries to be tested 
+  (test-grid-agent bootstraps a private quicklisp installation
+  and have no interference a quicklisp user might have
+  on his computer). The agent remembers what lisp implementations
+  where already tested on what quicklisp distros, and doesn't repeat
+  the work it has already done.
 
 * Participation
 ** Running tests
