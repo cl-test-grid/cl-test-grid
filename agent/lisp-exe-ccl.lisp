@@ -14,5 +14,6 @@
 ;; and confuses their readers (ECL and CLISP have
 ;; problem with id).
 (defun win-process-handle-to-id (process-handle)
+  #+windows
   (#_GetProcessId process-handle))
 
