@@ -35,6 +35,14 @@
   ;; whatever variant of the DSL config we use, because of
   ;; the implementation dependent behaviour of cl:pathname-match-p.
 
+  ;; Note that unlike the default ASDF configuration,
+  ;; we do not repeat the full path of .lisp file
+  ;; inside the temporary directory for .fasl.
+  ;; We just use <asdf-output-root-dir>/private-quicklisp/<library-archive-name>/*.fasl.
+  ;; This saves us from problems of very long paths -
+  ;; On Windows, without using a special notation,
+  ;; maximum path length is 260 characters.
+
   (labels ((starts-with (sequence prefix &key (test #'eql))
              (let ((mismatch (mismatch sequence prefix :test test)))
                (or (null mismatch)
@@ -51,30 +59,31 @@
                           (pathname-directory parent-dir)
                           :test (if (member :asdf-windows *features*)
                                     #'string-equal
-                                    #'string=))))
-
+                                    #'string=)))
+           (rel-path (dir child)
+             (make-pathname :directory (append '(:relative)
+                                               (nthcdr (length (pathname-directory dir))
+                                                       (pathname-directory child)))
+                            :name (pathname-name child)
+                            :type (pathname-type child)
+                            :version (pathname-version child))))
     (let ((orig-asdf-apply-output-translations #'asdf:apply-output-translations)
           (lib-dir (merge-pathnames (make-pathname :directory '(:relative "dists" "quicklisp" "software"))
                                     private-quicklisp-dir))
           (libs-output-dir (merge-pathnames (make-pathname :directory '(:relative "private-quicklisp"))
-                                            asdf-output-root-dir)))
+                                            asdf-output-root-dir))
+          (test-grid-dir test-grid-config:*src-base-dir*)
+          (test-grid-output-dir (merge-pathnames (make-pathname :directory '(:relative "test-grid"))
+                                                 asdf-output-root-dir)))
       (asdf::defun* asdf:apply-output-translations (path)
-        (if (child-path-p lib-dir path)
-            ;; Note that unlike the default ASDF configuration,
-            ;; we do not repeat the full path of .lisp file
-            ;; inside the temporary directory for .fasl.
-            ;; We just use <asdf-output-root-dir>/private-quicklisp/<library-archive-name>/*.fasl.
-            ;; This saves us from problems of very long paths -
-            ;; On Windows, without using a special notation,
-            ;; maximum path length is 260 characters.
-            (merge-pathnames (make-pathname :directory (append '(:relative)
-                                                               (nthcdr (length (pathname-directory lib-dir))
-                                                                       (pathname-directory path)))
-                                            :name (pathname-name path)
-                                            :type (pathname-type path)
-                                            :version (pathname-version path))
-                             libs-output-dir)
-            (funcall orig-asdf-apply-output-translations path))))))
+        (cond ((child-path-p lib-dir path)
+               (merge-pathnames (rel-path lib-dir path)
+                                libs-output-dir))
+              ((child-path-p test-grid-dir path)
+               (merge-pathnames (rel-path test-grid-dir path)
+                                test-grid-output-dir))
+              (t
+               (funcall orig-asdf-apply-output-translations path)))))))
 
 (defun run-libtest-with-response-to-file (libname
                                           run-descr
