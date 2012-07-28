@@ -125,7 +125,7 @@
 
    Function =test-grid-agent:main= runs the agent.
 
-   It is necessary to perform git pull on agent sources
+   It is necessary to perform =git pull= on agent sources
    often - that's how agent receives new tasks from admin.
 
    We provide template scripts demonstrating how to
