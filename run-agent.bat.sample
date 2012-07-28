@@ -1,6 +1,6 @@
 @echo off
 
-rem Updating to the recent cl-test-grid version
+rem Updating to the recent cl-test-grid version (required).
 call git pull
 
 rem Start your run-agent.lisp script. We suppose

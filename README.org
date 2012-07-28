@@ -125,12 +125,15 @@
 
    Function =test-grid-agent:main= runs the agent.
 
+   It is necessary to perform git pull on agent sources
+   often - that's how agent receives new tasks from admin.
+
    We provide template scripts demonstrating how to
    load, cofigure and run agent by a single commant.
 
    In our example we suggest to use [[http://ccl.clozure.com/][CCL]] and assume you
    have [[http://www.quicklisp.org/beta/][Quicklisp]] installed and added to the CCL
-   init file. Git is required.
+   init file. (SBCL was aslo tested successfully).
 
    The first time you will need do these steps:
 

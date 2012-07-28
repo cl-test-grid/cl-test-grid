@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Update to the recent cl-test-grid version
+# Update to the recent cl-test-grid version (required).
 git pull
 
 # Start your run-agent.lisp script. We suppose
