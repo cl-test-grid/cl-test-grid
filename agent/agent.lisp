@@ -113,13 +113,16 @@
   (log:info "All the external lisps passed the configuration check OK")
   t)
 
+(defparameter +implementation-identifier-timeout+ (* 3 60))
+
 (defgeneric implementation-identifier (lisp-exe)
   (:method ((lisp-exe lisp-exe:lisp-exe))
     (let ((ql-setup-file (workdir-file "quicklisp/setup.lisp")))
       (when (not (probe-file ql-setup-file))
         (error "Can not determine lisp implemntation name until quicklisp is installed - we need ASDF installed together with quicklisp to evaluate (asdf::implementation-identifier)."))
       (with-response-file (response-file)
-        (lisp-exe:run-lisp-process lisp-exe
+        (lisp-exe:run-with-timeout +implementation-identifier-timeout+
+                                   lisp-exe
                                    `(load ,(truename (src-file "proc-common.lisp")))
                                    ;; can only do after quicklisp is installed
                                    `(load ,(truename ql-setup-file))
@@ -189,7 +192,7 @@ the PREDICATE."
             (log:info "Running tests for ~A" (implementation-identifier lisp))
             (let ((results-dir (perform-test-run lib-world
                                                  lisp
-                                                 test-grid::*all-libs*
+                                                 '(:alexandria) ;test-grid::*all-libs*
                                                  (test-output-base-dir)
                                                  (user-email agent))))
               (submit-test-run-results (blobstore agent) results-dir)
