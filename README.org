@@ -104,8 +104,8 @@
    It is created with function =test-grid-agent:make-agent=
    and has 3 configuration properties:
 
-   - =lisps= - Paths to the lisp implementations on your machine
-               which should be used to run tests.
+   - =lisps= - Paths to the lisp implementations
+               that should be used to run tests.
 
    - =preferred-lisp= - The lisp implementation used when
                it is necessary to perform an auxiliary task
@@ -131,8 +131,8 @@
    We provide template scripts demonstrating how to
    load, cofigure and run agent by a single commant.
 
-   In our example we suggest to use [[http://ccl.clozure.com/][CCL]] and assume you
-   have [[http://www.quicklisp.org/beta/][Quicklisp]] installed and added to the CCL
+   In our example we suggest to use [[http://ccl.clozure.com/][CCL]] and assume
+   [[http://www.quicklisp.org/beta/][Quicklisp]] is installed and added to the CCL
    init file. (SBCL was aslo tested successfully).
 
    The first time you will need do these steps:
