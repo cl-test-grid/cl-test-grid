@@ -13,7 +13,7 @@
 
 (in-package #:test-grid-agent)
 
-(defparameter +singleton-agent-lock-port+ 7658)
+(defparameter +singleton-agent-lock-port+ 7685)
 
 (define-condition another-agent-is-running (simple-error) ())
 
