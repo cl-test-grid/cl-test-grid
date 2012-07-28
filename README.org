@@ -97,14 +97,15 @@
    The most appreciated way to participate.
 
    =test-grid-agent:agent= is a lisp object able
-   to manage test exectuion in subordinate lisp
-   processes.
+   to manage test exectuion by subordinate lisp
+   implementations (executables) and submit test
+   resutls to server.
 
    It is created with function =test-grid-agent:make-agent=
    and has 3 configuration properties:
 
-   - =lisps= - Paths to the lisp implementations (executables)
-               on your machine which should be used to run tests.
+   - =lisps= - Paths to the lisp implementations on your machine
+               which should be used to run tests.
 
    - =preferred-lisp= - The lisp implementation used when
                it is necessary to perform an auxiliary task
