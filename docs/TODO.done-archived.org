@@ -215,3 +215,38 @@
    CLOSED: [2012-04-22 Вс 04:13]
 ** DONE analyze the failures of Quicklisp 2012-04.
    CLOSED: [2012-07-23 Пн 04:39]
+* 0.4.0 Test Running Robustness - lisp-agent
+** DONE top level error handler in test-grid-agent:main
+   CLOSED: [2012-07-23 Пн 20:17]
+   write the unhandled error stacktrace (with causes)
+   into log and exit - never enter debugger as the 
+   program should be suitable to run in background with cron.
+** DONE prevent starting of two agents (try to open a socket on a constant port)
+   CLOSED: [2012-07-23 Пн 22:04]
+** DONE create test-grid-agent:api-compatible-p
+   CLOSED: [2012-07-23 Пн 23:45]
+** DONE check what lisps other than CCL can run lisp-agent
+   CLOSED: [2012-07-25 Ср 19:03]
+
+** DONE update README.org to reflect the current status and priorities (in
+   CLOSED: [2012-07-25 Ср 19:06]
+   other words, reflect the changes during the last month)
+** DONE prepare the announcement for the mailing-list
+   CLOSED: [2012-07-27 Пт 05:48]
+** DONE publish the lisp-agent - merge lisp-agent to master
+   CLOSED: [2012-07-27 Пт 05:48]
+** DONE Give every agent and unique ID. store the ID in the agent persistence.
+   CLOSED: [2012-07-24 Вт 03:20]
+** DONE error handling in the main process - during a test run and in other situations
+   CLOSED: [2012-07-23 Пн 04:21]
+   For example, after testing some library, the output file with library
+   status is not found. Record :FAIL and proceed to further libraries.
+   How to handle error during test results submission?
+** DONE Agent: when test results upload failed, do not mark this lisp as tested in persistence.
+   CLOSED: [2012-07-10 Вт 15:47]
+** DONE run each test suite in a separate process
+   CLOSED: [2012-06-15 Пт 01:44]
+** DONE enforce the libraries source code recompilation on every test run
+   CLOSED: [2012-07-09 Пн 16:54]
+   by configuring asdf:output-translations to a temporary 
+   subdirectory in the test-run directory

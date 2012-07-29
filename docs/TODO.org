@@ -1,51 +1,3 @@
-* 0.4.0 Test Running Robustness - lisp-agent
-** DONE top level error handler in test-grid-agent:main
-   CLOSED: [2012-07-23 Пн 20:17]
-   write the unhandled error stacktrace (with causes)
-   into log and exit - never enter debugger as the 
-   program should be suitable to run in background with cron.
-** DONE prevent starting of two agents (try to open a socket on a constant port)
-   CLOSED: [2012-07-23 Пн 22:04]
-** DONE create test-grid-agent:api-compatible-p
-   CLOSED: [2012-07-23 Пн 23:45]
-** DONE check what lisps other than CCL can run lisp-agent
-   CLOSED: [2012-07-25 Ср 19:03]
-
-** DONE update README.org to reflect the current status and priorities (in
-   CLOSED: [2012-07-25 Ср 19:06]
-   other words, reflect the changes during the last month)
-** DONE prepare the announcement for the mailing-list
-   CLOSED: [2012-07-27 Пт 05:48]
-** DONE publish the lisp-agent - merge lisp-agent to master
-   CLOSED: [2012-07-27 Пт 05:48]
-** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
-   Do it autmatically, or send email to all the contributors, or just ignore this issue
-** DONE Give every agent and unique ID. store the ID in the agent persistence.
-   CLOSED: [2012-07-24 Вт 03:20]
-** DONE error handling in the main process - during a test run and in other situations
-   CLOSED: [2012-07-23 Пн 04:21]
-   For example, after testing some library, the output file with library
-   status is not found. Record :FAIL and proceed to further libraries.
-   How to handle error during test results submission?
-** DONE Agent: when test results upload failed, do not mark this lisp as tested in persistence.
-   CLOSED: [2012-07-10 Вт 15:47]
-** DONE run each test suite in a separate process
-   CLOSED: [2012-06-15 Пт 01:44]
-** DONE enforce the libraries source code recompilation on every test run
-   CLOSED: [2012-07-09 Пн 16:54]
-   by configuring asdf:output-translations to a temporary 
-   subdirectory in the test-run directory
-** TODO contributor monthly summary.
-   Now that test grid agent can be run by cron, sending confirmation
-   email to contributor for every test result doesn't make sense,
-   because the contributor is anaware when testing happens. But providing
-   feedback is necessary. We may send a monthly digest to contributor
-   summarizing the test results received from his agent(s). May be implemented
-   as a cron task running say at the 8th of every month (so that admin has
-   time to commit all the resutls to db.lisp and the digest
-   producer task sees them). Admin should be BCC'ed in these emails.
-   Should it be a single email for all contributors and the mailing list,
-   or each contributor should be emailed individually?
 * 0.4.1 Code cleanup after finishing lisp-agent 
 ** TODO review test suites which have hard-coded failures
    due to hang-ups or other problems and consider
@@ -89,15 +41,40 @@
    functions shoud accept agent as a parameter.
 * 0.4.2 Install more lisps on my VPS
 * 0.5.0 Reports Improve 2
-** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO make lisp code the main and the easiest interface to the test results:
-   convenient interation, filtering and matching functions
+   convenient interation, filtering and matching functions.
+   We want to add to every HTML report a secion with lisp
+   code generating this report, so that all the users
+   see and understand how to query data and can follow
+   these examples.
 ** TODO document the data format, data access functions, reporting
    functions and utilities.
-** TODO an informer which may be embedded into a library    :report:informer:
-   project page, with reports about the test statuses 
+** TODO the diff report (aka regressions report) - diff along various dimentions
+   Currently we can only find differences between test statuses
+   of a library on different quicklisps, when the lisp implementation
+   version is a constant.
+   We should generalize this to compare test results on two 
+   different versions of a compiler (windows/linux or old compiler
+   version and new one). Also when comparing test results, 
+   we must be more flexible than matching results only of
+   exactly the same lisp-implementation-identifier, 
+   because we don't always has exactly this lisp.
+   For example when we compare the lates qicklisp version
+   with the previous one, we may want to consider ecl-12.7.1-dee2506a-linux-x86-lisp-to-c
+   and ecl-12.7.1-xxxxffff-linux-x86-lisp-to-c as the same compiler, 
+   because otherwise we might just have no results to compare.
+   At first sight it looks like the task may be solved
+   by parametrizing the report by two functions:
+   - the one which decides what results to put to left side and to right side
+   - a predicate which decides if a result from the left side is comparable 
+     to a result from the right side.
+
+** TODO library mainainer page:                             :report:informer:
+   with reports about the test statuses 
    for this single library on various platforms with
-   various quicklisp versions
+   various quicklisp versions,
+   history of regressions (by quicklisp versions)
+** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO Filters for pivot reports
 ** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
    to improve the page performance and load time.
@@ -108,6 +85,19 @@
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
 * lisp-agent postponed issues
+** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
+   Do it autmatically, or send email to all the contributors, or just ignore this issue
+** TODO contributor monthly summary.
+   Now that test grid agent can be run by cron, sending confirmation
+   email to contributor for every test result doesn't make sense,
+   because the contributor is anaware when testing happens. But providing
+   feedback is necessary. We may send a monthly digest to contributor
+   summarizing the test results received from his agent(s). May be implemented
+   as a cron task running say at the 8th of every month (so that admin has
+   time to commit all the resutls to db.lisp and the digest
+   producer task sees them). Admin should be BCC'ed in these emails.
+   Should it be a single email for all contributors and the mailing list,
+   or each contributor should be emailed individually?
 ** TODO a parameter to the main function: limit the maximum time the agent works
 ** TODO ensure the tesg-grid code is recompiled when necessary
    The libraries being tested are recompiled at every test run.
@@ -172,12 +162,12 @@
 ** TODO persistence.lisp format - sort and newline for every record
 
 * User Requests
+** TODO Juan Jose: collect build status for libraries
 ** TODO Vladimir Sedach: test multithreaded CLISP
 ** TODO Greg Pfeil: don't install quicklisp in ASDF source registry,
    allow to customize it's location. It's easy to fix now - just
    add a working directory property to agent and use it.
    https://github.com/cl-test-grid/cl-test-grid/issues/5
-** TODO Juan Jose: collect build status for libraries
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
 ** TODO Enable HTTP caching for library test logs (good recipe: https://developers.google.com/speed/docs/best-practices/caching)
@@ -217,11 +207,6 @@
    whatever.
 ** TODO A restart which will allow to skip the current library        :agent:
    test suite and proceed to the next one.
-** TODO how to enforce rebuild when loading an ASDF system?
-   Important for ECL, because ECL bytecompiler and lisp-to-c
-   compiler produce incompatible .fasl files, but ASDF
-   stores the files in the same location, because both
-   flavors of ECL have the same (asdf:immplementation-identifier).
 ** TODO quicklisp distro version in report headers may be a link to 
    list of library versions in this ql version
    (like this: http://www.quicklisp.org/beta/releases.html, but
@@ -244,7 +229,6 @@
 ** TODO reduce non cl-test-grid output in the console (quicklisp output,
    compiler output, etc), so that cl-test-grid messages to the user
    are better visible.
-** TODO save all the output to a log, so that the tests may be run in background
 ** TODO Limit library output file size (how?).
 ** TODO finalize the terminology we use in the code
    to refer our main data: 
