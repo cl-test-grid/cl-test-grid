@@ -5,6 +5,7 @@
 (asdf:defsystem #:test-grid-data
   :version "0.3.1"
   :serial t
+  :depends-on (#:test-grid-utils)
   :components 
   ((:module "data"
     :serial t
