@@ -2,7 +2,7 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
-;;;; This file is loaded into a child lisp process to run a test suite using test-grid::run-libtest.
+;;;; This file is loaded into a child lisp process to run a test suite using test-grid-testsuites::run-libtest.
 
 (in-package :cl-user)
 
@@ -16,7 +16,7 @@
 
   (load (merge-pathnames "proc-common.lisp" this-file-dir)))
 
-(ql:quickload :test-grid)
+(ql:quickload :test-grid-testsuites)
 
 (defun setup-asdf-output-translations (private-quicklisp-dir asdf-output-root-dir)
   ;; Configure ASDF so that .fasl files from our private quicklisp
@@ -72,7 +72,7 @@
                                     private-quicklisp-dir))
           (libs-output-dir (merge-pathnames (make-pathname :directory '(:relative "private-quicklisp"))
                                             asdf-output-root-dir))
-          (test-grid-dir test-grid-config:*src-base-dir*)
+          (test-grid-dir (asdf:system-relative-pathname :test-grid-testsuites #P"../"))
           (test-grid-output-dir (merge-pathnames (make-pathname :directory '(:relative "test-grid"))
                                                  asdf-output-root-dir)))
       (asdf::defun* asdf:apply-output-translations (path)
@@ -93,5 +93,5 @@
 
   (setup-asdf-output-translations (private-quicklisp-dir) asdf-output-root-dir)
 
-  (let ((lib-result (test-grid::run-libtest libname run-descr logfile)))
+  (let ((lib-result (test-grid-testsuites::run-libtest libname run-descr logfile)))
     (set-response response-file lib-result)))

@@ -12,19 +12,19 @@
   (make-instance 'agent-impl))
 
 ;;; File system roots:
-(defun work-dir ()
-  (merge-pathnames "work-dir/agent/"
-                   test-grid-config::*src-base-dir*))
 
-(defun src-dir ()
-  "File system location of test-grid-agent source code"
-  (merge-pathnames "agent/"
-                   test-grid-config::*src-base-dir*))
+(defun src-dir()
+  (asdf:system-relative-pathname :test-grid-agent #P"agent/"))
+
+(defun src-super-root()
+  (merge-pathnames "../" (src-dir)))
+
+(defun work-dir ()
+  (merge-pathnames "work-dir/agent/" (src-super-root)))
 
 ;;; Working directory structure
 (defun test-output-base-dir ()
-  (merge-pathnames "test-runs/"
-                   (work-dir)))
+  (merge-pathnames "test-runs/" (work-dir)))
 
 (defun log-file ()
   ;; good thing about log4cl, it creates
@@ -192,7 +192,7 @@ the PREDICATE."
             (log:info "Running tests for ~A" (implementation-identifier lisp))
             (let ((results-dir (perform-test-run lib-world
                                                  lisp
-                                                 '(:alexandria) ;test-grid::*all-libs*
+                                                 test-grid-testsuites::*all-libs*
                                                  (test-output-base-dir)
                                                  (user-email agent))))
               (submit-test-run-results (blobstore agent) results-dir)

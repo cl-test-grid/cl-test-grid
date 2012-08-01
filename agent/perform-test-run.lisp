@@ -51,7 +51,7 @@ data (libraries test suites output and the run results) will be saved."
                          :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                          :if-exists :supersede
                          :if-does-not-exist :create)
-      (test-grid::print-test-run out test-run))))
+      (test-grid-data::print-test-run out test-run))))
 
 (defun lib-log-file (test-run-directory lib-name)
   (merge-pathnames (substitute #\- #\.
@@ -70,7 +70,7 @@ as hung, kill the lisp process and record a :FAIL
 as the library test result.")
 
 (defun proc-run-libtest (lisp-exe libname run-descr logfile asdf-output-dir)
-  "Runs test-grid::run-libtest in a separate process and returns the result."
+  "Runs test-grid-testsuites::run-libtest in a separate process and returns the result."
   (flet ((finish-test-log-with-failure (format-control &rest format-arguments)
            ;; Helper function to record failure status to the library
            ;; test log if the child lisp process running
@@ -85,7 +85,7 @@ as the library test result.")
                                 :if-does-not-exist :create
                                 :if-exists :append)
              (apply #'format out format-control format-arguments)
-             (test-grid::print-log-footer libname :fail out))))
+             (test-grid-testsuites::print-log-footer libname :fail out))))
     (let ((start-time (get-internal-real-time))
           (status (handler-case
                       (with-response-file (response-file)
@@ -114,7 +114,7 @@ as the library test result.")
       (log:info "The ~A test suite status: ~S" libname status)
       (list :libname libname
             :status status
-            :log-byte-length (test-grid::file-byte-length logfile)
+            :log-byte-length (test-grid-utils::file-byte-length logfile)
             :test-duration (/ (- (get-internal-real-time) start-time)
                               internal-time-units-per-second)))))
 
@@ -140,13 +140,13 @@ as the library test result.")
       run-dir)))
 
 (defun submit-logs (blobstore test-run-dir)
-  (let* ((run-info (test-grid::safe-read-file (run-info-file test-run-dir)))
+  (let* ((run-info (test-grid-utils::safe-read-file (run-info-file test-run-dir)))
          ;; prepare parameters for the SUBMIT-FILES blobstore function
          (submit-params (mapcar #'(lambda (lib-result)
                                     (let ((libname (getf lib-result :libname)))
                                       (cons libname
                                             (lib-log-file test-run-dir libname))))
-                                (test-grid::run-results run-info))))
+                                (test-grid-data::run-results run-info))))
     ;; submit files to the blobstore and receive
     ;; their blobkeys in response
     (let ((libname-to-blobkey-alist
@@ -158,12 +158,12 @@ as the library test result.")
       (flet ((get-blob-key (lib)
                (or (cdr (assoc lib libname-to-blobkey-alist))
                    (error "blobstore didn't returned blob key for the log of the ~A libary" lib))))
-        (setf (test-grid::run-results run-info)
+        (setf (test-grid-data::run-results run-info)
               (mapcar #'(lambda (lib-result)
                           (setf (getf lib-result :log-blob-key)
                                 (get-blob-key (getf lib-result :libname)))
                           lib-result)
-                      (test-grid::run-results run-info))))
+                      (test-grid-data::run-results run-info))))
       ;; finally, save the updated run-info with blobkeys
       ;; to the file. Returns the run-info.
       (save-run-info run-info test-run-dir)

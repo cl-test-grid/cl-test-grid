@@ -1,8 +1,18 @@
-;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: test-grid; Base: 10; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+;;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
+;;;; See LICENSE for details.
 
-(defpackage #:test-grid (:use :cl))
+(defpackage #:test-grid-testsuites
+  (:use :cl)
+  (:export  ;; list of the libraries added to test-grid
+            #:*all-libst
+            ;; the generic function to be implemented for evey library
+            #:libtest
+             ;; wrapper around libtests, does some housekeeping
+            ;; (candidate to move to the agent module)
+            #:run-libtest))
 
-(in-package #:test-grid)
+(in-package #:test-grid-testsuites)
 
 (defgeneric libtest (library-name)
   (:documentation "Define a method for this function
@@ -44,7 +54,7 @@ it is not loaded yet).
 Some of test-grid components have separate package
 and ASDF system for API and separate package+ASDF
 system for the implementation. This allows test-grid
-to be compilable and (partially) opereable even
+to be compilable and (partialuly) opereable even
 when some components are broken on particular lisp.
 
 For these known test-grid componetns REQUIRE-IMPL loads
@@ -153,7 +163,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     (with-input-from-string (test-output (get-output-stream-string test-output-buf))
       (do ((line (read-line test-output nil) (read-line test-output nil)))
           ((null line))
-        (when (starts-with line "not ok")
+        (when (test-grid-utils::starts-with line "not ok")
           (format t "---------------------------------------------------------------------------~%")
           (format t "~A test suite has a test failure; the first TAP output failure string:~%~A"
                   project-name line)
@@ -172,12 +182,12 @@ just passed to the QUICKLISP:QUICKLOAD."
                                                       :known-to-fail ("c"))
                                                     '(:failed-tests ("a2" "c2")
                                                       :known-to-fail ("b2")))))
-          (and (set= '("a" "b" "a2" "c2")
-                     (getf combined :failed-tests)
-                     :test #'string=)
-               (set= '("c" "b2")
-                     (getf combined :known-to-fail)
-                     :test #'string=))))
+          (and (test-grid-utils:set= '("a" "b" "a2" "c2")
+                                     (getf combined :failed-tests)
+                                     :test #'string=)
+               (test-grid-utils:set= '("c" "b2")
+                                     (getf combined :known-to-fail)
+                                     :test #'string=))))
 
 (defmethod libtest ((library-name (eql :alexandria)))
 
@@ -912,7 +922,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     (terpri stream)
     (format stream "============================================================~%")
     (format stream "  cl-test-grid status for ~A: ~A~%"
-            libname (print-test-status nil status))
+            libname (test-grid-data::print-test-status nil status))
     (format stream "============================================================~%")))
 
 (defun run-libtest (lib run-descr log-file)
@@ -962,107 +972,3 @@ just passed to the QUICKLISP:QUICKLOAD."
 
         (print-log-footer lib status *standard-output*)))
     status))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Database
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defparameter *db* '(:version 0 :runs ()))
-
-(defvar *standard-db-file*
-  (merge-pathnames "db.lisp"
-                   test-grid-config:*src-base-dir*))
-
-(defun add-run (run-info &optional (db *db*))
-  (push run-info (getf db :runs)))
-
-(defun print-list-elements (destination list separator elem-printer)
-  (let ((maybe-separator ""))
-    (dolist (elem list)
-      (format destination maybe-separator)
-      (funcall elem-printer elem)
-      (setf maybe-separator separator))))
-
-(defun print-list (destination list separator elem-printer)
-  (format destination "(")
-  (print-list-elements destination list separator elem-printer)
-  (format destination ")"))
-
-(defun print-test-status (destination status)
-  (etypecase status
-    (symbol (format destination "~s" status))
-    (list (progn
-            (let ((dest (or destination (make-string-output-stream))))
-              (flet ((test-name-printer (test-name)
-                       (format dest "~s" test-name)))
-                (format dest "(:failed-tests ")
-                (print-list dest (sort (copy-list (getf status :failed-tests))
-                                       #'string<)
-                            " " #'test-name-printer)
-                (format dest " :known-to-fail ")
-                (print-list dest (sort (copy-list (getf status :known-to-fail))
-                                              #'string<)
-                            " " #'test-name-printer)
-                (format dest ")"))
-              (if (null destination)
-                  (get-output-stream-string dest)
-                  nil))))))
-
-(defun run-descr (run)
-  "The description part of the test run."
-  (getf run :descr))
-
-(defun run-results (run)
-  "The list of test suite statuses for every library in the specified test run."
-  (getf run :results))
-
-(defun (setf run-results) (new-run-results test-run)
-  (setf (getf test-run :results) new-run-results))
-
-(defun print-test-run (out test-run &optional (indent 0))
-  (let ((descr (getf test-run :descr)))
-    (format out
-            "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact (:email ~s))~%"
-            (getf descr :lisp)
-            (getf descr :lib-world)
-            (getf descr :time)
-            (getf descr :run-duration)
-            (getf (getf descr :contact) :email)))
-  (format out "~v,0t:results (" (1+ indent))
-  (print-list-elements out
-                       (sort (copy-list (getf test-run :results))
-                             #'string<
-                             :key #'(lambda (lib-result)
-                                      (getf lib-result :libname)))
-                       (format nil "~~%~~~Dt" (+ indent 11))
-                       #'(lambda (lib-result)
-                           (format out
-                                   "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
-                                   (getf lib-result :libname)
-                                   (print-test-status nil (getf lib-result :status))
-                                   (getf lib-result :test-duration)
-                                   (getf lib-result :log-byte-length)
-                                   (getf lib-result :log-blob-key))))
-  (format out "))"))
-
-(defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
-  (with-open-file (out stream-or-path
-                       :direction :output
-                       :element-type 'character ;'(unsigned-byte 8) + flexi-stream
-                       :if-exists :supersede
-                       :if-does-not-exist :create)
-    (format out "(:version ~a~%" (getf db :version))
-    (format out " :runs (")
-    (print-list-elements out
-                         (getf db :runs)
-                         "~%~8t"
-                         #'(lambda (test-run)
-                             (print-test-run out test-run 8)))
-    (format out "))")))
-
-(defun read-db (&optional (stream-or-path *standard-db-file*))
-  (with-open-file (in stream-or-path
-                      :direction :input
-                      :element-type 'character ;'(unsigned-byte 8) + flexi-stream
-                      )
-    (safe-read in)))
-

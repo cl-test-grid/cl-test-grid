@@ -11,7 +11,9 @@
 (asdf:defsystem #:test-grid-agent
   :version "1.0.1"
   :serial t
-  :depends-on (#:test-grid
+  :depends-on (#:test-grid-utils
+               #:test-grid-data
+               #:test-grid-testsuites
                #:test-grid-blobstore
                #:test-grid-gae-blobstore
                #:alexandria

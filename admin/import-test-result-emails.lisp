@@ -36,11 +36,11 @@
   (length uids))
 
 (defun save-letter-uids (letter-uids work-dir)
-  (test-grid::write-to-file letter-uids (merge-pathnames "letter-uids.txt" work-dir))
+  (test-grid-utils::write-to-file letter-uids (merge-pathnames "letter-uids.txt" work-dir))
   letter-uids)
 
 (defun read-letter-uids (work-dir)
-  (test-grid::safe-read-file (merge-pathnames "letter-uids.txt" work-dir)))
+  (test-grid-utils::safe-read-file (merge-pathnames "letter-uids.txt" work-dir)))
   
 (defun save-string (str pathname)
   (with-open-file (stream pathname 
@@ -109,22 +109,25 @@ using SAVE-LETTER-UIDS function."
     (setf (gethash lisp lisp-table) t)))
 
 (defun print-commit-message (table)
-  (dolist (contributor (sort (test-grid::hash-table-keys table) #'string<))
+  (dolist (contributor (sort (test-grid-utils::hash-table-keys table) #'string<))
     (let ((lib-world-table (gethash contributor table)))
-      (dolist (lib-world (sort (test-grid::hash-table-keys lib-world-table) #'string<))
+      (dolist (lib-world (sort (test-grid-utils::hash-table-keys lib-world-table) #'string<))
         (format t "Test results for ~A and ~{~A~^, ~}. "
                 lib-world 
-                (sort (test-grid::hash-table-keys (gethash lib-world 
+                (sort (test-grid-utils::hash-table-keys (gethash lib-world 
                                                            lib-world-table))
                       #'string<))))
     (format t "Contributed by ~A.~%" contributor)))
 
 ;;; End commit message helper.
 
+(defun src-dir()
+  (asdf:system-relative-pathname :test-grid-admin #P"admin/"))
+
 (defparameter *host* "pop.yandex.ru")
 (defparameter *user* "cl-test-grid")
-(defparameter *work-dir* (merge-pathnames "admin/mail-import-work-dir/" 
-                                          test-grid-config:*src-base-dir*))
+(defparameter *work-dir* (merge-pathnames "../work-dir/admin/mail-import/" 
+                                          (src-dir)))
 
 (defun import-test-result-emails (mailbox-password)
   "Reads email notifications about new test results and
@@ -146,16 +149,16 @@ the procedure."
   
   (let* ((attachment-files (get-all-attachments *host* *user* mailbox-password *work-dir*))
          (submittions-info (make-submittions-info-table))
-         (db (test-grid::read-db)) )  
+         (db (test-grid-data::read-db)) )  
     (dolist (attachment-file attachment-files)
-      (let* ((test-run-info (test-grid::safe-read-file attachment-file))
+      (let* ((test-run-info (test-grid-utils::safe-read-file attachment-file))
              (descr (getf test-run-info :descr)))      
-        (test-grid::add-run test-run-info db)
+        (test-grid-data::add-run test-run-info db)
         (add-submittions-info submittions-info 
                               (getf (getf descr :contact) :email)
                               (getf descr :lib-world)
                               (getf descr :lisp))))
-    (test-grid::save-db db)
+    (test-grid-data::save-db db)
     (print-commit-message submittions-info)
     (length attachment-files)))
 

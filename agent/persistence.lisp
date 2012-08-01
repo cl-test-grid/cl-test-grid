@@ -29,14 +29,14 @@ exitst, loads the data saved there."))
 
 (defun save (persistence)
   ;; todo: sort and newline for each record
-  (test-grid::write-to-file (state persistence)
-                            (file persistence)))
+  (test-grid-utils::write-to-file (state persistence)
+                                  (file persistence)))
 
 (defmethod init-persistence (file)
   (let ((p (make-instance 'persistence :file file)))
     (when (probe-file file)
       (setf (state p)
-            (test-grid::safe-read-file file)))
+            (test-grid-utils::safe-read-file file)))
     p))
 
 (defmethod get-agent-id ((persistence persistence))

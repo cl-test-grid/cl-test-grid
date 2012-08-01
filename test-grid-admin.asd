@@ -7,7 +7,7 @@
 (asdf:defsystem #:test-grid-admin
   :version "0.1.0"
   :serial t
-  :depends-on (#:test-grid #:cl-pop #:cl-mime #:cl-base64)
+  :depends-on (#:test-grid-data #:test-grid-utils #:cl-pop #:cl-mime #:cl-base64)
   :components
   ((:module "admin"
     :serial t

@@ -36,7 +36,7 @@
          (response-file (workdir-file response-file-name)))
     (unwind-protect (progn (funcall body-func response-file)
                            (handler-case
-                               (test-grid::safe-read-file response-file)
+                               (test-grid-utils::safe-read-file response-file)
                              (serious-condition (condition)
                                (error 'no-response :cause condition
                                       :format-control "Error reading response file ~A. Caused by serious condition \"~A\" of type ~A."
