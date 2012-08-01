@@ -39,7 +39,28 @@
 ** TODO agent fs structure functions: make the workdir root
    a configurable property of agent, and fs structure
    functions shoud accept agent as a parameter.
+
+   Fixes user request by Greg Pfeil: don't install quicklisp in ASDF source registry,
+   https://github.com/cl-test-grid/cl-test-grid/issues/5
+
+   Allows for increased speed on multiprocessor systems
+   by starting several agent processes, each assigned
+   different set of lisp implementations. It would require
+   another agent config property - lock-port, for the socket
+   whcih assures agent is a signelton. Every 
+   agent have different work-dir and different port.
+
+   Several agents may even run in different threads
+   of a single lisp process (if global shared libraries
+   like asdf whould allow this).
+   
 * 0.4.2 Install more lisps on my VPS
+* 0.4.3 Separate status value for compilation failure
+  Important in general and a user reques by Juan Jose Garcia-Ripoll.
+** TODO Test status should include separate indicator for the library compilation and loading.
+   This allows to add even libraries without test cases to the
+   test grid.
+
 * 0.5.0 Reports Improve 2
 ** TODO make lisp code the main and the easiest interface to the test results:
    convenient interation, filtering and matching functions.
@@ -63,10 +84,16 @@
    with the previous one, we may want to consider ecl-12.7.1-dee2506a-linux-x86-lisp-to-c
    and ecl-12.7.1-xxxxffff-linux-x86-lisp-to-c as the same compiler, 
    because otherwise we might just have no results to compare.
-   At first sight it looks like the task may be solved
+
+   In other case, we want to compare test results of these two
+   compilers. Then we consider them different and 
+   different sides of comparision: one on the left hand,
+   and another on the right side.
+   
+   At first sight the task may be solved
    by parametrizing the report by two functions:
    - the one which decides what results to put to left side and to right side
-   - a predicate which decides if a result from the left side is comparable 
+   - a predicate which decides if a result cell from the left side is comparable 
      to a result from the right side.
 
 ** TODO library mainainer page:                             :report:informer:
@@ -75,9 +102,11 @@
    various quicklisp versions,
    history of regressions (by quicklisp versions)
 ** TODO Prevent HTML injection via test-run-info                     :report:
+** TODO pivot reports: header column always visible
 ** TODO Filters for pivot reports
 ** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
    to improve the page performance and load time.
+** TODO kind of burndown chart: avearange number of bugs by time
 * 0.6.0 Add more test suites
   - drakma test suite - create and ensure drakma works on all the lisps.
     Drakma test suite is a must. HTTP client today is as vital thing
@@ -162,12 +191,7 @@
 ** TODO persistence.lisp format - sort and newline for every record
 
 * User Requests
-** TODO Juan Jose: collect build status for libraries
 ** TODO Vladimir Sedach: test multithreaded CLISP
-** TODO Greg Pfeil: don't install quicklisp in ASDF source registry,
-   allow to customize it's location. It's easy to fix now - just
-   add a working directory property to agent and use it.
-   https://github.com/cl-test-grid/cl-test-grid/issues/5
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
 ** TODO Enable HTTP caching for library test logs (good recipe: https://developers.google.com/speed/docs/best-practices/caching)
@@ -195,7 +219,6 @@
         - separate report?
         - or just output the information into the log?
 ** TODO osicat: automate the :no-resource condition
-** TODO Test status should include separate indicator for the library compilation and loading.
 ** TODO ABCL, cffi tests: return :no-resource if JNA is not available
 ** TODO cffi tests: return :no-resource if C compilation fails on linux
 ** TODO cl-fad and flexi-streams use c:\tmp as a temporary directory
