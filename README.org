@@ -194,7 +194,7 @@
    for that library and send us this code. 
 
    See examples for the already added libraries in the 
-   [[https://github.com/cl-test-grid/cl-test-grid/blob/master/testsuites/testsuites.lisp][testsuites.lisp]].
+   [[https://github.com/cl-test-grid/cl-test-grid/blob/master/testsuites/testsuites.lisp][testsuites/testsuites.lisp]].
 
 ** More
    Lot of things may be done in this project. But the project
