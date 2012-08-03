@@ -9,13 +9,19 @@
        (this-file-dir (make-pathname :directory (pathname-directory this-file))))
   (load (merge-pathnames "quicklisp.lisp" this-file-dir)))
 
-(handler-bind ((error #'(lambda (err)
-                          (declare (ignore err))
-                          (when (find-restart 'quicklisp-quickstart::load-setup)
-                            (invoke-restart 'quicklisp-quickstart::load-setup)))))
-  (quicklisp-quickstart:install :path (private-quicklisp-dir)))
+(defun install-quicklisp (install-dir)
+  (handler-bind ((error #'(lambda (err)
+                            (declare (ignore err))
+                            (when (find-restart 'quicklisp-quickstart::load-setup)
+                              (invoke-restart 'quicklisp-quickstart::load-setup)))))
+    (quicklisp-quickstart:install :path install-dir)))
 
-(defun do-quicklisp-update()
-  (quicklisp:update-client :prompt nil)
-  (quicklisp:update-all-dists :prompt nil)
-  (ql-dist:version (ql-dist:dist "quicklisp")))
+
+(defmacro fncall (funname &rest args)
+  `(funcall (read-from-string ,funname) ,@args))
+
+(defun do-quicklisp-update (install-dir)
+  (install-quicklisp install-dir)
+  (fncall "quicklisp:update-client" :prompt nil)
+  (fncall "quicklisp:update-all-dists" :prompt nil)
+  (fncall "ql-dist:version" (fncall "ql-dist:dist" "quicklisp")))

@@ -29,11 +29,16 @@
 (define-condition no-response (caused-condition simple-error)
   ())
 
+(defvar *response-file-temp-dir* nil)
+
 (defun with-response-file-impl (body-func)
-  (let* ((response-file-name (format nil
-                                     "response~A.lisp"
+  (let* ((response-file-name (format nil "response~A.lisp"
                                      (random #.(1- (expt 2 64)))))
-         (response-file (workdir-file response-file-name)))
+         (response-file (if *response-file-temp-dir*
+                            (merge-pathnames response-file-name *response-file-temp-dir*)
+                            (progn (log:warn "~A is not set, temporary resposne file wil be created in the default directory."
+                                             '*response-file-temp-dir*)
+                                   response-file-name))))
     (unwind-protect (progn (funcall body-func response-file)
                            (handler-case
                                (test-grid-utils::safe-read-file response-file)

@@ -33,6 +33,7 @@
 
            ;; the main function of interest for test-grid agent
            #:run-with-timeout
+           #:lisp-process-timeout
 
             ;; deprecated function, consider run-with-timeout where possible
            #:run-lisp-process

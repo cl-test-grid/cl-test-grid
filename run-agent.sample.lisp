@@ -19,7 +19,7 @@
 
 ;; ensure this script is not outdated in respect to
 ;; the agent public API
-(let ((api-version-required '(1 . 0)))
+(let ((api-version-required '(1 . 1)))
   (when (not (test-grid-agent:api-compatible-p api-version-required))
     (error "The agent public API has changed in an incompatible way:
 current agent API version is ~A. We use version ~A.
@@ -77,7 +77,14 @@ run-agent.sample.lisp for a fresh example)."
       ;;
       ;; If you are strongly opposed to publishing you email, please provide
       ;; just some nickname.
-      (test-grid-agent:user-email *agent*) "avodonosov@yandex.ru")
+      (test-grid-agent:user-email *agent*) "avodonosov@yandex.ru"
+
+      ;;; --- the settings below are not required ---
+
+      ;; You may specify custom working directory for
+      ;; the agent. By default it is <source-code-base>/work-dir/agent/
+      ;;(test-grid-agent:work-dir *agent*) #P"/my/cl-test-grid/work-dir/agent/"
+      )
 
 ;;; Ask agent to do it's work
 (test-grid-agent:main *agent*)

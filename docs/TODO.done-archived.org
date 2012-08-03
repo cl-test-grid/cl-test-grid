@@ -1,3 +1,4 @@
+;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 * Milestone 0
 ** DONE information about test run:
    CLOSED: [2011-12-18 Вс 01:41]

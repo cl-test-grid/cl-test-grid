@@ -4,13 +4,6 @@
 
 (in-package #:test-grid-agent)
 
-(defclass agent-impl (agent)
-  ((persistence :type persistence :accessor persistence)
-   (blobstore :accessor blobstore)))
-
-(defmethod make-agent ()
-  (make-instance 'agent-impl))
-
 ;;; File system roots:
 
 (defun src-dir()
@@ -19,39 +12,52 @@
 (defun src-super-root()
   (merge-pathnames "../" (src-dir)))
 
-(defun work-dir ()
+(defun default-work-dir ()
   (merge-pathnames "work-dir/agent/" (src-super-root)))
 
-;;; Working directory structure
-(defun test-output-base-dir ()
-  (merge-pathnames "test-runs/" (work-dir)))
+;;; Agent implementation class
+(defclass agent-impl (agent)
+  ((work-dir :initform (default-work-dir))
+   (persistence :type persistence :accessor persistence)
+   (blobstore :accessor blobstore)))
 
-(defun log-file ()
+(defmethod make-agent ()
+  (make-instance 'agent-impl))
+
+;;; Working directory structure
+(defun test-output-base-dir (agent)
+  (merge-pathnames "test-runs/" (work-dir agent)))
+
+(defun log-file (agent)
   ;; good thing about log4cl, it creates
   ;; intermediate directories automatically,
   ;; so we need not care about this
   (merge-pathnames "logs/agent.log"
-                   (work-dir)))
+                   (work-dir agent)))
 
 ;; File relative to the work-dir
-(defun workdir-file (relative-path)
-  (merge-pathnames relative-path (work-dir)))
+(defun workdir-child (agent relative-path)
+  (merge-pathnames relative-path (work-dir agent)))
 
-(defun persistence-file ()
-  (workdir-file "persistence.lisp"))
+(defun private-quicklisp-dir (agent)
+  (workdir-child agent #P"quicklisp/"))
+
+(defun persistence-file (agent)
+  (workdir-child agent "persistence.lisp"))
 
 ;; File relative to the src-dir
 (defun src-file (file-name)
   (merge-pathnames file-name (src-dir)))
 
-(defun update-testing-quicklisp (lisp-exe)
+(defun update-testing-quicklisp (agent)
   (log:info "Ensuring the quicklisp used to download the libraries being tested is updated to the recent version...")
   (let ((quicklisp-version
          (with-response-file (response-file)
-           (lisp-exe:run-lisp-process lisp-exe
+           (lisp-exe:run-lisp-process (preferred-lisp agent)
                                       `(load ,(truename (src-file "proc-common.lisp")))
                                       `(load ,(truename (src-file "proc-update-quicklisp.lisp")))
-                                      `(cl-user::set-response ,response-file (cl-user::do-quicklisp-update))))))
+                                      `(cl-user::set-response ,response-file
+                                                              (cl-user::do-quicklisp-update ,(private-quicklisp-dir agent)))))))
     (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
     quicklisp-version))
 
@@ -117,25 +123,14 @@
 
 (defgeneric implementation-identifier (lisp-exe)
   (:method ((lisp-exe lisp-exe:lisp-exe))
-    (let ((ql-setup-file (workdir-file "quicklisp/setup.lisp")))
-      (when (not (probe-file ql-setup-file))
-        (error "Can not determine lisp implemntation name until quicklisp is installed - we need ASDF installed together with quicklisp to evaluate (asdf::implementation-identifier)."))
-      (with-response-file (response-file)
-        (lisp-exe:run-with-timeout +implementation-identifier-timeout+
-                                   lisp-exe
-                                   `(load ,(truename (src-file "proc-common.lisp")))
-                                   ;; can only do after quicklisp is installed
-                                   `(load ,(truename ql-setup-file))
-                                   `(cl-user::set-response ,response-file
-                                                           ;; read from string is necessary
-                                                           ;; because if agent is run on say CCL,
-                                                           ;; then ASDF:IMPLEMENTATION-IDENTIFIER
-                                                           ;; is exported from ASDF. But if the
-                                                           ;; child process is CLISP, on it
-                                                           ;; the symbol is not exported, and
-                                                           ;; CLISP cant read the code s-expr we pass to it.
-                                                           (funcall (read-from-string
-                                                                     "asdf::implementation-identifier"))))))))
+    (with-response-file (response-file)
+      (lisp-exe:run-with-timeout +implementation-identifier-timeout+
+                                 lisp-exe
+                                 `(load ,(truename (src-file "proc-common.lisp")))
+                                 `(load ,(truename (src-file "proc-implementation-identifier.lisp")))
+                                 `(cl-user::set-response ,response-file
+                                                         (funcall (read-from-string
+                                                                   "implementation-identifier::implementation-identifier")))))))
 (defmethod implementation-identifier ((lisp-exe lisp-exe:ecl))
   ;; append type of compiler (bytecode or lisp-to-c)
   ;; to the implementation identifier
@@ -190,11 +185,10 @@ the PREDICATE."
       (handler-case
           (progn
             (log:info "Running tests for ~A" (implementation-identifier lisp))
-            (let ((results-dir (perform-test-run lib-world
+            (let ((results-dir (perform-test-run agent
+                                                 lib-world
                                                  lisp
-                                                 test-grid-testsuites::*all-libs*
-                                                 (test-output-base-dir)
-                                                 (user-email agent))))
+                                                 test-grid-testsuites::*all-libs*)))
               (submit-test-run-results (blobstore agent) results-dir)
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
@@ -223,21 +217,22 @@ the PREDICATE."
 (defmethod main (agent)
   (handler-case
       (as-singleton-agent
-        (log:config :daily (log-file) :immediate-flush)
-        ;; finish the agent initialization
-        (setf (persistence agent) (init-persistence (persistence-file))
-              (blobstore agent) (test-grid-gae-blobstore:make-blob-store
-                                 :base-url
-                                 ;; during development of GAE blob storage
-                                 ;; :base-url may be "http://localhost:8080"
-                                 "http://cl-test-grid.appspot.com"))
-        (check-config agent)
-        (ensure-has-id agent)
-        (say-hello-to-admin agent)
-        ;; now do the work
-        (let* ((quicklisp-version (update-testing-quicklisp (preferred-lisp agent)))
-               (lib-world (format nil "quicklisp ~A" quicklisp-version)))
-          (run-tests agent lib-world)))
+        (let ((*response-file-temp-dir* (work-dir agent)))
+          (log:config :daily (log-file agent) :immediate-flush)
+          ;; finish the agent initialization
+          (setf (persistence agent) (init-persistence (persistence-file agent))
+                (blobstore agent) (test-grid-gae-blobstore:make-blob-store
+                                   :base-url
+                                   ;; during development of GAE blob storage
+                                   ;; :base-url may be "http://localhost:8080"
+                                   "http://cl-test-grid.appspot.com"))
+          (check-config agent)
+          (ensure-has-id agent)
+          (say-hello-to-admin agent)
+          ;; now do the work
+          (let* ((quicklisp-version (update-testing-quicklisp agent))
+                 (lib-world (format nil "quicklisp ~A" quicklisp-version)))
+            (run-tests agent lib-world))))
     (serious-condition (c)
       (log:error "Unhandled seriours-condition of type ~A: ~A"
                  (type-of c) c))))

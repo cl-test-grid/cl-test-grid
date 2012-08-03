@@ -1,9 +1,11 @@
+;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 * 0.4.1 Code cleanup after finishing lisp-agent 
 ** TODO review test suites which have hard-coded failures
    due to hang-ups or other problems and consider
    removing the hardcoded failures as we now have
    timeouts for hang-ups.
-** TODO finish breaking-up the old monolitic module test-grid:
+** DONE finish breaking-up the old monolitic module test-grid:
+   CLOSED: [2012-08-03 Пт 03:22]
    test grid systems will consist of modules for:
    - testsuites 
      a function libtest(libname) runs test suite
@@ -36,15 +38,16 @@
      printing for these objects; and the database
    - utils
 
-** TODO agent fs structure functions: make the workdir root
+** DONE agent fs structure functions: make the workdir root
+   CLOSED: [2012-08-03 Пт 03:21]
    a configurable property of agent, and fs structure
    functions shoud accept agent as a parameter.
 
    Fixes user request by Greg Pfeil: don't install quicklisp in ASDF source registry,
    https://github.com/cl-test-grid/cl-test-grid/issues/5
 
-   Allows for increased speed on multiprocessor systems
-   by starting several agent processes, each assigned
+   In future it will allow for increased speed on multiprocessor
+   systems by starting several agent processes, each assigned
    different set of lisp implementations. It would require
    another agent config property - lock-port, for the socket
    whcih assures agent is a signelton. Every 
@@ -53,7 +56,6 @@
    Several agents may even run in different threads
    of a single lisp process (if global shared libraries
    like asdf whould allow this).
-   
 * 0.4.2 Install more lisps on my VPS
 * 0.4.3 Separate status value for compilation failure
   Important in general and a user reques by Juan Jose Garcia-Ripoll.
@@ -61,6 +63,7 @@
    This allows to add even libraries without test cases to the
    test grid.
 
+* 0.4.4 Test all the libraries in quicklisp. (if test-grid-testsuites-libtest is not implemented test compilation)
 * 0.5.0 Reports Improve 2
 ** TODO make lisp code the main and the easiest interface to the test results:
    convenient interation, filtering and matching functions.

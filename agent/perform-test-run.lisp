@@ -69,7 +69,7 @@ to complete. After this time we consider the test suite
 as hung, kill the lisp process and record a :FAIL
 as the library test result.")
 
-(defun proc-run-libtest (lisp-exe libname run-descr logfile asdf-output-dir)
+(defun proc-run-libtest (lisp-exe libname run-descr logfile private-quicklisp-dir asdf-output-dir)
   "Runs test-grid-testsuites::run-libtest in a separate process and returns the result."
   (flet ((finish-test-log-with-failure (format-control &rest format-arguments)
            ;; Helper function to record failure status to the library
@@ -90,11 +90,12 @@ as the library test result.")
           (status (handler-case
                       (with-response-file (response-file)
                         (let* ((code `(progn
-                                        (load ,(workdir-file "quicklisp/setup.lisp"))
+                                        (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
                                         (load ,(src-file "proc-run-libtest.lisp"))
                                         (cl-user::run-libtest-with-response-to-file ,libname
                                                                                     (quote ,run-descr)
                                                                                     ,logfile
+                                                                                    ,private-quicklisp-dir
                                                                                     ,asdf-output-dir
                                                                                     ,response-file))))
                           (log:info "preparing to start separate lisp process with code: ~S" code)
@@ -105,7 +106,7 @@ as the library test result.")
                       (finish-test-log-with-failure "~%Child lisp process running the ~A test suite finished without returing result test status. Looks like the lisp process has crashed. The error condition signalled: ~A"
                                                     libname condition)
                       :fail)
-                    (lisp-exe::lisp-process-timeout ()
+                    (lisp-exe:lisp-process-timeout ()
                       (log:info "Child lisp running the ~A test suite has exceeded the timeout of ~A seconds and killed."
                                 libname +libtest-timeout-seconds+)
                       (finish-test-log-with-failure "~%The ~A test suite hasn't finished in ~A seconds.~%We consider the test suite as hung; the test suite lisp process is killed.~%"
@@ -118,16 +119,19 @@ as the library test result.")
             :test-duration (/ (- (get-internal-real-time) start-time)
                               internal-time-units-per-second)))))
 
-(defun perform-test-run (lib-world lisp-exe libs output-base-dir user-email)
+(defun perform-test-run (agent lib-world lisp-exe libs)
   (let* ((run-descr (make-run-descr lib-world
                                     (implementation-identifier lisp-exe)
-                                    user-email))
-         (run-dir (run-directory run-descr output-base-dir))
+                                    (user-email agent)))
+         (run-dir (run-directory run-descr (test-output-base-dir agent)))
          (asdf-output-dir (merge-pathnames "asdf-output/" run-dir))
          (lib-results))
     (ensure-directories-exist run-dir)
     (dolist (lib libs)
-      (let ((lib-result (proc-run-libtest lisp-exe lib run-descr (lib-log-file run-dir lib) asdf-output-dir)))
+      (let ((lib-result (proc-run-libtest lisp-exe lib run-descr
+                                          (lib-log-file run-dir lib)
+                                          (private-quicklisp-dir agent)
+                                          asdf-output-dir)))
         (push lib-result lib-results)))
     (setf (getf run-descr :run-duration)
           (- (get-universal-time)
@@ -135,8 +139,10 @@ as the library test result.")
     (let ((run (make-run run-descr lib-results)))
       (save-run-info run run-dir)
       (log:info "The test results were saved to: ~%~A." (truename run-dir))
-      (when (not (cl-fad:directory-exists-p asdf-output-dir))
-        (log:warn "The ASDF output directroy specified for the test run does not exist; seems like the test run was not using our asdf-output-translations and we have no guarantee all the sourcess were freshly recompiled: ~S" asdf-output-dir))
+      (dolist (asdf-output-subdir (list (merge-pathnames asdf-output-dir "private-quicklisp/")
+                                        (merge-pathnames asdf-output-dir "test-grid/")))
+        (when (not (cl-fad:directory-exists-p asdf-output-subdir))
+          (log:warn "The ASDF output directroy ~S does not exist; seems like the test run was not using our asdf-output-translations and we have no guarantee all the sourcess were freshly recompiled." asdf-output-subdir)))
       run-dir)))
 
 (defun submit-logs (blobstore test-run-dir)

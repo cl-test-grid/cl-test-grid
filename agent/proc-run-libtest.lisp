@@ -72,7 +72,7 @@
                                     private-quicklisp-dir))
           (libs-output-dir (merge-pathnames (make-pathname :directory '(:relative "private-quicklisp"))
                                             asdf-output-root-dir))
-          (test-grid-dir (asdf:system-relative-pathname :test-grid-testsuites #P"../"))
+          (test-grid-dir (asdf:system-source-directory :test-grid-testsuites))
           (test-grid-output-dir (merge-pathnames (make-pathname :directory '(:relative "test-grid"))
                                                  asdf-output-root-dir)))
       (asdf::defun* asdf:apply-output-translations (path)
@@ -88,10 +88,11 @@
 (defun run-libtest-with-response-to-file (libname
                                           run-descr
                                           logfile
+                                          private-quicklisp-dir
                                           asdf-output-root-dir
                                           response-file)
 
-  (setup-asdf-output-translations (private-quicklisp-dir) asdf-output-root-dir)
+  (setup-asdf-output-translations private-quicklisp-dir asdf-output-root-dir)
 
   (let ((lib-result (test-grid-testsuites::run-libtest libname run-descr logfile)))
     (set-response response-file lib-result)))

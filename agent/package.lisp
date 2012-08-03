@@ -12,10 +12,13 @@
            ;; the agent class (abstract)
            #:agent
 
-           ;; agent configuration properties
+           ;; agent configuration properties,
+           ;; without default values, must be configured by user:
            #:lisps
            #:preferred-lisp
            #:user-email
+           ;; have default values:
+           #:work-dir
 
            ;; agent factory function
            #:make-agent
@@ -25,7 +28,7 @@
 
 (in-package #:test-grid-agent)
 
-(defparameter +api-version+ '(1 . 0)
+(defparameter +api-version+ '(1 . 1)
   "Current version of the test-grid-agent API.")
 
 (defgeneric api-compatible-p (version-required &optional version-provided)
@@ -44,7 +47,10 @@ VERSION-PROVIDED defaults to TEST-GRID-AGENT:+API-VERSION+"))
    ;; and supporting more libraries. Used run various small
    ;; lisp programs like quicklisp update.
    (preferred-lisp :type (or null lisp-exe) :accessor preferred-lisp :initform nil)
-   (user-email :type (or null string) :accessor user-email :initform nil)))
+   (user-email :type (or null string) :accessor user-email :initform nil)
+   ;; pathname-designator for the working directory,
+   ;; defaults to <source code root>/work-dir/agent
+   (work-dir :accessor work-dir)))
 
 (defgeneric make-agent ())
 
