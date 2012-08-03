@@ -191,16 +191,6 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :alexandria)))
 
-; We keep the below hardcoded failure in case we want to test
-; the ECL 11.1.1 release (until new release is out).
-; It is commented out or uncommented depending on what
-; ECL release we are going to test.
-
-  ;; #+ecl
-  ;; (progn
-  ;;   (format t "ECL 11.1.1 has bug causing a stack overflow on alexandria tests. http://sourceforge.net/tracker/?func=detail&aid=3463131&group_id=30035&atid=398053~%")
-  ;;   (return-from libtest :fail))
-
   ;; The test framework used: rt.
   (clean-rt #+sbcl :sb-rt #-sbcl :rtest)
   (asdf:clear-system :alexandria-tests)
@@ -294,18 +284,9 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :usocket)))
 
-  #+abcl
-  (progn
-    (format t "~&On ABCL abcl-1.0.0 the usocket test suite hangs (after producing significant~%")
-    (format t "number of errors/failures in the log). The last log message before it hangs is:~%")
-    (format t "USOCKET-TEST::WAIT-FOR-INPUT.3")
-    (return-from libtest :fail))
-
   ;; The test framework used: rt.
   (clean-rt)
   (asdf:clear-system :usocket-test)
-
-;  (asdf:operate 'asdf:load-op :usocket-test :force t)
 
   (quicklisp:quickload :usocket-test)
 
@@ -863,12 +844,6 @@ just passed to the QUICKLISP:QUICKLOAD."
   (when (is-windows)
     (format t "The external-program test suite uses unix shell commands, like cd, which, and therefor can not be tested on Windows.")
     (return-from libtest :no-resource))
-
-  #+ecl
-  (progn
-    (format t "external-program test suite hangs on ECL (as of ecl-11.1.1-606449eb-linux-x86, Quicklisp 2012-03-07 (external-program-20111001-git)~%")
-    (format t "Returning hardcoded :FAIL~%")
-    (return-from libtest :fail))
 
   (ql:quickload :external-program)
   (ql:quickload :external-program-test)
