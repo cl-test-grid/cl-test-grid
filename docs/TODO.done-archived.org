@@ -251,3 +251,61 @@
    CLOSED: [2012-07-09 Пн 16:54]
    by configuring asdf:output-translations to a temporary 
    subdirectory in the test-run directory
+* 0.4.1 Code cleanup after finishing lisp-agent
+** DONE review test suites which have hard-coded failures
+   CLOSED: [2012-08-03 Пт 04:20]
+   due to hang-ups or other problems and consider
+   removing the hardcoded failures as we now have
+   timeouts for hang-ups.
+** DONE push forward breaking-up the old monolitic module test-grid:
+   CLOSED: [2012-08-03 Пт 03:22]
+   test grid systems will consist of modules for:
+   - testsuites 
+     a function libtest(libname) runs test suite
+     of the specified library, downloading the lib from quicklisp
+     if necessary, and returns test result in a unified format.
+     I.e. the module knows how to invoke the library test suite
+     and has adapters for test results of various test frameworks
+     to the testgrid test result format.
+   - agent
+     the program with can run test in child lisp processes,
+     knows which lisps the contributor has on the machine,
+     decides when to run tests, and can upload the test
+     results to the central server.
+     [the changes required are small - agent will receive
+     some code from the current test-grid.lisp,
+     for example test suite log header/footer printing.
+     Maybe the test suite log will include whole lisp
+     process output, from the lisp startup (now we 
+     start logging bit later, right before invoking
+     the test suite)]
+   - admin
+     code to receive test results and add to db
+     [remains unchanged]
+   - reporting
+     [reamains unchanged]
+   - blobstore
+     [remains unchanges]
+   - data 
+     objects moving between other modules: test run, test results,
+     printing for these objects; and the database
+   - utils
+
+** DONE agent fs structure functions: make the workdir root
+   CLOSED: [2012-08-03 Пт 03:21]
+   a configurable property of agent, and fs structure
+   functions shoud accept agent as a parameter.
+
+   Fixes user request by Greg Pfeil: don't install quicklisp in ASDF source registry,
+   https://github.com/cl-test-grid/cl-test-grid/issues/5
+
+   In future it will allow for increased speed on multiprocessor
+   systems by starting several agent processes, each assigned
+   different set of lisp implementations. It would require
+   another agent config property - lock-port, for the socket
+   whcih assures agent is a signelton. Every 
+   agent have different work-dir and different port.
+
+   Several agents may even run in different threads
+   of a single lisp process (if global shared libraries
+   like asdf whould allow this).
