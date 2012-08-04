@@ -63,7 +63,7 @@ data (libraries test suites output and the run results) will be saved."
                                (string-downcase lib-name))
                    test-run-directory))
 
-(defparameter +libtest-timeout-seconds+ #.(* 30 60) ;; half an hour
+(defparameter +libtest-timeout-seconds+ #.(* 5 60)
   "Maximum number of seconds we give each library test suite
 to complete. After this time we consider the test suite
 as hung, kill the lisp process and record a :FAIL
