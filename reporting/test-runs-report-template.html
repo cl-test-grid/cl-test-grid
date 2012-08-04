@@ -28,6 +28,9 @@
         <h4>Legend</h4>
         <p>Library test statuses:
             <ul>
+                <li><span class="test-status load-failed-status">L</span> stands for Load Failed. The library can not be loaded (this status is only for the library itself, but not for it's test suite).</li>
+                <li><span class="test-status timeout-status">T</span> stands for Timeout. The test suite had probably hang.</li>
+                <li><span class="test-status crash-status">C</span> stands for Crash. The lisp process running the test suite terminated without returning test status.</li>
                 <li><span class="test-status fail-status">F</span> stands for FAIL</li>
                 <li><span class="test-status warn-status">K</span> stands for Known FAIL - test failures
                         exist, but all the failures are already known for the library developers.</li>

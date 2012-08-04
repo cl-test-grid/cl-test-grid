@@ -137,7 +137,7 @@
 (defun aggregated-status (normalized-status)
   "Returns the test resutl as one symbol, even
 if it was an \"extended status\". Possible return
-values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
+values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :LOAD-FAILED, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
   (etypecase normalized-status
     (symbol normalized-status)
     (list (destructuring-bind (&key failed-tests known-to-fail) normalized-status
@@ -154,6 +154,9 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
     (:ok "O")
     (:unexpected-ok "U")
     (:fail "F")
+    (:crash "C")
+    (:load-failed "L")
+    (:timeout "T")
     (:known-fail "K")
     (:no-resource "R")
     (otherwise aggregated-status)))
@@ -161,8 +164,11 @@ values: :OK, :UNEXPECTED-OK, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
 (defun status-css-class (aggregated-status)
   (case aggregated-status
     (:ok "ok-status")
-   ((:unexpected-ok :known-fail) "warn-status")
+    ((:unexpected-ok :known-fail) "warn-status")
     (:fail  "fail-status")
+    (:crash  "crash-status")
+    (:load-failed  "load-failed-status")
+    (:timeout  "timeout-status")
     (:no-resource "no-resource-status")
     (otherwise "")))
 
@@ -681,7 +687,7 @@ Every subaddress represents some level of pivot groupping."
 ;;; Note that fail-list does not distinguish known failures from unknwown failures;
 ;;; all of them are represented just by stings naming failed tests.
 
-;; Sort order for failures
+;; The sort order for failures
 (defun fail-less (fail-a fail-b)
   (if (stringp fail-a)
       (if (stringp fail-b)
@@ -720,69 +726,90 @@ Every subaddress represents some level of pivot groupping."
       (equal '("a" "b" (:unexpected-ok . "c"))
              (fail-list '(:failed-tests ("a" "b") :known-to-fail ("b" "c"))))))
 
+#|
+
+In order to compare test statuses, we classify them into
+the following type hierarchy.
+
+  t  ---------------------- all statuses
+    good  ----------------- all good statuses
+      :ok
+      extended-empty ------ extended status with empty :failed-tests and empty :known-to-fail
+    :no-resouorce
+    bad  ------------------ all bad statuses
+      bad-symbol ---------- bad status represended by single keyword symbol
+        :fail
+        :crash
+        :load-failed
+        :timeoout
+      extended-non-empty  - extended status with non-empty :failed-tests or :known-to-fail
+
+As you can see, all the subtypes are disjoint.
+
+The function OF-TYPE-P below implements the described type predicates.
+|#
+
+;; This table specifies how we comparte new test result
+;; with old test result based on their types.
 (defparameter *lib-status-regressions-rules*
-  `( ;new type              ;old type    ; do the new-result has regressions comparing to old-status?
-    (()                     t            nil)
-    (:ok                    t            nil)
-    (:no-resource           t            nil)
-    (:fail                  ()           t)
-    (:fail                  :ok          t)
-    (:fail                  (something)  nil)
-    (:fail                  :fail        nil)
-    (:fail                  :no-resource nil)
-    ;; (unexpected-oks-only) is a subtype of (something)
-    ;; therefore should be checked before (something)
-    ((unexpected-oks-only)  :ok          nil)
-    ((something)            ()           t)
-    ((something)            :ok          t)
-    ((something)            :no-resource nil)
-    ((something)            (something)  ,#'(lambda (new-status old-status)
-                                              (set-difference (fail-list new-status)
-                                                              (fail-list old-status)
-                                                              :test #'equal)))
-    ((something)            :fail        nil)))
+  `( ;new-statys type     ;old-status type  ;does the new-status have regressions comparing to old-status?
+    (good                 t                  nil)
+    (:no-resource         t                  nil)
+    (bad                  good               t)
+    (bad                  :no-resource       nil)
+    ;; coparisios between various bad results
+    (extended-non-empty   bad-symbol         nil)
+    (bad-symbol           extended-non-empty t)
 
+    (:fail                bad-symbol         nil)
+    (bad-symbol           bad-symbol         ,(lambda (new-status old-status)
+                                                (not (eq new-status old-status))))
+
+    (extended-non-empty   extended-non-empty ,(lambda (new-status old-status)
+                                                (set-difference (fail-list new-status)
+                                                                (fail-list old-status)
+                                                                :test #'equal)))))
 (defun of-type-p (lib-status lib-status-typespec)
-  (cond ((eq lib-status-typespec t)
-         t)
-        ((member lib-status-typespec '(:ok :fail :no-resource))
-         (eq lib-status lib-status-typespec))
-        ((equal lib-status-typespec '())
-         (and (listp lib-status)
-              (not (or (getf lib-status :failed-tests)
-                       (getf lib-status :known-to-fail)))))
-        ((equal lib-status-typespec '(something))
-         (and (listp lib-status)
-              (or (getf lib-status :failed-tests)
-                  (getf lib-status :known-to-fail))))
-        ((equal lib-status-typespec '(unexpected-oks-only))
-         (and (consp lib-status)
-              (let ((failed (getf lib-status :failed-tests))
-                    (known-to-fail (getf lib-status :known-to-fail)))
-                (and (null failed)
-                     (car known-to-fail)))))
-        (t (error "Unknown lib-status-typespec: ~S" lib-status-typespec))))
+  (ecase lib-status-typespec
+    ((t) t)
+    ((:ok :no-resource :fail :crash :load-failed :timeout)
+     (eq lib-status lib-status-typespec))
+    (bad-symbol (member lib-status
+                        '(:fail :crash :load-failed :timeout)
+                        :test #'eq))
+    (extended-empty (and (listp lib-status)
+                         (not (or (getf lib-status :failed-tests)
+                                  (getf lib-status :known-to-fail)))))
+    (extended-non-empty (and (listp lib-status)
+                             (or (getf lib-status :failed-tests)
+                                 (getf lib-status :known-to-fail))))
+    (bad (or (of-type-p lib-status 'bad-symbol)
+             (of-type-p lib-status 'extended-non-empty)))
+    (good (or (of-type-p lib-status :ok)
+              (of-type-p lib-status 'extended-empty)))))
 
-(assert
- (and (of-type-p '(:failed-tests ("a")) '(something))
-      (of-type-p '(:failed-tests ("a" "b") :known-to-fail ("a")) '(something))
-      (of-type-p '() '())
-      (not (of-type-p '(:failed-tests "a") '()))
-      (of-type-p :fail :fail)
-      (of-type-p :no-resource :no-resource)
-      (of-type-p :ok :ok)
-      (of-type-p :ok t)
-      (not (of-type-p '() '(unexpected-oks-only)))
-      (of-type-p '(:failed-tests () :known-to-fail ("a" "b")) '(unexpected-oks-only))
-      (of-type-p '(:failed-tests () :known-to-fail ("a" "b")) '(something))
-      (of-type-p '(:failed-tests () :known-to-fail ("a" "b")) t)))
+(assert (of-type-p '(:failed-tests ("a")) 'extended-non-empty))
+(assert (of-type-p '(:failed-tests ("a" "b") :known-to-fail ("a")) 'extended-non-empty))
+(assert (of-type-p '() 'extended-empty))
+(assert (not (of-type-p '(:failed-tests "a") 'extended-empty)))
+(assert (of-type-p :fail :fail))
+(assert (of-type-p :no-resource :no-resource))
+(assert (of-type-p :ok :ok))
+(assert (of-type-p :crash :crash))
+(assert (of-type-p :load-failed :load-failed))
+(assert (of-type-p :timeout :timeout))
+(assert (of-type-p :crash 'bad-symbol))
+(assert (of-type-p :timeout 'bad))
+(assert (of-type-p :load-failed t))
+(assert (of-type-p :ok t))
+(assert (not (of-type-p '() 'extended-non-empty)))
+(assert (of-type-p '() 'good))
+(assert (of-type-p '(:failed-tests () :known-to-fail ("a" "b")) 'extended-non-empty))
+(assert (of-type-p '(:failed-tests () :known-to-fail ("a" "b")) 'bad))
+(assert (of-type-p '(:failed-tests () :known-to-fail ("a" "b")) t))
 
 (defun has-regressions-p (new-lib-status old-lib-status)
-  "Returns true if NEW-LIB-STATUS has regressions comparing to OLD-LIB-STATUS.
-In most cases the result is obvious, but there is one subtle case, which deserves to be 
-explained here: if NEW-LIB-STATUS contains only unexpected OKs, and OLD-LIB-STATUS
-was :OK, then HAS-REGRESSIONS-P returns false - that's how we treat :OK, even
-unexpected OKs are OKs."
+  "Returns true if NEW-LIB-STATUS has regressions comparing to OLD-LIB-STATUS."
   (loop for (new-typespec old-typespec result-spec) in *lib-status-regressions-rules*
      do (when (and (of-type-p new-lib-status new-typespec)
                    (of-type-p old-lib-status old-typespec))
@@ -793,30 +820,34 @@ unexpected OKs are OKs."
   (error "Unrecognized lib-status combination. new-lib-status: ~S, old-lib-status: ~S"
          new-lib-status old-lib-status))
 
-(assert
- (and (not (has-regressions-p :ok :fail))
-      (not (has-regressions-p :ok '(:failed-tests ("a"))))
-      (not (has-regressions-p :no-resource :fail))
-      (not (has-regressions-p :no-resource :ok))
-      (not (has-regressions-p :no-resource :no-resource))
-      (not (has-regressions-p '(:failed-tests () :known-to-fail ()) :ok))
-      (not (has-regressions-p '(:failed-tests () :known-to-fail ()) :fail))
-      (not (has-regressions-p '(:failed-tests () :known-to-fail ()) '(:failed-tests ("a"))))
-      (has-regressions-p '(:failed-tests ("a" "b")) '(:failed-tests ("c")))
-      (not (has-regressions-p '(:failed-tests ("a" "b")) '(:failed-tests ("a" "b"))))
-      (has-regressions-p '(:failed-tests ("a" "b")) '())
-      (has-regressions-p '(:failed-tests ("a" "b")) :ok)
-      ;; unexpected OKs only - is not a regression comparing to :OK
-      (not (has-regressions-p '(:failed-tests () :known-to-fail ("a" "b"))
-                              :ok))
-      ;; but is a regression comparing an extended status with no failures
-      (has-regressions-p '(:failed-tests () :known-to-fail ("a" "b"))
-                         '(:failed-tests () :known-to-fail ()))
-      (has-regressions-p :fail :ok)
-      (has-regressions-p :fail '(:failed-tests () :known-to-fail ()))
-      (not (has-regressions-p '(:failed-tests () :known-to-fail ()) :fail))
-      (not (has-regressions-p :ok '(:failed-tests () :known-to-fail ())))
-      (not (has-regressions-p :fail :fail))))
+(assert (not (has-regressions-p :ok :fail)))
+(assert (not (has-regressions-p :ok '(:failed-tests ("a")))))
+(assert (not (has-regressions-p :no-resource :fail)))
+(assert (not (has-regressions-p :no-resource :ok)))
+(assert (not (has-regressions-p :no-resource :no-resource)))
+(assert (not (has-regressions-p '(:failed-tests () :known-to-fail ()) :ok)))
+(assert (not (has-regressions-p '(:failed-tests () :known-to-fail ()) :fail)))
+(assert (not (has-regressions-p '(:failed-tests () :known-to-fail ()) '(:failed-tests ("a")))))
+(assert (has-regressions-p '(:failed-tests ("a" "b")) '(:failed-tests ("c"))))
+(assert (not (has-regressions-p '(:failed-tests ("a" "b")) '(:failed-tests ("a" "b")))))
+(assert (has-regressions-p '(:failed-tests ("a" "b")) '()))
+(assert (has-regressions-p '(:failed-tests ("a" "b")) :ok))
+(assert (has-regressions-p '(:failed-tests () :known-to-fail ("a" "b"))
+                           :ok))
+(assert (has-regressions-p '(:failed-tests () :known-to-fail ("a" "b"))
+                           '(:failed-tests () :known-to-fail ())))
+(assert (has-regressions-p :fail :ok))
+(assert (has-regressions-p :fail '(:failed-tests () :known-to-fail ())))
+(assert (not (has-regressions-p '(:failed-tests () :known-to-fail ()) :fail)))
+(assert (not (has-regressions-p :ok '(:failed-tests () :known-to-fail ()))))
+(assert (not (has-regressions-p :fail :fail)))
+(assert (has-regressions-p :crash :fail))
+(assert (has-regressions-p :load-failed :fail))
+(assert (has-regressions-p :timeout :fail))
+(assert (has-regressions-p :timeout '(:failed-tests ("c"))))
+(assert (has-regressions-p :timeout '()))
+(assert (has-regressions-p :timeout :crash))
+(assert (not (has-regressions-p :fail :crash)))
 
 ;; Diff item represent two results
 ;; of the same library under the same lisp,

@@ -8,6 +8,18 @@
     color: red;
 }
 
+.crash-status {
+    color: blue;
+}
+
+.load-failed-status {
+    color: blue;
+}
+
+.timeout-status {
+    color: blue;
+}
+
 .warn-status {
     color: orange;
 }
