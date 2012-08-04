@@ -98,7 +98,7 @@ as the library test result.")
                                                                                     ,private-quicklisp-dir
                                                                                     ,asdf-output-dir
                                                                                     ,response-file))))
-                          (log:info "preparing to start separate lisp process with code: ~S" code)
+                          (log:info "Starting ~A test suite..." libname)
                           (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
                     (no-response (condition)
                       (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
