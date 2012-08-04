@@ -13,7 +13,7 @@
   (asdf:system-relative-pathname :test-grid-data #P"data/"))
 
 (defvar *standard-db-file*
-  (merge-pathnames #P"../cl-test-grid-results/db.lisp" (src-dir)))
+  (merge-pathnames #P"../../cl-test-grid-results/db.lisp" (src-dir)))
 
 (defun add-run (run-info &optional (db *db*))
   (push run-info (getf db :runs)))
