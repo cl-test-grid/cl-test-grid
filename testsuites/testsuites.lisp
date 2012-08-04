@@ -909,31 +909,44 @@ just passed to the QUICKLISP:QUICKLOAD."
           lib)
   (finish-output t)
 
-  (flet ((libtest-catching-all-problems ()
-           ;; We should never allow the test suite to enter debugger.
-           ;; If the test suite tries to enter debugger, then something
-           ;; is wrong, we just record failure.
-           (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
-                                      (declare (ignore me-or-my-encapsulation))
-                                      (format t
-                                              "The test suite calls invoke-debugger with condition of type ~A: ~A.~%"
-                                              (type-of condition)
-                                              condition)
-                                      (format t "Returning :FAIL.")
-                                      (return-from libtest-catching-all-problems :fail))))
-             ;; Even despite we prevent entering the interactive debugger,
-             ;; we capture all the SERIOUS-CONDITIONS signalled by test suite,
-             ;; because we don't want our caller (the code calling RUN-LIBTEST),
-             ;; to see the test suite errors as errors signalled by RUN-LIBTEST.
-             (handler-case
-                 (normalize-status (libtest lib))
-               (serious-condition (condition) (progn
-                                                (format t
-                                                        "~&Unhandled SERIOUS-CONDITION of type ~A is signaled: ~A~%"
-                                                        (type-of condition)
-                                                        condition)
-                                                (format t "Returning :FAIL.")
-                                                :fail))))))
+  (labels ((handling-problems (body-func on-problem-func)
+             "Runs BODY-FUNC and returns it's result. But if BODY-FUNC causes any problems, invoke ON-PROBLEM-FUNC."
+             ;; We should never allow the test suite to enter debugger.
+             ;; If the test suite tries to enter debugger, then something
+             ;; is wrong, we just record failure.
+             (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
+                                        (declare (ignore me-or-my-encapsulation))
+                                        (format t
+                                                "invoke-debugger is called with condition of type ~A: ~A.~%"
+                                                (type-of condition)
+                                                condition)
+                                        (funcall on-problem-func))))
+               ;; Even despite we prevent entering the interactive debugger,
+               ;; we capture all the SERIOUS-CONDITIONS signalled by test suite,
+               ;; because we don't want our caller (the code calling RUN-LIBTEST),
+               ;; to see the test suite errors as errors signalled by RUN-LIBTEST.
+               (handler-case
+                   (funcall body-func)
+                 (serious-condition (condition)
+                   (format t
+                           "~&Unhandled SERIOUS-CONDITION of type ~A is signaled: ~A~%"
+                           (type-of condition)
+                           condition)
+                   (funcall on-problem-func)))))
+
+           (libtest-handling-problems ()
+             (handling-problems (lambda ()
+                                  (format t "Testing the ~A load..." lib)
+                                  (ql:quickload lib))
+                                (lambda ()
+                                  (format t "Returning :LOAD-FAILED")
+                                  (return-from libtest-handling-problems :load-failed)))
+             (handling-problems (lambda ()
+                                  (format t "Running ~A's test suite..." lib)
+                                  (normalize-status (libtest lib)))
+                                (lambda ()
+                                  (format t "Returning :FAIL")
+                                  (return-from libtest-handling-problems :fail)))))
     (with-open-file (log-stream log-file
                                 :direction :output
                                 :if-exists :overwrite
@@ -941,6 +954,6 @@ just passed to the QUICKLISP:QUICKLOAD."
       (print-log-header lib run-descr log-stream)
       (let* ((*standard-output* log-stream)
              (*error-output* log-stream)
-             (status (libtest-catching-all-problems)))
+             (status (libtest-handling-problems)))
         (print-log-footer lib status log-stream)
         status))))

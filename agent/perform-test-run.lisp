@@ -105,13 +105,13 @@ as the library test result.")
                                 condition)
                       (finish-test-log-with-failure "~%Child lisp process running the ~A test suite finished without returing result test status. Looks like the lisp process has crashed. The error condition signalled: ~A"
                                                     libname condition)
-                      :fail)
+                      :crash)
                     (lisp-exe:lisp-process-timeout ()
                       (log:info "Child lisp running the ~A test suite has exceeded the timeout of ~A seconds and killed."
                                 libname +libtest-timeout-seconds+)
                       (finish-test-log-with-failure "~%The ~A test suite hasn't finished in ~A seconds.~%We consider the test suite as hung; the test suite lisp process is killed.~%"
                                                     libname +libtest-timeout-seconds+)
-                      :fail))))
+                      :timeout))))
       (log:info "The ~A test suite status: ~S" libname status)
       (list :libname libname
             :status status
