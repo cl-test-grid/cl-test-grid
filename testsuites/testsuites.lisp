@@ -936,16 +936,16 @@ just passed to the QUICKLISP:QUICKLOAD."
 
            (libtest-handling-problems ()
              (handling-problems (lambda ()
-                                  (format t "Testing the ~A load..." lib)
+                                  (format t "~&Testing the ~A load...~%" lib)
                                   (ql:quickload lib))
                                 (lambda ()
-                                  (format t "Returning :LOAD-FAILED")
+                                  (format t "~&Returning :LOAD-FAILED~%")
                                   (return-from libtest-handling-problems :load-failed)))
              (handling-problems (lambda ()
-                                  (format t "Running ~A's test suite..." lib)
+                                  (format t "~&Running ~A's test suite...~%" lib)
                                   (normalize-status (libtest lib)))
                                 (lambda ()
-                                  (format t "Returning :FAIL")
+                                  (format t "~&Returning :FAIL~%")
                                   (return-from libtest-handling-problems :fail)))))
     (with-open-file (log-stream log-file
                                 :direction :output
