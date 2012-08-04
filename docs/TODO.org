@@ -53,6 +53,12 @@
 ** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
    to improve the page performance and load time.
 ** TODO kind of burndown chart: avearange number of bugs by time
+** TODO visual graph of library dependencies, clickable (SVG?),
+        so that we can see what libraries are blocked when
+        the given library is broken, and what dependencies
+        block this library.
+        Look for help from http://chart.ravenbrook.com/ ?
+** TODO has-regressions-p - cover all the possible cased by unit tests?
 * 0.7.0 Add more test suites
   - drakma test suite - create and ensure drakma works on all the lisps.
     Drakma test suite is a must. HTTP client today is as vital thing
