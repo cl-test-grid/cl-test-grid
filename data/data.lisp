@@ -109,3 +109,10 @@
                       )
     (test-grid-utils::safe-read in)))
 
+
+#|
+ DB version change history:
+ 0 - initial
+ 1 - cl-routes and cl-closure-template are renamed to routes and closure-template
+
+|#
