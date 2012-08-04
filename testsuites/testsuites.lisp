@@ -5,7 +5,7 @@
 (defpackage #:test-grid-testsuites
   (:use :cl)
   (:export  ;; list of the libraries added to test-grid
-            #:*all-libst
+            #:*all-libs*
             ;; the generic function to be implemented for evey library
             #:libtest
              ;; wrapper around libtests, does some housekeeping
@@ -901,49 +901,46 @@ just passed to the QUICKLISP:QUICKLOAD."
     (format stream "============================================================~%")))
 
 (defun run-libtest (lib run-descr log-file)
-  (let (status)
+  ;; Rudiments from the times of single-process testing of all libraries
+  ;; and printing message for user to console.
+  ;; Should we mainain run-libtest suitable for such usage now?
+  (format t
+          "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
+          lib)
+  (finish-output t)
+
+  (flet ((libtest-catching-all-problems ()
+           ;; We should never allow the test suite to enter debugger.
+           ;; If the test suite tries to enter debugger, then something
+           ;; is wrong, we just record failure.
+           (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
+                                      (declare (ignore me-or-my-encapsulation))
+                                      (format t
+                                              "The test suite calls invoke-debugger with condition of type ~A: ~A.~%"
+                                              (type-of condition)
+                                              condition)
+                                      (format t "Returning :FAIL.")
+                                      (return-from libtest-catching-all-problems :fail))))
+             ;; Even despite we prevent entering the interactive debugger,
+             ;; we capture all the SERIOUS-CONDITIONS signalled by test suite,
+             ;; because we don't want our caller (the code calling RUN-LIBTEST),
+             ;; to see the test suite errors as errors signalled by RUN-LIBTEST.
+             (handler-case
+                 (normalize-status (libtest lib))
+               (serious-condition (condition) (progn
+                                                (format t
+                                                        "~&Unhandled SERIOUS-CONDITION of type ~A is signaled: ~A~%"
+                                                        (type-of condition)
+                                                        condition)
+                                                (format t "Returning :FAIL.")
+                                                :fail))))))
     (with-open-file (log-stream log-file
                                 :direction :output
                                 :if-exists :overwrite
                                 :if-does-not-exist :create)
-      (let* ((orig-std-out *standard-output*)
-             (*standard-output* log-stream)
-             (*error-output* log-stream))
-
-        (format orig-std-out
-                "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
-                lib)
-        (finish-output orig-std-out)
-
-        (print-log-header lib run-descr *standard-output*)
-
-        (setf status
-              ;; We should never allow the test suite to enter debugger.
-              ;; If the test suite tries to enter debugger, then something
-              ;; is wrong, we just record failure.
-              (restart-case
-                  (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
-                                             (declare (ignore me-or-my-encapsulation))
-                                             (format t
-                                                     "The test suite calls invoke-debugger with condition of type ~A: ~A.~%"
-                                                     (type-of condition)
-                                                     condition)
-                                             (invoke-restart 'fail-the-test-suite-because-of-debugger))))
-                    ;; Even despite we prevent entering the interactive debugger,
-                    ;; we capture all the SERIOUS-CONDITIONS signalled by test suite,
-                    ;; because we don't want our caller (the code calling RUN-LIBTEST),
-                    ;; to see the test suite errors as errors signalled by RUN-LIBTEST.
-                    (handler-case
-                        (normalize-status (libtest lib))
-                      (serious-condition (condition) (progn
-                                                       (format t
-                                                               "~&Unhandled SERIOUS-CONDITION of type ~A is signaled: ~A~%"
-                                                               (type-of condition)
-                                                               condition)
-                                                       :fail))))
-                (fail-the-test-suite-because-of-debugger ()
-                  (format t "The test suite stopped because of the debugger invocation. Returning :FAIL.")
-                  :fail)))
-
-        (print-log-footer lib status *standard-output*)))
-    status))
+      (print-log-header lib run-descr log-stream)
+      (let* ((*standard-output* log-stream)
+             (*error-output* log-stream)
+             (status (libtest-catching-all-problems)))
+        (print-log-footer lib status log-stream)
+        status))))
