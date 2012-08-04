@@ -84,7 +84,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :named-readtables      :arnesi              :local-time          :s-xml
     :cl-oauth              :cl-routes           :cl-unicode          :fiveam
     :trivial-utf-8         :yason               :cl-annot            :cl-openid
-    :split-sequence        :cl-closure-template :cl-interpol         :trivial-shell
+    :split-sequence        :closure-template    :cl-interpol         :trivial-shell
     :let-plus              :data-sift           :cl-num-utils        :ieee-floats
     :cl-project            :trivial-http        :cl-store            :hu.dwim.stefil
     :kmrcl                 :cxml-stp            :hu.dwim.walker      :hu.dwim.defclass-star
@@ -675,7 +675,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (ql:quickload :split-sequence-tests)
   (run-fiveam-test-suite :split-sequence))
 
-(defmethod libtest ((library-name (eql :cl-closure-template)))
+(defmethod libtest ((library-name (eql :closure-template)))
   ;; The test framework used: lift.
   (ql:quickload :closure-template)
   (ql:quickload :closure-template-test)
