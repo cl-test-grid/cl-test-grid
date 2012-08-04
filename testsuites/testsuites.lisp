@@ -82,7 +82,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :metabang-bind         :cl-json             :cl-containers       :metatilities-base
     :cl-cont               :moptilities         :trivial-timeout     :metatilities
     :named-readtables      :arnesi              :local-time          :s-xml
-    :cl-oauth              :cl-routes           :cl-unicode          :fiveam
+    :cl-oauth              :routes              :cl-unicode          :fiveam
     :trivial-utf-8         :yason               :cl-annot            :cl-openid
     :split-sequence        :closure-template    :cl-interpol         :trivial-shell
     :let-plus              :data-sift           :cl-num-utils        :ieee-floats
@@ -586,11 +586,11 @@ just passed to the QUICKLISP:QUICKLOAD."
       (setf (symbol-value (read-from-string "cl-oauth:*request-adapter*"))
             original-request-adapter))))
 
-(defmethod libtest ((library-name (eql :cl-routes)))
+(defmethod libtest ((library-name (eql :routes)))
   ;; The test framework used: lift.
   (quicklisp:quickload :routes)
   (quicklisp:quickload :routes-test)
-                       ;; good way to refre symbols, thanks cl-routes
+                       ;; good way to refer symbols, thanks cl-routes
   (run-lift-test-suite (read-from-string "routes.test::routes-test")))
 
 (defmethod libtest ((library-name (eql :cl-unicode)))
