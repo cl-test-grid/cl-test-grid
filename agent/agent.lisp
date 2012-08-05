@@ -232,7 +232,6 @@ the PREDICATE."
                               (return-from main)))))
     (as-singleton-agent
       (let ((*response-file-temp-dir* (work-dir agent)))
-        (error "hru-hru")
         (log:config :daily (log-file agent) :immediate-flush)
         ;; finish the agent initialization
         (setf (persistence agent) (init-persistence (persistence-file agent))
