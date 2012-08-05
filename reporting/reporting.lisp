@@ -2,9 +2,6 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
-(defpackage #:test-grid-reporting
-  (:use :cl))
-
 (in-package #:test-grid-reporting)
 
 ;; -------------- the reporting source code directory -----------;;
@@ -259,26 +256,12 @@ values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :LOAD-FAILED, :FAIL, :NO-RESOURSE
 ;; ...
 ;;
 
-(defun do-results-impl (db handler)
-  "Handler is a function of two arguments: TEST-RUN and LIB-RESULT"
-    (dolist (test-run (getf db :runs))
-      (dolist (lib-result (test-grid-data::run-results test-run))
-        (funcall handler test-run lib-result))))
-
-(defmacro do-results ((test-run-var lib-result-var db) &body body)
-  `(do-results-impl ,db
-     #'(lambda (,test-run-var ,lib-result-var)
-         ,@body)))
-
 (defun build-joined-index (db)
   (let ((all-results (make-hash-table :test 'equal)))
-    (do-results (run lib-result db)
-      (let* ((run-descr (test-grid-data::run-descr run))
-             (lisp (getf run-descr :lisp))
-             (lib-world (getf run-descr :lib-world))
-             (libname (getf lib-result :libname)))
-        (push (make-instance 'joined-lib-result :lib-result lib-result :test-run run)
-              (gethash (list lisp lib-world libname) all-results))))
+    (do-results (record db)
+      (push record
+            (gethash (list (lisp record) (lib-world record) (libname record))
+                     all-results)))
     all-results))
 
 ;; The pivot reports code below does not know exact form
@@ -979,7 +962,7 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
     (write-sequence (test-runs-report db) out))
 
   (with-report-file (out "export.csv")
-    (export-to-csv out))
+    (export-to-csv out db))
 
   (let ((joined-index (build-joined-index db)))
 

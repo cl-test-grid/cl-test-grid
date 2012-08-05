@@ -10,4 +10,6 @@
   ((:module "reporting"
     :serial t
     :components
-    ((:file "reporting")))))
+    ((:file "package")
+     (:file "do-results")
+     (:file "reporting")))))
