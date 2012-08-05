@@ -184,19 +184,24 @@ the PREDICATE."
                 lib-world
                 (mapcar #'implementation-identifier done-lisps)))
     (dolist (lisp pending-lisps)
-      (handler-case
-          (progn
-            (log:info "Running tests for ~A" (implementation-identifier lisp))
-            (let ((results-dir (perform-test-run agent
-                                                 lib-world
-                                                 lisp
-                                                 test-grid-testsuites::*all-libs*)))
-              (submit-test-run-results (blobstore agent) results-dir)
-              (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
-              (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
-        (serious-condition (e)
-          (log:error "Error during tests on ~A: ~A. Continuing for remaining lisps."
-                     (implementation-identifier lisp) e))))))
+      (handler-bind
+          ((serious-condition (lambda (c)
+                                (let ((msg (with-output-to-string (s)
+                                             (format s
+                                                     "Error of type ~A during tests on ~A: ~A. Continuing for remaining lisps."
+                                                     (type-of c) (implementation-identifier lisp) c)
+                                             (trivial-backtrace:print-backtrace-to-stream s))))
+                                  (log:error (log:make-logger) msg)
+                                  (go continue)))))
+        (log:info "Running tests for ~A" (implementation-identifier lisp))
+        (let ((results-dir (perform-test-run agent
+                                             lib-world
+                                             lisp
+                                             test-grid-testsuites::*all-libs*)))
+          (submit-test-run-results (blobstore agent) results-dir)
+          (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
+          (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
+      continue)))
 
 (defun ensure-has-id (agent)
   (let* ((p (persistence agent))
@@ -217,24 +222,29 @@ the PREDICATE."
                                   "hello"))
 
 (defmethod main (agent)
-  (handler-case
-      (as-singleton-agent
-        (let ((*response-file-temp-dir* (work-dir agent)))
-          (log:config :daily (log-file agent) :immediate-flush)
-          ;; finish the agent initialization
-          (setf (persistence agent) (init-persistence (persistence-file agent))
-                (blobstore agent) (test-grid-gae-blobstore:make-blob-store
-                                   :base-url
-                                   ;; during development of GAE blob storage
-                                   ;; :base-url may be "http://localhost:8080"
-                                   "http://cl-test-grid.appspot.com"))
-          (check-config agent)
-          (ensure-has-id agent)
-          (say-hello-to-admin agent)
-          ;; now do the work
-          (let* ((quicklisp-version (update-testing-quicklisp agent))
-                 (lib-world (format nil "quicklisp ~A" quicklisp-version)))
-            (run-tests agent lib-world))))
-    (serious-condition (c)
-      (log:error "Unhandled seriours-condition of type ~A: ~A"
-                 (type-of c) c))))
+  (handler-bind
+      ((serious-condition (lambda (c)
+                            (let ((msg (with-output-to-string (s)
+                                         (format s "Unhandled seriours-condition of type ~A: ~A"
+                                                 (type-of c) c)
+                                         (trivial-backtrace:print-backtrace-to-stream s))))
+                              (log:error (log:make-logger) msg)
+                              (return-from main)))))
+    (as-singleton-agent
+      (let ((*response-file-temp-dir* (work-dir agent)))
+        (error "hru-hru")
+        (log:config :daily (log-file agent) :immediate-flush)
+        ;; finish the agent initialization
+        (setf (persistence agent) (init-persistence (persistence-file agent))
+              (blobstore agent) (test-grid-gae-blobstore:make-blob-store
+                                 :base-url
+                                 ;; during development of GAE blob storage
+                                 ;; :base-url may be "http://localhost:8080"
+                                 "http://cl-test-grid.appspot.com"))
+        (check-config agent)
+        (ensure-has-id agent)
+        (say-hello-to-admin agent)
+        ;; now do the work
+        (let* ((quicklisp-version (update-testing-quicklisp agent))
+               (lib-world (format nil "quicklisp ~A" quicklisp-version)))
+          (run-tests agent lib-world))))))

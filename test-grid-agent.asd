@@ -22,7 +22,8 @@
                #:cl-fad
                #:log4cl
                #:fare-memoization
-               #:usocket)
+               #:usocket
+               #:trivial-backtrace)
   :components 
     ((:module "agent"
       :serial t

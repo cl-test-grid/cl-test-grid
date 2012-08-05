@@ -28,4 +28,5 @@
              :format-arguments (list +singleton-agent-lock-port+)))))
 
 (defmacro as-singleton-agent (&body body)
-  `(execute-as-singleton-agent (lambda () ,@body)))
+  `(execute-as-singleton-agent (alexandria:named-lambda as-singleton-agent-body ()
+                                 ,@body)))
