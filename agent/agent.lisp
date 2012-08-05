@@ -188,9 +188,10 @@ the PREDICATE."
           ((serious-condition (lambda (c)
                                 (let ((msg (with-output-to-string (s)
                                              (format s
-                                                     "Error of type ~A during tests on ~A: ~A. Continuing for remaining lisps."
+                                                     "Error of type ~A during tests on ~A: ~A~%"
                                                      (type-of c) (implementation-identifier lisp) c)
-                                             (trivial-backtrace:print-backtrace-to-stream s))))
+                                             (trivial-backtrace:print-backtrace-to-stream s)
+                                             (format s "~&~%Continuing for the remaining lisps."))))
                                   (log:error (log:make-logger) msg)
                                   (go continue)))))
         (log:info "Running tests for ~A" (implementation-identifier lisp))
