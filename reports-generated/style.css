@@ -46,10 +46,6 @@
     border-collapse: collapse;
 }
 
-.test-table th {
-    background: white;
-}
-
 .test-table td, .test-table th {
     padding-left: 2px;
     padding-right: 2px;
@@ -84,12 +80,16 @@ th.rotated-header {
 
 /* Table highlighting */
 
-th.hover, .hover { 
+.test-table {
     background-color: #f2f2f2; 
 }
 
+th.hover, .hover { 
+    background-color: white; 
+}
+
 th.no-hover {
-    background-color: white;
+    background-color: #f2f2f2;
     color: black !important;
 }
 
