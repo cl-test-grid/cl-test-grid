@@ -230,7 +230,10 @@ the PREDICATE."
                                                  (type-of c) c)
                                          (trivial-backtrace:print-backtrace-to-stream s))))
                               (log:error (log:make-logger) msg)
-                              (return-from main)))))
+                              (return-from main))))
+       (warning (lambda (w)
+                  (log:warn "A warning is signalled: ~A" w)
+                  (muffle-warning))))
     (as-singleton-agent
       (let ((*response-file-temp-dir* (work-dir agent)))
         (log:config :daily (log-file agent) :immediate-flush)
