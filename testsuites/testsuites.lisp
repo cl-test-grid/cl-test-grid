@@ -313,13 +313,6 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :bordeaux-threads)))
 
-  #+cmucl
-  (progn
-    (format t "~&On CMUCL bordeaux-threads test suite traps into some active~%")
-    (format t "deadlock, produces 8 MB of '.' symbols in log, constantly runs GC~%")
-    (format t "and finally dies when heap is exhausted.~%")
-    (return-from libtest :fail))
-
   ;; The test framework used: fiveam.
 
   (quicklisp:quickload :bordeaux-threads-test)
