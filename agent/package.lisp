@@ -28,7 +28,7 @@
 
 (in-package #:test-grid-agent)
 
-(defparameter +api-version+ '(1 . 1)
+(defparameter +api-version+ '(1 . 2)
   "Current version of the test-grid-agent API.")
 
 (defgeneric api-compatible-p (version-required &optional version-provided)
@@ -50,7 +50,13 @@ VERSION-PROVIDED defaults to TEST-GRID-AGENT:+API-VERSION+"))
    (user-email :type (or null string) :accessor user-email :initform nil)
    ;; pathname-designator for the working directory,
    ;; defaults to <source code root>/work-dir/agent
-   (work-dir :accessor work-dir)))
+   (work-dir :accessor work-dir)
+   ;; the tcp port used as a lock to prevent several agents
+   ;; running simultaneously.
+   ;; If you want to ran several agents, assign them all
+   ;; different signlethon-ports and different work-dirs.
+   (singleton-lock-port :type fixnum :accessor singleton-lock-port :initform 7685)))
+
 
 (defgeneric make-agent ())
 

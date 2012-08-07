@@ -13,20 +13,18 @@
 
 (in-package #:test-grid-agent)
 
-(defparameter +singleton-agent-lock-port+ 7685)
-
 (define-condition another-agent-is-running (simple-error) ())
 
-(defun execute-as-singleton-agent (body-func)
+(defun execute-as-singleton (agent body-func)
   (handler-case
-      (let ((s (usocket:socket-listen "localhost" +singleton-agent-lock-port+)))
+      (let ((s (usocket:socket-listen "localhost" (singleton-lock-port agent))))
         (unwind-protect (funcall body-func)
           (usocket:socket-close s)))
     (usocket:address-in-use-error ()
       (error 'another-agent-is-running
              :format-control "Another agent seems to be already running - our \"lock\" TCP port ~A is already in use."
-             :format-arguments (list +singleton-agent-lock-port+)))))
+             :format-arguments (list (singleton-lock-port agent))))))
 
-(defmacro as-singleton-agent (&body body)
-  `(execute-as-singleton-agent (alexandria:named-lambda as-singleton-agent-body ()
-                                 ,@body)))
+(defmacro as-singleton ((agent) &body body)
+  `(execute-as-singleton ,agent (alexandria:named-lambda as-singleton-agent-body ()
+                                  ,@body)))

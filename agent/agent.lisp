@@ -186,14 +186,15 @@ the PREDICATE."
     (dolist (lisp pending-lisps)
       (handler-bind
           ((serious-condition (lambda (c)
-                                (let ((msg (with-output-to-string (s)
-                                             (format s
-                                                     "Error of type ~A during tests on ~A: ~A~%"
-                                                     (type-of c) (implementation-identifier lisp) c)
-                                             (trivial-backtrace:print-backtrace-to-stream s)
-                                             (format s "~&~%Continuing for the remaining lisps."))))
-                                  (log:error (log:make-logger) msg)
-                                  (go continue)))))
+                                (let ((bt (with-output-to-string (s)
+                                            (trivial-backtrace:print-backtrace-to-stream s))))
+
+                                  (log:error "Error of type ~A during tests on ~A: ~A~%~A~%Continuing for the remaining lisps."
+                                           (type-of c)
+                                           (implementation-identifier lisp)
+                                           c
+                                           bt))
+                                (go continue))))
         (log:info "Running tests for ~A" (implementation-identifier lisp))
         (let ((results-dir (perform-test-run agent
                                              lib-world
@@ -225,18 +226,17 @@ the PREDICATE."
 (defmethod main (agent)
   (handler-bind
       ((serious-condition (lambda (c)
-                            (let ((msg (with-output-to-string (s)
-                                         (format s "Unhandled seriours-condition of type ~A: ~A"
-                                                 (type-of c) c)
-                                         (trivial-backtrace:print-backtrace-to-stream s))))
-                              (log:error (log:make-logger) msg)
-                              (return-from main))))
+                            (let ((bt (with-output-to-string (s)
+                                        (trivial-backtrace:print-backtrace-to-stream s))))
+                              (log:error "Unhandled seriours-condition of type ~A: ~A~%~A"
+                                         (type-of c) c bt))
+                            (return-from main)))
        (warning (lambda (w)
                   (log:warn "A warning is signalled: ~A" w)
                   (muffle-warning))))
-    (as-singleton-agent
+    (as-singleton (agent)
+      (log:config :daily (log-file agent) :immediate-flush)
       (let ((*response-file-temp-dir* (work-dir agent)))
-        (log:config :daily (log-file agent) :immediate-flush)
         ;; finish the agent initialization
         (setf (persistence agent) (init-persistence (persistence-file agent))
               (blobstore agent) (test-grid-gae-blobstore:make-blob-store
