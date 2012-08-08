@@ -131,9 +131,9 @@
    We provide template scripts demonstrating how to
    load, cofigure and run agent by a single commant.
 
-   In our example we suggest to use [[http://ccl.clozure.com/][CCL]] and assume
-   [[http://www.quicklisp.org/beta/][Quicklisp]] is installed and added to the CCL
-   init file. (SBCL was aslo tested successfully).
+   Please use [[http://ccl.clozure.com/][CCL]] - it is the development platform and
+   the only lisp known to run agent successfully.
+   We assume [[http://www.quicklisp.org/beta/][Quicklisp]] is installed and added to the CCL init file.
 
    The first time you will need do these steps:
 
