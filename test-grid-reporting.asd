@@ -18,5 +18,5 @@
      (:file "csv")
      (:file "pivot")
      (:file "regressions")
-     (:file "compiler-page")
+     (:file "ecl-pages")
      (:file "durations")))))

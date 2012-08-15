@@ -8,11 +8,11 @@
 
 ;; Macro
 ;;
-;;    do-results ((result-record-var db) &body body)
+;;    do-results ((result-record-var db &key where) &body body)
 ;;
-;; Iterates over all test resutls in the DB and
-;; for each result record executes the BODY
-;; binding the RESULT-RECORD-VAR to the result record.
+;; Iterates over all test resutls in the DB satisfying
+;; predicate WHERE (if specified) and for each result record
+;; executes the BODY, binding the RESULT-RECORD-VAR to the result record.
 
 ;; Every test result record has these fields:
 (defgeneric libname (item))           ;; library name - a keyword, like :babel, :alexandria, etc.
@@ -25,6 +25,12 @@
 (defgeneric contact-email (item))     ;; email of the person who run the test
 (defgeneric test-run-time (item))     ;; when the test run was started (test-run is an internal term for testing a set of libraries on a single lisp implementation; today test runs include 56 libraries)
 (defgeneric test-run-duration (item)) ;; duration of the test-run.
+
+;; A functional wrapper around do-results.
+;; Returns list of results satisfying the predicate
+;; WHERE. If WHERE is omitted, returns all
+;; the results.
+(defgeneric select (db &key where))
 
 ;;; Implementation
 
@@ -46,7 +52,12 @@ WHERE is a predicate of one argument - test result record."
        ,@body)
      :where ,where))
 
-;; a lib result with a reference to it's test run
+(defmethod select (db &key where)
+  (let ((results))
+    (do-results (result db :where where)
+      (push result results))))
+
+;;; RESULT record. Implemented as a lib result with a reference to it's test run.
 (defclass joined-lib-result ()
   ((test-run :initarg :test-run :accessor test-run)
    (lib-result :initarg :lib-result :accessor lib-result)))
