@@ -66,5 +66,6 @@
     (with-report-file (out "quicklisps-test-diff.html")
       (print-all-quicklisps-diff-report out joined-index)))
 
-  (print-ecl-pages db))
+  (print-ecl-pages db)
+  (print-abcl-page db))
 
