@@ -46,7 +46,7 @@
   (format out "</table>~%")
   (format out "<p>~%")
   (format out "Source code: <a href=\"https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/abcl-page.lisp\">abcl-page.lisp</a>.~%")
-  (format out "The code accesses test results using siple API defined here: <a href=\"https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/do-results.lisp\">do-results.lisp</a> and several HTML printing helper functions.~%")
+  (format out "The code accesses test results using siple API defined here: <a href=\"https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/do-results.lisp\">do-results.lisp</a> and uses several HTML printing helper functions.~%")
   (format out "</p>~%"))
 
 (defun print-abcl-page (db)
