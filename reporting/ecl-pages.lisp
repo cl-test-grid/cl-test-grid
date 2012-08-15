@@ -8,10 +8,9 @@
 (defparameter *last-ecl-quicklisp* "quicklisp 2012-08-11")
 
 (defun last-ecl-p (result)
-  (and
-   (search "ecl" (lisp result))
-   (search *last-ecl-version* (lisp result))
-   (string= *last-ecl-quicklisp* (lib-world result))))
+  (and (search "ecl" (lisp result))
+       (search *last-ecl-version* (lisp result))
+       (string= *last-ecl-quicklisp* (lib-world result))))
 
 (defun ecl-abnormal-results (db)
   ;;; select interesting test results from the DB
