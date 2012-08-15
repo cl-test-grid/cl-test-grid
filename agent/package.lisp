@@ -19,6 +19,7 @@
            #:user-email
            ;; have default values:
            #:work-dir
+           #:singleton-lock-port
 
            ;; agent factory function
            #:make-agent
