@@ -28,7 +28,7 @@
 ;;; Rendering ECL abnormal results HTML page
 (defun print-ecl-results (destination results)
   (format destination
-          "~{~{~A ~A ~A~}~%~}"
+          "<code><pre>~{~{~A ~A ~A~}~%~}</pre></code>"
           (mapcar (lambda (result)
                     (list (lisp result) (status result) (log-link result 'libname)))
                   results)))
