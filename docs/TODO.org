@@ -66,6 +66,8 @@
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
 * lisp-agent postponed issues
+** TODO when logging the name of a library currently being tested, log also it's number in the
+   total number of libraries, e.g. [41 of 56].
 ** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
    Do it autmatically, or send email to all the contributors, or just ignore this issue
 ** TODO contributor monthly summary.
