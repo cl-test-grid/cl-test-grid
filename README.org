@@ -87,7 +87,7 @@
   Each test suite is run in a separate lisp process
   Quicklisp is used to download the libraries to be tested 
   (test-grid-agent bootstraps a private quicklisp and have no
-  interference a quicklisp  installation user might have
+  interference with a quicklisp  installation user might have
   on his computer). The agent remembers what lisp implementations
   where already tested on what quicklisp distros, and doesn't repeat
   the work it has already done.

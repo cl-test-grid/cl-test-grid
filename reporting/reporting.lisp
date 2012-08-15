@@ -64,5 +64,7 @@
     (print-pivot-reports joined-index)
 
     (with-report-file (out "quicklisps-test-diff.html")
-      (print-all-quicklisps-diff-report out joined-index))))
+      (print-all-quicklisps-diff-report out joined-index)))
+
+  (print-ecl-pages db))
 

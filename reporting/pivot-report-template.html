@@ -61,20 +61,20 @@
         }
 
         function setupStatusTooltips() {
-            $('.fail-status').attr('title', 'Fail');
-            $('.ok-status').attr('title', 'OK');
-            $('.no-resource-status').attr('title', 'No Resource');
-            $('.crash-status').attr('title', 'Crash');
-            $('.load-failed-status').attr('title', 'Load Failed');
-            $('.timeout-status').attr('title', 'Timeout');
+            $('.fail-status').closest('td').attr('title', 'Fail');
+            $('.ok-status').closest('td').attr('title', 'OK');
+            $('.no-resource-status').closest('td').attr('title', 'No Resource');
+            $('.crash-status').closest('td').attr('title', 'Crash');
+            $('.load-failed-status').closest('td').attr('title', 'Load Failed');
+            $('.timeout-status').closest('td').attr('title', 'Timeout');
             var warns = $('.warn-status');
             for (var i = 0; i < warns.length; i++) {
                 var $warn = $(warns[i]);
                 var text = $warn.text()
                 if (text === 'U') {
-                    $warn.attr('title', 'Unexpected OK');
+                    $warn.closest('td').attr('title', 'Unexpected OK');
                 } else if (text === 'K') {
-                    $warn.attr('title', 'Known Fail');
+                    $warn.closest('td').attr('title', 'Known Fail');
                 } else {
                     throw new Error('Unknown status letter: ' + text);
                 }

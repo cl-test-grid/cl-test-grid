@@ -50,9 +50,11 @@
 ** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO pivot reports: header column always visible
 ** TODO Filters for pivot reports
-** TODO limit amount of data included into to HTML reports to the last 3 quicklisp releases 
+** DONE limit amount of data included into to HTML reports to the last 3 quicklisp releases 
+   CLOSED: [2012-08-15 Ср 20:42]
    to improve the page performance and load time.
 ** TODO kind of burndown chart: avearange number of bugs by time
+** TODO toplogical sorting of libraries by dependencies
 ** TODO visual graph of library dependencies, clickable (SVG?),
         so that we can see what libraries are blocked when
         the given library is broken, and what dependencies
@@ -66,6 +68,9 @@
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
 * lisp-agent postponed issues
+** TODO memoization of the implementation-identifier generic function is not portable
+   in particular, it's known that fare-memoization can't memoize it on ACL,
+   see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
 ** TODO when logging the name of a library currently being tested, log also it's number in the
    total number of libraries, e.g. [41 of 56].
 ** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
@@ -82,12 +87,11 @@
    Should it be a single email for all contributors and the mailing list,
    or each contributor should be emailed individually?
 ** TODO a parameter to the main function: limit the maximum time the agent works
-** TODO ensure the tesg-grid code is recompiled when necessary
+** DONE ensure the tesg-grid-testsuites code is recompiled when necessary
+   CLOSED: [2012-08-15 Ср 19:11]
    The libraries being tested are recompiled at every test run.
-   It would be good to ensure test grid code is also correctly
+   It would be good to ensure test-grid-testsuites code is also correctly
    recompiled.
-   - agent (the main process)
-   - test frameworks APIs (loaded into the child processes)
    Related thread on asdf-devel:
    http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
 ** TODO Admin stores a hashmap for lisps to be tested (or skipped)
@@ -108,11 +112,13 @@
     a string; provably it will even contains *features*
     of the lisp implementaion.
 ** TODO Agent: retry when test results upload failed.
-** TODO recompile cl-test-grid sources at every agetn run?
-   As currently ASDf doesn't rebuild depending libraries
-   when the libraries they depend on changed (add 
+** TODO recompile cl-test-grid-agent sources at every agetn run?
+   As currently ASDF doesn't rebuild depending libraries
+   when the libraries they depend on changed (add
    links to this TODO item when Internet connection
    will be up)
+   Related thread on asdf-devel:
+   http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
 ** TODO kill process tree on unix in case the test suite exceeded timeout
    Currenlty we only kill the lisp process, but not it's children.
    Some test suites may start other programs, and it makes sense
@@ -126,10 +132,12 @@
    and call it only form the agent process, not from the child, test suite
    running, process.
 ** TODO consider what test suite timeout value is the best (30 mins currently)
-** TODO backtrace in logs
+** DONE backtrace in logs
+   CLOSED: [2012-08-15 Ср 19:09]
 ** TODO should the lisp-process-timeout condition inherit from serous-condition, error, or just condition?
 
-** TODO Prevent child lisp process entering debugger.
+** DONE Prevent child lisp process entering debugger.
+   CLOSED: [2012-08-15 Ср 19:09]
    Note, different lisps treat unhangled signals during -eval
    differently: ECL exits with status 1, CCL enters debugger
    and hangs.
