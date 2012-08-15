@@ -250,4 +250,5 @@ the PREDICATE."
         ;; now do the work
         (let* ((quicklisp-version (update-testing-quicklisp agent))
                (lib-world (format nil "quicklisp ~A" quicklisp-version)))
-          (run-tests agent lib-world))))))
+          (run-tests agent lib-world)))))
+  (log:info "Agent is done. Bye."))
