@@ -26,16 +26,6 @@
                          (libname record))))))
 
 ;;; Rendering ECL abnormal results HTML page
-(defun log-link (result &rest fields)
-  "Generate HTML link to the online test suite log
-for the RESULT. The FIELDS specifies set of fields
-to include in to the text of the link, defaults to STATUS"
-  (setf fields (or fields '(status)))
-  (format nil "<a class=\"~a\" href=\"~a\">~{~a~^, ~}</a>"
-          (status-css-class (status result))
-          (lib-log-uri result)
-          (mapcar (alexandria:rcurry 'funcall result) fields)))
-
 (defun print-ecl-results (destination results)
   (format destination
           "~{~{~A ~A ~A~}~%~}"
@@ -43,17 +33,13 @@ to include in to the text of the link, defaults to STATUS"
                     (list (lisp result) (status result) (log-link result 'libname)))
                   results)))
 
-(defun print-ecl-report (destination db)
-  (format destination "<html><head>~%")
-  (format destination "  <title>ECL Abnormal Results - CL Test Grid</title>~%")
-  (format destination "  <link href=\"style.css\" rel=\"stylesheet\"/><head>~%")
-  (format destination "<head>~%")
-  (format destination "<h3>Abnormal test results for ECL ~A on quicklisp ~A</h3>~%"
-          *last-ecl-version* *last-ecl-quicklisp*)
-  (format destination "<body><pre>~%")
-  (print-ecl-results destination (ecl-abnormal-results db))
-  (format destination "</pre></body>~%")
-  (format destination "</html>~%"))
+(defun print-ecl-report (out db)
+  (report-page out
+               "ECL Abnormal Results"
+               (with-output-to-string (s)
+                 (format s "<h3>Abnormal test results for ECL ~A on quicklisp ~A</h3>~%"
+                         *last-ecl-version* *last-ecl-quicklisp*)
+                 (print-ecl-results s (ecl-abnormal-results db)))))
 
 ;;; Filtered pivot reports - contain only ECL data,
 ;;; or only abnormal ecl data, with various rotations
