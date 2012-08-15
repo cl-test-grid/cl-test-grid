@@ -3,7 +3,8 @@
 ;;;; See LICENSE for details.
 
 (defpackage #:test-grid-data
-  (:use :cl))
+  (:use :cl)
+  (:export #:read-db))
 
 (in-package #:test-grid-data)
 
