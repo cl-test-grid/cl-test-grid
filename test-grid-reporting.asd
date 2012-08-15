@@ -12,4 +12,11 @@
     :components
     ((:file "package")
      (:file "do-results")
-     (:file "reporting")))))
+     (:file "distinct")
+     (:file "reporting")
+     (:file "test-runs")
+     (:file "csv")
+     (:file "pivot")
+     (:file "regressions")
+     (:file "compiler-page")
+     (:file "durations")))))
