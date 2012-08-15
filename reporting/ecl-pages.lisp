@@ -94,3 +94,16 @@ to include in to the text of the link, defaults to STATUS"
   (with-report-file (out "ecl-abnormal-results.html")
     (print-ecl-report out db))
   (print-ecl-pivots db))
+
+;;; Usage
+#|
+
+git clone git@github.com:cl-test-grid/cl-test-grid.git
+git clone git@github.com:cl-test-grid/cl-test-grid-results.git
+
+(pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
+(ql:quickload :test-grid-reporting)
+
+(test-grid-reporting::print-ecl-pages (test-grid-data:read-db))
+
+#|
