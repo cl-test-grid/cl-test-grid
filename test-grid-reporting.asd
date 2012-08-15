@@ -12,6 +12,7 @@
     :components
     ((:file "package")
      (:file "do-results")
+     (:file "distinct")
      (:file "reporting")
      (:file "test-runs")
      (:file "csv")

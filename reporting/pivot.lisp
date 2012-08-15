@@ -35,9 +35,9 @@
 ;; ...
 ;;
 
-(defun build-joined-index (db)
+(defun build-joined-index (db &key where)
   (let ((all-results (make-hash-table :test 'equal)))
-    (do-results (record db)
+    (do-results (record db :where where)
       (push record
             (gethash (list (lisp record) (lib-world record) (libname record))
                      all-results)))

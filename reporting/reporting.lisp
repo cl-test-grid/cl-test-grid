@@ -56,8 +56,11 @@
   (with-report-file (out "export.csv")
     (export-to-csv out db))
 
-  (let ((joined-index (build-joined-index db)))
-
+  (let* ((last-lib-worlds (largest 'lib-world db :count 3))
+         (joined-index (build-joined-index db :where (lambda (record)
+                                                       (member (lib-world record)
+                                                               last-lib-worlds
+                                                               :test #'string=)))))
     (print-pivot-reports joined-index)
 
     (with-report-file (out "quicklisps-test-diff.html")

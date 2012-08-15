@@ -28,19 +28,23 @@
 
 ;;; Implementation
 
-(defun do-results-impl (db handler)
-  "Handler is a function of one argument - test result record."
+(defun do-results-impl (db handler &key where)
+  "HANDER is a function of one argument - test result record.
+WHERE is a predicate of one argument - test result record."
     (dolist (test-run (getf db :runs))
       (dolist (lib-result (test-grid-data::run-results test-run))
         (let ((record (make-instance 'joined-lib-result
                                      :lib-result lib-result
                                      :test-run test-run)))
-          (funcall handler record)))))
+          (when (or (not where)
+                    (funcall where record))
+            (funcall handler record))))))
 
-(defmacro do-results ((result-record-var db) &body body)
+(defmacro do-results ((result-record-var db &key where) &body body)
   `(do-results-impl ,db
      (alexandria:named-lambda do-results-body (,result-record-var)
-       ,@body)))
+       ,@body)
+     :where ,where))
 
 ;; a lib result with a reference to it's test run
 (defclass joined-lib-result ()
