@@ -106,4 +106,6 @@ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
 
 (test-grid-reporting::print-ecl-pages (test-grid-data:read-db))
 
+ the pages are placed into cl-test-grid/reports-generated/
+
 #|
