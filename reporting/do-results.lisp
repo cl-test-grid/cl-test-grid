@@ -55,7 +55,8 @@ WHERE is a predicate of one argument - test result record."
 (defmethod select (db &key where)
   (let ((results))
     (do-results (result db :where where)
-      (push result results))))
+      (push result results))
+    results))
 
 ;;; RESULT record. Implemented as a lib result with a reference to it's test run.
 (defclass joined-lib-result ()

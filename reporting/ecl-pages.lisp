@@ -108,4 +108,4 @@ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
 
  the pages are placed into cl-test-grid/reports-generated/
 
-#|
+|#
