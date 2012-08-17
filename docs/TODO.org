@@ -61,6 +61,23 @@
    to improve the page performance and load time.
 ** TODO kind of burndown chart: avearange number of bugs by time
 ** TODO toplogical sorting of libraries by dependencies
+   It will allow us to find "root" compilation blockers -
+   the libraries which do not compile and block other libraries
+   compilation.
+
+   After the milestone 0.5.1 we will have compilation status
+   for all the ASDF systems in quicklisp on all the lisp implemetations.
+
+   If we combine the compilation statuses with the dependency
+   information, it will become visible, what libraries should
+   be fixed first to make certain lisp implementation wider adopted.
+
+   Of course, quicklisp download statistics we have already
+   provides some information about "importance" of libraries,
+   but the dependency information will make the situation more clear.
+
+   This feature is suggested by Juan Jose - the ECL maintainer.
+
 ** TODO visual graph of library dependencies, clickable (SVG?),
         so that we can see what libraries are blocked when
         the given library is broken, and what dependencies
