@@ -20,7 +20,7 @@ TODO.org - Notes about what needs to be done in the project.
 TODO.done-archived.org - Done TODO items.
 
 issues-found.org - Information about all the bug reports
-            I submitted based on the test-grid resutls.
+            I submitted before we started https://bugs.launchpad.net/common-lisp.
 
 agent-portability.txt - Notes about running test grid agent
             on various CL implementations.
