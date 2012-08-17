@@ -1,11 +1,8 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
-* 0.5.0 Separate status value for compilation failure
-  Important in general and a user reques by Juan Jose Garcia-Ripoll.
-** TODO Test status should include separate indicator for the library compilation and loading.
-   This allows to add even libraries without test cases to the
-   test grid.
+* 0.5.1 Test all the libraries in quicklisp.
+  If test-grid-testsuites:libtest is not implemented, test only compilation.
+  Complication:
 
-* 0.5.1 Test all the libraries in quicklisp. (if test-grid-testsuites-libtest is not implemented, test only compilation)
 * 0.5.1 Install more lisps on my VPS
 * 0.6.0 Reports Improve 2
 ** TODO make lisp code the main and the easiest interface to the test results:
@@ -14,7 +11,8 @@
    code generating this report, so that all the users
    see and understand how to query data and can follow
    these examples.
-** TODO document the data format, data access functions, reporting
+** DONE document the data format, data access functions, reporting
+   CLOSED: [2012-08-17 Пт 21:47]
    functions and utilities.
 ** TODO the diff report (aka regressions report) - diff along various dimentions
    Currently we can only find differences between test statuses
@@ -62,6 +60,24 @@
         Look for help from http://chart.ravenbrook.com/ ?
 ** TODO has-regressions-p - cover all the possible cased by unit tests?
 * 0.7.0 Add more test suites
+  - add testsuites of more libraries from quicklisp
+
+    See the following files in the "docs" directory:
+
+    test-systems - list of all the ASDF systems in Quicklisp
+           with a word "test" in the system name;
+           ordered by the project download count.
+
+    detect-test-systems.lisp - the lisp code which
+          generated the test-systems file
+
+    quicklisp-download-statistics-2012.txt - quiclisp download statistics
+
+    coverage.org - information about the libraries already reviewed:
+          whether it is added to test grid, and if not added - why
+         (no test suite, needs manual configuration, hangs, etc.)
+          The libraries are ordered in alphabetical order.
+
   - drakma test suite - create and ensure drakma works on all the lisps.
     Drakma test suite is a must. HTTP client today is as vital thing
     as file system access. It should work on all the lisps.
@@ -154,6 +170,8 @@
 
 * User Requests
 ** TODO Vladimir Sedach: test multithreaded CLISP
+   (less important now as Vladimir already installed such lisp on his
+   machine and contributes tests)
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
 ** TODO Enable HTTP caching for library test logs (good recipe: https://developers.google.com/speed/docs/best-practices/caching)

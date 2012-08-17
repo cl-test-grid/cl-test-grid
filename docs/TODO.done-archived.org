@@ -309,3 +309,10 @@
    Several agents may even run in different threads
    of a single lisp process (if global shared libraries
    like asdf whould allow this).
+* 0.5.0 Separate status value for compilation failure
+  Important in general and a user reques by Juan Jose Garcia-Ripoll.
+** DONE Test status should include separate indicator for the library compilation and loading.
+   CLOSED: [2012-08-17 Пт 21:48]
+   This allows to add even libraries without test cases to the
+   test grid.
+
