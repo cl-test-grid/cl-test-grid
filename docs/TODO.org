@@ -1,7 +1,13 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 * 0.5.1 Test all the libraries in quicklisp.
+  <in progress>
+
   If test-grid-testsuites:libtest is not implemented, test only compilation.
-  Complication:
+
+  Complications: one project may have more than one ASDF system,
+  and in such case it's not clear how to relate compilation
+  failures with test suite status, if only part of ASDF systems
+  failed to compile.
 
 * 0.5.1 Install more lisps on my VPS
 * 0.6.0 Reports Improve 2
@@ -41,13 +47,15 @@
      to a result from the right side.
 
 ** TODO library mainainer page:                             :report:informer:
-   with reports about the test statuses 
+   with reports about the test statuses
    for this single library on various platforms with
    various quicklisp versions,
    history of regressions (by quicklisp versions)
+
+   There is some draft (uncommited) code for this task.
+
 ** TODO Prevent HTML injection via test-run-info                     :report:
-** TODO pivot reports: header column always visible
-** TODO Filters for pivot reports
+** TODO pivot reports: make row header column always visible
 ** DONE limit amount of data included into to HTML reports to the last 3 quicklisp releases 
    CLOSED: [2012-08-15 Ср 20:42]
    to improve the page performance and load time.
@@ -58,7 +66,19 @@
         the given library is broken, and what dependencies
         block this library.
         Look for help from http://chart.ravenbrook.com/ ?
-** TODO has-regressions-p - cover all the possible cased by unit tests?
+** TODO has-regressions-p - cover all the possible cases by unit tests?
+** TODO Filters for pivot reports
+   Partially done - in a non interactive way.
+   I.e. I apply filters when generate reports to publish,
+   but there is no way to filter them on WEB. The
+   only way for user is to checkout lisp code and
+   use it's own filters. Not that bad way, especially
+   in the ideology that Lisp is the main interface to
+   test results.
+
+   Do we really need WEB UI for filters? If so, it
+   is low priority anyway.
+
 * 0.7.0 Add more test suites
   - add testsuites of more libraries from quicklisp
 
