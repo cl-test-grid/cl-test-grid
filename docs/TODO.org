@@ -11,6 +11,67 @@
 
 * 0.5.1 Install more lisps on my VPS
 * 0.6.0 Reports Improve 2
+** TODO combine information about load failures with information about system dependencies
+   It will allow us to find "root" compilation blockers -
+   the libraries which do not compile and block other libraries
+   compilation.
+
+   After the milestone 0.5.1 we will have compilation status
+   for all the ASDF systems in quicklisp on all the lisp implemetations.
+
+   If we combine the compilation statuses with the dependency
+   information, it will become visible, what libraries should
+   be fixed first to make certain lisp implementation wider adopted.
+
+   Of course, quicklisp download statistics we have already
+   provides some information about "importance" of libraries,
+   but the dependency information will make the situation more clear.
+
+   This feature is suggested by Juan Jose - the ECL maintainer.
+
+
+   We now have information which ASDF systems fail to load on particular Lisps
+   (this is implemented for the 56 libraries already included into the test-grid,
+   and After the milestone 0.5.1 we will have compilation status
+   for all the ASDF systems in quicklisp on all the lisp implemetations).
+
+   But ASDF systems depend on each other, so if system A fails to load,
+   all other systems which depend on A directly or indirectly fail to load as well.
+   So if we just list all the load failures, we are going to have large list, but will
+   be unable to see where the real problem is, what is necessary to fix.
+
+   The idea is to combine the information about load failures with information
+   about dependencies to find out the root "blockers" - the libraries failing by
+   themselves and blocking others.
+
+   To do so we may just sort the ASDF systems by dependencies
+   (https://en.wikipedia.org/wiki/Topological_sorting), and the root blockers
+   will be at the top of the list.
+
+   I envision simple report in the form
+
+   system-a: blocked-by: <list of failed systems on which system-a depends>; blocks <list of failed systems depending on system-a>
+   system-b: blocked-by: <list of failed systems on which system-b depends>; blocks <list of failed systems depending on system-b>
+   ...
+
+   While the real data is not available, you can just hardcode
+   two stub functions:
+   (load-failed-p <system name>) => true or false,
+   and
+   (dependencies <system name>) => list of systems on which the given system depends.
+
+   With hardcoded stub information we may already experiment and develop with the report.
+
+   Also, we can extract the dependency information for the real implementation
+   of the DEPENDENCIES function. It may be done either by loading
+   every system and querying ASDF, or from quicklisp - see file quicklisp\dists\quicklisp\systems.txt
+   in your quicklisp installation. Note, there is no way to detect 100% exact
+   dependency information, because .asd files are just lisp code,
+   and some of them just do (asdf:operate 'asdf:load-op 'something)
+   instead of putting something to :depend-on clause of defsystem macro.
+   But the information which IS possible to extract will give us good results
+   I believe.
+
 ** TODO make lisp code the main and the easiest interface to the test results:
    convenient interation, filtering and matching functions.
    We want to add to every HTML report a secion with lisp
@@ -60,24 +121,6 @@
    CLOSED: [2012-08-15 Ср 20:42]
    to improve the page performance and load time.
 ** TODO kind of burndown chart: avearange number of bugs by time
-** TODO toplogical sorting of libraries by dependencies
-   It will allow us to find "root" compilation blockers -
-   the libraries which do not compile and block other libraries
-   compilation.
-
-   After the milestone 0.5.1 we will have compilation status
-   for all the ASDF systems in quicklisp on all the lisp implemetations.
-
-   If we combine the compilation statuses with the dependency
-   information, it will become visible, what libraries should
-   be fixed first to make certain lisp implementation wider adopted.
-
-   Of course, quicklisp download statistics we have already
-   provides some information about "importance" of libraries,
-   but the dependency information will make the situation more clear.
-
-   This feature is suggested by Juan Jose - the ECL maintainer.
-
 ** TODO visual graph of library dependencies, clickable (SVG?),
         so that we can see what libraries are blocked when
         the given library is broken, and what dependencies
@@ -295,3 +338,5 @@
    when the manual configuration hasn't been
    performed and return :no-resource status.
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
+
+(/ (/ 37000.0 19) 121)
