@@ -11,10 +11,5 @@ git pull
 /home/testgrid/lisps/ccl-1.8/lx86cl --load run-agent.lisp --eval "(quit)"
 # CCL is the recommented choice, as it is the test grid development platform.
 
-# Alternatively SBCL may also be used (but not on windows). Tested with SBCL 1.0.57.
-#
-#export SBCL_HOME=/home/testgrid/lisps/sbcl-1.0.57/lib/sbcl
-#/home/testgrid/lisps/sbcl-1.0.57/bin/sbcl --load run-agent.lisp --eval "(quit)"
-
 # As for other lisps, see docs/agent-portability.txt.
 
