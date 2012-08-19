@@ -1,8 +1,10 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
-* 0.5.1 Test all the libraries in quicklisp.
+* 0.5.1 Test loading (including fresh recompilation) of all the libraries in quicklisp.
   <in progress>
 
-  If test-grid-testsuites:libtest is not implemented, test only compilation.
+  This means even if the library doesn't have a test suite,
+  or the test suite is not yet integrated into the test-grid,
+  we will know it's compilation status.
 
   Complications: one project may have more than one ASDF system,
   and in such case it's not clear how to relate compilation
@@ -10,6 +12,10 @@
   failed to compile.
 
 * 0.5.1 Install more lisps on my VPS
+  I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
+** DONE ABCL
+   CLOSED: [2012-08-20 Пн 01:48]
+** TODO CLISP (build a multithreaded version)
 * 0.6.0 Reports Improve 2
 ** TODO combine information about load failures with information about system dependencies
    It will allow us to find "root" compilation blockers -
@@ -116,6 +122,10 @@
    There is some draft (uncommited) code for this task.
 
 ** TODO Prevent HTML injection via test-run-info                     :report:
+** TODO Apply for a subdomain at common-lisp.net, e.g. test-grid.common-lisp.net,
+   It is another way to solve the security issue with HTML injections,
+   because in this case web browser keeps test grid reports in different
+   security domain than other common-lisp.net pages.
 ** TODO pivot reports: make row header column always visible
 ** DONE limit amount of data included into to HTML reports to the last 3 quicklisp releases 
    CLOSED: [2012-08-15 Ср 20:42]
@@ -163,6 +173,48 @@
     as file system access. It should work on all the lisps.
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
+* 0.8.0 Test source control HEADs of libraries, not only quicklisp releases
+** TODO a way to specify lib-wold as a quicklisp version with some
+   library versions overriden (checkout this particular
+   libraries from the scm), so that library author can quickly
+   get test result for his changes (fixes)  in scm.
+   An implementation idea to consider: almost every scm allows
+   to download asnapshot via http, so the quicklisp http machinery may
+   be reused here, whithout running a shell command for
+   checkout.
+   40h
+
+* 0.9.0 For all the libraries which need specific environment
+   (like cffi, cl-sql) correctly detect the absense of required
+   envorinment and return :NO-RESOURCE status and provide guiding message to the
+   user how to configure them (log to the output test output?).
+
+   This may be implemented by invoking generic function
+   (test-grid-testsuites:check-enviroment <library-name> <test-enviroment-object>) => :NO-RESOURCE or :OK,
+   by default returns :OK, but the library maintainer
+   may define a method for his library which checks for available envoriment
+   and return :NO-RESOURCE, or if the enviroment is OK
+   returns :OK and may store some data on the test-envormment-object.
+
+   Then (test-grid-testsuites:libtest <library-name> <test-enviroment-object>) is
+   called by agent. So the check-envoronment method may pass enviroment
+   information (for examle DB connection parametrs for cl-sql) to the test suite.
+
+   Also we need to define a way for check-enviromnent to be configured
+   by the end-user who runs the agent, because every installation
+   may have different DB connection parameters. For example, check-enviroment
+   may load a file <workdir>/test-configs/<library-name>-config.lisp.
+   This file is expected to be provided by the user who runs agant
+   and is willing to spend an extra effort to contribute test
+   results for these libraries.
+
+   We may provide only the API and leave the implementation
+   of check-environment methods to the library maintainers, because
+   othersize it may take very long time for us to impelement
+   it for all such libraries.
+
+   Although, for the most important libraries which don't have
+   enough maintainers we could provide implementation.
 * lisp-agent postponed issues
 ** TODO memoization of the implementation-identifier generic function is not portable
    in particular, it's known that fare-memoization can't memoize it on ACL,
@@ -196,10 +248,10 @@
     between agents having overlaping sets of lisp implementations.
     Need a mechanizm for announcing the lisps present on
     agent (probably just add agent-id to the test run
-    description and consider test results as an announcement).
-    As the compilers versions are changed, probably the 
+    description submitted form agent to admin, and this as an announcement).
+    As the compilers versions are changed, probably the
     hashmap to store responsibility specifications should
-    contain not full lisp implementation identifier, 
+    contain not full lisp implementation identifier,
     but only generic name, like SBCL instead of SBCL 1.0.57.
     But allow for ECL-bytecode to be distingueshed from
     ECL-lisp-to-c. I.e. in the end we can get some kind
@@ -222,7 +274,7 @@
    the most portable API on unix to find out child processes,
    as it seems to be, is the ps program. We will need to
    implement a shell script killtree.sh <pid> which uses
-   ps to find all descendents and kill the. Portable format
+   ps to find all descendents and kill them. Portable format
    of ps arguments should be used.
 ** TODO move test-grid::print-log-footer to the test-grid-agent package,
    and call it only form the agent process, not from the child, test suite
@@ -262,15 +314,6 @@
    commit fixes there, and the version string we use now - "ccl-1.8-f95-linux-x86",
    does not reflect this. In other words, our version string does not
    identify CCL uniquly.
-** TODO a way to specify lib-wold as a quicklisp version with some 
-   library versions overriden (checkout this particular 
-   libraries from the scm), so that library author can quickly 
-   get test result for his changes (fixes)  in scm. 
-   An implementation idea to consider: almost every scm allows 
-   to download asnapshot via http, so the quicklisp http machinery may
-   be reused here, whithout running a shell command for 
-   checkout.
-   24h
 ** TODO code coverage: SBCL provides sb-cover. Integrate it somehow
         and publish in the reports.
         How?
@@ -285,12 +328,11 @@
    on Windows; it's not very good. Maybe try to provide them
    with a temporary directory inside of the cl-test-grid working
    dir?
-** TODO Do not allow empty contributor contact in test results. Instead
+** DONE Do not allow empty contributor contact in test results. Instead
+   CLOSED: [2012-08-20 Пн 01:56]
    always ask the contributor to provide something, nickname,
    whatever.
-** TODO A restart which will allow to skip the current library        :agent:
-   test suite and proceed to the next one.
-** TODO quicklisp distro version in report headers may be a link to 
+** TODO quicklisp distro version in report headers may be a link to
    list of library versions in this ql version
    (like this: http://www.quicklisp.org/beta/releases.html, but
    it's only for the latest QL).
@@ -304,7 +346,6 @@
    with pivot calculating avearage duration of 
    tests for every library.
 ** TODO spell check the reports-overview                    :report:overview:
-** TODO an informer for CL implementation with libraries statuses? :report:informer:
 ** TODO quick access to the test run info from the pivot report table cell  :report:pivot:
    (or maybe just print the test run info to the log, like a header;
     but it is a duplication and also we will have invonviniences
@@ -314,13 +355,13 @@
    are better visible.
 ** TODO Limit library output file size (how?).
 ** TODO finalize the terminology we use in the code
-   to refer our main data: 
+   to refer our main data:
    - test status for a particular library
-   - library test result object (includes the status 
+   - library test result object (includes the status
      as well as log length, the key of the log
      in the online blob store, probably the
      library test duration)
-   - list of library test results in a particular test 
+   - list of library test results in a particular test
      run
    - test run description, consists of lisp name,
      libraries set (think quicklisp distro),
@@ -329,14 +370,9 @@
 ** TODO when GAE quotas (for requests, emails, anything else)
    are exceeded, recognize it and display a meaningfull
    message to the user.
-** TODO For all the libraries which need manual configuration
-   (cffi, usocket) provide guiding message to the
-   user how to configure them, before running
-   the tests.
 ** TODO usocket test suite might need manual configuration,
-   see their README. Distinguish the case 
+   see their README. Distinguish the case
    when the manual configuration hasn't been
    performed and return :no-resource status.
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
 
-(/ (/ 37000.0 19) 121)
