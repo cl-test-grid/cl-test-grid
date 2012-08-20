@@ -5,7 +5,6 @@
 (in-package #:test-grid-reporting)
 
 (defparameter *abcl-1.0.1-impl* "abcl-1.0.1-svn-13750-13751-fasl38-win-x64")
-(defparameter *abcl-diff-quicklisp* "quicklisp 2012-08-11")
 
 ;;; Finding difference between the test results
 (defclass abcl-diff ()
