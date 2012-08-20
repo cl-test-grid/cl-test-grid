@@ -12,7 +12,7 @@
                 :type list
                 :accessor regressions
                 :initform nil)
-   (improvements :documentation "List of pairs (<old result> . <new result> where new result is better than old result"
+   (improvements :documentation "List of pairs (<old result> . <new result> where new result is better than the old result"
                  :type list
                  :accessor improvements
                  :initform nil)))
