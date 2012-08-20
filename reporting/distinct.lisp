@@ -4,15 +4,15 @@
 
 (in-package #:test-grid-reporting)
 
-(defun distinct (prop-getter db &key (test #'equal))
+(defun distinct (prop-getter db &key (test #'equal) where)
   (let ((distinct (make-hash-table :test test)))
-    (do-results (result db)
+    (do-results (result db :where where)
       (let ((val (funcall prop-getter result)))
         (setf (gethash val distinct)
               val)))
     (alexandria:hash-table-keys distinct)))
 
-(defun largest (prop-getter db &key (count 1) (predicate #'string>))
-  (let* ((all (distinct prop-getter db))
+(defun largest (prop-getter db &key (count 1) (predicate #'string>) where)
+  (let* ((all (distinct prop-getter db :where where))
          (sorted (sort all predicate)))
     (subseq sorted 0 count)))
