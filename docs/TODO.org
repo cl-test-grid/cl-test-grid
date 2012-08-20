@@ -11,11 +11,12 @@
   failures with test suite status, if only part of ASDF systems
   failed to compile.
 
-* 0.5.1 Install more lisps on my VPS
+* 0.5.2 Install more lisps on my VPS
   I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
 ** DONE ABCL
    CLOSED: [2012-08-20 Пн 01:48]
 ** TODO CLISP (build a multithreaded version)
+* 0.5.3 Reuild free the lisps from source control daily, before running test-grid-agent
 * 0.6.0 Reports Improve 2
 ** TODO combine information about load failures with information about system dependencies
    It will allow us to find "root" compilation blockers -
@@ -150,7 +151,7 @@
    is low priority anyway.
 
 * 0.7.0 Add more test suites
-  - add testsuites of more libraries from quicklisp
+** TODO add testsuites of more libraries from quicklisp
 
     See the following files in the "docs" directory:
 
@@ -168,11 +169,13 @@
          (no test suite, needs manual configuration, hangs, etc.)
           The libraries are ordered in alphabetical order.
 
-  - drakma test suite - create and ensure drakma works on all the lisps.
+** TODO createdrakma test suite - will ensure drakma works on all the lisps.
     Drakma test suite is a must. HTTP client today is as vital thing
     as file system access. It should work on all the lisps.
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
+* 0.7.1 Add ANSI test suite?
+  Does not depend on quicklisp distro version; but BTW may be distirbuted via quicklisp.
 * 0.8.0 Test source control HEADs of libraries, not only quicklisp releases
 ** TODO a way to specify lib-wold as a quicklisp version with some
    library versions overriden (checkout this particular
@@ -184,7 +187,8 @@
    checkout.
    40h
 
-* 0.9.0 For all the libraries which need specific environment
+* 0.9.0 Automate test results publishing process, send notification when regressions occur
+* 0.10.0 For all the libraries which need specific environment
    (like cffi, cl-sql) correctly detect the absense of required
    envorinment and return :NO-RESOURCE status and provide guiding message to the
    user how to configure them (log to the output test output?).
@@ -206,7 +210,7 @@
    may load a file <workdir>/test-configs/<library-name>-config.lisp.
    This file is expected to be provided by the user who runs agant
    and is willing to spend an extra effort to contribute test
-   results for these libraries.
+   results for these libraries (this is optional of course).
 
    We may provide only the API and leave the implementation
    of check-environment methods to the library maintainers, because
