@@ -112,14 +112,14 @@ as the system load status.")
                     (no-response (condition)
                       (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
                                 condition)
-                      (finish-test-log-with-failure "~%Child lisp process running the ~A test suite finished without returing result test status. Looks like the lisp process has crashed. The error condition signalled: ~A"
+                      (finish-test-log-with-failure "~%Child lisp process running the ~A test suite finished without returing result test status. Looks like the lisp process has crashed. The error condition signalled in the parent process: ~A"
                                                     libname condition)
                       :crash)
-                    (lisp-exe:lisp-process-timeout ()
+                    (lisp-exe:lisp-process-timeout (c)
                       (log:info "Child lisp running the ~A test suite has exceeded the timeout of ~A seconds and killed."
-                                libname +libtest-timeout-seconds+)
+                                libname (lisp-exe:seconds c))
                       (finish-test-log-with-failure "~%The ~A test suite hasn't finished in ~A seconds.~%We consider the test suite as hung; the test suite lisp process is killed.~%"
-                                                    libname +libtest-timeout-seconds+)
+                                                    libname (lisp-exe:seconds c))
                       :timeout))))
       (log:info "The ~A test suite status: ~S" libname status)
       (list :libname libname
@@ -203,6 +203,13 @@ as the system load status.")
              "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
              year month date hour min sec)))
 
+(defmacro appending (stream-var file &body body)
+  `(with-open-file (,stream-var ,file
+                                :direction :output
+                                :if-does-not-exist :create
+                                :if-exists :append)
+     ,@body))
+
 (defun print-loadtest-log-header (system-name run-descr log-file)
   (with-open-file (stream log-file
                           :direction :output
@@ -220,10 +227,7 @@ as the system load status.")
       (format stream "============================================================~%"))))
 
 (defun print-log-footer (lib-or-system status log-file)
-  (with-open-file (stream log-file
-                          :direction :output
-                          :if-does-not-exist :error
-                          :if-exists :append)
+  (appending stream log-file
     (let ((*print-case* :downcase))
       (fresh-line stream)
       (terpri stream)
@@ -252,12 +256,21 @@ as the system load status.")
                         (print-loadtest-log-header system-name run-descr logfile)
                         (lisp-exe:run-with-timeout +loadtest-timeout-seconds+ lisp-exe code)))
                   (no-response (condition)
+                    (appending log logfile
+                      (format log "~%Child lisp process loading the ~A system finished without returing result test status."
+                              system-name)
+                      (format log "Looks like the lisp process has crashed.")
+                      (format log "The error condition signalled in the parent process: ~A" condition))
+
                     (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
                               condition)
                     :crash)
-                  (lisp-exe:lisp-process-timeout ()
+                  (lisp-exe:lisp-process-timeout (c)
+                    (appending log logfile
+                      (format log "~%The system ~A load hasn't finished in ~A seconds." system-name (lisp-exe:seconds c))
+                      (format log "~%We consider the load operation as hung; the lisp process is killed.~%"))
                     (log:info "Child lisp testing loading the ~A system has exceeded the timeout of ~A seconds and killed."
-                              system-name +libtest-timeout-seconds+)
+                              system-name (lisp-exe:seconds c))
                     :timeout))))
     (print-log-footer system-name status logfile)
     (log:info "The ~A system load status:: ~S" system-name status)
@@ -428,7 +441,7 @@ TODO:
   + printing for loadtest results
   - P1 db format: rename projects back to their original names (routes -> cl-routes)
   - db format: optimize, don't print testing status/duration/log-key when absent
-    (relevan for new resuls where most of the systems don't have test suite)
+    (relevant for new resuls where most of the systems don't have test suite)
     and don't pring load-results when absent (only releant for old results
     submitted before agent become able to test loading)
   - db format: the :LOAD-FAILED test status should be moved to :load-results collections

@@ -33,7 +33,8 @@
 
            ;; the main function of interest for test-grid agent
            #:run-with-timeout
-           #:lisp-process-timeout
+           #:lisp-process-timeout ; timeout condition
+           #:seconds              ; the condition slot accessor
 
             ;; deprecated function, consider run-with-timeout where possible
            #:run-lisp-process
@@ -63,7 +64,11 @@ does not finish in the specified TIMEOUT-SECONDS, the process
 is killed together with it's possible child processes, a
 LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL."))
 
-(define-condition lisp-process-timeout (condition) ()) ;; should it inherit from ERROR?
+(define-condition lisp-process-timeout (condition) ;; should it inherit from ERROR?
+  ((seconds :accessor seconds
+            :initarg :seconds
+            :type number
+            :initform (error ":seconds is required"))))
 
 (defclass lisp-exe () ())
 
@@ -274,7 +279,7 @@ remains running)."
                       (external-program:process-status lisp-process)))
          (return (external-program:process-status lisp-process)))
        (when (< end-time (get-universal-time))
-         (signal 'lisp-process-timeout)
+         (signal 'lisp-process-timeout :seconds seconds)
          (return))
        (sleep 1))))
 
