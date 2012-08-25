@@ -24,7 +24,12 @@
   ((cause :accessor cause
           :type (or null condition)
           :initarg :cause
-          :initform nil)))
+          :initform nil))
+  (:documentation "A mixin condition class to allow condition
+chaining - when signalling a condition we may specify another
+condition caused the situation. This way user has
+more complete picture about the problem. (Similar to
+java.lang.Throwable#getCause in Java)"))
 
 (define-condition no-response (caused-condition simple-error)
   ())
@@ -36,7 +41,7 @@
                                      (random #.(1- (expt 2 64)))))
          (response-file (if *response-file-temp-dir*
                             (merge-pathnames response-file-name *response-file-temp-dir*)
-                            (progn (log:warn "~A is not set, temporary resposne file wil be created in the default directory."
+                            (progn (log:warn "~A is not set, temporary resposne file will be created in the default directory."
                                              '*response-file-temp-dir*)
                                    response-file-name))))
     (unwind-protect (progn (funcall body-func response-file)

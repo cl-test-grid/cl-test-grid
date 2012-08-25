@@ -82,9 +82,9 @@ just passed to the QUICKLISP:QUICKLOAD."
     :metabang-bind         :cl-json             :cl-containers       :metatilities-base
     :cl-cont               :moptilities         :trivial-timeout     :metatilities
     :named-readtables      :arnesi              :local-time          :s-xml
-    :cl-oauth              :routes              :cl-unicode          :fiveam
+    :cl-oauth              :cl-routes           :cl-unicode          :fiveam
     :trivial-utf-8         :yason               :cl-annot            :cl-openid
-    :split-sequence        :closure-template    :cl-interpol         :trivial-shell
+    :split-sequence        :cl-closure-template :cl-interpol         :trivial-shell
     :let-plus              :data-sift           :cl-num-utils        :ieee-floats
     :cl-project            :trivial-http        :cl-store            :hu.dwim.stefil
     :kmrcl                 :cxml-stp            :hu.dwim.walker      :hu.dwim.defclass-star
@@ -579,7 +579,7 @@ just passed to the QUICKLISP:QUICKLOAD."
       (setf (symbol-value (read-from-string "cl-oauth:*request-adapter*"))
             original-request-adapter))))
 
-(defmethod libtest ((library-name (eql :routes)))
+(defmethod libtest ((library-name (eql :cl-routes)))
   ;; The test framework used: lift.
   (quicklisp:quickload :routes)
   (quicklisp:quickload :routes-test)
@@ -668,7 +668,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (ql:quickload :split-sequence-tests)
   (run-fiveam-test-suite :split-sequence))
 
-(defmethod libtest ((library-name (eql :closure-template)))
+(defmethod libtest ((library-name (eql :cl-closure-template)))
   ;; The test framework used: lift.
   (ql:quickload :closure-template)
   (ql:quickload :closure-template-test)
@@ -928,12 +928,6 @@ just passed to the QUICKLISP:QUICKLOAD."
                    (funcall on-problem-func)))))
 
            (libtest-handling-problems ()
-             (handling-problems (lambda ()
-                                  (format t "~&Testing the ~A load...~%" lib)
-                                  (ql:quickload lib))
-                                (lambda ()
-                                  (format t "~&Returning :LOAD-FAILED~%")
-                                  (return-from libtest-handling-problems :load-failed)))
              (handling-problems (lambda ()
                                   (format t "~&Running ~A's test suite...~%" lib)
                                   (normalize-status (libtest lib)))

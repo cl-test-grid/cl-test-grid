@@ -196,13 +196,16 @@ the PREDICATE."
                                            bt))
                                 (go continue))))
         (log:info "Running tests for ~A" (implementation-identifier lisp))
-        (let ((results-dir (perform-test-run agent
-                                             lib-world
-                                             lisp
-                                             test-grid-testsuites::*all-libs*)))
-          (submit-test-run-results (blobstore agent) results-dir)
+        (let ((results-dir (perform-test-run2 agent
+                                              lib-world
+                                              lisp
+                                              ;;test-grid-testsuites::*all-libs*
+                                              (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))
+                                              )))
+          (submit-test-run-results2 (blobstore agent) results-dir)
           (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
-          (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
+          ;(cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)
+          ))
       continue)))
 
 (defun ensure-has-id (agent)
