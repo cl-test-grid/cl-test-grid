@@ -423,6 +423,7 @@ TODO:
   - P1 default implementation of test-grid-testsuites:libtest returning :NO-TESTSUITE (or just NIL)
   + P1 rename projects back to their original names (routes -> cl-routes)
   + pass the list of project names as parameter?
+  - specify the dependency on quicklisp
 - test-grid-data
   + printing for loadtest results
   - P1 db format: rename projects back to their original names (routes -> cl-routes)

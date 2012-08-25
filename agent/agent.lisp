@@ -172,6 +172,13 @@ the PREDICATE."
 
 ;;; Main program
 
+(defun project-names ()
+  "All projects in Quicklisp"
+  (let ((names (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))))
+    ;; workdaround for the quiclisp issue 61
+    ;; https://github.com/quicklisp/quicklisp-client/issues/61
+    (remove-if-not #'ql-dist:release names)))
+
 (defun run-tests (agent lib-world)
 
   (divide-into (lisps agent) (lambda (lisp)
@@ -200,7 +207,7 @@ the PREDICATE."
                                               lib-world
                                               lisp
                                               ;;test-grid-testsuites::*all-libs*
-                                              (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))
+                                              (project-names)
                                               )))
           (submit-test-run-results2 (blobstore agent) results-dir)
           (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
