@@ -220,7 +220,7 @@ as the system load status.")
 
 (defun submit-test-run-results (blobstore test-run-dir)
   (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
-  (let* ((run-info (submit-logs blobstore test-run-dir)))
+  (let* ((run-info (submit-logs2 blobstore test-run-dir)))
     (log:info "The log files are submitted. Submitting the test run info...")
     (test-grid-blobstore:submit-run-info blobstore run-info)
     (log:info "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.")

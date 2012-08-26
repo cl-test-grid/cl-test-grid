@@ -209,7 +209,7 @@ the PREDICATE."
                                               ;;test-grid-testsuites::*all-libs*
                                               (project-names)
                                               )))
-          (submit-test-run-results2 (blobstore agent) results-dir)
+          (submit-test-run-results (blobstore agent) results-dir)
           (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
           ;(cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)
           ))
