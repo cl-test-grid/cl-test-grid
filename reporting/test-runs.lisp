@@ -31,10 +31,12 @@
   (format nil "~A/blob?key=~A"
           "http://cl-test-grid.appspot.com" blob-key))
 
+(defparameter *local-test-runs-dir* #P"C:\\Users\\anton\\projects\\cl-test-grid2-work-dir2\\agent\\test-runs\\")
+
 (defun lib-log-local-uri (joined-lib-result)
   (format nil "file://~A~A"
           (test-grid-agent::run-directory (test-grid-data::run-descr (test-run joined-lib-result))
-                                          (test-grid-agent::test-output-base-dir))
+                                          *local-test-runs-dir*)
           (string-downcase (getf (lib-result joined-lib-result) :libname))))
 
 (defun no-blob-key-js-alert (&rest unused-args)
