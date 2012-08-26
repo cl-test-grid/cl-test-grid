@@ -12,21 +12,43 @@
   ;; make test-grid.asd available for ASDF
   (pushnew (merge-pathnames "../" this-file-dir)
            asdf:*central-registry*
-           :test #'equal)
-
-  (load (merge-pathnames "proc-common.lisp" this-file-dir))
-  (load (merge-pathnames "proc-common-asdf.lisp" this-file-dir)))
+           :test #'equal))
 
 (ql:quickload :test-grid-testsuites)
 
-(defun run-libtest-with-response-to-file (libname
-                                          run-descr
-                                          logfile
-                                          private-quicklisp-dir
-                                          asdf-output-root-dir
-                                          response-file)
+(defun setup-asdf-output-translations (private-quicklisp-dir asdf-output-root-dir)
+  (let (;; Configure ASDF so that .fasl files from our private quicklisp
+        ;; are stored in the specified output directory
+        ;; (this allows us to ensure the libraries are freshly recompiled
+        ;; at every test run, if every test run specifies different
+        ;; temporary directory for .fasl files.
+        (lib-dir (merge-pathnames (make-pathname :directory '(:relative "dists" "quicklisp" "software"))
+                                  private-quicklisp-dir))
+        (libs-output-dir (merge-pathnames (make-pathname :directory '(:relative "private-quicklisp"))
+                                          asdf-output-root-dir))
 
+        ;; The .fasl files of test-grid-testsuites also stored in custom
+        ;; output directory.
+        (test-grid-dir (asdf:system-source-directory :test-grid-testsuites))
+        (test-grid-output-dir (merge-pathnames (make-pathname :directory '(:relative "test-grid"))
+                                               asdf-output-root-dir)))
+
+    (add-asdf-output-translation lib-dir libs-output-dir)
+    (add-asdf-output-translation test-grid-dir test-grid-output-dir)))
+
+(defun run-libtest (libname)
+  (catching-problems (lambda ()
+                       (test-grid-testsuites::normalize-status (test-grid-testsuites:libtest libname)))
+                     (lambda ()
+                       (return-from run-libtest :fail))))
+
+(defun run-libtest-main (libname
+                         log-file
+                         private-quicklisp-dir
+                         asdf-output-root-dir)
   (setup-asdf-output-translations private-quicklisp-dir asdf-output-root-dir)
+  (saving-output log-file
+                 (lambda ()
+                   (format t "  *features*:        ~(~A~)~%~%" (sort (copy-list *features*) #'string<))
+                   (run-libtest libname))))
 
-  (let ((lib-result (test-grid-testsuites::run-libtest libname run-descr logfile)))
-    (set-response response-file lib-result)))

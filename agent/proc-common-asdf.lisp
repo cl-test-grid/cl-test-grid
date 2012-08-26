@@ -75,15 +75,6 @@
                (funcall orig-asdf-apply-output-translations path)))))))
 
 (defun add-asdf-output-translation (source-dir output-dir)
-  ;; Configure ASDF so that .fasl files from our private quicklisp
-  ;; are stored in the specified output directory
-  ;; (this allows us to ensure the libraries are freshly recompiled
-  ;; at every test run, if every test run specifies different
-  ;; temporary directory for .fasl files.
-  ;;
-  ;; .fasl files of everything except the libraries in the private quicklisp
-  ;; go into the usual location (for example the .fasls of the cl-test-grid itself).
-
   ;; The only reliable way we found to customize where ASDF stores the .fasl
   ;; files is to redefine the asdf:apply-output-translations function.
   ;; Official ASDF approach of passing configuration DSL to

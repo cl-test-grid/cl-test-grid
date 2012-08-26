@@ -78,55 +78,89 @@ in a fresh lisp process.  After this time we consider system
 as hung, kill the lisp process and record :TIMEOUT
 as the system load status.")
 
-(defun proc-run-libtest (lisp-exe libname run-descr logfile private-quicklisp-dir asdf-output-dir)
-  "Runs test-grid-testsuites::run-libtest in a separate process and returns the result."
-  (flet ((finish-test-log-with-failure (format-control &rest format-arguments)
-           ;; Helper function to record failure status to the library
-           ;; test log if the child lisp process running
-           ;; the test suite has terminated abnormally.
-           ;; (In case of successful termination it is
-           ;; responsibility of the child process to print
-           ;; the log footer. We already have a TODO item to move
-           ;; all the log header/footer printing to the
-           ;; parent process.)
-           (with-open-file (out logfile
+(defun pretty-fmt-time (universal-time &optional destination)
+  "The human-readable time format, used in reports."
+  (multiple-value-bind (sec min hour date month year)
+      (decode-universal-time universal-time 0)
+    (funcall #'format
+             destination
+             "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
+             year month date hour min sec)))
+
+(defmacro appending (stream-var file &body body)
+  `(with-open-file (,stream-var ,file
                                 :direction :output
                                 :if-does-not-exist :create
                                 :if-exists :append)
-             (apply #'format out format-control format-arguments)
-             (test-grid-testsuites::print-log-footer libname :fail out))))
-    (let ((start-time (get-internal-real-time))
-          (status (handler-case
-                      (with-response-file (response-file)
-                        (let* ((code `(progn
-                                        (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
-                                        (load ,(src-file "proc-run-libtest.lisp"))
-                                        (cl-user::run-libtest-with-response-to-file ,libname
-                                                                                    (quote ,run-descr)
-                                                                                    ,logfile
-                                                                                    ,private-quicklisp-dir
-                                                                                    ,asdf-output-dir
-                                                                                    ,response-file))))
-                          (log:info "Starting ~A test suite..." libname)
-                          (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
-                    (no-response (condition)
-                      (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
-                                condition)
-                      (finish-test-log-with-failure "~%Child lisp process running the ~A test suite finished without returing result test status. Looks like the lisp process has crashed. The error condition signalled in the parent process: ~A"
-                                                    libname condition)
-                      :crash)
-                    (lisp-exe:lisp-process-timeout (c)
-                      (log:info "Child lisp running the ~A test suite has exceeded the timeout of ~A seconds and killed."
-                                libname (lisp-exe:seconds c))
-                      (finish-test-log-with-failure "~%The ~A test suite hasn't finished in ~A seconds.~%We consider the test suite as hung; the test suite lisp process is killed.~%"
-                                                    libname (lisp-exe:seconds c))
-                      :timeout))))
-      (log:info "The ~A test suite status: ~S" libname status)
-      (list :libname libname
-            :status status
-            :log-byte-length (test-grid-utils::file-byte-length logfile)
-            :test-duration (/ (- (get-internal-real-time) start-time)
-                              internal-time-units-per-second)))))
+     ,@body))
+
+(defun print-testsuite-log-header (libname run-descr log-file)
+  (with-open-file (stream log-file
+                          :direction :output
+                          :if-does-not-exist :create
+                          :if-exists :supersede)
+    (let ((*print-case* :downcase) (*print-pretty* nil))
+      (format stream "============================================================~%")
+      (format stream "  cl-test-grid testsuite execution~%")
+      (format stream "------------------------------------------------------------~%")
+      (format stream "  library:           ~A~%" libname)
+      (format stream "  lib-world:         ~A~%" (getf run-descr :lib-world))
+      (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
+      (format stream "  contributor email: ~A~%" (getf (getf run-descr :contact) :email))
+      (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
+      (format stream "============================================================~%"))))
+
+(defun print-log-footer (lib-or-system status log-file)
+  (appending stream log-file
+    (let ((*print-case* :downcase))
+      (fresh-line stream)
+      (terpri stream)
+      (format stream "~%============================================================~%")
+      (format stream "  cl-test-grid status for ~A: ~A~%"
+              lib-or-system (test-grid-data::print-test-status nil status))
+      (format stream "============================================================~%"))))
+
+(defun proc-run-libtest (lisp-exe libname run-descr logfile private-quicklisp-dir asdf-output-dir)
+  "Runs test-grid-testsuites::run-libtest in a separate process and returns the result."
+  (let ((start-time (get-internal-real-time))
+        (status (handler-case
+                    (with-response-file (response-file)
+                      (let* ((code `(progn
+                                      (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
+                                      (load ,(src-file "proc-common.lisp"))
+                                      (load ,(src-file "proc-common-asdf.lisp"))
+                                      (load ,(src-file "proc-run-libtest.lisp"))
+                                      (cl-user::set-response ,response-file
+                                                             (cl-user::run-libtest-main ,libname
+                                                                                        ,logfile
+                                                                                        ,private-quicklisp-dir
+                                                                                        ,asdf-output-dir)))))
+                        (log:info "Starting ~A test suite..." libname)
+                        (print-testsuite-log-header libname run-descr logfile)
+                        (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
+                  (no-response (condition)
+                    (appending log logfile
+                      (format log "~%Child lisp process running the ~A test suite finished without returing result test status."
+                              libname)
+                      (format log "Looks like the lisp process has crashed.")
+                      (format log "The error condition signalled in the parent process: ~A" condition))
+                    (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
+                              condition)
+                    :crash)
+                  (lisp-exe:lisp-process-timeout (c)
+                    (appending log logfile
+                      (format log "~%The ~A test suite hasn't finished in ~A seconds." libname (lisp-exe:seconds c))
+                      (format log "~%We consider the test suite as hung; the test suite lisp process is killed.~%"))
+                    (log:info "Child lisp process running ~A test suite has exceeded the timeout of ~A seconds and killed."
+                              libname (lisp-exe:seconds c))
+                    :timeout))))
+    (log:info "The ~A test suite status: ~S" libname status)
+    (print-log-footer libname status logfile)
+    (list :libname libname
+          :status status
+          :log-byte-length (test-grid-utils::file-byte-length logfile)
+          :test-duration (/ (- (get-internal-real-time) start-time)
+                            internal-time-units-per-second))))
 
 (defun perform-test-run (agent lib-world lisp-exe libs)
   (let* ((run-descr (make-run-descr lib-world
@@ -194,22 +228,6 @@ as the system load status.")
 
 ;;; perform-test-run2
 
-(defun pretty-fmt-time (universal-time &optional destination)
-  "The human-readable time format, used in reports."
-  (multiple-value-bind (sec min hour date month year)
-      (decode-universal-time universal-time 0)
-    (funcall #'format
-             destination
-             "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
-             year month date hour min sec)))
-
-(defmacro appending (stream-var file &body body)
-  `(with-open-file (,stream-var ,file
-                                :direction :output
-                                :if-does-not-exist :create
-                                :if-exists :append)
-     ,@body))
-
 (defun print-loadtest-log-header (system-name run-descr log-file)
   (with-open-file (stream log-file
                           :direction :output
@@ -224,16 +242,6 @@ as the system load status.")
       (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
       (format stream "  contributor email: ~A~%" (getf (getf run-descr :contact) :email))
       (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
-      (format stream "============================================================~%"))))
-
-(defun print-log-footer (lib-or-system status log-file)
-  (appending stream log-file
-    (let ((*print-case* :downcase))
-      (fresh-line stream)
-      (terpri stream)
-      (format stream "============================================================~%")
-      (format stream "  cl-test-grid status for ~A: ~A~%"
-              lib-or-system (test-grid-data::print-test-status nil status))
       (format stream "============================================================~%"))))
 
 (defun proc-test-loading (lisp-exe system-name run-descr
@@ -261,7 +269,6 @@ as the system load status.")
                               system-name)
                       (format log "Looks like the lisp process has crashed.")
                       (format log "The error condition signalled in the parent process: ~A" condition))
-
                     (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
                               condition)
                     :crash)
@@ -273,7 +280,7 @@ as the system load status.")
                               system-name (lisp-exe:seconds c))
                     :timeout))))
     (print-log-footer system-name status logfile)
-    (log:info "The ~A system load status:: ~S" system-name status)
+    (log:info "The ~A system load status: ~S" system-name status)
     (list :system system-name
           :status status
           :log-byte-length (test-grid-utils::file-byte-length logfile)
@@ -433,7 +440,6 @@ TODO:
     with default implementation as (ql-dist:provided-systems (ql-dist:dist <project-name>))
 - perform-test-run2:
   + P1 submit loading logs and store loading results in the test-run-info
-  - P1 default implementation of test-grid-testsuites:libtest returning :NO-TESTSUITE (or just NIL)
   + P1 rename projects back to their original names (routes -> cl-routes)
   + pass the list of project names as parameter?
   - specify the dependency on quicklisp
@@ -451,14 +457,14 @@ TODO:
                   :log-blob-key -> :test-log-blob-key
                   :log-byte-length -> :test-log-byte-length
   - project name: a keyword libname, or string?
-- unify calling proc-libtest and proc-test-loading
-  - loading of proc-common.lisp
-  - log header and footer code is contained in agent
-  - remove duplicated version pretty-fmt-time from test-grid-testsuites module
-  - saving-output, catching-problems
-  - asdf-output-translations
++ unify calling proc-libtest and proc-test-loading
+  + loading of proc-common.lisp
+  + log header and footer code is contained in agent
+  + remove duplicated version pretty-fmt-time from test-grid-testsuites module
+  + saving-output, catching-problems
+  + asdf-output-translations
 - reporting
-  - P1 support for :NO-TESTSUITE status (or just NIL)
+  - P1 handle the results where test status is NIL (i.e. the project has no testsuite)
   - P1 there will be no :LOAD-FAILED status?
     think more how to integrate load results with test results
 
