@@ -7,10 +7,7 @@
   (:export  ;; list of the libraries added to test-grid
             #:*all-libs*
             ;; the generic function to be implemented for evey library
-            #:libtest
-             ;; wrapper around libtests, does some housekeeping
-            ;; (candidate to move to the agent module)
-            #:run-libtest))
+            #:libtest))
 
 (in-package #:test-grid-testsuites)
 
@@ -857,90 +854,3 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;
 ;;   (combine-extended-libresult (run-lift-test-suite :weblocks-suite)
 ;;                               (run-lift-test-suite :store-suite)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; run-libtest
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun pretty-fmt-time (universal-time &optional destination)
-  "The human-readable time format, used in reports."
-  (multiple-value-bind (sec min hour date month year)
-      (decode-universal-time universal-time 0)
-    (funcall #'format
-             destination
-             "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
-             year month date hour min sec)))
-
-(defun print-log-header (libname run-descr stream)
-  (let ((*print-case* :downcase) (*print-pretty* nil))
-    (format stream "============================================================~%")
-    (format stream "  cl-test-grid test run~%")
-    (format stream "------------------------------------------------------------~%")
-    (format stream "  library:           ~A~%" libname)
-    (format stream "  lib-world:         ~A~%" (getf run-descr :lib-world))
-    (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
-    (format stream "  *features*:        ~A~%" (sort (copy-list *features*) #'string<))
-    (format stream "  contributor email: ~A~%" (getf (getf run-descr :contact) :email))
-    (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
-    (format stream "============================================================~%~%")))
-
-(defun print-log-footer (libname status stream)
-  (let ((*print-case* :downcase))
-    (fresh-line stream)
-    (terpri stream)
-    (format stream "============================================================~%")
-    (format stream "  cl-test-grid status for ~A: ~A~%"
-            libname (test-grid-data::print-test-status nil status))
-    (format stream "============================================================~%")))
-
-(defun run-libtest (lib run-descr log-file)
-  ;; Rudiments from the times of single-process testing of all libraries
-  ;; and printing message for user to console.
-  ;; Should we mainain run-libtest suitable for such usage now?
-  (format t
-          "Running tests for ~A. *STANDARD-OUTPUT* and *ERROR-OUTPUT* are redirected.~%"
-          lib)
-  (finish-output t)
-
-  (labels ((handling-problems (body-func on-problem-func)
-             "Runs BODY-FUNC and returns it's result. But if BODY-FUNC causes any problems, invoke ON-PROBLEM-FUNC."
-             ;; We should never allow the test suite to enter debugger.
-             ;; If the test suite tries to enter debugger, then something
-             ;; is wrong, we just record failure.
-             (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
-                                        (declare (ignore me-or-my-encapsulation))
-                                        (format t
-                                                "invoke-debugger is called with condition of type ~A: ~A.~%"
-                                                (type-of condition)
-                                                condition)
-                                        (funcall on-problem-func))))
-               ;; Even despite we prevent entering the interactive debugger,
-               ;; we capture all the SERIOUS-CONDITIONS signalled by test suite,
-               ;; because we don't want our caller (the code calling RUN-LIBTEST),
-               ;; to see the test suite errors as errors signalled by RUN-LIBTEST.
-               (handler-case
-                   (funcall body-func)
-                 (serious-condition (condition)
-                   (format t
-                           "~&Unhandled SERIOUS-CONDITION of type ~A is signaled: ~A~%"
-                           (type-of condition)
-                           condition)
-                   (funcall on-problem-func)))))
-
-           (libtest-handling-problems ()
-             (handling-problems (lambda ()
-                                  (format t "~&Running ~A's test suite...~%" lib)
-                                  (normalize-status (libtest lib)))
-                                (lambda ()
-                                  (format t "~&Returning :FAIL~%")
-                                  (return-from libtest-handling-problems :fail)))))
-    (with-open-file (log-stream log-file
-                                :direction :output
-                                :if-exists :overwrite
-                                :if-does-not-exist :create)
-      (print-log-header lib run-descr log-stream)
-      (let* ((*standard-output* log-stream)
-             (*error-output* log-stream)
-             (status (libtest-handling-problems)))
-        (print-log-footer lib status log-stream)
-        status))))
