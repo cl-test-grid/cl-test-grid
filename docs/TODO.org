@@ -169,7 +169,7 @@
          (no test suite, needs manual configuration, hangs, etc.)
           The libraries are ordered in alphabetical order.
 
-** TODO createdrakma test suite - will ensure drakma works on all the lisps.
+** TODO create drakma test suite - will ensure drakma works on all the lisps.
     Drakma test suite is a must. HTTP client today is as vital thing
     as file system access. It should work on all the lisps.
     Create a test suite, the simples one - download one file
