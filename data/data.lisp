@@ -80,22 +80,24 @@
                        (format nil "~~%~~~Dt" (+ indent 11))
                        #'(lambda (lib-result)
                            (format out
-                                   "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s~%"
+                                   "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s"
                                    (getf lib-result :libname)
                                    (print-test-status nil (getf lib-result :status))
                                    (getf lib-result :test-duration)
                                    (getf lib-result :log-byte-length)
                                    (getf lib-result :log-blob-key))
-                           (format out "~v,0t:load-results (" (+ indent 12))
-                           (print-list-elements out
-                                                (sort (copy-list (getf lib-result :load-results))
-                                                      #'string<
-                                                      :key #'(lambda (load-result)
-                                                               (getf load-result :system)))
-                                                (format nil "~~%~~~Dt" (+ indent 27))
-                                                (lambda (load-result)
-                                                  (format out "~S" load-result)))
-                           (format out "))")))
+                           (when (getf lib-result :load-results)
+                             (format out "~%~v,0t:load-results (" (+ indent 12))
+                             (print-list-elements out
+                                                  (sort (copy-list (getf lib-result :load-results))
+                                                        #'string<
+                                                        :key #'(lambda (load-result)
+                                                                 (getf load-result :system)))
+                                                  (format nil "~~%~~~Dt" (+ indent 27))
+                                                  (lambda (load-result)
+                                                    (format out "~S" load-result)))
+                             (format out ")"))
+                           (format out ")")))
   (format out "))"))
 
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
