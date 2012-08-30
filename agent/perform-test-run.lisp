@@ -322,14 +322,15 @@ as the system load status.")
                                    (private-quicklisp-dir agent)
                                    asdf-output-dir)
                 load-results))
-        (log:info "Testsuite of project ~A" project) (string-equal "a" :a)
         (let* (;; project may be a string, translate it to keyword first
                (libname (find project test-grid-testsuites:*all-libs* :test #'string-equal))
                (lib-result (if libname
-                               (proc-run-libtest lisp-exe libname run-descr
-                                                 (lib-log-file run-dir project)
-                                                 (private-quicklisp-dir agent)
-                                                 asdf-output-dir)
+                               (progn
+                                 (log:info "Testsuite of project ~A" project)
+                                 (proc-run-libtest lisp-exe libname run-descr
+                                                   (lib-log-file run-dir project)
+                                                   (private-quicklisp-dir agent)
+                                                   asdf-output-dir))
                                (list :libname (as-keyword project)))))
           (setf (getf lib-result :load-results) load-results)
           (push lib-result lib-results))))
@@ -390,7 +391,83 @@ as the system load status.")
     (save-run-info run-info test-run-dir)    
     run-info))
 
+(defun perform-test-run3 (test-run agent lisp-exe project-names)
+  (let* ((run-descr (test-grid-data::run-descr test-run))
+         (run-dir (run-directory run-descr (test-output-base-dir agent)))
+         (asdf-output-dir (merge-pathnames "asdf-output/" run-dir))
+         (lib-results (getf test-run :results))
+         (start-time (get-universal-time))
+         (prev-duration (if (numberp (getf run-descr :run-duration))
+                            (getf run-descr :run-duration)
+                            0)))
+    (flet ((tested-p (project-name)
+             (find (as-keyword project-name) lib-results :key (alexandria:rcurry #'getf :libname) :test #'eq)))
+      (let ((project-names (remove-if #'tested-p project-names)))
+        (ensure-directories-exist run-dir)
+        (dolist (project project-names)
+          (log:info "Testing load of project ~A" project)
+          (let ((load-results '()))
+            (dolist (system (ql-dist:provided-systems (ql-dist:release project)))
+              (push (proc-test-loading lisp-exe (ql-dist:name system)
+                                       run-descr
+                                       (loadtest-log-file run-dir (ql-dist:name system))
+                                       (private-quicklisp-dir agent)
+                                       asdf-output-dir)
+                    load-results))
+            (let* ( ;; project may be a string, translate it to keyword first
+                   (libname (find project test-grid-testsuites:*all-libs* :test #'string-equal))
+                   (lib-result (if libname
+                                   (progn
+                                     (log:info "Testsuite of project ~A" project)
+                                     (proc-run-libtest lisp-exe libname run-descr
+                                                       (lib-log-file run-dir project)
+                                                       (private-quicklisp-dir agent)
+                                                       asdf-output-dir))
+                                   (list :libname (as-keyword project)))))
+              (setf (getf lib-result :load-results) load-results)
+              (push lib-result lib-results)
+
+              ;; persist the currently computed results to disk
+              (setf (getf run-descr :run-duration)
+                    (+ prev-duration (- (get-universal-time) start-time)))
+              (setf (getf test-run :descr) run-descr)
+              (setf (getf test-run :results) lib-results)
+              (save-run-info test-run run-dir))))
+        (log:info "The test results were saved to: ~%~A." (truename run-dir))
+        (dolist (asdf-output-subdir (list (merge-pathnames asdf-output-dir "private-quicklisp/")
+                                          (merge-pathnames asdf-output-dir "test-grid/")))
+          (when (not (cl-fad:directory-exists-p asdf-output-subdir))
+            (log:warn "The ASDF output directroy ~S does not exist; seems like the test run was not using our asdf-output-translations and we have no guarantee all the sourcess were freshly recompiled." asdf-output-subdir)))
+        run-dir))))
+
+(defun submitted-p (test-run)
+  "Tests whether the specified TEST-RUN is already
+submitetd by examining checking if it contains a blobstore key
+for some log."
+  (let ((lib-result (first (getf test-run :results))))
+    (or (getf lib-result :log-blob-key)
+        (let ((load-result (first (getf lib-result :load-results))))
+          (getf load-result :log-blob-key)))))
+
+(defun list-test-runs (test-runs-root-dir)
+  (let ((test-runs '()))
+    (dolist (child (cl-fad:list-directory test-runs-root-dir))
+      (let ((run-info-file (merge-pathnames "test-run-info.lisp"
+                                            child)))
+        (when (probe-file run-info-file)
+          (push (test-grid-utils::safe-read-file run-info-file) test-runs))))
+    test-runs))
+
+(defun list-unfinished-test-runs (test-runs-root-dir)
+  (remove-if #'submitted-p (list-test-runs test-runs-root-dir)))
+
+
 #|
+
+(length (list-unfinished-test-runs #P"C:\\Users\\anton\\projects\\cl-test-grid2-work-dir2\\agent-dev\\test-runs\\"))
+
+;; --- agent initialization --- 
+
 (defparameter *ccl-1.8-x86* (make-instance 'lisp-exe:ccl
                                            :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl.exe"))
 
@@ -399,7 +476,7 @@ as the system load status.")
 (setf (test-grid-agent:lisps *agent*) (list *ccl-1.8-x86*)
       (test-grid-agent:preferred-lisp *agent*) *ccl-1.8-x86*
       (test-grid-agent:user-email *agent*) "avodonosov@yandex.ru"
-      (test-grid-agent:work-dir *agent*) #P"C:\\Users\\anton\\..\\anton\\projects\\cl-test-grid2-work-dir2\\dev-agent\\")
+      (test-grid-agent:work-dir *agent*) #P"C:\\Users\\anton\\..\\anton\\projects\\cl-test-grid2-work-dir2\\agent-dev\\")
 
 ;(proc-test-loading cl-user::*ccl-1.8-x86-64* :zalexandria "alexandria-load" #P"/Users/anton/projects/cl-test-grid2-work-dir/agent/quicklisp/")
 
@@ -410,6 +487,13 @@ as the system load status.")
                    (preferred-lisp *agent*)
                    (subseq (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))
                            0 10))
+
+(let ((run (first (list-unfinished-test-runs (test-output-base-dir *agent*)))))
+  (perform-test-run3 run
+                     *agent*
+                     (preferred-lisp *agent*)
+                     (subseq (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))
+                             0 13)))
 
 (time
  (let ((test-run-dir #P"C:\\Users\\anton\\projects\\cl-test-grid2-work-dir2\\agent-dev\\test-runs\\20120824192514-ccl-1.8-f95-win-x86\\"))
@@ -443,6 +527,8 @@ TODO:
   + P1 rename projects back to their original names (routes -> cl-routes)
   + pass the list of project names as parameter?
   - specify the dependency on quicklisp
+- perform-test-run3:
+  - clean asdf output directories before continuing a test-run?
 - test-grid-data
   + printing for loadtest results
   - P1 db format: rename projects back to their original names (routes -> cl-routes)
@@ -467,41 +553,5 @@ TODO:
   - P1 handle the results where test status is NIL (i.e. the project has no testsuite)
   - P1 there will be no :LOAD-FAILED status?
     think more how to integrate load results with test results
-
-
-log header:
-  problems:
-    I don't want to pass all the test run parameters to child process only to write log header
-    when child process crashes, parent process need to add log footer
-
-    If we retrieve *features* of lisp implementation by separate lisp process
-    invocation, we may get different features than are used during actual testing,
-    because when starting child lisp process for testing we pass different
-    parameters, for exampel loading quicklisp. 
-
-    Solutions:
-    - write log header fully by the parent process, retrieving
-      *featuers* of the child by separate invocation
-      [risk of imprecise *features*]
-
-    - write log header fully by the child process
-      [too many parameters passed to it; differs
-       from the log footer handling]
-       
-    - pass almost finished log header as a string parameter
-      to child process, and the child process is responsible
-      to store it at the beginning of the file, replacing
-      ~A by *featuers* first
-      [redundant long parameter in the child
-       process invocation command line, although
-       it's only single parameter]
-
-    - write all the log header except for *features*
-      to the log file by the parent process, and
-      add only *features* line by the child process
-      [*features* in the log header are apart
-       from the "lisp" field, while they are
-       the closest by the meaning]
-      
 
 |#
