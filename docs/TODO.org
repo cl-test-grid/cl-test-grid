@@ -1,5 +1,6 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 * 0.5.1 Test loading (including fresh recompilation) of all the libraries in quicklisp.
+** Test loading of every ASDF system and publish results.
   <in progress>
 
   This means even if the library doesn't have a test suite,
@@ -11,12 +12,16 @@
   failures with test suite status, if only part of ASDF systems
   failed to compile.
 
-* 0.5.2 Install more lisps on my VPS
+** Workaround the GAE issue https://code.google.com/p/googleappengine/issues/detail?id=8032
+
+* 0.5.2 Don't loose test run results if it was interrupted (due to errors, network outage or agent termination)
+** Continuable test runs
+* 0.5.3 Install more lisps on my VPS
   I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
 ** DONE ABCL
    CLOSED: [2012-08-20 Пн 01:48]
 ** TODO CLISP (build a multithreaded version)
-* 0.5.3 Reuild free the lisps from source control daily, before running test-grid-agent
+* 0.5.4 Reuild free the lisps from source control daily, before running test-grid-agent
 * 0.6.0 Reports Improve 2
 ** TODO combine information about load failures with information about system dependencies
    It will allow us to find "root" compilation blockers -
@@ -223,6 +228,8 @@
 ** TODO memoization of the implementation-identifier generic function is not portable
    in particular, it's known that fare-memoization can't memoize it on ACL,
    see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
+** TODO when killing child process, sometimes we may have "No such process" simple-error
+   if the process already finished. Handle it.
 ** TODO when logging the name of a library currently being tested, log also it's number in the
    total number of libraries, e.g. [41 of 56].
 ** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
