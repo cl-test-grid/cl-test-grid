@@ -116,7 +116,7 @@ values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :LOAD-FAILED, :FAIL, :NO-RESOURSE
       (let ((run-descr (test-grid-data::run-descr run))
             (lib-statuses (test-grid-data::run-results run)))
         (format out "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td>"
-                (test-grid-testsuites::pretty-fmt-time (getf run-descr :time))
+                (test-grid-agent::pretty-fmt-time (getf run-descr :time))
                 (getf run-descr :lib-world)
                 (getf run-descr :lisp)
                 (getf (getf run-descr :contact) :email))
@@ -128,8 +128,8 @@ values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :LOAD-FAILED, :FAIL, :NO-RESOURSE
     (write-line "</tbody>" out)
     (write-line "</table>" out)))
 
-(defun test-runs-report (&optional (db test-grid-testsuites::*db*))
+(defun test-runs-report (db)
   (fmt-template *test-runs-report-template*
                 `(("{THE-TABLE}" . ,(test-runs-table-html db))
-                  ("{TIME}" . ,(test-grid-testsuites::pretty-fmt-time (get-universal-time))))))
+                  ("{TIME}" . ,(test-grid-agent::pretty-fmt-time (get-universal-time))))))
 

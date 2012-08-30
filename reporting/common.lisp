@@ -22,6 +22,6 @@ to include in to the text of the link, defaults to STATUS"
   (format out "<body>~%")
   (format out "~A~%" body)
   (format out "<p class=\"timestamp\">Generated at: ~A GMT.</p>"
-          (test-grid-testsuites::pretty-fmt-time (get-universal-time)))
+          (test-grid-agent::pretty-fmt-time (get-universal-time)))
   (format out "</body>~%")
   (format out "</html>~%"))

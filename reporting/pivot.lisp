@@ -374,7 +374,7 @@ Every subaddress represents some level of pivot groupping."
 
     (write-sequence (fmt-template *pivot-report-template*
                                   `(("{THE-TABLE}" . ,table)
-                                    ("{TIME}" . ,(test-grid-testsuites::pretty-fmt-time (get-universal-time)))))
+                                    ("{TIME}" . ,(test-grid-agent::pretty-fmt-time (get-universal-time)))))
                     out)))
 
 (defun print-pivot-reports (joined-index)
