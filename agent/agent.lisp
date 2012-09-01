@@ -260,8 +260,7 @@ the PREDICATE."
                                                   (project-names))))
               (submit-test-run-results (blobstore agent) results-dir)
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
-                                        ;(cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)
-              ))
+              (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
           continue)))))
 
 (defun ensure-has-id (agent)
