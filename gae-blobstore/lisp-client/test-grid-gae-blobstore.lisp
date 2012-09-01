@@ -16,22 +16,6 @@
   (declare (ignore base-url))
   (apply #'make-instance 'blobstore params))
 
-;; copy/paste from
-;; http://www.gigamonkeys.com/book/practical-an-mp3-browser.html
-(defmacro with-safe-io-syntax (&body body)
-  `(with-standard-io-syntax
-     (let ((*read-eval* nil))
-       ,@body)))
-
-(defun safe-read (&rest args)
-  (with-safe-io-syntax (apply #'read args)))
-
-(defun file-byte-length (path)
-  (with-open-file (s path
-                     :direction :input
-                     :element-type '(unsigned-byte 8))
-    (file-length s)))
-
 (defconstant +max-file-length+ 100000)
 
 (defun limit-file-length (filespec &optional (max-len +max-file-length+))
@@ -40,7 +24,7 @@ returns the FILESPEC; otherwise returns a function accepting a binary
 stream as it's only argument, and writing to that stream the file content
 shortened to a satisfying length: the beginning of the file,
 a warning message, followed by the end of the file."
-  (let ((file-len (file-byte-length filespec)))
+  (let ((file-len (test-grid-utils::file-byte-length filespec)))
     (if (<= file-len max-len)
         filespec
         (let* ((msg (format nil "~%~%[... SNIPPED OFF BY CL-TEST-GRID BECAUSE THIS FILE EXCEEDS THE ALLOWED MAXIMUM SIZE OF ~A BYTES: ~A ...]~%~%"
@@ -83,53 +67,58 @@ a warning message, followed by the end of the file."
 ;;         (funcall fun out)
 ;;         fun)))
 
-(defmethod test-grid-blobstore:submit-files ((blobstore blobstore) id-pathname-alist)
-  (let* (;; Google App Engine does not allow to submit blobs to a constant URL,
-         ;; we need to perform a separate request to our servlet, which will
-         ;; generate an URL where we can upload files.
-         (upload-url (drakma:http-request (format nil "~A/upload-url" (base-url blobstore))
-                                          :content-type "text/plain"))
 
-         ;; Now prepare POST parameters for the main submit request,
-         ;; according the drakma API for file posting.
-         ;;
-         ;; Namely, ensure the IDs are strings and add "text/plain" content type.
-         ;;
-         ;; Example: if ID-PATHNAME-ALIST is
-         ;;   ((:alexandria #P"/logs/alexandria.log") ... )
-         ;; convert it to
-         ;;   (("alexandria" #P"/logs/alexandria.log" :content-type "text/plain") ... )
-         (post-params (mapcar #'(lambda (elem)
-                                  (cons (string-downcase (car elem))
-                                        (list (limit-file-length (cdr elem))
-                                              :filename (file-namestring (cdr elem))
-                                              :content-type "text/plain")))
-                              id-pathname-alist))
-         ;; Perrorm the query.
-         (response (with-open-stream (in (drakma:http-request upload-url
-                                                              :method :post
-                                                              :content-length t
-                                                              :parameters post-params
-                                                              :want-stream t))
-                     ;; And read the response
-                     (safe-read in))))
-    ;; Now RESPONSE contains an alist of
-    ;; (<stringified ID> . <blob key>)  pairs.
-    ;; For example:
-    ;;    (("alexandria" . "cJVA1Klp7o-Lz2Cc6KuPcg") ...)
-    ;; As in the original id-pathname-alist the IDs might be represented
-    ;; as symbols, lets return response with IDs in the original form, e.g.
-    ;;    ((:alexandria . "cJVA1Klp7o-Lz2Cc6KuPcg") ...)
-    ;;
-    ;; During the conversion we also check that we got blobkeys for
-    ;; all the files we submitted.
-    (flet ((get-blobkey (for-id)
-             (or (cdr (assoc for-id response :test #'string-equal))
-                 (error "The response does not contain a blobkey for the ~A" for-id))))
-      (mapcar (lambda (id-pathname-pair)
-                (cons (car id-pathname-pair)
-                      (get-blobkey (car id-pathname-pair))))
-              id-pathname-alist))))
+(defmethod test-grid-blobstore:submit-files ((blobstore blobstore) id-pathname-alist)
+  (flet ((submit-impl (id-pathname-alist-part)
+           (let* (;; Google App Engine does not allow to submit blobs to a constant URL,
+                  ;; we need to perform a separate request to our servlet, which will
+                  ;; generate an URL where we can upload files.
+                  (upload-url (drakma:http-request (format nil "~A/upload-url" (base-url blobstore))
+                                                   :content-type "text/plain"))
+                  ;; Now prepare POST parameters for the main submit request,
+                  ;; according the drakma API for file posting.
+                  ;;
+                  ;; Namely, ensure the IDs are strings and add "text/plain" content type.
+                  ;;
+                  ;; Example: if ID-PATHNAME-ALIST is
+                  ;;   ((:alexandria #P"/logs/alexandria.log") ... )
+                  ;; convert it to
+                  ;;   (("alexandria" #P"/logs/alexandria.log" :content-type "text/plain") ... )
+                  (post-params (mapcar #'(lambda (elem)
+                                           (cons (string-downcase (car elem))
+                                                 (list (limit-file-length (cdr elem))
+                                                       :filename (file-namestring (cdr elem))
+                                                       :content-type "text/plain")))
+                                       id-pathname-alist-part)))
+             (with-open-stream (in (drakma:http-request upload-url
+                                                        :method :post
+                                                        :content-length t
+                                                        :parameters post-params
+                                                        :want-stream t))
+               (log:info "next ~A files are uploaded" (length id-pathname-alist-part))
+               ;; And read the response
+               (test-grid-utils::safe-read in)))))
+    (let* ( ;;Split the files submitted into batches by < 500 elements
+           ;; to workaround GAE blobstore issue: https://code.google.com/p/googleappengine/issues/detail?id=8032
+           (batches (test-grid-utils::split-list id-pathname-alist 100))
+           (response (mapcan #'submit-impl batches)))
+      ;; Now RESPONSE contains an alist of
+      ;; (<stringified ID> . <blob key>)  pairs.
+      ;; For example:
+      ;;    (("alexandria" . "cJVA1Klp7o-Lz2Cc6KuPcg") ...)
+      ;; As in the original id-pathname-alist the IDs might be represented
+      ;; as symbols, lets return response with IDs in the original form, e.g.
+      ;;    ((:alexandria . "cJVA1Klp7o-Lz2Cc6KuPcg") ...)
+      ;;
+      ;; During the conversion we also check that we got blobkeys for
+      ;; all the files we submitted.
+      (flet ((get-blobkey (for-id)
+               (or (cdr (assoc for-id response :test #'string-equal))
+                   (error "The response does not contain a blobkey for the ~A" for-id))))
+        (mapcar (lambda (id-pathname-pair)
+                  (cons (car id-pathname-pair)
+                        (get-blobkey (car id-pathname-pair))))
+                id-pathname-alist)))))
 
 (defmethod test-grid-blobstore:submit-run-info ((blobstore blobstore) run-info)
   (assert (not (null run-info)))
@@ -137,7 +126,7 @@ a warning message, followed by the end of the file."
                                        :method :post
                                        :parameters `(("run-info" . ,(prin1-to-string run-info))))))
     (when (not (eq :ok (with-input-from-string (s response)
-                         (safe-read s))))
+                         (test-grid-utils::safe-read s))))
       (error "Error submitting run info to the server. Unexpected response: ~A." response))))
 
 (defmethod test-grid-blobstore:tell-admin ((blobstore blobstore) subject body)
@@ -148,5 +137,5 @@ a warning message, followed by the end of the file."
                                        :parameters `(("subject" . ,subject)
                                                      ("body" . ,body)))))
     (when (not (eq :ok (with-input-from-string (s response)
-                         (safe-read s))))
+                         (test-grid-utils::safe-read s))))
       (error "Error sending message to admin. Unexpected response: ~A." response))))
