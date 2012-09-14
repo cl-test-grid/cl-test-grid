@@ -51,14 +51,17 @@
   (list :version (getf db :version)
         :runs (mapcar (lambda (run)
                         (list :descr (getf run :descr)
-                              :results (remove-if-not predicate (getf run :results))))
+                              :results (remove-if-not (lambda (lib-result)
+                                                        (funcall predicate lib-result run))
+                                                      (getf run :results))))
                       (getf db :runs))))
 
 (defun generate-reports (db)
   (let* (;; Old reports can work only with lib-result objects representing
          ;; testsuite results, but not load tests.
          ;; Compute filtered DB where only testsuite results are persent.
-         (filtered-db (filter-lib-results db (lambda (lib-result)
+         (filtered-db (filter-lib-results db (lambda (lib-result test-run)
+                                               (declare (ignore test-run))
                                                (getf lib-result :status))))
          (all-results (select db))
          (all-failures (list-failures all-results)))
