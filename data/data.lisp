@@ -127,5 +127,5 @@
  DB version change history:
  0 - initial
  1 - cl-routes and cl-closure-template are renamed to routes and closure-template
-
+ 2 - routes and closure-template are renamed back to cl-routes and cl-closure-template 
 |#
