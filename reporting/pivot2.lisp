@@ -5,8 +5,8 @@
 (in-package #:test-grid-reporting)
 
 (defun list-props (object prop-readers)
-  (mapcar (lambda (accessor)
-            (funcall accessor object))
+  (mapcar (lambda (prop-reader)
+            (funcall prop-reader object))
           prop-readers))
 
 (defun group-by (items item-prop-readers)
@@ -57,10 +57,8 @@
 
 (assert (alexandria:set-equal '((1) (7))
                               (distinct '((:a 1 :b 2) (:a 1 :b 3) (:a 7 :b 1))
-                                        (list (test-grid-utils::plist-getter :a)))                              
+                                        (list (test-grid-utils::plist-getter :a)))
                               :test #'equal))
-
-
 
 (defun pivot-table-html2 (out
                           objects
@@ -98,30 +96,3 @@
           (princ "</td>" out))
         (format out "</tr>~%"))))
   (princ "</table>" out))
-
-;;;; --- performance experiments
-
-(defparameter *long-list* (reduce 'append (make-sequence 'list 10000
-                                                         :initial-element '((:a 1 :b 2) (:a 1 :b 3) (:a 7 :b 1)))))
-
-(defparameter *long-list* (map-into (make-sequence 'list (* 2000 100 100))
-                                    (lambda ()
-                                      (list :libname (random 2000) :lisp (random 100) :lib-world (random 100)))))
-
-(/ 320000128.0 (length *long-list*))
-(asdf:implementation-identifier)
-(first *long-list*)
-(time
- (defparameter *filtered-list* (remove-if-not (lambda (item)
-                                                (member (getf item :lib-world) '(10 11 12)))
-                                              *long-list*)))
-
-(time
- (defparameter *filtered-list* (remove-if-not (constantly nil) *long-list*)))
-
-(length *filtered-list*)
-
-(time 
- (defparameter *distinct-list* (distinct *filtered-list* (list (test-grid-utils::plist-getter :libname)
-                                                               (test-grid-utils::plist-getter :lib-world)))))
-      

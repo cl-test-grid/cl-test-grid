@@ -45,27 +45,41 @@
       (setf template (replace-str template (car subst) (cdr subst))))
     template))
 
+;;; =========== print all the reports at once =============
 
-;; =========== print all the reports at once =============
+(defun filter-lib-results (db predicate)
+  (list :version (getf db :version)
+        :runs (mapcar (lambda (run)
+                        (list :descr (getf run :descr)
+                              :results (remove-if-not predicate (getf run :results))))
+                      (getf db :runs))))
 
-(defun generate-reports (&optional (db test-grid-data::*db*))
+(defun generate-reports (db)
+  (let* (;; Old reports can work only with lib-result objects representing
+         ;; testsuite results, but not load tests.
+         ;; Compute filtered DB where only testsuite results are persent.
+         (filtered-db (filter-lib-results db (lambda (lib-result)
+                                               (getf lib-result :status))))
+         (all-results (select db))
+         (all-failures (list-failures all-results)))
 
-  (with-report-file (out "test-runs-report.html")
-    (write-sequence (test-runs-report db) out))
+    (with-report-file (out "test-runs-report.html")
+      (write-sequence (test-runs-report filtered-db) out))
 
-  (with-report-file (out "export.csv")
-    (export-to-csv out db))
+    (with-report-file (out "export.csv")
+      (export-to-csv out filtered-db))
 
-  (let* ((last-lib-worlds (largest 'lib-world db :count 3))
-         (joined-index (build-joined-index db :where (lambda (record)
-                                                       (member (lib-world record)
-                                                               last-lib-worlds
-                                                               :test #'string=)))))
-    (print-pivot-reports joined-index)
+    (let* ((last-lib-worlds (largest 'lib-world filtered-db :count 3))
+           (joined-index (build-joined-index filtered-db :where (lambda (record)
+                                                                  (member (lib-world record)
+                                                                          last-lib-worlds
+                                                                          :test #'string=)))))
+      (print-pivot-reports joined-index)
 
-    (with-report-file (out "quicklisps-test-diff.html")
-      (print-all-quicklisps-diff-report out joined-index)))
+      (with-report-file (out "quicklisps-test-diff.html")
+        (print-all-quicklisps-diff-report out joined-index)))
 
-  (print-ecl-pages db)
-  (print-abcl-page db))
+    (time (print-quicklisp-diff-report all-failures))
+    (time (print-ecl-pages filtered-db))
+    (time (print-abcl-page all-failures))))
 

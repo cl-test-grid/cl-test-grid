@@ -54,10 +54,10 @@
                           row-fields row-fields-sort-predicates
                           col-fields col-fields-sort-predicates)
              (with-report-file (out filename)
-               (pivot-report-html out
-                                  result-index
-                                  row-fields row-fields-sort-predicates
-                                  col-fields col-fields-sort-predicates))))
+               (pivot-report-old out
+                                 result-index
+                                 row-fields row-fields-sort-predicates
+                                 col-fields col-fields-sort-predicates))))
 
       (print-report all-results
                     "ecl-pivot_lisp_ql-lib.html"

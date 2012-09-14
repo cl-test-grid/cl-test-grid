@@ -8,10 +8,10 @@
   (mapcan #'failures lib-results))
 
 (defun failures (lib-result)
-  (nconc (test-failures lib-result)
+  (nconc (testsuite-failures lib-result)
          (load-failures lib-result)))
 
-(defun test-failures (lib-result)
+(defun testsuite-failures (lib-result)
   (let* ((test-status (status lib-result))
          (test-fail-specs (etypecase test-status
                             (keyword (when (and (not (eq :ok test-status))
@@ -59,74 +59,5 @@
       (log-byte-length (lib-result item))))
 (defmethod contact-email ((item failure))
   (contact-email (lib-result item)))
-
-(defparameter *db* (test-grid-data:read-db))
-(defparameter *pr* (select *db*))
-(defparameter *fails* (list-failures *pr*))
-
-(let* (
-       ;;(last-abcl (first (largest #'lisp *db* :where (lambda (lib-result)
-       ;;                                                (search "abcl" (lisp lib-result))))))
-       (last-quicklisp "quicklisp 2012-08-11")
-       (last-abcl "abcl-1.1.0-dev-svn-14149-fasl39-linux-java")
-       (last-abcl-fails (remove-if-not (lambda (failure)
-                                         (and
-                                          (string= (lisp failure) last-abcl)
-                                          (string= (lib-world failure) last-quicklisp)))
-                                       *fails*))
-       (abcl-1.0.1-fails (remove-if-not (lambda (failure)
-                                          (and (string= (lisp failure) *abcl-1.0.1-impl*)
-                                               (string= (lib-world failure) last-quicklisp)))
-                                        *fails*))
-       (diff (set-exclusive-or last-abcl-fails
-                               abcl-1.0.1-fails
-                               :test #'equal
-                               :key (lambda (failure)
-                                      (list (fail-spec failure)
-                                            (libname failure))))))
-  (with-report-file (out "failures.html")
-    (pivot-report out (cl:with-output-to-string (str)
-                        (pivot-table-html2 str diff
-                                           (list #'libname) (list #'string<)
-                                           (list #'lib-world #'lisp) (list #'string> #'string<)
-                                           (lambda (out cell-data) (format out "~{~S<br/>~}" (mapcar #'fail-spec cell-data))))))))
-
-
-(with-report-file (out "failures.lisp")
-  (dolist (fail *fails*)
-    (format out "~S ~S ~S ~S~%" (libname fail) (fail-spec fail) (lisp fail) (lib-world fail) )))
-
-
-(let* (
-       ;;(last-abcl (first (largest #'lisp *db* :where (lambda (lib-result)
-       ;;                                                (search "abcl" (lisp lib-result))))))
-       (last-quicklisp "quicklisp 2012-08-11")
-       (last-abcl "abcl-1.1.0-dev-svn-14149-fasl39-linux-java")
-       (last-abcl-fails (time (progn (format t "remove-if-not~%")
-                                     (remove-if-not (lambda (failure)
-                                                      (and
-                                                       (string= (lisp failure) last-abcl)
-                                                       (string= (lib-world failure) last-quicklisp)))
-                                                    *fails*))))
-       (abcl-1.0.1-fails (time (progn (format t "remove-if-not~%")
-                                      (remove-if-not (lambda (failure)
-                                                       (and (string= (lisp failure) *abcl-1.0.1-impl*)
-                                                            (string= (lib-world failure) last-quicklisp)))
-                                                     *fails*))))
-       (diff (time (progn (format t "set-exclisive-or~%")
-                          (set-exclusive-or last-abcl-fails
-                                            abcl-1.0.1-fails
-                                            :test #'equal
-                                            :key (lambda (failure)
-                                                   (list (fail-spec failure)
-                                                         (libname failure))))))))
-  (with-report-file (out "failures.html")
-    (pivot-report out (cl:with-output-to-string (str)
-                        (pivot-table-html2 str diff
-                                           (list #'libname) (list #'string<)
-                                           (list #'lib-world #'lisp) (list #'string> #'string<)
-                                           (lambda (out cell-data)
-                                             (dolist (fail cell-data)
-                                               (format out "~A</br>" (failure-log-link fail #'fail-spec)))))))))
 
 

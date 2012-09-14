@@ -271,11 +271,11 @@ specified by QUICKLISP-NEW and QUICKLISP-OLD."
                      (lisp diff-item)
                      ql-new
                      (status-css-class (aggregated-status (status (new-result diff-item))))
-                     (lib-log-uri (new-result diff-item))
+                     (log-uri (new-result diff-item))
                      (status (new-result diff-item))
                      ql-old
                      (status-css-class (aggregated-status (status (old-result diff-item))))
-                     (lib-log-uri (old-result diff-item))
+                     (log-uri (old-result diff-item))
                      (status (old-result diff-item))))))
     (format destination "~%~%***************************************************************************~%")
     (format destination "* test results diff between ~A and ~A *~%" ql-new ql-old)
