@@ -61,3 +61,9 @@
   (contact-email (lib-result item)))
 
 
+(defmethod print-object ((failure failure) stream)
+  (format stream "<~S ~S ~S ~S>"
+          (lib-world failure)
+          (lisp failure)
+          (libname failure)
+          (fail-spec failure)))
