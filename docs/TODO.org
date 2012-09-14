@@ -1,8 +1,6 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 * 0.5.1 Test loading (including fresh recompilation) of all the libraries in quicklisp.
-** Test loading of every ASDF system and publish results.
-  <in progress>
-
+** Test loading of every ASDF system and publish results in db.lisp.
   This means even if the library doesn't have a test suite,
   or the test suite is not yet integrated into the test-grid,
   we will know it's compilation status.
@@ -12,16 +10,41 @@
   failures with test suite status, if only part of ASDF systems
   failed to compile.
 
-** Workaround the GAE issue https://code.google.com/p/googleappengine/issues/detail?id=8032
+** DONE Continuable test runs
+   CLOSED: [2012-09-04 Вт 02:06]
+   Don't loose test run results if it was interrupted (due to errors, network outage or agent termination)
+** DONE Workaround the GAE issue https://code.google.com/p/googleappengine/issues/detail?id=8032
+   CLOSED: [2012-09-04 Вт 02:05]
+** TODO The list of projects to test should be reteieved from the quicklisp
+        tested by agent in child processes, but not the quicklisp used
+        to run the agent itself.
+** TODO The OpenVRP workaround (https://github.com/quicklisp/quicklisp-client/issues/61)
+        should be done so that it only applies to quicklisp 2012-08-11,
+        but not to any other (fixed in starting from quicklisp 2012-09-09).
+** TODO when killing child process, sometimes we may have "No such process" simple-error
+   if the process already finished. Handle it.
+** TODO Timeout detection should sustain laptop hibernation
+* 0.5.4 Introduce an option to limit agent run time
+  Use case: someone wants to run agents at night, but have
+  the machine free from agent during dayly work.
+  We will provide and option the user can configure in run-agent.lisp
+  which limits agent run time so that agent exits after this duration.
 
-* 0.5.2 Don't loose test run results if it was interrupted (due to errors, network outage or agent termination)
-** Continuable test runs
-* 0.5.3 Install more lisps on my VPS
+  Before terminating agent should sumbit the results accumulated to server
+  (even partial test runs). This is necessary becase we can not
+  be sure the user will ever start the agent again.
+
+  This also means that if next time agent is started, it should
+  know what part of test run is completed, and continue for
+  remaining projects (record the completenes status
+  per library in persistence.lisp instead of whole
+  quicklisp distros?)
+* 0.5.5 Install more lisps on my VPS
   I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
 ** DONE ABCL
    CLOSED: [2012-08-20 Пн 01:48]
 ** TODO CLISP (build a multithreaded version)
-* 0.5.4 Reuild free the lisps from source control daily, before running test-grid-agent
+* 0.5.6 Reuild free the lisps from source control daily, before running test-grid-agent
 * 0.6.0 Reports Improve 2
 ** TODO combine information about load failures with information about system dependencies
    It will allow us to find "root" compilation blockers -
@@ -181,7 +204,30 @@
     form common-lisp.net. And make sure it works on all the lisps.
 * 0.7.1 Add ANSI test suite?
   Does not depend on quicklisp distro version; but BTW may be distirbuted via quicklisp.
-* 0.8.0 Test source control HEADs of libraries, not only quicklisp releases
+* 0.8.0 Move online log storage to Amazon S3 from Google App Engine?
+  We are already close to limit of free GAE resources
+  (mostly on datastore write operations, several of which
+  are performed for every uploaded log, and when testing
+  quicklisp we upload thousands of logs).
+
+  Payed GAE plan costs minimum $15 per month.
+
+  Amazon S3 costs $0.12 per GB per month - much cheaper
+  (whole quicklisp by singl lisp implementation produces
+  2-5 MB of logs).
+
+  Also we have seen GAE stability/user support issues.
+
+  Problem: uploading logs is easy usin zs3 library,
+  but how to assing unique identifiers to them?
+  S3 doesn't provide such a functionality. We would
+  like to avoid another service only for identifier
+  generation. Randome identifiers seems good, but
+  we must resovle possible collisions. Maybe calculate
+  MD5 for every log before submit and compare with
+  ETag returned by S3 in HTTP header? Can it help?
+
+* 0.9.0 Test source control HEADs of libraries, not only quicklisp releases
 ** TODO a way to specify lib-wold as a quicklisp version with some
    library versions overriden (checkout this particular
    libraries from the scm), so that library author can quickly
@@ -192,8 +238,8 @@
    checkout.
    40h
 
-* 0.9.0 Automate test results publishing process, send notification when regressions occur
-* 0.10.0 For all the libraries which need specific environment
+* 0.10.0 Automate test results publishing process, send notification when regressions occur
+* 0.11.0 For all the libraries which need specific environment
    (like cffi, cl-sql) correctly detect the absense of required
    envorinment and return :NO-RESOURCE status and provide guiding message to the
    user how to configure them (log to the output test output?).
@@ -228,8 +274,6 @@
 ** TODO memoization of the implementation-identifier generic function is not portable
    in particular, it's known that fare-memoization can't memoize it on ACL,
    see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
-** TODO when killing child process, sometimes we may have "No such process" simple-error
-   if the process already finished. Handle it.
 ** TODO when logging the name of a library currently being tested, log also it's number in the
    total number of libraries, e.g. [41 of 56].
 ** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
