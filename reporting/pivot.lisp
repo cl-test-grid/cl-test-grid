@@ -384,7 +384,7 @@ Every subaddress represents some level of pivot groupping."
                                            objects
                                            row-field-getters row-fields-sort-predicates
                                            col-field-getters col-fields-sort-predicates
-                                           cell-formatter))))))
+                                           cell-formatter)))))
 
 (defun print-pivot-reports (joined-index)
   (flet ((print-report (filename
