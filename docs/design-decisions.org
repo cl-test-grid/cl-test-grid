@@ -82,8 +82,7 @@
   The directory is not deleted until the results are submitted
   successfully.
 
-  Every time agent starts it looks for unfinished test runs
-  (due to errors at previous agent invokation, or because
-  pervious agent was interrupted). If unfinished test run
-  is found, it is continued instead of starting a new one.
+  Every time agent starts it looks for unfinished test runs.
+  If unfinished test run is found, it is continued instead
+  of starting a new one.
 
