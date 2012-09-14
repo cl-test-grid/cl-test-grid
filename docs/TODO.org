@@ -10,11 +10,31 @@
   failures with test suite status, if only part of ASDF systems
   failed to compile.
 
+** DONE Change agent to perform load test of every ASDF system in Quicklisp
+   CLOSED: [2012-09-01 06:43]
 ** DONE Continuable test runs
    CLOSED: [2012-09-04 Вт 02:06]
    Don't loose test run results if it was interrupted (due to errors, network outage or agent termination)
 ** DONE Workaround the GAE issue https://code.google.com/p/googleappengine/issues/detail?id=8032
    CLOSED: [2012-09-04 Вт 02:05]
+** DONE rework ABCL report
+   CLOSED: [2012-09-14 Пт 06:39]
+** DONE make sure old reports work when DB contains ASDF systems load results
+   CLOSED: [2012-09-10 06:43]
+** TODO collect results for libraries missed in Quicklisp 2012-09-09 results
+   Some are missed because of agent bug: list of project was retrieved
+   from wrong (old) quicklisp:
+     cartesian-product-switch, cl-cheshire-cat, cl-grace, coleslaw,
+     com.clearly-useful.iterator-protocol,
+     com.clearly-useful.protocols, com.clearly-useful.sequence-protocol,
+     formlets, glu-tessellate, infix-dollar-reader, lambda-lift,
+     optima, place-modifiers, pzmq.
+
+   bknr-datastore testsuite was not run because it was added to testgrid
+   as bknr.datastore.
+** TODO rework quicklisp diff report
+   <in progress>
+** TODO rework ECL reports
 ** TODO The list of projects to test should be reteieved from the quicklisp
         tested by agent in child processes, but not the quicklisp used
         to run the agent itself.
@@ -24,6 +44,9 @@
 ** TODO when killing child process, sometimes we may have "No such process" simple-error
    if the process already finished. Handle it.
 ** TODO Timeout detection should sustain laptop hibernation
+** TODO remove the :load-failed status
+** TODO document the new version of agent (how to run it, that it takes long and may be restarted)
+** TODO increase load-test timeout
 * 0.5.4 Introduce an option to limit agent run time
   Use case: someone wants to run agents at night, but have
   the machine free from agent during dayly work.
@@ -44,7 +67,6 @@
 ** DONE ABCL
    CLOSED: [2012-08-20 Пн 01:48]
 ** TODO CLISP (build a multithreaded version)
-* 0.5.6 Reuild free the lisps from source control daily, before running test-grid-agent
 * 0.6.0 Reports Improve 2
 ** TODO combine information about load failures with information about system dependencies
    It will allow us to find "root" compilation blockers -
@@ -361,6 +383,7 @@
    machine and contributes tests)
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
+** TODO Reuild free the lisps from source control daily, before running test-grid-agent
 ** TODO Enable HTTP caching for library test logs (good recipe: https://developers.google.com/speed/docs/best-practices/caching)
 ** TODO add CCL revision to the version string (I have impression
    that CCL versions checked out at different time from the official release SVN
