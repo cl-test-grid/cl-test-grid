@@ -21,7 +21,6 @@
                                  abcl-1.0.1-fails
                                  :test (lambda (fail-a fail-b)
                                          (and (eq (libname fail-a) (libname fail-b))
-                                              (string= (lisp fail-a) (lisp fail-b))
                                               (equal (fail-spec fail-a) (fail-spec fail-b)))))))
     (print-pivot "abcl.html"
                  diff
