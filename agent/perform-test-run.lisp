@@ -140,10 +140,10 @@ as the system load status.")
                         (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
                   (no-response (condition)
                     (appending log logfile
-                      (format log "~%Child lisp process running the ~A test suite finished without returing result test status."
+                      (format log "~%Child lisp process running the ~A test suite finished without returing result test status. "
                               libname)
-                      (format log "Looks like the lisp process has crashed.")
-                      (format log "The error condition signalled in the parent process: ~A" condition))
+                      (format log "Looks like the lisp process has crashed. ")
+                      (format log "The error condition signalled in the parent process: ~A~%" condition))
                     (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
                               condition)
                     :crash)
