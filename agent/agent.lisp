@@ -174,10 +174,28 @@ the PREDICATE."
 
 (defun project-names ()
   "All projects in Quicklisp"
-  (let ((names (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))))
-    ;; workdaround for the quiclisp issue 61
-    ;; https://github.com/quicklisp/quicklisp-client/issues/61
-    (remove-if-not #'ql-dist:release names)))
+  ;; (let ((names (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))))
+  ;;   ;; workdaround for the quiclisp issue 61
+  ;;   ;; https://github.com/quicklisp/quicklisp-client/issues/61
+  ;;   (remove-if-not #'ql-dist:release names))
+
+  ;; temporary:
+  (list "cartesian-product-switch"
+        "cl-cheshire-cat"
+        "cl-grace"
+        "coleslaw"
+        "com.clearly-useful.iterator-protocol"
+        "com.clearly-useful.protocols"
+        "com.clearly-useful.sequence-protocol"
+        "formlets"
+        "glu-tessellate"
+        "infix-dollar-reader"
+        "lambda-lift"
+        "optima"
+        "place-modifiers"
+        "pzmq"
+
+       "bknr-datastore"))
 
 (defun run-tests (agent lib-world)
 
