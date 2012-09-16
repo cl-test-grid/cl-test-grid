@@ -39,7 +39,7 @@
                     (load ,(src-file "proc-list-quicklisp-projects.lisp"))
                     (cl-user::set-response ,response-file
                                            (cl-user::list-quicklisp-projects)))))
-      (log:info "Running child process to retrieve the list of projects and their ASDF systems from the Quicklisp version we are going to test...")
+      (log:info "Retrieving the list of projects and their ASDF systems from the Quicklisp version we are going to test...")
       (lisp-exe:run-with-timeout +list-quicklisp-projects-timeout-seconds+ lisp-exe code))))
 
 
