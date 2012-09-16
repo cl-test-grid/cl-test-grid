@@ -38,5 +38,6 @@
        (:file "fake-blobstore")
        (:file "as-singleton-agent")
        (:file "generate-id")
+       (:file "project-lister")
        (:file "agent")
        (:file "api-compatible-p")))))

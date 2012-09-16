@@ -1,4 +1,3 @@
-
 ;;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
@@ -162,71 +161,13 @@ as the system load status.")
           :test-duration (/ (- (get-internal-real-time) start-time)
                             internal-time-units-per-second))))
 
-(defun perform-test-run (agent lib-world lisp-exe libs)
-  (let* ((run-descr (make-run-descr lib-world
-                                    (implementation-identifier lisp-exe)
-                                    (user-email agent)))
-         (run-dir (run-directory run-descr (test-output-base-dir agent)))
-         (asdf-output-dir (merge-pathnames "asdf-output/" run-dir))
-         (lib-results))
-    (ensure-directories-exist run-dir)
-    (dolist (lib libs)
-      (let ((lib-result (proc-run-libtest lisp-exe lib run-descr
-                                          (lib-log-file run-dir lib)
-                                          (private-quicklisp-dir agent)
-                                          asdf-output-dir)))
-        (push lib-result lib-results)))
-    (setf (getf run-descr :run-duration)
-          (- (get-universal-time)
-             (getf run-descr :time)))
-    (let ((run (make-run run-descr lib-results)))
-      (save-run-info run run-dir)
-      (log:info "The test results were saved to: ~A" (truename run-dir))
-      (dolist (asdf-output-subdir (list (merge-pathnames asdf-output-dir "private-quicklisp/")
-                                        (merge-pathnames asdf-output-dir "test-grid/")))
-        (when (not (cl-fad:directory-exists-p asdf-output-subdir))
-          (log:warn "The ASDF output directroy ~S does not exist; seems like the test run was not using our asdf-output-translations and we have no guarantee all the sourcess were freshly recompiled." asdf-output-subdir)))
-      run-dir)))
-
-(defun submit-logs (blobstore test-run-dir)
-  (let* ((run-info (test-grid-utils::safe-read-file (run-info-file test-run-dir)))
-         ;; prepare parameters for the SUBMIT-FILES blobstore function
-         (submit-params (mapcar #'(lambda (lib-result)
-                                    (let ((libname (getf lib-result :libname)))
-                                      (cons libname
-                                            (lib-log-file test-run-dir libname))))
-                                (test-grid-data::run-results run-info))))
-    ;; submit files to the blobstore and receive
-    ;; their blobkeys in response
-    (let ((libname-to-blobkey-alist
-           (test-grid-blobstore:submit-files blobstore
-                                             submit-params)))
-      ;; Now store the blobkeys for every library in the run-info.
-      ;; Note, we destructively modify parts of the previously
-      ;; read run-info.
-      (flet ((get-blob-key (lib)
-               (or (cdr (assoc lib libname-to-blobkey-alist))
-                   (error "blobstore didn't returned blob key for the log of the ~A libary" lib))))
-        (setf (test-grid-data::run-results run-info)
-              (mapcar #'(lambda (lib-result)
-                          (setf (getf lib-result :log-blob-key)
-                                (get-blob-key (getf lib-result :libname)))
-                          lib-result)
-                      (test-grid-data::run-results run-info))))
-      ;; finally, save the updated run-info with blobkeys
-      ;; to the file. Returns the run-info.
-      (save-run-info run-info test-run-dir)
-      run-info)))
-
 (defun submit-test-run-results (blobstore test-run-dir)
   (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
-  (let* ((run-info (submit-logs2 blobstore test-run-dir)))
+  (let* ((run-info (submit-logs blobstore test-run-dir)))
     (log:info "The log files are submitted. Submitting the test run info...")
     (test-grid-blobstore:submit-run-info blobstore run-info)
     (log:info "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.")
     run-info))
-
-;;; perform-test-run2
 
 (defun print-loadtest-log-header (system-name run-descr log-file)
   (with-open-file (stream log-file
@@ -304,49 +245,7 @@ as the system load status.")
 (defun as-keyword (string-designator)
   (read-from-string (format nil ":~A" string-designator)))
 
-(defun perform-test-run2 (agent lib-world lisp-exe project-names)
-  (let* ((run-descr (make-run-descr lib-world
-                                    (implementation-identifier lisp-exe)
-                                    (user-email agent)))
-         (run-dir (run-directory run-descr (test-output-base-dir agent)))
-         (asdf-output-dir (merge-pathnames "asdf-output/" run-dir))
-         (lib-results))
-    (ensure-directories-exist run-dir)
-    (dolist (project project-names)
-      (log:info "Testing load of project ~A" project)
-      (let ((load-results '()))
-        (dolist (system (ql-dist:provided-systems (ql-dist:release project)))
-          (push (proc-test-loading lisp-exe (ql-dist:name system)
-                                   run-descr
-                                   (loadtest-log-file run-dir (ql-dist:name system))
-                                   (private-quicklisp-dir agent)
-                                   asdf-output-dir)
-                load-results))
-        (let* (;; project may be a string, translate it to keyword first
-               (libname (find project test-grid-testsuites:*all-libs* :test #'string-equal))
-               (lib-result (if libname
-                               (progn
-                                 (log:info "Testsuite of project ~A" project)
-                                 (proc-run-libtest lisp-exe libname run-descr
-                                                   (lib-log-file run-dir project)
-                                                   (private-quicklisp-dir agent)
-                                                   asdf-output-dir))
-                               (list :libname (as-keyword project)))))
-          (setf (getf lib-result :load-results) load-results)
-          (push lib-result lib-results))))
-    (setf (getf run-descr :run-duration)
-          (- (get-universal-time)
-             (getf run-descr :time)))
-    (let ((run (make-run run-descr lib-results)))
-      (save-run-info run run-dir)
-      (log:info "The test results were saved to: ~%~A." (truename run-dir))
-      (dolist (asdf-output-subdir (list (merge-pathnames asdf-output-dir "private-quicklisp/")
-                                        (merge-pathnames asdf-output-dir "test-grid/")))
-        (when (not (cl-fad:directory-exists-p asdf-output-subdir))
-          (log:warn "The ASDF output directroy ~S does not exist; seems like the test run was not using our asdf-output-translations and we have no guarantee all the sourcess were freshly recompiled." asdf-output-subdir)))
-      run-dir)))
-
-(defun submit-logs2 (blobstore test-run-dir)
+(defun submit-logs (blobstore test-run-dir)
   (let* ((run-info (test-grid-utils::safe-read-file (run-info-file test-run-dir)))
          ;; prepare parameters for the SUBMIT-FILES blobstore function:
          ;; alist ((<log file name> . <full log file path>) ...)
@@ -391,7 +290,7 @@ as the system load status.")
     (save-run-info run-info test-run-dir)    
     run-info))
 
-(defun perform-test-run3 (test-run agent lisp-exe project-names)
+(defun perform-test-run (test-run agent lisp-exe project-names)
   (let* ((run-descr (test-grid-data::run-descr test-run))
          (run-dir (run-directory run-descr (test-output-base-dir agent)))
          (asdf-output-dir (merge-pathnames "asdf-output/" run-dir))
@@ -407,10 +306,10 @@ as the system load status.")
         (dolist (project project-names)
           (log:info "Testing load of project ~A" project)
           (let ((load-results '()))
-            (dolist (system (ql-dist:provided-systems (ql-dist:release project)))
-              (push (proc-test-loading lisp-exe (ql-dist:name system)
+            (dolist (system (project-systems (project-lister agent) project))
+              (push (proc-test-loading lisp-exe system
                                        run-descr
-                                       (loadtest-log-file run-dir (ql-dist:name system))
+                                       (loadtest-log-file run-dir system)
                                        (private-quicklisp-dir agent)
                                        asdf-output-dir)
                     load-results))
@@ -480,26 +379,20 @@ for some log."
 
 ;(proc-test-loading cl-user::*ccl-1.8-x86-64* :zalexandria "alexandria-load" #P"/Users/anton/projects/cl-test-grid2-work-dir/agent/quicklisp/")
 
-
 (update-testing-quicklisp *agent*)
-(perform-test-run2 *agent*
-                   "quicklisp 2012-08-11"
-                   (preferred-lisp *agent*)
-                   (subseq (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))
-                           0 10))
 
 (let ((run (first (list-unfinished-test-runs (test-output-base-dir *agent*)))))
-  (perform-test-run3 run
-                     *agent*
-                     (preferred-lisp *agent*)
-                     (subseq (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))
-                             0 13)))
+  (perform-test-run run
+                    *agent*
+                    (preferred-lisp *agent*)
+                    (subseq (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))
+                            0 13)))
 
 (time
  (let ((test-run-dir #P"C:\\Users\\anton\\projects\\cl-test-grid2-work-dir2\\agent-dev\\test-runs\\20120824192514-ccl-1.8-f95-win-x86\\"))
-   (submit-logs2 (test-grid-gae-blobstore:make-blob-store :base-url "http://cl-test-grid.appspot.com")             
-                 ;;(make-instance 'fake-blobstore)
-                 test-run-dir)))
+   (submit-logs (test-grid-gae-blobstore:make-blob-store :base-url "http://cl-test-grid.appspot.com")             
+                ;;(make-instance 'fake-blobstore)
+                test-run-dir)))
 
 
 (lisp-features (preferred-lisp *agent*))
@@ -529,9 +422,10 @@ TODO:
   - specify the dependency on quicklisp
 - perform-test-run3:
   - clean asdf output directories before continuing a test-run?
+    No need.
 - test-grid-data
   + printing for loadtest results
-  - P1 db format: rename projects back to their original names (routes -> cl-routes)
+  + P1 db format: rename projects back to their original names (routes -> cl-routes)
   - db format: optimize, don't print testing status/duration/log-key when absent
     (relevant for new resuls where most of the systems don't have test suite)
     and don't pring load-results when absent (only releant for old results
@@ -550,8 +444,8 @@ TODO:
   + saving-output, catching-problems
   + asdf-output-translations
 - reporting
-  - P1 handle the results where test status is NIL (i.e. the project has no testsuite)
-  - P1 there will be no :LOAD-FAILED status?
+  + P1 handle the results where test status is NIL (i.e. the project has no testsuite)
+  + P1 there will be no :LOAD-FAILED status?
     think more how to integrate load results with test results
 
 |#

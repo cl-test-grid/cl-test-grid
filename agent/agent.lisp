@@ -21,7 +21,8 @@
    (work-dir :initform (default-work-dir))
    ;; own slots
    (persistence :type persistence :accessor persistence)
-   (blobstore :accessor blobstore)))
+   (blobstore :accessor blobstore)
+   (project-lister :type project-lister :accessor project-lister)))
 
 (defmethod make-agent ()
   (make-instance 'agent-impl))
@@ -172,69 +173,7 @@ the PREDICATE."
 
 ;;; Main program
 
-(defun project-names ()
-  "All projects in Quicklisp"
-  ;; (let ((names (mapcar #'ql-dist:name (ql-dist:provided-releases (ql-dist:dist "quicklisp")))))
-  ;;   ;; workdaround for the quiclisp issue 61
-  ;;   ;; https://github.com/quicklisp/quicklisp-client/issues/61
-  ;;   (remove-if-not #'ql-dist:release names))
-
-  ;; temporary:
-  (list "cartesian-product-switch"
-        "cl-cheshire-cat"
-        "cl-grace"
-        "coleslaw"
-        "com.clearly-useful.iterator-protocol"
-        "com.clearly-useful.protocols"
-        "com.clearly-useful.sequence-protocol"
-        "formlets"
-        "glu-tessellate"
-        "infix-dollar-reader"
-        "lambda-lift"
-        "optima"
-        "place-modifiers"
-        "pzmq"
-
-       "bknr-datastore"))
-
 (defun run-tests (agent lib-world)
-
-  (divide-into (lisps agent) (lambda (lisp)
-                               (tested-p (persistence agent)
-                                         lib-world
-                                         (implementation-identifier lisp)))
-      (done-lisps pending-lisps)
-    (when done-lisps
-      (log:info "Skipping the lisps already tested on ~A: ~S"
-                lib-world
-                (mapcar #'implementation-identifier done-lisps)))
-    (dolist (lisp pending-lisps)
-      (handler-bind
-          ((serious-condition (lambda (c)
-                                (let ((bt (with-output-to-string (s)
-                                            (trivial-backtrace:print-backtrace-to-stream s))))
-
-                                  (log:error "Error of type ~A during tests on ~A: ~A~%~A~%Continuing for the remaining lisps."
-                                           (type-of c)
-                                           (implementation-identifier lisp)
-                                           c
-                                           bt))
-                                (go continue))))
-        (log:info "Running tests for ~A" (implementation-identifier lisp))
-        (let ((results-dir (perform-test-run2 agent
-                                              lib-world
-                                              lisp
-                                              ;;test-grid-testsuites::*all-libs*
-                                              (project-names)
-                                              )))
-          (submit-test-run-results (blobstore agent) results-dir)
-          (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
-          ;(cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)
-          ))
-      continue)))
-
-(defun run-tests3 (agent lib-world)
-
   (divide-into (lisps agent) (lambda (lisp)
                                (tested-p (persistence agent)
                                          lib-world
@@ -271,11 +210,11 @@ the PREDICATE."
                                                  (type-of c) (implementation-identifier lisp) c bt))
                                     (go continue))))
             (log:info "Running tests for ~A" (implementation-identifier lisp))
-            (let ((results-dir (perform-test-run3 (or (find-unfinished-run lib-world (implementation-identifier lisp))
-                                                      (make-run lib-world (implementation-identifier lisp)))
-                                                  agent
-                                                  lisp
-                                                  (project-names))))
+            (let ((results-dir (perform-test-run (or (find-unfinished-run lib-world (implementation-identifier lisp))
+                                                     (make-run lib-world (implementation-identifier lisp)))
+                                                 agent
+                                                 lisp
+                                                 (project-names (project-lister agent)))))
               (submit-test-run-results (blobstore agent) results-dir)
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
@@ -323,8 +262,10 @@ the PREDICATE."
         (check-config agent)
         (ensure-has-id agent)
         (say-hello-to-admin agent)
-        ;; now do the work
         (let* ((quicklisp-version (update-testing-quicklisp agent))
                (lib-world (format nil "quicklisp ~A" quicklisp-version)))
-          (run-tests3 agent lib-world)))))
+          (setf (project-lister agent) (init-project-lister (preferred-lisp agent)
+                                                            (private-quicklisp-dir agent)))
+          ;; now do the work
+          (run-tests agent lib-world)))))
   (log:info "Agent is done. Bye."))
