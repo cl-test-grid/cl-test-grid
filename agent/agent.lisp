@@ -214,7 +214,10 @@ the PREDICATE."
                                                      (make-run lib-world (implementation-identifier lisp)))
                                                  agent
                                                  lisp
-                                                 (project-names (project-lister agent)))))
+                                                 ;;temporary hardcode "bknr-datastore":
+                                                 ;;(project-names (project-lister agent))
+                                                 '("bknr-datastore")
+                                                 )))
               (submit-test-run-results (blobstore agent) results-dir)
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
