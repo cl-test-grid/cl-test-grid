@@ -23,8 +23,7 @@
 (defun do-quicklisp-update (install-dir)
   (install-quicklisp install-dir)
   (fncall "quicklisp:update-client" :prompt nil)
-  ;; temporary, to test bknr-datastore on quicklisp 2012-08-11
-  ;;(fncall "quicklisp:update-all-dists" :prompt nil)
-  ;; installing particular quicklisp version:
-  (fncall "ql-dist:install-dist" "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt" :replace t :prompt nil)
+  (fncall "quicklisp:update-all-dists" :prompt nil)
+  ;; or, if we need to install particular quicklisp version:
+  ;;(fncall "ql-dist:install-dist" "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt" :replace t :prompt nil)
   (fncall "ql-dist:version" (fncall "ql-dist:dist" "quicklisp")))
