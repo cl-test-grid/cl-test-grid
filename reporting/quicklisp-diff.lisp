@@ -4,8 +4,8 @@
 
 (in-package #:test-grid-reporting)
 
-(defparameter *last-quicklisp* "quicklisp 2012-08-11")
-(defparameter *prev-quicklisp* "quicklisp 2012-09-09")
+(defparameter *last-quicklisp* "quicklisp 2012-09-09")
+(defparameter *prev-quicklisp* "quicklisp 2012-08-11")
 
 (defun print-quicklisp-diff-report (failures)
   (let* ((last-ql-fails (remove-if-not (lambda (failure)
@@ -49,6 +49,6 @@ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
        (all-failures (list-failures all-results)))
   (test-grid-reporting::print-quicklisp-diff-report all-failures))
 
- the result is stored in cl-test-grid/reports-generated/quicklisp-diff2.html
+the result is stored in cl-test-grid/reports-generated/quicklisp-diff.html
 
 |#
