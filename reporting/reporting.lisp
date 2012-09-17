@@ -79,7 +79,7 @@
                                                                           :test #'string=)))))
       (print-pivot-reports joined-index)
 
-      (with-report-file (out "quicklisps-test-diff.html")
+      (with-report-file (out "quicklisp-diff-old.html")
         (print-all-quicklisps-diff-report out joined-index)))
 
     (time (print-quicklisp-diff-report all-failures))

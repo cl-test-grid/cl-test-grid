@@ -20,7 +20,7 @@
      (:file "csv")
      (:file "pivot")
      (:file "pivot2")
-     (:file "quicklisp-diff2")
+     (:file "quicklisp-diff")
      (:file "regressions")
      (:file "ecl-pages")
      (:file "abcl-page")
