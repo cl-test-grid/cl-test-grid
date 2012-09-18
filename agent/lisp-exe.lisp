@@ -35,6 +35,7 @@
            #:run-with-timeout
            #:lisp-process-timeout ; timeout condition
            #:seconds              ; the condition slot accessor
+           #:hibernation-detected ; another condition
 
             ;; deprecated function, consider run-with-timeout where possible
            #:run-lisp-process
@@ -62,13 +63,27 @@ hanging lisp processes. Consider RUN-WITH-TIMEOUT where possible."))
   (:documentation "Like RUN-LISP-PROCESS, but if the lisp porcess
 does not finish in the specified TIMEOUT-SECONDS, the process
 is killed together with it's possible child processes, a
-LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL."))
+LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL.
+
+If while waiting for the process to finish it is detected that
+the machive was hibernated and then woken up, HIBERNATION-DETECTED
+conditon is signalled (which is not a SERIOUS-CONDITION subclass),
+and the hibernation duration is excluded from the time accounted
+for the timeout.
+
+If the calller thinks the hibernation may affect the results
+of the lisp process (e.g. because network connections
+were terminated) he can handle the HIBERNATION-DETECTED
+condition; for example by running the process again.
+Otherwise he may just ignore the condition."))
 
 (define-condition lisp-process-timeout (condition) ;; should it inherit from ERROR?
   ((seconds :accessor seconds
             :initarg :seconds
             :type number
             :initform (error ":seconds is required"))))
+
+(define-condition hibernation-detected (condition) ())
 
 (defclass lisp-exe () ())
 
@@ -267,20 +282,27 @@ command, the rest strings are the command arguments."))
           ,@(prepend-each "-eval" form-strings)
           "-eval" "(lispworks:quit)")))
 
-;;; Timeouts: waiting for the process and killing the process tree on timeout
+;;; Timeouts: waiting for the process and killing the process tree on timeout;
+;;; also detecting the machine hibernation while the process is running.
 
 (defun wait (seconds lisp-process)
   "If the process is not finished upot the SECONDS timeout
 signal LISP-PROCESS-TIMEOUT conditios and exit (the process
 remains running)."
-  (let ((end-time (+ seconds (get-universal-time))))
+  (let* ((last-active-time (get-universal-time))
+         (end-time (+ seconds last-active-time)))
     (loop
        (when (not (eq :running
                       (external-program:process-status lisp-process)))
          (return (external-program:process-status lisp-process)))
-       (when (< end-time (get-universal-time))
-         (signal 'lisp-process-timeout :seconds seconds)
-         (return))
+       (let ((now (get-universal-time)))
+         (when (> now (+ last-active-time 7))
+           (signal 'hibernation-detected)
+           (incf end-time (- now last-active-time)))
+         (setf last-active-time now)
+         (when (< end-time now)
+           (signal 'lisp-process-timeout :seconds seconds)
+           (return)))
        (sleep 1))))
 
 (defun try-to-kill-process-tree (lisp-process)

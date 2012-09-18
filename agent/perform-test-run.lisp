@@ -119,47 +119,71 @@ as the system load status.")
               lib-or-system (test-grid-data::print-test-status nil status))
       (format stream "============================================================~%"))))
 
+(defun restarting-on-hibernate-impl (body-fn)
+  "Runs the BODY-FN function. If during the BODY-FN
+execution a LIXP-EXE:HIBERNATION-DETECTED condition
+is signalled, then upon BODY-FN completion runs it again."
+  (let (retry)
+    (handler-bind ((lisp-exe:hibernation-detected
+                    (lambda (condition)
+                      (declare (ignore condition))
+                      (log:warn "Hibernation detected. After the process is finshed, we will re-run it again to rule out possible errors caused by the hibernation, like loosing network connections and similar. (Not killing the process immediatelly to avoid inconsistencies left by the process, like half-written .fasl files)")
+                      (setf retry t))))
+      (loop
+         (setf retry nil)
+         (let ((result (multiple-value-list (funcall body-fn))))
+           (if (not retry)
+               (return (values-list result))
+               (log:info "Re-running the process:")))))))
+
+(defmacro restarting-on-hibernate (&body body)
+  "Runs the BODY. If during the BODY execution a
+LIXP-EXE:HIBERNATION-DETECTED condition is signalled, then
+upon the BODY completion runs the BODY again."
+  `(restarting-on-hibernate-impl (lambda () ,@body)))
+
 (defun proc-run-libtest (lisp-exe libname run-descr logfile private-quicklisp-dir asdf-output-dir)
   "Runs test-grid-testsuites::run-libtest in a separate process and returns the result."
-  (let ((start-time (get-internal-real-time))
-        (status (handler-case
-                    (with-response-file (response-file)
-                      (let* ((code `(progn
-                                      (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
-                                      (load ,(src-file "proc-common.lisp"))
-                                      (load ,(src-file "proc-common-asdf.lisp"))
-                                      (load ,(src-file "proc-run-libtest.lisp"))
-                                      (cl-user::set-response ,response-file
-                                                             (cl-user::run-libtest-main ,libname
-                                                                                        ,logfile
-                                                                                        ,private-quicklisp-dir
-                                                                                        ,asdf-output-dir)))))
-                        (log:info "Starting ~A test suite..." libname)
-                        (print-testsuite-log-header libname run-descr logfile)
-                        (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
-                  (no-response (condition)
-                    (appending log logfile
-                      (format log "~%Child lisp process running the ~A test suite finished without returing result test status. "
-                              libname)
-                      (format log "Looks like the lisp process has crashed. ")
-                      (format log "The error condition signalled in the parent process: ~A~%" condition))
-                    (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
-                              condition)
-                    :crash)
-                  (lisp-exe:lisp-process-timeout (c)
-                    (appending log logfile
-                      (format log "~%The ~A test suite hasn't finished in ~A seconds." libname (lisp-exe:seconds c))
-                      (format log "~%We consider the test suite as hung; the test suite lisp process is killed.~%"))
-                    (log:info "Child lisp process running ~A test suite has exceeded the timeout of ~A seconds and killed."
-                              libname (lisp-exe:seconds c))
-                    :timeout))))
-    (log:info "The ~A test suite status: ~S" libname status)
-    (print-log-footer libname status logfile)
-    (list :libname libname
-          :status status
-          :log-byte-length (test-grid-utils::file-byte-length logfile)
-          :test-duration (/ (- (get-internal-real-time) start-time)
-                            internal-time-units-per-second))))
+  (restarting-on-hibernate
+    (let ((start-time (get-internal-real-time))
+          (status (handler-case
+                      (with-response-file (response-file)
+                        (let* ((code `(progn
+                                        (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
+                                        (load ,(src-file "proc-common.lisp"))
+                                        (load ,(src-file "proc-common-asdf.lisp"))
+                                        (load ,(src-file "proc-run-libtest.lisp"))
+                                        (cl-user::set-response ,response-file
+                                                               (cl-user::run-libtest-main ,libname
+                                                                                          ,logfile
+                                                                                          ,private-quicklisp-dir
+                                                                                          ,asdf-output-dir)))))
+                          (log:info "Starting ~A test suite..." libname)
+                          (print-testsuite-log-header libname run-descr logfile)
+                          (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
+                    (no-response (condition)
+                      (appending log logfile
+                        (format log "~%Child lisp process running the ~A test suite finished without returing result test status. "
+                                libname)
+                        (format log "Looks like the lisp process has crashed. ")
+                        (format log "The error condition signalled in the parent process: ~A~%" condition))
+                      (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
+                                condition)
+                      :crash)
+                    (lisp-exe:lisp-process-timeout (c)
+                      (appending log logfile
+                        (format log "~%The ~A test suite hasn't finished in ~A seconds." libname (lisp-exe:seconds c))
+                        (format log "~%We consider the test suite as hung; the test suite lisp process is killed.~%"))
+                      (log:info "Child lisp process running ~A test suite has exceeded the timeout of ~A seconds and killed."
+                                libname (lisp-exe:seconds c))
+                      :timeout))))
+      (log:info "The ~A test suite status: ~S" libname status)
+      (print-log-footer libname status logfile)
+      (list :libname libname
+            :status status
+            :log-byte-length (test-grid-utils::file-byte-length logfile)
+            :test-duration (/ (- (get-internal-real-time) start-time)
+                              internal-time-units-per-second)))))
 
 (defun submit-test-run-results (blobstore test-run-dir)
   (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
