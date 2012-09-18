@@ -80,12 +80,15 @@
                        (format nil "~~%~~~Dt" (+ indent 11))
                        #'(lambda (lib-result)
                            (format out
-                                   "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s"
-                                   (getf lib-result :libname)
-                                   (print-test-status nil (getf lib-result :status))
-                                   (getf lib-result :test-duration)
-                                   (getf lib-result :log-byte-length)
-                                   (getf lib-result :log-blob-key))
+                                   "(:libname ~s"
+                                   (getf lib-result :libname))
+                           (when (getf lib-result :status)
+                             (format out
+                                     " :status ~a :log-blob-key ~s :log-byte-length ~s :test-duration ~s"
+                                     (print-test-status nil (getf lib-result :status))
+                                     (getf lib-result :log-blob-key)
+                                     (getf lib-result :log-byte-length)
+                                     (getf lib-result :test-duration)))
                            (when (getf lib-result :load-results)
                              (format out "~%~v,0t:load-results (" (+ indent 12))
                              (print-list-elements out
