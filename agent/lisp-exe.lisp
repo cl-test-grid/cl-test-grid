@@ -322,7 +322,23 @@ remains running)."
   ;; shell commands). Implementing the process tree
   ;; kill on unix is in our TODO.
   (log:warn "Killing the process tree for non-windows platforms is not implemented yet. Just killing the process.")
-  (external-program:signal-process lisp-process 9))
+  (handler-case
+      (external-program:signal-process lisp-process 9)
+    (serious-condition (c)
+      ;; If the process already terminates, when we ask CCL to kill it,
+      ;; CCL signals a SIMPLE-ERROR "No such process".
+      ;; see http://trac.clozure.com/ccl/ticket/1015
+      ;;
+      ;; Handle serious conditions, check the process status.
+      ;; If it is already finished, just continue. If the status
+      ;; is :running, log a warning and continue anyway,
+      ;; because we know that CCL do not synchronize
+      ;; the process status immediately, so the :running
+      ;; value may be just outdated information.
+      (let ((status (external-program:process-status lisp-process)))
+        (when (eq :running status)
+          (log:warn "~A \"~A\" is signalled when killing the process. external-program:process-status still returns :running for the process, but this value may be outdated, so we hope that the error is signalled because the process is already terminated."
+                    (type-of c) c))))))
 
 (defmethod run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (let ((p (apply #'start-lisp-process lisp-exe forms)))
