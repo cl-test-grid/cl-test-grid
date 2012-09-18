@@ -95,7 +95,12 @@
                                                                  (getf load-result :system)))
                                                   (format nil "~~%~~~Dt" (+ indent 27))
                                                   (lambda (load-result)
-                                                    (format out "~S" load-result)))
+                                                    (format out "(:system ~s :status ~s :log-blob-key ~s :log-byte-length ~s :load-duration ~s)"
+                                                            (getf load-result :system)
+                                                            (getf load-result :status)
+                                                            (getf load-result :log-blob-key)
+                                                            (getf load-result :log-byte-length)
+                                                            (getf load-result :load-duration))))
                              (format out ")"))
                            (format out ")")))
   (format out "))"))
