@@ -17,7 +17,7 @@
 
 ;;; Agent implementation class
 (defclass agent-impl (agent)
-  ( ;; initial value for the base class slots
+  ( ;; initial values for the base class slots
    (work-dir :initform (default-work-dir))
    ;; own slots
    (persistence :type persistence :accessor persistence)
