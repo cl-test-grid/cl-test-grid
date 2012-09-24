@@ -8,8 +8,8 @@
 
 #|
 ;;;; To extract the meta info from your
-;;;; quicklisp and save them into an intermediate file
-;;;; (needs to be only only once, as we have the intermediate
+;;;; quicklisp and save it into an intermediate file
+;;;; (needs to be done only only once, as we have the intermediate
 ;;;; file commited):
 
   (extract-and-save-meta-info-from-quicklisp "C:\\Users\\anton\\quicklisp\\dists\\quicklisp\\systems.txt")
