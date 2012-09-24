@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us">
+<head>
+
+    <title>Load Failures - CL Test Grid Report</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    <link href="style.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="http://tablesorter.com/themes/blue/style.css" type="text/css" id="" media="print, projection, screen" />
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.tablesorter.min.js"></script>
+
+    <script type="text/javascript" id="js">
+        $(document).ready(function() {
+            var $table = $('table');
+
+            // add the attributes required by tablesorter
+            $table.attr('cellspacing', 1);
+            $table.addClass('tablesorter');
+            $table.find('th').addClass('header');            
+        	
+            // call the tablesorter plugin
+            var asc = 0, desc = 1;
+    	    $table.tablesorter({ 
+                // default soring is the second column asc, the third column desc, the first column asc 
+                sortList: [[1,asc],[3,desc],[0,asc]] 
+            });
+        }); 
+    </script>
+
+    <link href="style.css" rel="stylesheet"/>
+
+</head>
+<body>
+	<h1>Load Failures - <a href="http://github.com/cl-test-grid/cl-test-grid">CL Test Grid</a> Report</h1>
+    <b>lisp:</b> {LISP}, <b>lib-world:</b> {LIB-WORLD}
+    <table>
+        <thead>
+            <tr><th title="ASDF system name.">system-name</th>
+                <th title="The ASDF systems preventing the given system to load.">root-blocker-systems</th>
+                <th title="The systems, which have the given system and the only root blocker.">systems-blocked-exclusively</th>
+                <th title="Projects containing the systems-blocked-exclusively.">projects of the systems-blocked-exclusively</th>
+                <th title="Projects depending on the given ASDF system.">dependent-projects</th>
+                <th title="ASDF system depending on the given ASDF system.">dependent-systems</th>
+            </tr>
+        </thead>
+        <tbody>
+            {TABLE-ROWS}
+        </tbody>
+    </table>
+    <p><a href="reports-overview.html" class="to-overview">To reports overview</a></p>
+    <p class="timestamp">Generated at: {TIME} GMT.</p>
+
+    <small>Table sorting is powered by <a href="http://tablesorter.com/">http://tablesorter.com/</a></small>
+</body>
+</html>
+

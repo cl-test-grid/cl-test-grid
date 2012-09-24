@@ -79,7 +79,11 @@
 (defun print-ecl-pages (db)
   (with-report-file (out "ecl-abnormal-results.html")
     (print-ecl-report out db))
-  (print-ecl-pivots db))
+  (print-ecl-pivots db)
+  (print-load-failures *failures*
+                     "ecl-12.7.1-dfc94901-linux-x86-lisp-to-c"
+                     "quicklisp 2012-09-09"
+                     "ecl-load-failures.html"))
 
 ;;; Usage
 #|

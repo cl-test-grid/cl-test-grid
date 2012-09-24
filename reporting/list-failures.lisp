@@ -40,7 +40,7 @@
 
 (defclass failure ()
   ((lib-result :type joined-lib-result :initarg :lib-result :reader lib-result)
-   (load-result :type (or nul list) :initarg :load-result :initform nil :reader load-result)
+   (load-result :type (or null list) :initarg :load-result :initform nil :reader load-result)
    (fail-spec :type list :initarg :fail-spec :reader fail-spec)))
 
 (defmethod lisp ((item failure))
@@ -59,11 +59,15 @@
       (log-byte-length (lib-result item))))
 (defmethod contact-email ((item failure))
   (contact-email (lib-result item)))
-
+(defmethod system-name ((item failure))
+  (when (load-result item)
+    (system-name (load-result item))))
 
 (defmethod print-object ((failure failure) stream)
-  (format stream "<~S ~S ~S ~S>"
-          (lib-world failure)
-          (lisp failure)
-          (libname failure)
-          (fail-spec failure)))
+  (print-unreadable-object (failure stream)
+    (format stream "~S ~S ~S ~S ~S"
+            (lib-world failure)
+            (lisp failure)
+            (libname failure)
+            (fail-spec failure)
+            (log-uri failure))))

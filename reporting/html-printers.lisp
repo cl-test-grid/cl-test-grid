@@ -70,7 +70,7 @@
 
 (defun log-link (lib-result &rest fields)
   "Generate HTML link to the online test suite log
-for the RESULT. The FIELDS specifies set of fields
+for the LIB-RESULT. The FIELDS specifies set of fields
 to include in to the text of the link, defaults to STATUS"
   (setf fields (or fields '(status)))
   (format nil "<a class=\"~a\" href=\"~a\">~{~a~^, ~}</a>"
