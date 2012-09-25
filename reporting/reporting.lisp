@@ -64,26 +64,32 @@
       (format t "pivot reports...~%")
       (print-pivot-reports joined-index)
 
-      (format t "old quicklisp diff report...~%")
+      (format t "old Quicklisp diff report...~%")
       (time (with-report-file (out "quicklisp-diff-old.html")
               (print-all-quicklisps-diff-report out joined-index))))
 
-    (format t "quicklisp diff...~%")
-    (time (print-quicklisp-diff-report all-failures))
+    ;; (format t "Quicklisp diff...~%")
+    ;; (time (print-quicklisp-diff-report all-failures))
 
-    (format t "ecl pages...~%")
+    (format t "ECL pages...~%")
     (time (print-ecl-pages filtered-db))
-    (format t "ecl load failures...~%")
+    (format t "ECL load failures...~%")
     (time (print-load-failures all-failures
                                "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
                                "quicklisp 2012-09-09"
                                "ecl-load-failures.html"))
 
-    (format t "abcl page...~%")
+    (format t "ABCL page...~%")
     (time (print-abcl-page all-failures))
-    (format t "abcl load failures...~%")
+    (format t "ABCL load failures...~%")
     (time (print-load-failures all-failures
                                "abcl-1.1.0-dev-svn-14149-fasl39-linux-java"
+                               "quicklisp 2012-09-09"
+                               "abcl-load-failures.html"))
+
+    (format t "CCL load failures...~%")
+    (time (print-load-failures all-failures
+                               "ccl-1.8-f95-linux-x86"
                                "quicklisp 2012-09-09"
                                "abcl-load-failures.html"))))
 
