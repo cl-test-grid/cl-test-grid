@@ -61,12 +61,29 @@
                                                                   (member (lib-world record)
                                                                           last-lib-worlds
                                                                           :test #'string=)))))
+      (format t "pivot reports...~%")
       (print-pivot-reports joined-index)
 
-      (with-report-file (out "quicklisp-diff-old.html")
-        (print-all-quicklisps-diff-report out joined-index)))
+      (format t "old quicklisp diff report...~%")
+      (time (with-report-file (out "quicklisp-diff-old.html")
+              (print-all-quicklisps-diff-report out joined-index))))
 
+    (format t "quicklisp diff...~%")
     (time (print-quicklisp-diff-report all-failures))
-    (time (print-ecl-pages filtered-db all-failures))
-    (time (print-abcl-page all-failures))))
+
+    (format t "ecl pages...~%")
+    (time (print-ecl-pages filtered-db))
+    (format t "ecl load failures...~%")
+    (time (print-load-failures all-failures
+                               "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
+                               "quicklisp 2012-09-09"
+                               "ecl-load-failures.html"))
+
+    (format t "abcl page...~%")
+    (time (print-abcl-page all-failures))
+    (format t "abcl load failures...~%")
+    (time (print-load-failures all-failures
+                               "abcl-1.1.0-dev-svn-14149-fasl39-linux-java"
+                               "quicklisp 2012-09-09"
+                               "abcl-load-failures.html"))))
 

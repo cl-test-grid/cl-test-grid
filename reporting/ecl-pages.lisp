@@ -76,11 +76,7 @@
                     '(:libname) (list #'string<)
                     '(:lib-world :lisp) (list #'string> #'string<)))))
 
-(defun print-ecl-pages (db all-failures)
+(defun print-ecl-pages (db)
   (with-report-file (out "ecl-abnormal-results.html")
     (print-ecl-report out db))
-  (print-ecl-pivots db)
-  (print-load-failures all-failures
-                       "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
-                       "quicklisp 2012-09-09"
-                       "ecl-load-failures.html"))
+  (print-ecl-pivots db))
