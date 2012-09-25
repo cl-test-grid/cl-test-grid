@@ -21,7 +21,8 @@
    CLOSED: [2012-09-14 Пт 06:39]
 ** DONE make sure old reports work when DB contains ASDF systems load results
    CLOSED: [2012-09-10 06:43]
-** TODO collect results for libraries missed in Quicklisp 2012-09-09 results
+** DONE collect results for libraries missed in Quicklisp 2012-09-09 results
+   CLOSED: [2012-09-17 Пн 03:39]
    Some are missed because of agent bug: list of project was retrieved
    from wrong (old) quicklisp:
      cartesian-product-switch, cl-cheshire-cat, cl-grace, coleslaw,
@@ -32,21 +33,67 @@
 
    bknr-datastore testsuite was not run because it was added to testgrid
    as bknr.datastore.
-** TODO rework quicklisp diff report
-   <in progress>
-** TODO rework ECL reports
-** TODO The list of projects to test should be reteieved from the quicklisp
+
+   Also run bknr-datastore on quicklisp 2012-08-11.
+
+** DONE The list of projects to test should be reteieved from the quicklisp
+   CLOSED: [2012-09-17 Пн 02:09]
         tested by agent in child processes, but not the quicklisp used
         to run the agent itself.
-** TODO The OpenVRP workaround (https://github.com/quicklisp/quicklisp-client/issues/61)
-        should be done so that it only applies to quicklisp 2012-08-11,
-        but not to any other (fixed in starting from quicklisp 2012-09-09).
-** TODO when killing child process, sometimes we may have "No such process" simple-error
+** DONE remove old versions of perform-test-run, run-tests, submit-logs.
+   CLOSED: [2012-09-17 Пн 02:09]
+** DONE rework and announce new quicklisp diff report
+   CLOSED: [2012-09-18 Вт 00:21]
+   <in progress>
+** DONE remove the TODO list from the bottom of perform-test-run.lisp
+   CLOSED: [2012-09-18 Вт 02:52]
+** DONE when killing child process, sometimes we may have "No such process" simple-error
+   CLOSED: [2012-09-18 Вт 06:34]
    if the process already finished. Handle it.
-** TODO Timeout detection should sustain laptop hibernation
-** TODO remove the :load-failed status
+** DONE Testsuite timeout detection should sustain laptop hibernation
+   CLOSED: [2012-09-18 Вт 21:49]
+** DONE db.lisp: deterministic formatting of load-results
+   CLOSED: [2012-09-19 Ср 00:21]
+** DONE db.lisp: don't print testsuite values if there is no testsuite (values are NIL)
+   CLOSED: [2012-09-19 Ср 00:21]
+   don't print testing status/duration/log-key when absent
+   (relevant for new resuls where most of the systems don't have test suite)
+** DONE db.lisp: don't print load-results when absent
+   CLOSED: [2012-09-19 Ср 00:21]
+   (only releant for old results submitted before agent become able to test loading)
+** DONE open launchpad tickets for the issues revealed by the quicklisp diff report
+   CLOSED: [2012-09-19 Ср 01:27]
+
+** TODO the load failures report, with libraries sorted topologically by dependencies
+** DONE test fresh ECL to validate this fix:
+   CLOSED: [2012-09-25 Вт 06:03]
+   http://sourceforge.net/mailarchive/forum.php?thread_name=CANejTzrbiG71bStNg54J-sJ7QDBRwPgoOOGOWt7unrHfwMkByQ%40mail.gmail.com&forum_name=ecls-list
+** TODO profile the reporing, to see why it's so slow now
+** TODO remove the :load-failed status from DB and reporting
 ** TODO document the new version of agent (how to run it, that it takes long and may be restarted)
-** TODO increase load-test timeout
+** TODO terminology improvement
+  - db format: rename?
+                  :libname -> :project
+                  :status -> :test-status
+                  :log-blob-key -> :test-log-blob-key
+                  :log-byte-length -> :test-log-byte-length
+  - project name: a keyword, or string? Currently a keyword; but ASDF system names are strings.
+  - rename test-grid-testsuites:*all-libs* to *all-testsuites*?
+
+** DONE increase the load-test timeout from 1 to 2 minutes
+   CLOSED: [2012-09-15 Сб 10:02]
+** DONE increase the load-test timeout from 2 to 5 minutes
+   CLOSED: [2012-09-21 Пт 07:37]
+** TODO foreign library load errors should be recognized as :no-resource
+   Catch CFFI conditions, and in case of ABCL, failure to load JNA classes.
+   This should be done for load test and for testsuite run.
+
+   After this is implemented, it is desirable to re-run the tests on
+   the current and the previous Quicklisps, so that we don't redundant
+   items in the diff report (what previous was a load failure
+   now becomes :no-resource - not a failure).
+
+** TODO test run duration should be decreased by the time of hibernation
 * 0.5.4 Introduce an option to limit agent run time
   Use case: someone wants to run agents at night, but have
   the machine free from agent during dayly work.
@@ -68,6 +115,43 @@
    CLOSED: [2012-08-20 Пн 01:48]
 ** TODO CLISP (build a multithreaded version)
 * 0.6.0 Reports Improve 2
+** TODO document, for each CL community role, how he can befig from testgrid
+   - library mainaner:
+     - Status of your library ASDF systems loaded by various lisps
+     - If you have a testsuite, results of your test suite on various lisps
+     - Updated with every quicklisp distro
+     - Regressions (desirable to show regression
+       history along quicklisp versions).
+   - lisp implementation maintener
+     - How you lisp is supported by libraries
+     - What libraries are most importatn to fix,
+       to unlock your lisp to maximum amount
+       of code (other libraries), and correspondingly
+       to users
+     - Pre-release testing: run tests on the new version,
+       compare with results of the previous release,
+       ensure there is no regressions and see improvements.
+   - distribution maintainer (Quicklisp):
+     - release testing: run tests on the same lisp implemetations
+       as run on the previouse release, and compare results:
+       ensure there is no regressions, and see the improvements.
+   - application developer
+     (Actually, the application developer as the end user
+      of CL infrastructuure, rarely will use testgrid directly.
+      He, hopefully, will benefit indirectly, from improved
+      stability and quality of the CL world).
+      Still, the end user may:
+     - see what libraries work on your platform
+
+** TODO library mainainer page:                             :report:informer:
+   with reports about the test statuses
+   for this single library on various platforms with
+   various quicklisp versions,
+   history of regressions (by quicklisp versions)
+
+   There is some draft (uncommited) code for this task.
+
+** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO combine information about load failures with information about system dependencies
    It will allow us to find "root" compilation blockers -
    the libraries which do not compile and block other libraries
@@ -142,37 +226,28 @@
    Currently we can only find differences between test statuses
    of a library on different quicklisps, when the lisp implementation
    version is a constant.
-   We should generalize this to compare test results on two 
+   We should generalize this to compare test results on two
    different versions of a compiler (windows/linux or old compiler
-   version and new one). Also when comparing test results, 
+   version and new one). Also when comparing test results,
    we must be more flexible than matching results only of
-   exactly the same lisp-implementation-identifier, 
+   exactly the same lisp-implementation-identifier,
    because we don't always has exactly this lisp.
    For example when we compare the lates qicklisp version
    with the previous one, we may want to consider ecl-12.7.1-dee2506a-linux-x86-lisp-to-c
-   and ecl-12.7.1-xxxxffff-linux-x86-lisp-to-c as the same compiler, 
+   and ecl-12.7.1-xxxxffff-linux-x86-lisp-to-c as the same compiler,
    because otherwise we might just have no results to compare.
 
    In other case, we want to compare test results of these two
-   compilers. Then we consider them different and 
+   compilers. Then we consider them different and
    different sides of comparision: one on the left hand,
    and another on the right side.
-   
+
    At first sight the task may be solved
    by parametrizing the report by two functions:
    - the one which decides what results to put to left side and to right side
-   - a predicate which decides if a result cell from the left side is comparable 
+   - a predicate which decides if a result cell from the left side is comparable
      to a result from the right side.
 
-** TODO library mainainer page:                             :report:informer:
-   with reports about the test statuses
-   for this single library on various platforms with
-   various quicklisp versions,
-   history of regressions (by quicklisp versions)
-
-   There is some draft (uncommited) code for this task.
-
-** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO Apply for a subdomain at common-lisp.net, e.g. test-grid.common-lisp.net,
    It is another way to solve the security issue with HTML injections,
    because in this case web browser keeps test grid reports in different
@@ -383,7 +458,35 @@
    machine and contributes tests)
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
-** TODO Reuild free the lisps from source control daily, before running test-grid-agent
+** TODO Child processes collision if agent is restarted very soon after it was killed.
+   Agent is pretty resistent to restarts. If it is killed
+   and started again, it can continue test run from the point
+   reached previously.
+   It prevents of starting of several agent instances by "locking"
+   via opening a TCP port.
+   If laptop is hibernated, after waking up agent re-runs the
+   testsuite interrupted by hibernation (to avoid possible
+   problems with lost network connections of the testsuite,
+   and similar).
+
+   But there is one problem. If we kill agant, we don't
+   kill its child processes running tests.
+   If we start another agent before the child process finishes
+   (completes the testuite or loads the ASDF system), then
+   new agent is anaware about the child process, and may start
+   new process with the same task. These two child processes,
+   the old one and the new one, may intefrere, for example
+   thying to write to the same .fasl file, and to the same
+   log file.
+
+   How to solve this?
+   - To solve what exactly?
+   - To ensure, the child process run by new agent,
+     the result of which finally gets into the DB,
+     is not affected by obsolete child processes
+     of the old agent.
+
+** TODO Reuild the free lisps from source control daily, before running test-grid-agent
 ** TODO Enable HTTP caching for library test logs (good recipe: https://developers.google.com/speed/docs/best-practices/caching)
 ** TODO add CCL revision to the version string (I have impression
    that CCL versions checked out at different time from the official release SVN
