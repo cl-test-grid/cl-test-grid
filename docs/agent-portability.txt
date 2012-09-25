@@ -43,7 +43,8 @@ When it starts child CCL process to update quicklisp, the CCL crashes.
     ecl -load run-agent.lisp -eval "(quit)"
 
 
-Allegro - not tested:
+Allegro - problem with memoizing generic a function:
+https://groups.google.com/forum/?fromgroups=#!topic/cl-test-grid/Vnl3kHJbQ0M
 
     alisp -qq -L run-agent.lisp
 
