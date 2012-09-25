@@ -4,7 +4,7 @@
 
 (in-package #:test-grid-reporting)
 
-(defparameter *last-ecl-version* "c7faea1d")
+(defparameter *last-ecl-version* "ce653d88")
 (defparameter *last-ecl-quicklisp* "quicklisp 2012-08-11")
 
 (defun last-ecl-p (result)
@@ -76,26 +76,11 @@
                     '(:libname) (list #'string<)
                     '(:lib-world :lisp) (list #'string> #'string<)))))
 
-(defun print-ecl-pages (db)
+(defun print-ecl-pages (db all-failures)
   (with-report-file (out "ecl-abnormal-results.html")
     (print-ecl-report out db))
   (print-ecl-pivots db)
-  (print-load-failures *failures*
-                     "ecl-12.7.1-dfc94901-linux-x86-lisp-to-c"
-                     "quicklisp 2012-09-09"
-                     "ecl-load-failures.html"))
-
-;;; Usage
-#|
-
-git clone git@github.com:cl-test-grid/cl-test-grid.git
-git clone git@github.com:cl-test-grid/cl-test-grid-results.git
-
-(pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
-(ql:quickload :test-grid-reporting)
-
-(test-grid-reporting::print-ecl-pages (test-grid-data:read-db))
-
- the pages are placed into cl-test-grid/reports-generated/
-
-|#
+  (print-load-failures all-failures
+                       "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
+                       "quicklisp 2012-09-09"
+                       "ecl-load-failures.html"))
