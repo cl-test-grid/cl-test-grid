@@ -67,6 +67,6 @@
         (print-all-quicklisps-diff-report out joined-index)))
 
     (time (print-quicklisp-diff-report all-failures))
-    (time (print-ecl-pages filtered-db))
+    (time (print-ecl-pages filtered-db all-failures))
     (time (print-abcl-page all-failures))))
 

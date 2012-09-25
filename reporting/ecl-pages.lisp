@@ -4,7 +4,7 @@
 
 (in-package #:test-grid-reporting)
 
-(defparameter *last-ecl-version* "ce653d88")
+(defparameter *last-ecl-version* "c7faea1d")
 (defparameter *last-ecl-quicklisp* "quicklisp 2012-08-11")
 
 (defun last-ecl-p (result)
