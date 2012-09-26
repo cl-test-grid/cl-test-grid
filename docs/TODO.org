@@ -64,11 +64,17 @@
 ** DONE open launchpad tickets for the issues revealed by the quicklisp diff report
    CLOSED: [2012-09-19 Ср 01:27]
 
-** TODO the load failures report, with libraries sorted topologically by dependencies
+** DONE the load failures report, with libraries sorted topologically by dependencies
+   CLOSED: [2012-09-25 Вт 22:10]
 ** DONE test fresh ECL to validate this fix:
    CLOSED: [2012-09-25 Вт 06:03]
    http://sourceforge.net/mailarchive/forum.php?thread_name=CANejTzrbiG71bStNg54J-sJ7QDBRwPgoOOGOWt7unrHfwMkByQ%40mail.gmail.com&forum_name=ecls-list
-** TODO profile the reporing, to see why it's so slow now
+** DONE profile the reporing, to see why it's so slow now and fix
+   CLOSED: [2012-09-26 Ср 03:58]
+   The reason was set-exclusive-or, which takes minutes
+   on large lists. Introduced fast-exclusive-or
+   which uses hash tables if the arguments allow -
+   :TEST is a designator of EQ, EQL, EQUAL or EQUALP.
 ** TODO remove the :load-failed status from DB and reporting
 ** TODO document the new version of agent (how to run it, that it takes long and may be restarted)
 ** TODO terminology improvement
