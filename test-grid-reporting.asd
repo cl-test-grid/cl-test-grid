@@ -11,6 +11,8 @@
     :serial t
     :components
     ((:file "package")
+     (:file "my-time")
+     (:file "fast-exclusive-or")
      (:file "do-results")
      (:file "distinct")
      (:file "html-printers")

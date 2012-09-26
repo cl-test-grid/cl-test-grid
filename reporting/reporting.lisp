@@ -44,52 +44,64 @@
   (let* (;; Old reports can work only with lib-result objects representing
          ;; testsuite results, but not load tests.
          ;; Compute filtered DB where only testsuite results are persent.
-         (filtered-db (filter-lib-results db (lambda (lib-result test-run)
-                                               (declare (ignore test-run))
-                                               (getf lib-result :status))))
-         (all-results (select db))
-         (all-failures (list-failures all-results)))
+         (filtered-db (my-time ("filter-lib-results...")
+                        (filter-lib-results db (lambda (lib-result test-run)
+                                                 (declare (ignore test-run))
+                                                 (getf lib-result :status)))))
+         (all-results (my-time ("select [all results]...")
+                        (select db)))
+         (all-failures (my-time ("list-failures...")
+                         (list-failures all-results))))
 
-    (with-report-file (out "test-runs-report.html")
-      (write-sequence (test-runs-report filtered-db) out))
+    (my-time ("test runs..")
+      (with-report-file (out "test-runs-report.html")
+        (write-sequence (test-runs-report filtered-db) out)))
 
-    (with-report-file (out "export.csv")
-      (export-to-csv out filtered-db))
+    (my-time ("CSV ...")
+      (with-report-file (out "export.csv")
+        (export-to-csv out filtered-db)))
 
     (let* ((last-lib-worlds (largest 'lib-world filtered-db :count 3))
-           (joined-index (build-joined-index filtered-db :where (lambda (record)
-                                                                  (member (lib-world record)
-                                                                          last-lib-worlds
-                                                                          :test #'string=)))))
-      (format t "pivot reports...~%")
-      (print-pivot-reports joined-index)
+           (joined-index (my-time ("build-joined-index...")
+                           (build-joined-index filtered-db :where (lambda (record)
+                                                                    (member (lib-world record)
+                                                                            last-lib-worlds
+                                                                            :test #'string=))))))
+      (my-time ("pivot reports...~%")
+        (print-pivot-reports joined-index))
 
-      (format t "old Quicklisp diff report...~%")
-      (time (with-report-file (out "quicklisp-diff-old.html")
-              (print-all-quicklisps-diff-report out joined-index))))
+      (my-time ("old Quicklisp diff report...~%")
+        (with-report-file (out "quicklisp-diff-old.html")
+          (print-all-quicklisps-diff-report out joined-index))))
 
-    ;; (format t "Quicklisp diff...~%")
-    ;; (time (print-quicklisp-diff-report all-failures))
+    (format t "Quicklisp diff...~%")
+    (time (print-quicklisp-diff-report all-failures))
 
-    (format t "ECL pages...~%")
-    (time (print-ecl-pages filtered-db))
-    (format t "ECL load failures...~%")
-    (time (print-load-failures all-failures
-                               "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
-                               "quicklisp 2012-09-09"
-                               "ecl-load-failures.html"))
+    (my-time ("ECL pages...~%")
+      (print-ecl-pages filtered-db))
+    (my-time ("ECL load failures...~%")
+      (print-load-failures all-failures
+                           "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
+                           "quicklisp 2012-09-09"
+                           "ecl-load-failures.html"))
 
-    (format t "ABCL page...~%")
-    (time (print-abcl-page all-failures))
-    (format t "ABCL load failures...~%")
-    (time (print-load-failures all-failures
-                               "abcl-1.1.0-dev-svn-14149-fasl39-linux-java"
-                               "quicklisp 2012-09-09"
-                               "abcl-load-failures.html"))
+    (let ((last-abcl "abcl-1.1.0-dev-svn-14149-fasl39-linux-java")
+          (abcl-1.0.1 "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
+      (my-time ("ABCL diff...~%")
+        (print-compiler-diff all-failures
+                             "quicklisp 2012-09-09"
+                             last-abcl
+                             abcl-1.0.1
+                             "abcl.html"))
+      (my-time ("ABCL load failures...~%")
+        (print-load-failures all-failures
+                             last-abcl
+                             "quicklisp 2012-09-09"
+                             "abcl-load-failures.html")))
 
-    (format t "CCL load failures...~%")
-    (time (print-load-failures all-failures
-                               "ccl-1.8-f95-linux-x86"
-                               "quicklisp 2012-09-09"
-                               "abcl-load-failures.html"))))
+    (my-time ("CCL load failures...~%")
+      (print-load-failures all-failures
+                           "ccl-1.8-f95-linux-x86"
+                           "quicklisp 2012-09-09"
+                           "ccl-load-failures.html"))))
 

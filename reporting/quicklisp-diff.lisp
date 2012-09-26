@@ -8,12 +8,14 @@
 (defparameter *prev-quicklisp* "quicklisp 2012-08-11")
 
 (defun print-quicklisp-diff-report (failures)
-  (let* ((last-ql-fails (remove-if-not (lambda (failure)
-                                         (string= (lib-world failure) *last-quicklisp*))
-                                       failures))
-         (prev-ql-fails (remove-if-not (lambda (failure)
-                                         (string= (lib-world failure) *prev-quicklisp*))
-                                       failures))
+  (let* ((last-ql-fails (my-time ("last-ql-fails...")
+                          (remove-if-not (lambda (failure)
+                                           (string= (lib-world failure) *last-quicklisp*))
+                                         failures)))
+         (prev-ql-fails (my-time ("prev-ql-fails...")
+                          (remove-if-not (lambda (failure)
+                                           (string= (lib-world failure) *prev-quicklisp*))
+                                         failures)))
          ;; only consider results for lisps which were tested on both quicklisp versions
          (last-ql-lisps (alexandria:flatten (distinct last-ql-fails (list #'lisp))))
          (prev-ql-lisps (alexandria:flatten (distinct prev-ql-fails (list #'lisp))))
@@ -21,19 +23,22 @@
          (common-lisp-p (lambda (lisp) (member lisp common-lisps :test #'string=)))
          ;; now compute the diff between the results of two quicklisps,
          ;; considering only results from lisps tested on both versions.
-         (diff (set-exclusive-or (remove-if-not common-lisp-p last-ql-fails :key #'lisp)
-                                 (remove-if-not common-lisp-p prev-ql-fails :key #'lisp)
-                                 :test (lambda (fail-a fail-b)
-                                         (and (eq (libname fail-a) (libname fail-b))
-                                              (string= (lisp fail-a) (lisp fail-b))
-                                              (equal (fail-spec fail-a) (fail-spec fail-b)))))))
-    (print-pivot "quicklisp-diff.html"
-                 diff
-                 (list #'lisp #'libname) (list #'string< #'string<)
-                 (list #'lib-world) (list #'string>)
-                 (lambda (out cell-data)
-                   (dolist (fail cell-data)
-                     (format out "~A</br>" (failure-log-link fail #'fail-spec)))))))
+         (diff (my-time ("fast-exclusive-or...")
+                 (fast-exclusive-or (remove-if-not common-lisp-p last-ql-fails :key #'lisp)
+                                    (remove-if-not common-lisp-p prev-ql-fails :key #'lisp)
+                                    :test #'equal
+                                    :key (lambda (fail)
+                                           (list (libname fail)
+                                                 (lisp fail)
+                                                 (fail-spec fail)))))))
+    (my-time ("print-pivot...")
+      (print-pivot "quicklisp-diff.html"
+                   diff
+                   (list #'lisp #'libname) (list #'string< #'string<)
+                   (list #'lib-world) (list #'string>)
+                   (lambda (out cell-data)
+                     (dolist (fail cell-data)
+                       (format out "~A</br>" (failure-log-link fail #'fail-spec))))))))
 
 
 ;;; Usage
