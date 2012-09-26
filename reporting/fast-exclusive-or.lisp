@@ -16,7 +16,7 @@ is used, FAST-EXCLUSIVE-OR signals a warning and
 falls back to CL:SET-EXCLUSIVE-OR.
 
 Note, that CL:SET-EXCLUSIVE-OR takes minutes(!) on the
-list sized we are interested in (tested on CCL and SBCL)."
+list sizes we are interested in (tested on CCL and SBCL)."
   (when test-not
     (warn "FAST-EXCLUSIVE-OR falls back to CL:SET-EXCLUSIVE-OR because we don't know how to handle TEST-NOT")
     (return-from fast-exclusive-or (apply #'cl:set-exclusive-or list-1 list-2 rest)))
