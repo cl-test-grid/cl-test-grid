@@ -85,7 +85,7 @@
                            "quicklisp 2012-09-09"
                            "ecl-load-failures.html"))
 
-    (let ((last-abcl "abcl-1.1.0-dev-svn-14149-fasl39-linux-java")
+    (let ((last-abcl "abcl-1.1.0-dev-svn-14157-fasl39-linux-java")
           (abcl-1.0.1 "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
       (my-time ("ABCL diff...~%")
         (print-compiler-diff all-failures
@@ -103,5 +103,19 @@
       (print-load-failures all-failures
                            "ccl-1.8-f95-linux-x86"
                            "quicklisp 2012-09-09"
-                           "ccl-load-failures.html"))))
-
+                           "ccl-load-failures.html"))
+    (my-time ("ACL load failures...~%")
+      (print-load-failures all-failures
+                           "acl-8.2a-linux-x86"
+                           "quicklisp 2012-09-09"
+                           "acl-load-failures.html"))
+    (my-time ("CMUCL load failures...~%")
+      (print-load-failures all-failures
+                           "cmu-20c_release-20c__20c_unicode_-linux-x86"
+                           "quicklisp 2012-09-09"
+                           "cmucl-load-failures.html"))
+    (my-time ("SBCL load failures...~%")
+      (print-load-failures all-failures
+                           "sbcl-1.0.57-linux-x86"
+                           "quicklisp 2012-09-09"
+                           "sbcl-load-failures.html"))))
