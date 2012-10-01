@@ -239,14 +239,14 @@
    The agent takes measures to ensure there is only
    one agent instance using this working directory.
 
-   This is acheaved by using a TCP port as a inter-process
-   lock. When started agent tries to open a socket on
+   This is acheaved by using a TCP port as an inter-process
+   lock. When started, agent tries to open a socket on
    the port. If it is successful, the agent continues.
    If the port is busy, the agent deduces there is
    another agent instance running, logs a warning
    and exists.
 
-   The port number is specified by configuration
+   The port number is specified by the configuration
    property
    - =singleton-lock-port= defaults to 7685.
 
