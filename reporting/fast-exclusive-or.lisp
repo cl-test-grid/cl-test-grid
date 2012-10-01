@@ -7,24 +7,24 @@
 
 (defun fast-exclusive-or (list-1 list-2 &rest rest &key key (test #'eql) (test-not nil))
   "Exactly as CL:SET-EXCLUSIVE-OR, but takes advantage
-of hash table if the :TEST predicate is suitable
-for CL:MAKE-HASH-TABLE, i.e. one is a designator
-designator of EQ, EQL, EQUAL or EQUALP. 
+of hash tables if the :TEST predicate is suitable
+for CL:MAKE-HASH-TABLE, i.e. a designator
+of EQ, EQL, EQUAL or EQUALP.
 
-Otherwise, if :TEST is different predicate, or :TEST-NOT
+Otherwise, if :TEST is a different predicate, or :TEST-NOT
 is used, FAST-EXCLUSIVE-OR signals a warning and
 falls back to CL:SET-EXCLUSIVE-OR.
 
 Note, that CL:SET-EXCLUSIVE-OR takes minutes(!) on the
-list sizes we are interested in (tested on CCL and SBCL)."
+list sizes we are interested in (tested on CCL and SBCL,
+and must be the same on other implementations, because
+of too generic contract of CL:SET-EXCLUSIVE-OR)."
   (when test-not
     (warn "FAST-EXCLUSIVE-OR falls back to CL:SET-EXCLUSIVE-OR because we don't know how to handle TEST-NOT")
     (return-from fast-exclusive-or (apply #'cl:set-exclusive-or list-1 list-2 rest)))
-  (when (not (member test
-                     `(eq eql equal equalp ,#'eq ,#'eql ,#'equal #'equalp)))
+  (when (not (member test `(eq eql equal equalp ,#'eq ,#'eql ,#'equal #'equalp)))
     (warn "FAST-EXCLUSIVE-OR falls back to CL:SET-EXCLUSIVE-OR because the TEST predicate is not a designator of EQ, EQL, EQUAL or EQUALP")
     (return-from fast-exclusive-or (apply #'cl:set-exclusive-or list-1 list-2 rest)))
-
   (unless key (setq key #'identity))
   (flet ((to-hash (list)
            (let ((hash (make-hash-table :test test)))
