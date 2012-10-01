@@ -1,5 +1,6 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 * 0.6.0 Reports Improve 2
+** TODO remove the :load-failed status from DB and reporting
 ** TODO library mainainer page:                             :report:informer:
    with reports about the test statuses
    for this single library on various platforms with
@@ -8,7 +9,14 @@
 
    There is some draft (uncommited) code for this task.
 
-** TODO remove the :load-failed status from DB and reporting
+** TODO make lisp code the main and the easiest interface to the test results:
+   convenient interation, filtering and matching functions.
+   We want to add to every HTML report a secion with lisp
+   code generating this report, so that all the users
+   see and understand how to query data and can follow
+   these examples.
+** TODO document the data format, data access functions, reporting
+   functions and utilities.
 ** TODO terminology improvement
   - db format: rename?
                   :libname -> :project
@@ -47,7 +55,8 @@
      - see what libraries work on your platform
 
 ** TODO Prevent HTML injection via test-run-info                     :report:
-** TODO combine information about load failures with information about system dependencies
+** DONE combine information about load failures with information about system dependencies
+   CLOSED: [2012-10-01 Пн 07:12]
    It will allow us to find "root" compilation blockers -
    the libraries which do not compile and block other libraries
    compilation.
@@ -108,14 +117,6 @@
    But the information which IS possible to extract will give us good results
    I believe.
 
-** TODO make lisp code the main and the easiest interface to the test results:
-   convenient interation, filtering and matching functions.
-   We want to add to every HTML report a secion with lisp
-   code generating this report, so that all the users
-   see and understand how to query data and can follow
-   these examples.
-** TODO document the data format, data access functions, reporting
-   functions and utilities.
 ** TODO the diff report (aka regressions report) - diff along various dimentions
    Currently we can only find differences between test statuses
    of a library on different quicklisps, when the lisp implementation
@@ -167,7 +168,7 @@
    test results.
 
    Do we really need WEB UI for filters? If so, it
-   is low priority anyway.
+   is a low priority anyway.
 
 * 0.6.1 Install more lisps on my VPS
   I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
