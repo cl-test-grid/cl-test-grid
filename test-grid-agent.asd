@@ -33,7 +33,7 @@
        (:file "lisp-exe-ccl") 
        (:file "lisp-exe") 
        (:file "with-response-file")
-       (:file "perform-test-run")
+       (:file "complete-test-run")
        (:file "persistence")
        (:file "fake-blobstore")
        (:file "as-singleton-agent")
