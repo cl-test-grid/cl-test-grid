@@ -77,8 +77,6 @@
     (format t "Quicklisp diff...~%")
     (time (print-quicklisp-diff-report all-failures))
 
-    (my-time ("ECL pages...~%")
-      (print-ecl-pages filtered-db))
     (my-time ("ECL load failures...~%")
       (print-load-failures all-failures
                            "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
@@ -98,7 +96,6 @@
                              last-abcl
                              "quicklisp 2012-09-09"
                              "abcl-load-failures.html")))
-
     (my-time ("CCL load failures...~%")
       (print-load-failures all-failures
                            "ccl-1.8-f95-linux-x86"

@@ -28,7 +28,6 @@
      (:file "meta-info-from-quicklisp")
      (:file "dependencies-and-blockers")
      (:file "load-failures")
-     (:file "ecl-pages")
      (:file "compiler-diff")
      (:file "durations")
      (:file "contributors")))))

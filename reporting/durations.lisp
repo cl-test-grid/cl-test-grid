@@ -10,7 +10,7 @@
                        :runs))
       (let ((descr (test-grid-data::run-descr run)))
         (when (string= lib-world (getf descr :lib-world))
-          (pusn (cons (getf descr :lisp)
+          (push (cons (getf descr :lisp)
                       (getf descr :run-duration))
                 duration-alist))))
     (setf duration-alist (sort duration-alist #'string< :key #'car))
@@ -21,4 +21,4 @@
                         60))))))
 
 ;; usage:
- (print-test-run-durations "quicklisp 2012-09-09")
+;; (print-test-run-durations "quicklisp 2012-09-09")

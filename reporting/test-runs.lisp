@@ -26,7 +26,7 @@
 (defun aggregated-status (normalized-status)
   "Returns the test result as one symbol, even
 if it was an \"extended status\". Possible return
-values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :LOAD-FAILED, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
+values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :FAIL, :NO-RESOURSE, :KNOWN-FAIL."
   (etypecase normalized-status
     (symbol normalized-status)
     (list (destructuring-bind (&key failed-tests known-to-fail) normalized-status

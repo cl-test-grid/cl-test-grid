@@ -75,7 +75,6 @@ the following type hierarchy.
       bad-symbol ---------- bad status represended by single keyword symbol
         :fail
         :crash
-        :load-failed
         :timeoout
       extended-non-empty  - extended status with non-empty :failed-tests or :known-to-fail
 
@@ -107,10 +106,10 @@ The function OF-TYPE-P below implements the described type predicates.
 (defun of-type-p (lib-status lib-status-typespec)
   (ecase lib-status-typespec
     ((t) t)
-    ((:ok :no-resource :fail :crash :load-failed :timeout)
+    ((:ok :no-resource :fail :crash :timeout)
      (eq lib-status lib-status-typespec))
     (bad-symbol (member lib-status
-                        '(:fail :crash :load-failed :timeout)
+                        '(:fail :crash :timeout)
                         :test #'eq))
     (extended-empty (and (listp lib-status)
                          (not (or (getf lib-status :failed-tests)
@@ -131,11 +130,9 @@ The function OF-TYPE-P below implements the described type predicates.
 (assert (of-type-p :no-resource :no-resource))
 (assert (of-type-p :ok :ok))
 (assert (of-type-p :crash :crash))
-(assert (of-type-p :load-failed :load-failed))
 (assert (of-type-p :timeout :timeout))
 (assert (of-type-p :crash 'bad-symbol))
 (assert (of-type-p :timeout 'bad))
-(assert (of-type-p :load-failed t))
 (assert (of-type-p :ok t))
 (assert (not (of-type-p '() 'extended-non-empty)))
 (assert (of-type-p '() 'good))
@@ -177,7 +174,6 @@ The function OF-TYPE-P below implements the described type predicates.
 (assert (not (has-regressions-p :ok '(:failed-tests () :known-to-fail ()))))
 (assert (not (has-regressions-p :fail :fail)))
 (assert (has-regressions-p :crash :fail))
-(assert (has-regressions-p :load-failed :fail))
 (assert (has-regressions-p :timeout :fail))
 (assert (has-regressions-p :timeout '(:failed-tests ("c"))))
 (assert (has-regressions-p :timeout '()))

@@ -18,7 +18,7 @@
 (defgeneric libname (item))           ;; library name - a keyword, like :babel, :alexandria, etc.
 (defgeneric lisp (item))              ;; lisp implementation identifier - a string
 (defgeneric lib-world (item))         ;; a string, like "quicklisp 2012-07-03"
-(defgeneric status (item))            ;; test status, like :ok, :fail, :timeout, :crash, :load-failed, :no-resource, (:failed-tests (<list of test case name string>) :known-to-fail (<list of test case names marked by the test suite autor as "known">))
+(defgeneric status (item))            ;; test status, like :ok, :fail, :timeout, :crash, :no-resource, (:failed-tests (<list of test case name string>) :known-to-fail (<list of test case names marked by the test suite autor as "known">))
 (defgeneric log-blob-key (item))      ;; the key under which the log produced by this test is stored online at https://cl-test-grid.appspot.com/blob?key=<key>
 (defgeneric log-byte-length (item))   ;; length of the log file
 (defgeneric load-results (item))      ;; List of load results for every ASDF system provided by that project (see below for the description of load-result object
