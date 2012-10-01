@@ -132,8 +132,8 @@ just passed to the QUICKLISP:QUICKLOAD."
           :known-to-fail '())))
 
 (defun running-cl-test-more-suite (project-name runner-function)
-  ;; cl-test-more test suites usually run tests the
-  ;; load time.
+  ;; cl-test-more test suites usually run tests during
+  ;; the load time.
   ;;
   ;; cl-test-more produces text output in
   ;; the TAP (Test Anhything Protocol),
@@ -146,7 +146,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; looking for strings starting with "not ok"
   ;; in the output).
 
-  ;; Intersepting cl-test-more TAP output
+  ;; Intercepting cl-test-more TAP output
   (quicklisp:quickload :cl-test-more)
 
   (let ((test-output-buf (make-string-output-stream)))
