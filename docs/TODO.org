@@ -1,82 +1,14 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
-* 0.5.1 Test loading (including fresh recompilation) of all the libraries in quicklisp.
-** Test loading of every ASDF system and publish results in db.lisp.
-  This means even if the library doesn't have a test suite,
-  or the test suite is not yet integrated into the test-grid,
-  we will know it's compilation status.
+* 0.6.0 Reports Improve 2
+** TODO library mainainer page:                             :report:informer:
+   with reports about the test statuses
+   for this single library on various platforms with
+   various quicklisp versions,
+   history of regressions (by quicklisp versions)
 
-  Complications: one project may have more than one ASDF system,
-  and in such case it's not clear how to relate compilation
-  failures with test suite status, if only part of ASDF systems
-  failed to compile.
+   There is some draft (uncommited) code for this task.
 
-** DONE Change agent to perform load test of every ASDF system in Quicklisp
-   CLOSED: [2012-09-01 06:43]
-** DONE Continuable test runs
-   CLOSED: [2012-09-04 Вт 02:06]
-   Don't loose test run results if it was interrupted (due to errors, network outage or agent termination)
-** DONE Workaround the GAE issue https://code.google.com/p/googleappengine/issues/detail?id=8032
-   CLOSED: [2012-09-04 Вт 02:05]
-** DONE rework ABCL report
-   CLOSED: [2012-09-14 Пт 06:39]
-** DONE make sure old reports work when DB contains ASDF systems load results
-   CLOSED: [2012-09-10 06:43]
-** DONE collect results for libraries missed in Quicklisp 2012-09-09 results
-   CLOSED: [2012-09-17 Пн 03:39]
-   Some are missed because of agent bug: list of project was retrieved
-   from wrong (old) quicklisp:
-     cartesian-product-switch, cl-cheshire-cat, cl-grace, coleslaw,
-     com.clearly-useful.iterator-protocol,
-     com.clearly-useful.protocols, com.clearly-useful.sequence-protocol,
-     formlets, glu-tessellate, infix-dollar-reader, lambda-lift,
-     optima, place-modifiers, pzmq.
-
-   bknr-datastore testsuite was not run because it was added to testgrid
-   as bknr.datastore.
-
-   Also run bknr-datastore on quicklisp 2012-08-11.
-
-** DONE The list of projects to test should be reteieved from the quicklisp
-   CLOSED: [2012-09-17 Пн 02:09]
-        tested by agent in child processes, but not the quicklisp used
-        to run the agent itself.
-** DONE remove old versions of perform-test-run, run-tests, submit-logs.
-   CLOSED: [2012-09-17 Пн 02:09]
-** DONE rework and announce new quicklisp diff report
-   CLOSED: [2012-09-18 Вт 00:21]
-   <in progress>
-** DONE remove the TODO list from the bottom of perform-test-run.lisp
-   CLOSED: [2012-09-18 Вт 02:52]
-** DONE when killing child process, sometimes we may have "No such process" simple-error
-   CLOSED: [2012-09-18 Вт 06:34]
-   if the process already finished. Handle it.
-** DONE Testsuite timeout detection should sustain laptop hibernation
-   CLOSED: [2012-09-18 Вт 21:49]
-** DONE db.lisp: deterministic formatting of load-results
-   CLOSED: [2012-09-19 Ср 00:21]
-** DONE db.lisp: don't print testsuite values if there is no testsuite (values are NIL)
-   CLOSED: [2012-09-19 Ср 00:21]
-   don't print testing status/duration/log-key when absent
-   (relevant for new resuls where most of the systems don't have test suite)
-** DONE db.lisp: don't print load-results when absent
-   CLOSED: [2012-09-19 Ср 00:21]
-   (only releant for old results submitted before agent become able to test loading)
-** DONE open launchpad tickets for the issues revealed by the quicklisp diff report
-   CLOSED: [2012-09-19 Ср 01:27]
-
-** DONE the load failures report, with libraries sorted topologically by dependencies
-   CLOSED: [2012-09-25 Вт 22:10]
-** DONE test fresh ECL to validate this fix:
-   CLOSED: [2012-09-25 Вт 06:03]
-   http://sourceforge.net/mailarchive/forum.php?thread_name=CANejTzrbiG71bStNg54J-sJ7QDBRwPgoOOGOWt7unrHfwMkByQ%40mail.gmail.com&forum_name=ecls-list
-** DONE profile the reporing, to see why it's so slow now and fix
-   CLOSED: [2012-09-26 Ср 03:58]
-   The reason was set-exclusive-or, which takes minutes
-   on large lists. Introduced fast-exclusive-or
-   which uses hash tables if the arguments allow -
-   :TEST is a designator of EQ, EQL, EQUAL or EQUALP.
 ** TODO remove the :load-failed status from DB and reporting
-** TODO document the new version of agent (how to run it, that it takes long and may be restarted)
 ** TODO terminology improvement
   - db format: rename?
                   :libname -> :project
@@ -85,42 +17,7 @@
                   :log-byte-length -> :test-log-byte-length
   - project name: a keyword, or string? Currently a keyword; but ASDF system names are strings.
   - rename test-grid-testsuites:*all-libs* to *all-testsuites*?
-
-** DONE increase the load-test timeout from 1 to 2 minutes
-   CLOSED: [2012-09-15 Сб 10:02]
-** DONE increase the load-test timeout from 2 to 5 minutes
-   CLOSED: [2012-09-21 Пт 07:37]
-** TODO foreign library load errors should be recognized as :no-resource
-   Catch CFFI conditions, and in case of ABCL, failure to load JNA classes.
-   This should be done for load test and for testsuite run.
-
-   After this is implemented, it is desirable to re-run the tests on
-   the current and the previous Quicklisps, so that we don't redundant
-   items in the diff report (what previous was a load failure
-   now becomes :no-resource - not a failure).
-
-** TODO test run duration should be decreased by the time of hibernation
-* 0.5.4 Introduce an option to limit agent run time
-  Use case: someone wants to run agents at night, but have
-  the machine free from agent during dayly work.
-  We will provide and option the user can configure in run-agent.lisp
-  which limits agent run time so that agent exits after this duration.
-
-  Before terminating agent should sumbit the results accumulated to server
-  (even partial test runs). This is necessary becase we can not
-  be sure the user will ever start the agent again.
-
-  This also means that if next time agent is started, it should
-  know what part of test run is completed, and continue for
-  remaining projects (record the completenes status
-  per library in persistence.lisp instead of whole
-  quicklisp distros?)
-* 0.5.5 Install more lisps on my VPS
-  I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
-** DONE ABCL
-   CLOSED: [2012-08-20 Пн 01:48]
-** TODO CLISP (build a multithreaded version)
-* 0.6.0 Reports Improve 2
+** TODO remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
 ** TODO document, for each CL community role, how he can befig from testgrid
    - library mainaner:
      - Status of your library ASDF systems loaded by various lisps
@@ -148,14 +45,6 @@
       stability and quality of the CL world).
       Still, the end user may:
      - see what libraries work on your platform
-
-** TODO library mainainer page:                             :report:informer:
-   with reports about the test statuses
-   for this single library on various platforms with
-   various quicklisp versions,
-   history of regressions (by quicklisp versions)
-
-   There is some draft (uncommited) code for this task.
 
 ** TODO Prevent HTML injection via test-run-info                     :report:
 ** TODO combine information about load failures with information about system dependencies
@@ -225,8 +114,7 @@
    code generating this report, so that all the users
    see and understand how to query data and can follow
    these examples.
-** DONE document the data format, data access functions, reporting
-   CLOSED: [2012-08-17 Пт 21:47]
+** TODO document the data format, data access functions, reporting
    functions and utilities.
 ** TODO the diff report (aka regressions report) - diff along various dimentions
    Currently we can only find differences between test statuses
@@ -281,6 +169,11 @@
    Do we really need WEB UI for filters? If so, it
    is low priority anyway.
 
+* 0.6.1 Install more lisps on my VPS
+  I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
+** DONE ABCL
+   CLOSED: [2012-08-20 Пн 01:48]
+** TODO CLISP (build a multithreaded version)
 * 0.7.0 Add more test suites
 ** TODO add testsuites of more libraries from quicklisp
 
@@ -373,7 +266,43 @@
 
    Although, for the most important libraries which don't have
    enough maintainers we could provide implementation.
-* lisp-agent postponed issues
+* agent postponed issues
+** TODO Introduce an option to limit agent run time
+  Use case: someone wants to run agents at night, but have
+  the machine free from agent during dayly work.
+  We will provide and option the user can configure in run-agent.lisp
+  which limits agent run time so that agent exits after this duration.
+
+  Before terminating agent should sumbit the results accumulated to server
+  (even partial test runs). This is necessary becase we can not
+  be sure the user will ever start the agent again.
+
+  This also means that if next time agent is started, it should
+  know what part of test run is completed, and continue for
+  remaining projects (record the completenes status
+  per library in persistence.lisp instead of whole
+  quicklisp distros?)
+** TODO A "quit" command for soft termination of the agent instead of killing it
+   Will ensure agent finishes only afther all his child processes
+   are finished, so that starting agent again is safe.
+
+   How the command should be sent to agent? Via web interface?
+   Lisp command from REPL?
+
+** TODO foreign library load errors should be recognized and represented
+   in test results (maybe as :no-resource status, but it's better
+   to have a special status, including the library name. that way
+   we will have up to date list of foreign libraries necessary
+   to have quicklisp fully working).
+
+   Catch CFFI conditions, and in case of ABCL, failure to load JNA classes.
+   This should be done for load test and for testsuite run.
+
+   After this is implemented, it is desirable to re-run the tests on
+   the current and the previous Quicklisps, so that we don't redundant
+   items in the diff report (what previous was a load failure
+   now becomes :no-resource - not a failure).
+** TODO test run duration should be decreased by the time of hibernation
 ** TODO memoization of the implementation-identifier generic function is not portable
    in particular, it's known that fare-memoization can't memoize it on ACL,
    see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
