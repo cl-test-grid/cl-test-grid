@@ -54,10 +54,10 @@
                           row-fields row-fields-sort-predicates
                           col-fields col-fields-sort-predicates)
              (with-report-file (out filename)
-               (pivot-report-html out
-                                  result-index
-                                  row-fields row-fields-sort-predicates
-                                  col-fields col-fields-sort-predicates))))
+               (pivot-report-old out
+                                 result-index
+                                 row-fields row-fields-sort-predicates
+                                 col-fields col-fields-sort-predicates))))
 
       (print-report all-results
                     "ecl-pivot_lisp_ql-lib.html"
@@ -80,18 +80,3 @@
   (with-report-file (out "ecl-abnormal-results.html")
     (print-ecl-report out db))
   (print-ecl-pivots db))
-
-;;; Usage
-#|
-
-git clone git@github.com:cl-test-grid/cl-test-grid.git
-git clone git@github.com:cl-test-grid/cl-test-grid-results.git
-
-(pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
-(ql:quickload :test-grid-reporting)
-
-(test-grid-reporting::print-ecl-pages (test-grid-data:read-db))
-
- the pages are placed into cl-test-grid/reports-generated/
-
-|#

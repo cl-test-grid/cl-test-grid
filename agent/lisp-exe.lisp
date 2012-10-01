@@ -33,7 +33,9 @@
 
            ;; the main function of interest for test-grid agent
            #:run-with-timeout
-           #:lisp-process-timeout
+           #:lisp-process-timeout ; timeout condition
+           #:seconds              ; the condition slot accessor
+           #:hibernation-detected ; another condition
 
             ;; deprecated function, consider run-with-timeout where possible
            #:run-lisp-process
@@ -61,9 +63,27 @@ hanging lisp processes. Consider RUN-WITH-TIMEOUT where possible."))
   (:documentation "Like RUN-LISP-PROCESS, but if the lisp porcess
 does not finish in the specified TIMEOUT-SECONDS, the process
 is killed together with it's possible child processes, a
-LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL."))
+LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL.
 
-(define-condition lisp-process-timeout (condition) ()) ;; should it inherit from ERROR?
+If while waiting for the process to finish it is detected that
+the machive was hibernated and then woken up, HIBERNATION-DETECTED
+conditon is signalled (which is not a SERIOUS-CONDITION subclass),
+and the hibernation duration is excluded from the time accounted
+for the timeout.
+
+If the calller thinks the hibernation may affect the results
+of the lisp process (e.g. because network connections
+were terminated) he can handle the HIBERNATION-DETECTED
+condition; for example by running the process again.
+Otherwise he may just ignore the condition."))
+
+(define-condition lisp-process-timeout (condition) ;; should it inherit from ERROR?
+  ((seconds :accessor seconds
+            :initarg :seconds
+            :type number
+            :initform (error ":seconds is required"))))
+
+(define-condition hibernation-detected (condition) ())
 
 (defclass lisp-exe () ())
 
@@ -262,20 +282,27 @@ command, the rest strings are the command arguments."))
           ,@(prepend-each "-eval" form-strings)
           "-eval" "(lispworks:quit)")))
 
-;;; Timeouts: waiting for the process and killing the process tree on timeout
+;;; Timeouts: waiting for the process and killing the process tree on timeout;
+;;; also detecting the machine hibernation while the process is running.
 
 (defun wait (seconds lisp-process)
   "If the process is not finished upot the SECONDS timeout
 signal LISP-PROCESS-TIMEOUT conditios and exit (the process
 remains running)."
-  (let ((end-time (+ seconds (get-universal-time))))
+  (let* ((last-active-time (get-universal-time))
+         (end-time (+ seconds last-active-time)))
     (loop
        (when (not (eq :running
                       (external-program:process-status lisp-process)))
          (return (external-program:process-status lisp-process)))
-       (when (< end-time (get-universal-time))
-         (signal 'lisp-process-timeout)
-         (return))
+       (let ((now (get-universal-time)))
+         (when (> now (+ last-active-time 7))
+           (signal 'hibernation-detected)
+           (incf end-time (- now last-active-time)))
+         (setf last-active-time now)
+         (when (< end-time now)
+           (signal 'lisp-process-timeout :seconds seconds)
+           (return)))
        (sleep 1))))
 
 (defun try-to-kill-process-tree (lisp-process)
@@ -317,7 +344,23 @@ remains running)."
   ;; shell commands). Implementing the process tree
   ;; kill on unix is in our TODO.
   (log:warn "Killing the process tree for non-windows platforms is not implemented yet. Just killing the process.")
-  (external-program:signal-process lisp-process 9))
+  (handler-case
+      (external-program:signal-process lisp-process 9)
+    (serious-condition (c)
+      ;; If the process already terminates, when we ask CCL to kill it,
+      ;; CCL signals a SIMPLE-ERROR "No such process".
+      ;; see http://trac.clozure.com/ccl/ticket/1015
+      ;;
+      ;; Handle serious conditions, check the process status.
+      ;; If it is already finished, just continue. If the status
+      ;; is :running, log a warning and continue anyway,
+      ;; because we know that CCL do not synchronize
+      ;; the process status immediately, so the :running
+      ;; value may be just outdated information.
+      (let ((status (external-program:process-status lisp-process)))
+        (when (eq :running status)
+          (log:warn "~A \"~A\" is signalled when killing the process. external-program:process-status still returns :running for the process, but this value may be outdated, so we hope that the error is signalled because the process is already terminated."
+                    (type-of c) c))))))
 
 (defmethod run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (let ((p (apply #'start-lisp-process lisp-exe forms)))

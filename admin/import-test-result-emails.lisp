@@ -72,11 +72,11 @@ using SAVE-LETTER-UIDS function."
       (cl-pop:with-pop-connection (conn :host host
                                         :username username
                                         :password password)
-        (dotimes (iterator (cl-pop:message-count conn))
-          (let* ((attachment-file-name (format nil "attachement-letter~A.txt" iterator))
+        (dotimes (i (cl-pop:message-count conn))
+          (let* ((attachment-file-name (format nil "attachement-letter~A.txt" i))
                  (attachment-file (merge-pathnames attachment-file-name work-dir))
-                 (message-uid (pop-message-uid conn (+ 1 iterator))))
-            (save-string (attachment-str conn (1+ iterator)) attachment-file)
+                 (message-uid (pop-message-uid conn (+ 1 i))))
+            (save-string (attachment-str conn (1+ i)) attachment-file)
             (push attachment-file attachment-files)
             (push message-uid message-uids)))))
     (save-letter-uids message-uids work-dir)

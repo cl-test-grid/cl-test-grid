@@ -8,6 +8,9 @@
 (defun src-dir()
   (asdf:system-relative-pathname :test-grid-reporting #P"reporting/"))
 
+(defun src-file (file-name)
+  (merge-pathnames file-name (src-dir)))
+
 ;; ------ file system location for generated reports ------
 
 (defun reports-dir ()
@@ -26,46 +29,93 @@
 (defmacro with-report-file ((out-stream-var filename) &body body)
   `(with-report-file-impl ,filename #'(lambda (,out-stream-var) ,@body)))
 
-;; -------------  Templating ---------------------;;
-;; (will be replaced by cl-closure-templates or html-template
-;; after the reports are moved to a separate ASDF system).
+;;; =========== print all the reports at once =============
 
-(defun replace-str (template placeholder value)
-  "Differs from CL:REPLACE in that placeholder and value may be of different length."
-  (let* ((pos (or (search placeholder template)
-                  (error "Can't find the placeholder ~A in the template." placeholder))))
-    (concatenate 'string
-                 (subseq template 0 pos)
-                 value
-                 (subseq template (+ pos (length placeholder))))))
+(defun filter-lib-results (db predicate)
+  (list :version (getf db :version)
+        :runs (mapcar (lambda (run)
+                        (list :descr (getf run :descr)
+                              :results (remove-if-not (lambda (lib-result)
+                                                        (funcall predicate lib-result run))
+                                                      (getf run :results))))
+                      (getf db :runs))))
 
-(defun fmt-template (file substitutions-alist)
-  (let ((template (test-grid-utils::file-string file)))
-    (dolist (subst substitutions-alist)
-      (setf template (replace-str template (car subst) (cdr subst))))
-    template))
+(defun generate-reports (db)
+  (let* (;; Old reports can work only with lib-result objects representing
+         ;; testsuite results, but not load tests.
+         ;; Compute filtered DB where only testsuite results are persent.
+         (filtered-db (my-time ("filter-lib-results...")
+                        (filter-lib-results db (lambda (lib-result test-run)
+                                                 (declare (ignore test-run))
+                                                 (getf lib-result :status)))))
+         (all-results (my-time ("select [all results]...")
+                        (select db)))
+         (all-failures (my-time ("list-failures...")
+                         (list-failures all-results))))
 
+    (my-time ("test runs..")
+      (with-report-file (out "test-runs-report.html")
+        (write-sequence (test-runs-report filtered-db) out)))
 
-;; =========== print all the reports at once =============
+    (my-time ("CSV ...")
+      (with-report-file (out "export.csv")
+        (export-to-csv out filtered-db)))
 
-(defun generate-reports (&optional (db test-grid-data::*db*))
+    (let* ((last-lib-worlds (largest 'lib-world filtered-db :count 3))
+           (joined-index (my-time ("build-joined-index...")
+                           (build-joined-index filtered-db :where (lambda (record)
+                                                                    (member (lib-world record)
+                                                                            last-lib-worlds
+                                                                            :test #'string=))))))
+      (my-time ("pivot reports...~%")
+        (print-pivot-reports joined-index))
 
-  (with-report-file (out "test-runs-report.html")
-    (write-sequence (test-runs-report db) out))
+      (my-time ("old Quicklisp diff report...~%")
+        (with-report-file (out "quicklisp-diff-old.html")
+          (print-all-quicklisps-diff-report out joined-index))))
 
-  (with-report-file (out "export.csv")
-    (export-to-csv out db))
+    (format t "Quicklisp diff...~%")
+    (time (print-quicklisp-diff-report all-failures))
 
-  (let* ((last-lib-worlds (largest 'lib-world db :count 3))
-         (joined-index (build-joined-index db :where (lambda (record)
-                                                       (member (lib-world record)
-                                                               last-lib-worlds
-                                                               :test #'string=)))))
-    (print-pivot-reports joined-index)
+    (my-time ("ECL pages...~%")
+      (print-ecl-pages filtered-db))
+    (my-time ("ECL load failures...~%")
+      (print-load-failures all-failures
+                           "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
+                           "quicklisp 2012-09-09"
+                           "ecl-load-failures.html"))
 
-    (with-report-file (out "quicklisps-test-diff.html")
-      (print-all-quicklisps-diff-report out joined-index)))
+    (let ((last-abcl "abcl-1.1.0-dev-svn-14157-fasl39-linux-java")
+          (abcl-1.0.1 "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
+      (my-time ("ABCL diff...~%")
+        (print-compiler-diff all-failures
+                             "quicklisp 2012-09-09"
+                             last-abcl
+                             abcl-1.0.1
+                             "abcl.html"))
+      (my-time ("ABCL load failures...~%")
+        (print-load-failures all-failures
+                             last-abcl
+                             "quicklisp 2012-09-09"
+                             "abcl-load-failures.html")))
 
-  (print-ecl-pages db)
-  (print-abcl-page db))
-
+    (my-time ("CCL load failures...~%")
+      (print-load-failures all-failures
+                           "ccl-1.8-f95-linux-x86"
+                           "quicklisp 2012-09-09"
+                           "ccl-load-failures.html"))
+    (my-time ("ACL load failures...~%")
+      (print-load-failures all-failures
+                           "acl-8.2a-linux-x86"
+                           "quicklisp 2012-09-09"
+                           "acl-load-failures.html"))
+    (my-time ("CMUCL load failures...~%")
+      (print-load-failures all-failures
+                           "cmu-20c_release-20c__20c_unicode_-linux-x86"
+                           "quicklisp 2012-09-09"
+                           "cmucl-load-failures.html"))
+    (my-time ("SBCL load failures...~%")
+      (print-load-failures all-failures
+                           "sbcl-1.0.57-linux-x86"
+                           "quicklisp 2012-09-09"
+                           "sbcl-load-failures.html"))))

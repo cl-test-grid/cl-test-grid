@@ -9,5 +9,5 @@
 Implements the API defined by the test-grid-blobstore package."
   :version "0.1.0"
   :serial t
-  :depends-on (#:test-grid-blobstore :drakma)
+  :depends-on (#:test-grid-blobstore :drakma #:test-grid-utils #:log4cl)
   :components ((:file "test-grid-gae-blobstore")))

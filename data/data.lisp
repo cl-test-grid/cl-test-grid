@@ -80,12 +80,32 @@
                        (format nil "~~%~~~Dt" (+ indent 11))
                        #'(lambda (lib-result)
                            (format out
-                                   "(:libname ~s :status ~a :test-duration ~s :log-byte-length ~s :log-blob-key ~s)"
-                                   (getf lib-result :libname)
-                                   (print-test-status nil (getf lib-result :status))
-                                   (getf lib-result :test-duration)
-                                   (getf lib-result :log-byte-length)
-                                   (getf lib-result :log-blob-key))))
+                                   "(:libname ~s"
+                                   (getf lib-result :libname))
+                           (when (getf lib-result :status)
+                             (format out
+                                     " :status ~a :log-blob-key ~s :log-byte-length ~s :test-duration ~s"
+                                     (print-test-status nil (getf lib-result :status))
+                                     (getf lib-result :log-blob-key)
+                                     (getf lib-result :log-byte-length)
+                                     (getf lib-result :test-duration)))
+                           (when (getf lib-result :load-results)
+                             (format out "~%~v,0t:load-results (" (+ indent 12))
+                             (print-list-elements out
+                                                  (sort (copy-list (getf lib-result :load-results))
+                                                        #'string<
+                                                        :key #'(lambda (load-result)
+                                                                 (getf load-result :system)))
+                                                  (format nil "~~%~~~Dt" (+ indent 27))
+                                                  (lambda (load-result)
+                                                    (format out "(:system ~s :status ~s :log-blob-key ~s :log-byte-length ~s :load-duration ~s)"
+                                                            (getf load-result :system)
+                                                            (getf load-result :status)
+                                                            (getf load-result :log-blob-key)
+                                                            (getf load-result :log-byte-length)
+                                                            (getf load-result :load-duration))))
+                             (format out ")"))
+                           (format out ")")))
   (format out "))"))
 
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
@@ -115,5 +135,6 @@
  DB version change history:
  0 - initial
  1 - cl-routes and cl-closure-template are renamed to routes and closure-template
-
+ 2 - routes and closure-template are renamed back to cl-routes and cl-closure-template 
+ 3 - bknr.datastore is renamed to bknr-datastore, in order to match the Quicklisp release name
 |#

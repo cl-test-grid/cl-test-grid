@@ -6,10 +6,6 @@
 
 (in-package #:test-grid-utils)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Utils
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defun set= (set-a set-b &key (test #'eql) key)
   (null (set-exclusive-or set-a set-b :test test :key key)))
 
@@ -63,7 +59,7 @@
   '((:A 1 :B "x") (:A 2 :B "y") (:A 2 :B "y") (:A 3 :B "z")))
 |#
 
-(defun getter (prop)
+(defun plist-getter (prop)
   #'(lambda (plist)
       (getf plist prop)))
 

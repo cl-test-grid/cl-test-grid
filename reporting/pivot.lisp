@@ -233,15 +233,6 @@ Every subaddress represents some level of pivot groupping."
           (incf (span helper)))))
     helpers))
 
-;; This is how we print data in table data cells.
-(defun format-lib-results (out joined-lib-results)
-  (dolist (joined-lib-result joined-lib-results)
-    (let ((status (aggregated-status (getf (lib-result joined-lib-result) :status))))
-      (format out "<a href=\"~a\" class=\"test-status ~a\">~a</a> "
-              (lib-log-uri joined-lib-result)
-              (status-css-class status)
-              (single-letter-status status)))))
-
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))
     (let* ((helper (gethash subaddr row-spans))
@@ -315,7 +306,8 @@ Every subaddress represents some level of pivot groupping."
 (defun pivot-table-html (out
                          joined-index
                          row-fields row-fields-sort-predicates
-                         col-fields col-fields-sort-predicates)
+                         col-fields col-fields-sort-predicates
+                         cell-formatter)
 
   (assert (= (length row-fields) (length row-fields-sort-predicates)))
   (assert (= (length col-fields) (length col-fields-sort-predicates)))
@@ -352,7 +344,7 @@ Every subaddress represents some level of pivot groupping."
         (dolist (col cols)
           (let ((lib-results (test-results-by-row-col row col)))
             (princ "<td>" out)
-            (format-lib-results out lib-results)
+            (funcall cell-formatter out lib-results)
             (princ "</td>" out)))
         (format out "</tr>~%"))))
   (princ "</table>" out))
@@ -361,31 +353,48 @@ Every subaddress represents some level of pivot groupping."
   (merge-pathnames "pivot-report-template.html"
                    (src-dir)))
 
-(defun pivot-report-html (out
-                          joined-index
-                          row-fields row-fields-sort-predicates
-                          col-fields col-fields-sort-predicates)
+(defun pivot-report-old (out
+                         joined-index
+                         row-fields row-fields-sort-predicates
+                         col-fields col-fields-sort-predicates
+                         &optional (cell-formatter #'format-lib-results))
+"Deprecated. Use PIVOT-REPORT."
+  (pivot-report out (with-output-to-string (str)
+                      (pivot-table-html str
+                                        joined-index
+                                        row-fields row-fields-sort-predicates
+                                        col-fields col-fields-sort-predicates
+                                        cell-formatter))))
 
-  (let ((table (with-output-to-string (str)
-                 (pivot-table-html str
-                                   joined-index
-                                   row-fields row-fields-sort-predicates
-                                   col-fields col-fields-sort-predicates))))
+(defun pivot-report (out pivot-table)
+  (write-sequence (fmt-template *pivot-report-template*
+                                `(("{THE-TABLE}" . ,pivot-table)
+                                  ("{TIME}" . ,(test-grid-agent::pretty-fmt-time (get-universal-time)))))
+                  out)
+  nil)
 
-    (write-sequence (fmt-template *pivot-report-template*
-                                  `(("{THE-TABLE}" . ,table)
-                                    ("{TIME}" . ,(test-grid-testsuites::pretty-fmt-time (get-universal-time)))))
-                    out)))
+(defun print-pivot (file-name
+                    objects
+                    row-field-getters row-fields-sort-predicates
+                    col-field-getters col-fields-sort-predicates
+                    cell-formatter)
+  (with-report-file (out file-name)
+    (pivot-report out (cl:with-output-to-string (str)
+                        (pivot-table-html2 str
+                                           objects
+                                           row-field-getters row-fields-sort-predicates
+                                           col-field-getters col-fields-sort-predicates
+                                           cell-formatter)))))
 
 (defun print-pivot-reports (joined-index)
   (flet ((print-report (filename
                         row-fields row-fields-sort-predicates
                         col-fields col-fields-sort-predicates)
            (with-report-file (out filename)
-             (pivot-report-html out
-                                joined-index
-                                row-fields row-fields-sort-predicates
-                                col-fields col-fields-sort-predicates))))
+             (pivot-report-old out
+                               joined-index
+                               row-fields row-fields-sort-predicates
+                               col-fields col-fields-sort-predicates))))
 
     (print-report "pivot_ql_lisp-lib.html"
                   '(:lib-world) (list #'string>)

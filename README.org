@@ -1,5 +1,5 @@
 * Collaborative testing of Common Lisp libraries.
-[[http://common-lisp.net/project/cl-test-grid/][Test Results]] | [[https://bugs.launchpad.net/common-lisp][Bugs Found]]
+[[http://common-lisp.net/project/cl-test-grid/][Test Results]] | [[https://bugs.launchpad.net/common-lisp][Bugs Reported]]
 
 * The Goal
   Improve stability of the Common Lisp ecosystem
@@ -72,37 +72,65 @@
   and the test-grid-agent runs tests of common lisp libraries
   on these implementations.
 
-  The test results are uploaded to the central server and
-  published as a lisp data file and as HTML reports here:
-  [[http://common-lisp.net/project/cl-test-grid/]]. Clicking library test 
-  status (OK/FAIL) in any report refers to the library test logs 
-  with the failure details.
-  
-  We have so far considered 113 libraries. 56 of these libraries
-  have appropriate test suites (fully automated, no user interaction is needed)
-  and are added to the cl-test-grid.
+  The tests performed by agent include fresh recompilation
+  and loading of every ASDF system found in Quicklisp,
+  and also testsuites of some of the libraries.
 
+  We have so far considered 113 libraries. 56 of these libraries
+  have appropriate test suites (fully automated, no user
+  interaction is needed) which are added to the cl-test-grid.
+  
   Test-grid-agent may be run manually from command line or
   configured as a periodical task with cron or similar service.
   Each test suite is run in a separate lisp process
   Quicklisp is used to download the libraries to be tested 
   (test-grid-agent bootstraps a private quicklisp and have no
-  interference with a quicklisp  installation user might have
+  interference with a quicklisp installation user might have
   on his computer). The agent remembers what lisp implementations
   where already tested on what quicklisp distros, and doesn't repeat
   the work it has already done.
 
+  The test results including:
+  - compile/load statuses of ASDF systems of every project in Quicklisp,
+  - results of the test suites (OK or a list of FAILed test cases)
+  for the tested lisp implementations / quicklisp distros
+  are uploaded to admin and then published as a plain lisp
+  data file in a separate git repository:
+  https://github.com/cl-test-grid/cl-test-grid-results.
+  Besides this, we store online the output produced by the
+  lisp processes when running test suites or compiling ASDF systems.
+  The logs are referenced from the test results lisp data.
+  This allows interested parties to navigate to the corresponding
+  log to study the failure details.
+
+  Having the pure lisp data it is easy to extract useful
+  information from it. For example, compare how two versions
+  of particular lisp implementation behave and detect
+  regressions between them; detect regressions between
+  Quicklisp distibutions, find out status of particular
+  library on all the tested lisp implementations.
+
+  Some HTML reports deomostrating this are published here:
+  [[http://common-lisp.net/project/cl-test-grid/]]. Clicking test 
+  status (OK/FAIL) in any report refers to the corresponding
+  log file with the failure details.
+
+  Our current task in progress is to precisely document
+  the data collected by agent, and provide more report
+  examples demostrating how to analyze the data.
+  
+  Meantime, feel free to send plain english queries
+  to the mailing list.
+
 * Participation
 ** Running tests
-   The most appreciated way to participate.
-
    =test-grid-agent:agent= is a lisp object able
    to manage test exectuion by subordinate lisp
    implementations (executables) and submit test
    resutls to server.
 
    It is created with function =test-grid-agent:make-agent=
-   and has 3 configuration properties:
+   and has 3 required configuration properties:
 
    - =lisps= - Paths to the lisp implementations
                that should be used to run tests.
@@ -126,16 +154,16 @@
    Function =test-grid-agent:main= runs the agent.
 
    It is necessary to perform =git pull= on agent sources
-   often - that's how agent receives new tasks from admin.
+   often.
 
-   We provide template scripts demonstrating how to
+   There are template scripts demonstrating how to
    load, cofigure and run agent by a single commant.
 
-   Please use [[http://ccl.clozure.com/][CCL]] - it is the development platform and
-   the only lisp known to run agent successfully.
-   We assume [[http://www.quicklisp.org/beta/][Quicklisp]] is installed and added to the CCL init file.
+   Please use [[http://ccl.clozure.com/][CCL]] - it is the development platform and the only
+   lisp known to run agent successfully. The template scripts
+   assume [[http://www.quicklisp.org/beta/][Quicklisp]] is installed and added to the CCL init file.
 
-   The first time you will need do these steps:
+   So, the steps:
 
    1. =git clone git://github.com/cl-test-grid/cl-test-grid.git=
    2. =cd cl-test-grid=
@@ -157,8 +185,82 @@
        0 10 * * * cd /home/testgrid/cl-test-grid/ && ./run-agent.sh
 #+END_SRC
 
-   Feel free to contact us if you have any questions or difficulties
-   (see the mailing list address below).
+*** Details of what agent actually does
+
+   Simplified, the agent mode of operation may be represened
+   by the following pseudo code:
+
+#+BEGIN_SRC common-lisp
+   (let ((current-quicklisp (update-quicklisp)))
+     (loop for lisp in my-lisp-implementations
+        (when (not (tested-already lisp current-quicklisp))
+           (let ((results-dir (complete-test-run lisp (or (find-unfinished-test-run lisp current-quicklisp)
+                                                          (make-new-test-run lisp current-quicklisp)))))
+              (submit-results results-dir)
+              (remember-tested lisp current-quicklisp)
+              (cl-fad:delete-directory-and-files results-dir)))))
+#+END_SRC
+
+   As you can see, the agent submits test results after
+   completing full test set on a single lisp implementation. 
+
+   The code, including the internal implementaton
+   of =complete-test-run= is organized so that agent can
+   be interrupted (computer rebooted or hibernated,
+   agent process killed). When started again, it continues
+   the work from the point of interruption.
+
+   Testing single lisp implementation may take from 1-2
+   hours up to 10 hours or more (for ABCL - ABCL has long
+   startup time, which becomes significant in our use case
+   as we run every test suite or ASDF system compilation
+   in a fresh lisp process).
+
+   Caveat of killing the agent: if you killed the agent process,
+   (without rebooting the machine), the subordinate process
+   running current testsute or compiling current ASDF system
+   remains alive. Typically it takes less than a minute for
+   it to finish, but sometimes it may take longer (the
+   testsuite or library compilation may require longer
+   time; or, in the worst case, test suite may hang).
+   If you start agent again, it spawns new test running
+   process, which can interfere with the old one via file
+   system (.fasl files, output logs). Therefore it's better
+   to give the old child process time to finish before
+   starting the agent again.
+
+*** Parallel execution of multiple agents
+   Agent operates sequentially.
+
+   During its work, agent keeps it's working data in
+   a directory specified by the cofiguration property
+   - =work-dir= - Defaults to the /<cl-test-grid source code root>/work-dir/agent/
+   
+   The agent takes measures to ensure there is only
+   one agent instance using this working directory.
+
+   This is acheaved by using a TCP port as a inter-process
+   lock. When started agent tries to open a socket on
+   the port. If it is successful, the agent continues.
+   If the port is busy, the agent deduces there is
+   another agent instance running, logs a warning
+   and exists.
+
+   The port number is specified by configuration
+   property
+   - =singleton-lock-port= defaults to 7685.
+
+   If you want to run several agent processes
+   and distirbute testing work between them,
+   you can assign each agent different set 
+   of lisp implemenations and give each
+   agent different working directory and lock
+   port.
+
+*** Getting assistance
+
+   Feel free to contact us if you have any questions or
+   difficulties (see the mailing list address below).
 
    We are looking for contributors who would agree to run
    =test-grid-agent= periodically (ideally once a day, but even
@@ -185,7 +287,7 @@
 
    - ...
   
-** Adding more libraries
+** Adding testsuite of your library
    It is quite easy - few lines of code. 
    
    Look how the library tests are started in the asdf:perform method 

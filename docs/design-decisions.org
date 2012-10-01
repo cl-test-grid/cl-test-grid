@@ -1,0 +1,88 @@
+* How to represent library names (aka project names): keyword, string, symbol in test-grid package
+     This representation is used in the:
+     - libtest method parameter (eql specialized)
+     - in the database and testrun datastructure.
+
+     Solution: keyword.
+    
+     The alternatives considered:
+     a keyword
+        good for READ (package independent),
+        good for EQL specializer
+        good for GETF when working with the database
+     a symbol from the test-grid package
+        - good for EQL specializer
+        - package dependent in READ
+        - good for GETF when working with the database
+        - adds one more (unnecessary) way to represent a library 
+          in addition the specified for ASDF and Quicklisp
+     or a downcased string
+        - needs special handling in libtest eql specialization
+        - good ro READ (package independent)
+        - needs care to work with GETF when working with the database      
+  
+* Who of the two processes participating in testing writes log header and footer.
+  The two processes are: the agent and the child process started by agent for every test.
+
+  Solution: agent writes log header and log footer.
+
+  Motivation.
+
+  Problems to consider:
+    I don't want to pass all the test run parameters to child process only to write log header
+    when child process crashes, parent process need to add log footer
+
+    If we retrieve *features* of lisp implementation by separate lisp process
+    invocation, we may get different features than are used during actual testing,
+    because when starting child lisp process for testing we pass different
+    parameters, for exampel loading quicklisp. 
+
+    Solutions:
+    - write log header fully by the parent process, retrieving
+      *featuers* of the child by separate invocation
+      [risk of imprecise *features*]
+
+    - write log header fully by the child process
+      [too many parameters passed to it; differs
+       from the log footer handling]
+       
+    - pass almost finished log header as a string parameter
+      to child process, and the child process is responsible
+      to store it at the beginning of the file, replacing
+      ~A by *featuers* first
+      [redundant long parameter in the child
+       process invocation command line, although
+       it's only single parameter]
+
+    - write all the log header except for *features*
+      to the log file by the parent process, and
+      add only *features* line by the child process
+      [*features* in the log header are apart
+       from the "lisp" field, while they are
+       the closest by the meaning]
+      
+
+* How to don't loose test run results if test run was interrupted (by error or agent termination)
+  One test run takes hours (more than 700 projects in quicklisp
+  tested on a single implementation).
+
+  If test run hasn't been fully completed and submitted
+  (error in code, error during submit at GAE server, network outage,
+  or agent is interrupted), it is inconvenient to repeat the whole
+  test run at next agent startup.
+
+  The most obvious idea is to submit smaller parts or results,
+  e.g. every 20 projects, or every 15 minutes.
+
+  But we have a constraint that every submit is accompanied
+  by email to admin, and GAE free plan allows only 100
+  emails per day.
+
+  Therefore we persist current result in the test run directory.
+  The directory is not deleted until the results are submitted
+  successfully.
+
+  Every time agent starts it looks for unfinished test runs.
+  If unfinished test run is found, it is continued instead
+  of starting a new one.
+
