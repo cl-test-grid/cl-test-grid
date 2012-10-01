@@ -216,7 +216,7 @@
    as we run every test suite or ASDF system compilation
    in a fresh lisp process).
 
-   Caveat of killing the agent: if you killed the agent process,
+   *Caveat of killing the agent:* if you killed the agent process,
    (without rebooting the machine), the subordinate process
    running current testsute or compiling current ASDF system
    remains alive. Typically it takes less than a minute for
