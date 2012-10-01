@@ -185,14 +185,6 @@ upon the BODY completion runs the BODY again."
             :test-duration (/ (- (get-internal-real-time) start-time)
                               internal-time-units-per-second)))))
 
-(defun submit-test-run-results (blobstore test-run-dir)
-  (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
-  (let* ((run-info (submit-logs blobstore test-run-dir)))
-    (log:info "The log files are submitted. Submitting the test run info...")
-    (test-grid-blobstore:submit-run-info blobstore run-info)
-    (log:info "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.")
-    run-info))
-
 (defun print-loadtest-log-header (system-name run-descr log-file)
   (with-open-file (stream log-file
                           :direction :output
@@ -269,52 +261,13 @@ upon the BODY completion runs the BODY again."
 (defun as-keyword (string-designator)
   (read-from-string (format nil ":~A" string-designator)))
 
-(defun submit-logs (blobstore test-run-dir)
-  (let* ((run-info (test-grid-utils::safe-read-file (run-info-file test-run-dir)))
-         ;; prepare parameters for the SUBMIT-FILES blobstore function:
-         ;; alist ((<log file name> . <full log file path>) ...)
-         (submit-params (mapcan (lambda (lib-result)
-                                  (append 
-                                   ;; the first element is the testsuite log of the project
-                                   ;; (if the project has one)
-                                   (when (getf lib-result :status)
-                                     (let ((log-file (lib-log-file test-run-dir
-                                                                   (getf lib-result :libname))))
-                                       (list (cons (pathname-name log-file) log-file))))
-                                   ;; rest are the loadtest logs for all the ASDF systems in that project
-                                   (mapcar (lambda (load-result)
-                                             (let ((log-file (loadtest-log-file test-run-dir
-                                                                                (getf load-result :system))))
-                                               (cons (pathname-name log-file) log-file)))
-                                           (getf lib-result :load-results))))
-                                (test-grid-data::run-results run-info)))
-         (log-name-to-blobkey-alist (test-grid-blobstore:submit-files blobstore
-                                                                      submit-params)))
-    (flet ((get-blob-key (log-name)
-                 (or (cdr (assoc log-name log-name-to-blobkey-alist :test #'string=))
-                     (error "blobstore didn't returned blob key for the log file ~A" log-name))))
-      ;; now patch the run-info with the received blob keys
-      (setf (test-grid-data::run-results run-info)
-            (mapcar (lambda (lib-result)
-                      ;; set blobkey of the project testsuite (if the project has one)
-                      (when (getf lib-result :status)
-                        (setf (getf lib-result :log-blob-key)
-                              (get-blob-key (lib-log-name (getf lib-result :libname)))))
-                      ;; and blobkeys of loadtests for all the ASDF systems in the project
-                      (setf (getf lib-result :load-results)
-                            (mapcar (lambda (load-result)
-                                      (setf (getf load-result :log-blob-key)
-                                            (get-blob-key (loadtest-log-name (getf load-result :system))))
-                                      load-result)
-                                    (getf lib-result :load-results)))
-                      lib-result)
-                    (test-grid-data::run-results run-info))))
-    ;; finally, save the updated run-info with blobkeys
-    ;; to the file. Returns the run-info.
-    (save-run-info run-info test-run-dir)    
-    run-info))
-
-(defun perform-test-run (test-run agent lisp-exe project-names)
+(defun complete-test-run (test-run agent lisp-exe project-names)
+  "Executes tests for the given LISP-EXE. The TEST-RUN may be
+a fresh test run, or a test run partially done alredy (during
+previous agent invocation). If the TEST-RUN directory already
+contains results for some of the PROJECT-NAMES, these tests
+are not repeated. Only the projects which don't have test
+results in this directory are tested."
   (let* ((run-descr (test-grid-data::run-descr test-run))
          (run-dir (run-directory run-descr (test-output-base-dir agent)))
          (asdf-output-dir (merge-pathnames "asdf-output/" run-dir))
@@ -363,9 +316,62 @@ upon the BODY completion runs the BODY again."
             (log:warn "The ASDF output directroy ~S does not exist; seems like the test run was not using our asdf-output-translations and we have no guarantee all the sourcess were freshly recompiled." asdf-output-subdir)))
         run-dir))))
 
+(defun submit-logs (blobstore test-run-dir)
+  (let* ((run-info (test-grid-utils::safe-read-file (run-info-file test-run-dir)))
+         ;; prepare parameters for the SUBMIT-FILES blobstore function:
+         ;; alist ((<log file name> . <full log file path>) ...)
+         (submit-params (mapcan (lambda (lib-result)
+                                  (append
+                                   ;; the first element is the testsuite log of the project
+                                   ;; (if the project has one)
+                                   (when (getf lib-result :status)
+                                     (let ((log-file (lib-log-file test-run-dir
+                                                                   (getf lib-result :libname))))
+                                       (list (cons (pathname-name log-file) log-file))))
+                                   ;; rest are the loadtest logs for all the ASDF systems in that project
+                                   (mapcar (lambda (load-result)
+                                             (let ((log-file (loadtest-log-file test-run-dir
+                                                                                (getf load-result :system))))
+                                               (cons (pathname-name log-file) log-file)))
+                                           (getf lib-result :load-results))))
+                                (test-grid-data::run-results run-info)))
+         (log-name-to-blobkey-alist (test-grid-blobstore:submit-files blobstore
+                                                                      submit-params)))
+    (flet ((get-blob-key (log-name)
+                 (or (cdr (assoc log-name log-name-to-blobkey-alist :test #'string=))
+                     (error "blobstore didn't returned blob key for the log file ~A" log-name))))
+      ;; now patch the run-info with the received blob keys
+      (setf (test-grid-data::run-results run-info)
+            (mapcar (lambda (lib-result)
+                      ;; set blobkey of the project testsuite (if the project has one)
+                      (when (getf lib-result :status)
+                        (setf (getf lib-result :log-blob-key)
+                              (get-blob-key (lib-log-name (getf lib-result :libname)))))
+                      ;; and blobkeys of loadtests for all the ASDF systems in the project
+                      (setf (getf lib-result :load-results)
+                            (mapcar (lambda (load-result)
+                                      (setf (getf load-result :log-blob-key)
+                                            (get-blob-key (loadtest-log-name (getf load-result :system))))
+                                      load-result)
+                                    (getf lib-result :load-results)))
+                      lib-result)
+                    (test-grid-data::run-results run-info))))
+    ;; finally, save the updated run-info with blobkeys
+    ;; to the file. Returns the run-info.
+    (save-run-info run-info test-run-dir)
+    run-info))
+
+(defun submit-test-run-results (blobstore test-run-dir)
+  (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
+  (let* ((run-info (submit-logs blobstore test-run-dir)))
+    (log:info "The log files are submitted. Submitting the test run info...")
+    (test-grid-blobstore:submit-run-info blobstore run-info)
+    (log:info "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.")
+    run-info))
+
 (defun submitted-p (test-run)
   "Tests whether the specified TEST-RUN is already
-submitetd by examining checking if it contains a blobstore key
+submitetd by checking if it contains a blobstore key
 for some log."
   (let ((lib-result (first (getf test-run :results))))
     (or (getf lib-result :log-blob-key)

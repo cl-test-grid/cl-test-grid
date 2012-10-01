@@ -210,11 +210,11 @@ the PREDICATE."
                                                  (type-of c) (implementation-identifier lisp) c bt))
                                     (go continue))))
             (log:info "Running tests for ~A" (implementation-identifier lisp))
-            (let ((results-dir (perform-test-run (or (find-unfinished-run lib-world (implementation-identifier lisp))
-                                                     (make-run lib-world (implementation-identifier lisp)))
-                                                 agent
-                                                 lisp
-                                                 (project-names (project-lister agent)))))
+            (let ((results-dir (complete-test-run (or (find-unfinished-run lib-world (implementation-identifier lisp))
+                                                      (make-run lib-world (implementation-identifier lisp)))
+                                                  agent
+                                                  lisp
+                                                  (project-names (project-lister agent)))))
               (submit-test-run-results (blobstore agent) results-dir)
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
@@ -239,6 +239,7 @@ the PREDICATE."
                                   "hello"))
 
 (defmethod main (agent)
+  ;; setup logging for unhandled errors and warnings
   (handler-bind
       ((serious-condition (lambda (c)
                             (let ((bt (with-output-to-string (s)
