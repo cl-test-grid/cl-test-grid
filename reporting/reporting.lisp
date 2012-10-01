@@ -98,7 +98,6 @@
                              last-abcl
                              "quicklisp 2012-09-09"
                              "abcl-load-failures.html")))
-
     (my-time ("CCL load failures...~%")
       (print-load-failures all-failures
                            "ccl-1.8-f95-linux-x86"

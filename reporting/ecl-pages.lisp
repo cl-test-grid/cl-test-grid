@@ -16,7 +16,7 @@
   ;;; select interesting test results from the DB
   (let ((problems (select db :where (lambda (result)
                                       (and (last-ecl-p result)
-                                           (member (status result) '(:load-failed :crash :timeout)))))))
+                                           (member (status result) '(:crash :timeout)))))))
     ;; order by lisp, status, libname
     (sort problems #'string<
           :key (lambda (record)
@@ -48,7 +48,7 @@
   (let ((all-results (build-joined-index db :where #'last-ecl-p))
         (abnormal-results (build-joined-index db :where (lambda (result)
                                                           (and (last-ecl-p result)
-                                                               (member (status result) '(:load-failed :crash :timeout)))))))
+                                                               (member (status result) '(:crash :timeout)))))))
     (flet ((print-report (result-index
                           filename
                           row-fields row-fields-sort-predicates
