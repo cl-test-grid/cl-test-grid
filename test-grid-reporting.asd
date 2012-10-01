@@ -29,6 +29,6 @@
      (:file "dependencies-and-blockers")
      (:file "load-failures")
      (:file "ecl-pages")
-     (:file "abcl-page")
+     (:file "compiler-diff")
      (:file "durations")
      (:file "contributors")))))
