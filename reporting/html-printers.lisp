@@ -91,7 +91,7 @@ to include in to the text of the link, defaults to STATUS"
                   ((:test-case :load) (third (result-spec result))))))
     (ecase status
       (:ok "ok-status")
-      (:unexpected-ok "warn-status")
+      ((:known-fail :unexpected-ok) "warn-status")
       (:fail  "fail-status")
       (:crash  "crash-status")
       (:timeout  "timeout-status")

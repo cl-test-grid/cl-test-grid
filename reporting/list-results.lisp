@@ -16,14 +16,22 @@
          (suite-results (etypecase suite-status
                           (keyword (list (list :whole-test-suite suite-status)))
                           (list (let* ((failures (getf suite-status :failed-tests))
-                                       (unexpected-oks (set-difference (getf suite-status :known-to-fail)
+                                       (expected-to-fail (getf suite-status :known-to-fail))
+                                       (known-failures (intersection expected-to-fail
+                                                                     failures
+                                                                     :test #'string=))
+                                       (just-failures (set-difference failures
+                                                                      known-failures
+                                                                      :test #'string=))
+                                       (unexpected-oks (set-difference expected-to-fail
                                                                        failures
                                                                        :test #'string=)))
                                   (flet ((as-results (testcases status)
                                            (mapcar (lambda (testcase)
                                                      (list :test-case testcase status))
                                                    testcases)))
-                                    (nconc (as-results failures :fail)
+                                    (nconc (as-results just-failures :fail)
+                                           (as-results known-failures :known-fail)
                                            (as-results unexpected-oks :unexpected-ok))))))))
     (mapcar (lambda (suite-result)
               (make-instance 'result :lib-result lib-result :result-spec suite-result))
