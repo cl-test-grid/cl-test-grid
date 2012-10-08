@@ -17,6 +17,7 @@
      (:file "distinct")
      (:file "html-printers")
      (:file "list-failures")
+     (:file "list-results")
      (:file "templating")
      (:file "reporting")
      (:file "test-runs")
