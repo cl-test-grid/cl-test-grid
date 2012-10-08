@@ -29,5 +29,6 @@
      (:file "dependencies-and-blockers")
      (:file "load-failures")
      (:file "compiler-diff")
+     (:file "demo-reports")
      (:file "durations")
      (:file "contributors")))))

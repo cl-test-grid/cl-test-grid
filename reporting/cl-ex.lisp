@@ -44,6 +44,6 @@ of too generic contract of CL:SET-EXCLUSIVE-OR)."
           (push el-2 result)))
       result)))
 
-(defun subset (superset predicate)
+(defun subset (superset predicate &key key)
   "Similar to CL:REMOVE-IF-NOT but the name SUBSET is more adequate for our use cases."
-  (remove-if-not predicate superset))
+  (remove-if-not predicate superset :key key))
