@@ -1,5 +1,5 @@
 ;;;; Trivial templating utility.
-;;;; May be replaced by cl-closure-templates or html-template.
+;;;; DEPRECATED: we use html-template now.
 
 (in-package #:test-grid-reporting)
 

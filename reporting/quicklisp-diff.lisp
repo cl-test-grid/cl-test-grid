@@ -4,56 +4,38 @@
 
 (in-package #:test-grid-reporting)
 
-(defparameter *last-quicklisp* "quicklisp 2012-09-09")
-(defparameter *prev-quicklisp* "quicklisp 2012-08-11")
-
-(defun print-quicklisp-diff-report (failures)
-  (let* ((last-ql-fails (my-time ("last-ql-fails...")
-                          (remove-if-not (lambda (failure)
-                                           (string= (lib-world failure) *last-quicklisp*))
-                                         failures)))
-         (prev-ql-fails (my-time ("prev-ql-fails...")
-                          (remove-if-not (lambda (failure)
-                                           (string= (lib-world failure) *prev-quicklisp*))
-                                         failures)))
+(defun print-quicklisp-diff-report (report-file
+                                    all-failures
+                                    new-quicklisp
+                                    old-quicklisp)
+  (let* ((new-ql-fails (my-time ("last-ql-fails...")
+                         (subset all-failures
+                                 (lambda (failure)
+                                   (string= (lib-world failure) new-quicklisp)))))
+         (old-ql-fails (my-time ("prev-ql-fails...")
+                         (subset all-failures
+                                 (lambda (failure)
+                                   (string= (lib-world failure) old-quicklisp)))))
          ;; only consider results for lisps which were tested on both quicklisp versions
-         (last-ql-lisps (alexandria:flatten (distinct last-ql-fails (list #'lisp))))
-         (prev-ql-lisps (alexandria:flatten (distinct prev-ql-fails (list #'lisp))))
-         (common-lisps (intersection last-ql-lisps prev-ql-lisps :test #'string=))
+         (new-ql-lisps (remove-duplicates (mapcar #'lisp new-ql-fails) :test #'string=))
+         (old-ql-lisps (remove-duplicates (mapcar #'lisp old-ql-fails) :test #'string=))
+         (common-lisps (intersection new-ql-lisps old-ql-lisps :test #'string=))
          (common-lisp-p (lambda (lisp) (member lisp common-lisps :test #'string=)))
          ;; now compute the diff between the results of two quicklisps,
          ;; considering only results from lisps tested on both versions.
          (diff (my-time ("fast-exclusive-or...")
-                 (fast-exclusive-or (remove-if-not common-lisp-p last-ql-fails :key #'lisp)
-                                    (remove-if-not common-lisp-p prev-ql-fails :key #'lisp)
+                 (fast-exclusive-or (subset new-ql-fails common-lisp-p :key #'lisp)
+                                    (subset old-ql-fails common-lisp-p :key #'lisp)
                                     :test #'equal
                                     :key (lambda (fail)
                                            (list (libname fail)
                                                  (lisp fail)
                                                  (fail-spec fail)))))))
     (my-time ("print-pivot...")
-      (print-pivot "quicklisp-diff.html"
+      (print-pivot report-file
                    diff
-                   (list #'lisp #'libname) (list #'string< #'string<)
-                   (list #'lib-world) (list #'string>)
-                   (lambda (out cell-data)
-                     (dolist (fail cell-data)
-                       (format out "~A</br>" (failure-log-link fail #'fail-spec))))))))
-
-
-;;; Usage
-#|
-git clone git@github.com:cl-test-grid/cl-test-grid.git
-git clone git@github.com:cl-test-grid/cl-test-grid-results.git
-
-(pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
-(ql:quickload :test-grid-reporting)
-
-(let* ((db (test-grid-data:read-db))
-       (all-results (select db))
-       (all-failures (list-failures all-results)))
-  (test-grid-reporting::print-quicklisp-diff-report all-failures))
-
-the result is stored in cl-test-grid/reports-generated/quicklisp-diff.html
-
-|#
+                   :rows '((lisp string<) (libname string<))
+                   :cols '((lib-world string<))
+                   :cell-printer (lambda (out cell-data)
+                                   (dolist (fail cell-data)
+                                     (format out "~A</br>" (failure-log-link fail #'fail-spec))))))))

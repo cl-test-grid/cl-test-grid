@@ -2,8 +2,10 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
-(in-package #:test-grid-reporting)
+;;;; In this file we keep functions repeating standard CL
+;;;; functions, but with some minor improvements.
 
+(in-package #:test-grid-reporting)
 
 (defun fast-exclusive-or (list-1 list-2 &rest rest &key key (test #'eql) (test-not nil))
   "Exactly as CL:SET-EXCLUSIVE-OR, but takes advantage
@@ -41,3 +43,7 @@ of too generic contract of CL:SET-EXCLUSIVE-OR)."
         (when (not (gethash (funcall key el-2) hash-1))
           (push el-2 result)))
       result)))
+
+(defun subset (superset predicate)
+  "Similar to CL:REMOVE-IF-NOT but the name SUBSET is more adequate for our use cases."
+  (remove-if-not predicate superset))

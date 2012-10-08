@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8"/>
     <title>CL Test Grid Pivot Report</title>
-    <link href="style.css" rel="stylesheet"/>
+    <link href="<!-- TMPL_VAR reports-dir-relative-path -->style.css" rel="stylesheet"/>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js">
     </script>
-    <script type="text/javascript" src="jquery.thead-1.1.min.js">
+    <script type="text/javascript" src="<!-- TMPL_VAR reports-dir-relative-path -->jquery.thead-1.1.min.js">
     </script>
     <script type="text/javascript">
         function Highlighter($table) {
@@ -96,8 +97,8 @@
 <body>
     <!-- jquery.thead for some reason wants the table to have a parent element with some CSS class -->
     <div class="dummy-class-for-jquery-thead"> 
-    {THE-TABLE}
+    <!-- TMPL_VAR the-table -->
     </div>
-    <p><a href="reports-overview.html" class="to-overview">To reports overview</a></p>
-    <p class="timestamp">Generated at: {TIME} GMT.</p>
+    <p><a href="<!-- TMPL_VAR reports-dir-relative-path -->results-overview.html" class="to-overview">To results overview</a></p>
+    <p class="timestamp">Generated at: <!-- TMPL_VAR time --> GMT.</p>
 </body></html>

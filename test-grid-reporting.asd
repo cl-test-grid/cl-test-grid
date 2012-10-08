@@ -5,14 +5,14 @@
 (asdf:defsystem #:test-grid-reporting
   :version "0.1.0"
   :serial t
-  :depends-on (#:test-grid-data #:test-grid-utils #:test-grid-agent)
+  :depends-on (#:test-grid-data #:test-grid-utils #:test-grid-agent #:html-template)
   :components
   ((:module "reporting"
     :serial t
     :components
     ((:file "package")
      (:file "my-time")
-     (:file "fast-exclusive-or")
+     (:file "cl-ex")
      (:file "do-results")
      (:file "distinct")
      (:file "html-printers")

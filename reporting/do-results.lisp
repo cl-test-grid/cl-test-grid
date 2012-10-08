@@ -38,7 +38,7 @@
 ;; Returns list of results satisfying the predicate
 ;; WHERE. If WHERE is omitted, returns all
 ;; the results.
-(defgeneric select (db &key where))
+(defgeneric list-lib-results (db &key where))
 
 ;;; Implementation
 
@@ -60,7 +60,7 @@ WHERE is a predicate of one argument - test result record."
        ,@body)
      :where ,where))
 
-(defmethod select (db &key where)
+(defmethod list-lib-results (db &key where)
   (let ((results))
     (do-results (result db :where where)
       (push result results))

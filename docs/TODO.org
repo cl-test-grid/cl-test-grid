@@ -1,60 +1,5 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 * 0.6.0 Reports Improve 2
-** TODO remove the :load-failed status from DB and reporting
-** TODO library mainainer page:                             :report:informer:
-   with reports about the test statuses
-   for this single library on various platforms with
-   various quicklisp versions,
-   history of regressions (by quicklisp versions)
-
-   There is some draft (uncommited) code for this task.
-
-** TODO make lisp code the main and the easiest interface to the test results:
-   convenient interation, filtering and matching functions.
-   We want to add to every HTML report a secion with lisp
-   code generating this report, so that all the users
-   see and understand how to query data and can follow
-   these examples.
-** TODO document the data format, data access functions, reporting
-   functions and utilities.
-** TODO terminology improvement
-  - db format: rename?
-                  :libname -> :project
-                  :status -> :test-status
-                  :log-blob-key -> :test-log-blob-key
-                  :log-byte-length -> :test-log-byte-length
-  - project name: a keyword, or string? Currently a keyword; but ASDF system names are strings.
-  - rename test-grid-testsuites:*all-libs* to *all-testsuites*?
-** TODO remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
-** TODO document, for each CL community role, how he can befig from testgrid
-   - library mainaner:
-     - Status of your library ASDF systems loaded by various lisps
-     - If you have a testsuite, results of your test suite on various lisps
-     - Updated with every quicklisp distro
-     - Regressions (desirable to show regression
-       history along quicklisp versions).
-   - lisp implementation maintener
-     - How you lisp is supported by libraries
-     - What libraries are most importatn to fix,
-       to unlock your lisp to maximum amount
-       of code (other libraries), and correspondingly
-       to users
-     - Pre-release testing: run tests on the new version,
-       compare with results of the previous release,
-       ensure there is no regressions and see improvements.
-   - distribution maintainer (Quicklisp):
-     - release testing: run tests on the same lisp implemetations
-       as run on the previouse release, and compare results:
-       ensure there is no regressions, and see the improvements.
-   - application developer
-     (Actually, the application developer as the end user
-      of CL infrastructuure, rarely will use testgrid directly.
-      He, hopefully, will benefit indirectly, from improved
-      stability and quality of the CL world).
-      Still, the end user may:
-     - see what libraries work on your platform
-
-** TODO Prevent HTML injection via test-run-info                     :report:
 ** DONE combine information about load failures with information about system dependencies
    CLOSED: [2012-10-01 Пн 07:12]
    It will allow us to find "root" compilation blockers -
@@ -117,7 +62,8 @@
    But the information which IS possible to extract will give us good results
    I believe.
 
-** TODO the diff report (aka regressions report) - diff along various dimentions
+** DONE the diff report (aka regressions report) - diff along various dimentions
+   CLOSED: [2012-10-01 Пн 08:26]
    Currently we can only find differences between test statuses
    of a library on different quicklisps, when the lisp implementation
    version is a constant.
@@ -143,15 +89,100 @@
    - a predicate which decides if a result cell from the left side is comparable
      to a result from the right side.
 
+  ==============
+  The solution:
+  - select two sets of results
+  - compute exclusive-or of them
+  - print pivot with necessary columns and rows
+
+  Example is the compiler-diff report and quicklisp-diff
+
+** DONE limit amount of data included into to HTML reports to the last 3 quicklisp releases 
+   CLOSED: [2012-08-15 Ср 20:42]
+   to improve the page performance and load time.
+** DONE remove the :load-failed status from DB and reporting
+   CLOSED: [2012-10-01 Пн 08:48]
+** DONE document the lisp functions for test results access and report generation,
+   CLOSED: [2012-10-08 Пн 09:03]
+   provide source code examples
+** DONE describe the load-failures, the compiler-diff and quicklisp-diff
+   CLOSED: [2012-10-08 Пн 09:14]
+   reports on the reporting page
+
+   Sketch of the reporing page structure:
+
+   - data collected by test-grid
+   - how to load the data: repository and ASDF systems
+     git clone
+     git clone
+     asdf:*central-regitsty*
+     (*db* (load-db))
+     (in-package :test-grid-reporting)
+
+   - simpliest list-failures example:
+
+   - diffs:
+     compiler diff
+     quicklisp diff
+
+   - representation tools: pivots
+
+   - load failures + dependencies
+
+** TODO [24 h] library mainainer page
+   with reports about the test statuses
+   for this single library on various platforms with
+   various quicklisp versions,
+   history of regressions (by quicklisp versions)
+
+   There is some draft (uncommited) code for this task.
+
+** TODO [2 h] remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
+** TODO [6 h] Prevent HTML injection via test-run-info
+** TODO [4 h] document, for each CL community role, how he can benefit from testgrid
+   - library mainaner:
+     - Status of your library ASDF systems loaded by various lisps
+     - If you have a testsuite, results of your test suite on various lisps
+     - Updated with every quicklisp distro
+     - Regressions (desirable to show regression
+       history along quicklisp versions).
+   - lisp implementation maintener
+     - How you lisp is supported by libraries
+     - What libraries are most importatn to fix,
+       to unlock your lisp to maximum amount
+       of code (other libraries), and correspondingly
+       to users
+     - Pre-release testing: run tests on the new version,
+       compare with results of the previous release,
+       ensure there is no regressions and see improvements.
+   - distribution maintainer (Quicklisp):
+     - release testing: run tests on the same lisp implemetations
+       as run on the previouse release, and compare results:
+       ensure there is no regressions, and see the improvements.
+   - application developer
+     (Actually, the application developer as the end user
+      of CL infrastructuure, rarely will use testgrid directly.
+      He, hopefully, will benefit indirectly, from improved
+      stability and quality of the CL world).
+      Still, the end user may:
+     - see what libraries work on his platform
+     - giving his ASDF system see what dependencies
+       are broken on what platform
+
+** TODO terminology improvement
+  - db format: rename?
+                  :libname -> :project
+                  :status -> :test-status
+                  :log-blob-key -> :test-log-blob-key
+                  :log-byte-length -> :test-log-byte-length
+  - project name: a keyword, or string? Currently a keyword; but ASDF system names are strings.
+  - rename test-grid-testsuites:*all-libs* to *all-testsuites*?
 ** TODO Apply for a subdomain at common-lisp.net, e.g. test-grid.common-lisp.net,
    It is another way to solve the security issue with HTML injections,
    because in this case web browser keeps test grid reports in different
    security domain than other common-lisp.net pages.
 ** TODO pivot reports: make row header column always visible
-** DONE limit amount of data included into to HTML reports to the last 3 quicklisp releases 
-   CLOSED: [2012-08-15 Ср 20:42]
-   to improve the page performance and load time.
-** TODO kind of burndown chart: avearange number of bugs by time
+** TODO kind of burndown chart: avearage number of bugs by time
 ** TODO visual graph of library dependencies, clickable (SVG?),
         so that we can see what libraries are blocked when
         the given library is broken, and what dependencies
@@ -170,12 +201,54 @@
    Do we really need WEB UI for filters? If so, it
    is a low priority anyway.
 
-* 0.6.1 Install more lisps on my VPS
+* 0.7.0 Wrap-up the active development phase
+** TODO [24 h] document the code base
+** TODO [8 h] security: agent runs lot of code provided by unknown peple
+   Discuss with Zach, what we know about these people
+   and what level of confidence we have in their code.
+   This includes:
+   - confidence in their good intentions
+   - confidence their code don't open unintentional doors to the machine
+     (e.g. opens a socker, receives s-expression from it and executes)
+
+   Anyway, the final solution will most likely be to advice
+   contributors to run agent under a separate user on their OSes.
+** TODO [40 h] Move online log storage to Amazon S3 from Google App Engine?
+  We are already close to limit of free GAE resources
+  (mostly on datastore write operations, several of which
+  are performed for every uploaded log, and when testing
+  quicklisp we upload thousands of logs).
+
+  Payed GAE plan costs minimum $15 per month.
+
+  Amazon S3 costs $0.12 per GB per month - much cheaper
+  (whole quicklisp by singl lisp implementation produces
+  2-5 MB of logs).
+
+  Also we have seen GAE stability/user support issues.
+
+  Problem: uploading logs is easy usin zs3 library,
+  but how to assing unique identifiers to them?
+  S3 doesn't provide such a functionality. We would
+  like to avoid another service only for identifier
+  generation. Randome identifiers seems good, but
+  we must resovle possible collisions. Maybe calculate
+  MD5 for every log before submit and compare with
+  ETag returned by S3 in HTTP header? Can it help?
+
+** TODO [40+ h] Immediate test results avaiability, without waiting for admin
+   - Store test results locally?
+   - Provide a script example, whcih after completing the tests
+     generates necessary reports from local test results
+     (optionally merged with the global db)
+   - Or maybe instead create a server with accepts results
+     and makes them available without participation of admin?
+* 1.1.0 Install more lisps on my VPS
   I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
 ** DONE ABCL
    CLOSED: [2012-08-20 Пн 01:48]
 ** TODO CLISP (build a multithreaded version)
-* 0.7.0 Add more test suites
+* 1.2.0 Add more test suites
 ** TODO add testsuites of more libraries from quicklisp
 
     See the following files in the "docs" directory:
@@ -199,32 +272,9 @@
     as file system access. It should work on all the lisps.
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
-* 0.7.1 Add ANSI test suite?
+* 1.3.1 Add ANSI test suite?
   Does not depend on quicklisp distro version; but BTW may be distirbuted via quicklisp.
-* 0.8.0 Move online log storage to Amazon S3 from Google App Engine?
-  We are already close to limit of free GAE resources
-  (mostly on datastore write operations, several of which
-  are performed for every uploaded log, and when testing
-  quicklisp we upload thousands of logs).
-
-  Payed GAE plan costs minimum $15 per month.
-
-  Amazon S3 costs $0.12 per GB per month - much cheaper
-  (whole quicklisp by singl lisp implementation produces
-  2-5 MB of logs).
-
-  Also we have seen GAE stability/user support issues.
-
-  Problem: uploading logs is easy usin zs3 library,
-  but how to assing unique identifiers to them?
-  S3 doesn't provide such a functionality. We would
-  like to avoid another service only for identifier
-  generation. Randome identifiers seems good, but
-  we must resovle possible collisions. Maybe calculate
-  MD5 for every log before submit and compare with
-  ETag returned by S3 in HTTP header? Can it help?
-
-* 0.9.0 Test source control HEADs of libraries, not only quicklisp releases
+* 1.4.0 Test source control HEADs of libraries, not only quicklisp releases
 ** TODO a way to specify lib-wold as a quicklisp version with some
    library versions overriden (checkout this particular
    libraries from the scm), so that library author can quickly
@@ -235,8 +285,7 @@
    checkout.
    40h
 
-* 0.10.0 Automate test results publishing process, send notification when regressions occur
-* 0.11.0 For all the libraries which need specific environment
+* 1.5.0 For all the libraries which need specific environment
    (like cffi, cl-sql) correctly detect the absense of required
    envorinment and return :NO-RESOURCE status and provide guiding message to the
    user how to configure them (log to the output test output?).
@@ -394,6 +443,8 @@
    machine and contributes tests)
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
+** TODO Project dependencies info is hardcoded from quicklisp 2012-09-09. Make it more flexible
+   and use the dependency info for the quicklisp we generate report for.
 ** TODO Child processes collision if agent is restarted very soon after it was killed.
    Agent is pretty resistent to restarts. If it is killed
    and started again, it can continue test run from the point
@@ -422,7 +473,7 @@
      is not affected by obsolete child processes
      of the old agent.
 
-** TODO Reuild the free lisps from source control daily, before running test-grid-agent
+** TODO Rebuild the free lisps from source control daily, before running test-grid-agent
 ** TODO Enable HTTP caching for library test logs (good recipe: https://developers.google.com/speed/docs/best-practices/caching)
 ** TODO add CCL revision to the version string (I have impression
    that CCL versions checked out at different time from the official release SVN
@@ -492,4 +543,3 @@
    when the manual configuration hasn't been
    performed and return :no-resource status.
 ** TODO An utility to delete blobs not used in db.lisp from the blobstore :server:
-

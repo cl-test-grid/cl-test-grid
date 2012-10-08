@@ -7,11 +7,11 @@
 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-    <link href="style.css" rel="stylesheet"/>
+    <link href="<!-- TMPL_VAR reports-dir-relative-path -->style.css" rel="stylesheet"/>
     <link rel="stylesheet" href="http://tablesorter.com/themes/blue/style.css" type="text/css" id="" media="print, projection, screen" />
 
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
-    <script type="text/javascript" src="jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="<!-- TMPL_VAR reports-dir-relative-path -->jquery.tablesorter.min.js"></script>
 
     <script type="text/javascript" id="js">
         $(document).ready(function() {
@@ -31,12 +31,12 @@
         }); 
     </script>
 
-    <link href="style.css" rel="stylesheet"/>
+    <link href="<!-- TMPL_VAR reports-dir-relative-path -->style.css" rel="stylesheet"/>
 
 </head>
 <body>
 	<h1>Load Failures - <a href="http://github.com/cl-test-grid/cl-test-grid">CL Test Grid</a> Report</h1>
-    <b>lisp:</b> {LISP}, <b>lib-world:</b> {LIB-WORLD}
+    <b>lisp:</b> <!-- TMPL_VAR lisp -->, <b>lib-world:</b> <!-- TMPL_VAR lib-world -->
     <table>
         <thead>
             <tr><th title="ASDF system name.">system-name</th>
@@ -48,11 +48,11 @@
             </tr>
         </thead>
         <tbody>
-            {TABLE-ROWS}
+            <!-- TMPL_VAR table-rows -->
         </tbody>
     </table>
-    <p><a href="reports-overview.html" class="to-overview">To reports overview</a></p>
-    <p class="timestamp">Generated at: {TIME} GMT.</p>
+    <p><a href="<!-- TMPL_VAR reports-dir-relative-path -->results-overview.html" class="to-overview">To results overview</a></p>
+    <p class="timestamp">Generated at: <!-- TMPL_VAR time --> GMT.</p>
 
     <small>Table sorting is powered by <a href="http://tablesorter.com/">http://tablesorter.com/</a></small>
 </body>
