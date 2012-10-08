@@ -32,17 +32,17 @@
                 (length (project-names (dependents system)))
                 (length (dependents system)))))))
 
-(defun print-load-failures (report-file-name
+(defun print-load-failures (report-file
                             all-failures
                             lisp
                             lib-world)
   (let ((load-failures (load-failures-of all-failures lisp lib-world)))
-    (with-report-file (out report-file-name)
-      (write-sequence (fmt-template (src-file "load-failures-report-template.html")
-                                    (list :lisp lisp
-                                          :lib-world lib-world
-                                          :table-rows (load-failures-table-rows load-failures)
-                                          :time (test-grid-agent::pretty-fmt-time (get-universal-time)))))
-                      out))
-    )
-  nil)
+    (with-report-file (out report-file)
+      (let ((html-template:*string-modifier* #'cl:identity))
+        (html-template:fill-and-print-template (src-file "load-failures-report-template.html")
+                                               (list :reports-root-dir-relative-path (reports-root-dir-relative-path report-file)
+                                                     :lisp lisp
+                                                     :lib-world lib-world
+                                                     :table-rows (load-failures-table-rows load-failures)
+                                                     :time (test-grid-agent::pretty-fmt-time (get-universal-time)))
+                                               :stream out)))))

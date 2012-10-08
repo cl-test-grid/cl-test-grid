@@ -349,16 +349,12 @@ Every subaddress represents some level of pivot groupping."
         (format out "</tr>~%"))))
   (princ "</table>" out))
 
-(defvar *pivot-report-template*
-  (merge-pathnames "pivot-report-template.html"
-                   (src-dir)))
-
 (defun pivot-report (out pivot-table reports-root-dir-relative-path)
-  (let ((html-template:*escape-char-p* #'cl:identity))
-    (html-template:fill-and-print-template *pivot-report-template*
+  (let ((html-template:*string-modifier* #'cl:identity))
+    (html-template:fill-and-print-template (src-file "pivot-report-template.html")
                                            (list :the-table pivot-table
                                                  :time (test-grid-agent::pretty-fmt-time (get-universal-time))
-                                                 :reports-dir-relative-path reports-root-dir-relative-path)
+                                                 :reports-root-dir-relative-path reports-root-dir-relative-path)
                                            :stream out)))
 
 ;; New pivot report printing function

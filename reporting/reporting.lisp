@@ -25,9 +25,9 @@
           (format nil "~{../~*~}" (cdr dir)))
         "")))
 
-(assert (string= "" (reports-dir-relative-path "abc.html")))
-(assert (string= "../" (reports-dir-relative-path "demo/abc.html")))
-(assert (string= "../../" (reports-dir-relative-path "demo/subdir/abc.html")))
+(assert (string= "" (reports-root-dir-relative-path "abc.html")))
+(assert (string= "../" (reports-root-dir-relative-path "demo/abc.html")))
+(assert (string= "../../" (reports-root-dir-relative-path "demo/subdir/abc.html")))
 
 (defun with-report-file-impl (filename handler-func)
   (let ((reports-dir (reports-dir)))
@@ -128,4 +128,6 @@
       (print-load-failures "sbcl-load-failures.html"
                            all-failures
                            "sbcl-1.0.57-linux-x86"
-                           "quicklisp 2012-09-09"))))
+                           "quicklisp 2012-09-09"))
+
+    (print-demo-reports all-failures)))
