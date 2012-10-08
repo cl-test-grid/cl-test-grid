@@ -32,29 +32,17 @@
                 (length (project-names (dependents system)))
                 (length (dependents system)))))))
 
-(defun print-load-failures (all-failures lisp lib-world
-                            report-file-name)
+(defun print-load-failures (report-file-name
+                            all-failures
+                            lisp
+                            lib-world)
   (let ((load-failures (load-failures-of all-failures lisp lib-world)))
     (with-report-file (out report-file-name)
       (write-sequence (fmt-template (src-file "load-failures-report-template.html")
-                                    `(("{LISP}" . ,lisp)
-                                      ("{LIB-WORLD}" . ,lib-world)
-                                      ("{TABLE-ROWS}" . ,(load-failures-table-rows load-failures))
-                                      ("{TIME}" . ,(test-grid-agent::pretty-fmt-time (get-universal-time)))))
+                                    (list :lisp lisp
+                                          :lib-world lib-world
+                                          :table-rows (load-failures-table-rows load-failures)
+                                          :time (test-grid-agent::pretty-fmt-time (get-universal-time)))))
                       out))
     )
   nil)
-
-#|
-
-;; Usage:
-
-(defparameter *db* (test-grid-data:read-db))
-(defparameter *results* (test-grid-reporting::select *db*))
-(defparameter *failures* (test-grid-reporting::list-failures *results*))
-
-(print-load-failures *failures*
-                     "ecl-12.7.1-dfc94901-linux-x86-lisp-to-c"
-                     "quicklisp 2012-09-09"
-                     "ecl-load-failures.html")
-|#

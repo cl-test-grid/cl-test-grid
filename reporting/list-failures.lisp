@@ -4,8 +4,8 @@
 
 (in-package #:test-grid-reporting)
 
-(defun list-failures (lib-results)
-  (mapcan #'failures lib-results))
+(defun list-failures (db)
+  (mapcan #'failures (list-lib-results db)))
 
 (defun failures (lib-result)
   (nconc (testsuite-failures lib-result)

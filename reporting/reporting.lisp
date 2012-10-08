@@ -17,6 +17,18 @@
   (merge-pathnames "reports-generated/"
                    (merge-pathnames #P"../" (src-dir))))
 
+(defun reports-root-dir-relative-path (report-file)
+  (let ((dir (pathname-directory report-file)))
+    (if dir
+        (progn
+          (assert (eq :relative (car dir)))
+          (format nil "~{../~*~}" (cdr dir)))
+        "")))
+
+(assert (string= "" (reports-dir-relative-path "abc.html")))
+(assert (string= "../" (reports-dir-relative-path "demo/abc.html")))
+(assert (string= "../../" (reports-dir-relative-path "demo/subdir/abc.html")))
+
 (defun with-report-file-impl (filename handler-func)
   (let ((reports-dir (reports-dir)))
     (with-open-file (out (merge-pathnames filename reports-dir)
@@ -48,10 +60,8 @@
                         (filter-lib-results db (lambda (lib-result test-run)
                                                  (declare (ignore test-run))
                                                  (getf lib-result :status)))))
-         (all-results (my-time ("select [all results]...")
-                        (select db)))
          (all-failures (my-time ("list-failures...")
-                         (list-failures all-results))))
+                         (list-failures db))))
 
     (my-time ("test runs..")
       (with-report-file (out "test-runs-report.html")
@@ -68,51 +78,54 @@
                                                                             last-lib-worlds
                                                                             :test #'string=))))))
       (my-time ("pivot reports...~%")
-        (print-pivot-reports joined-index))
+        (print-old-pivots joined-index))
 
       (my-time ("old Quicklisp diff report...~%")
         (with-report-file (out "quicklisp-diff-old.html")
           (print-all-quicklisps-diff-report out joined-index))))
 
-    (format t "Quicklisp diff...~%")
-    (time (print-quicklisp-diff-report all-failures))
+    (my-time ("Quicklisp diff...~%")
+      (print-quicklisp-diff-report "quicklisp-diff.html"
+                                   all-failures
+                                   "quicklisp 2012-09-09"
+                                   "quicklisp 2012-08-11"))
 
     (my-time ("ECL load failures...~%")
-      (print-load-failures all-failures
+      (print-load-failures "ecl-load-failures.html"
+                           all-failures
                            "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
-                           "quicklisp 2012-09-09"
-                           "ecl-load-failures.html"))
+                           "quicklisp 2012-09-09"))
 
-    (let ((last-abcl "abcl-1.1.0-dev-svn-14157-fasl39-linux-java")
+    (let ((last-abcl "abcl-1.1.0-dev-svn-14164-fasl39-linux-java")
           (abcl-1.0.1 "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
       (my-time ("ABCL diff...~%")
-        (print-compiler-diff all-failures
+        (print-compiler-diff "abcl.html"
+                             all-failures
                              "quicklisp 2012-09-09"
                              last-abcl
-                             abcl-1.0.1
-                             "abcl.html"))
+                             abcl-1.0.1))
       (my-time ("ABCL load failures...~%")
-        (print-load-failures all-failures
+        (print-load-failures "abcl-load-failures.html"
+                             all-failures
                              last-abcl
-                             "quicklisp 2012-09-09"
-                             "abcl-load-failures.html")))
+                             "quicklisp 2012-09-09")))
     (my-time ("CCL load failures...~%")
-      (print-load-failures all-failures
+      (print-load-failures "ccl-load-failures.html"
+                           all-failures
                            "ccl-1.8-f95-linux-x86"
-                           "quicklisp 2012-09-09"
-                           "ccl-load-failures.html"))
+                           "quicklisp 2012-09-09"))
     (my-time ("ACL load failures...~%")
-      (print-load-failures all-failures
+      (print-load-failures "acl-load-failures.html"
+                           all-failures
                            "acl-8.2a-linux-x86"
-                           "quicklisp 2012-09-09"
-                           "acl-load-failures.html"))
+                           "quicklisp 2012-09-09"))
     (my-time ("CMUCL load failures...~%")
-      (print-load-failures all-failures
+      (print-load-failures "cmucl-load-failures.html"
+                           all-failures
                            "cmu-20c_release-20c__20c_unicode_-linux-x86"
-                           "quicklisp 2012-09-09"
-                           "cmucl-load-failures.html"))
+                           "quicklisp 2012-09-09"))
     (my-time ("SBCL load failures...~%")
-      (print-load-failures all-failures
+      (print-load-failures "sbcl-load-failures.html"
+                           all-failures
                            "sbcl-1.0.57-linux-x86"
-                           "quicklisp 2012-09-09"
-                           "sbcl-load-failures.html"))))
+                           "quicklisp 2012-09-09"))))
