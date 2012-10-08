@@ -85,6 +85,35 @@ to include in to the text of the link, defaults to STATUS"
           (log-uri failure)
           (mapcar (alexandria:rcurry 'funcall failure) fields)))
 
+(defun result-css-class (result)
+  (let ((status (ecase (first (result-spec result))
+                  (:whole-test-suite (second (result-spec result)))
+                  ((:test-case :load) (third (result-spec result))))))
+    (ecase status
+      (:ok "ok-status")
+      (:unexpected-ok "warn-status")
+      (:fail  "fail-status")
+      (:crash  "crash-status")
+      (:timeout  "timeout-status")
+      (:no-resource "no-resource-status"))))
+
+(defun result-log-link (result &rest fields)
+  "Generate HTML link to the online test suite log
+for the RESULT. The FIELDS specifies set of fields
+to include in to the text of the link, defaults to RESULT-SPEC"
+  (setf fields (or fields '(result-spec)))
+  (format nil "<a class=\"~a\" href=\"~a\">~{~a~^, ~}</a>"
+          (result-css-class result)
+          (log-uri result)
+          (mapcar (alexandria:rcurry 'funcall result) fields)))
+
+(defun results-cell-printer (out cell-data)
+  "Convenient for the most cases printer of
+a RESULT object list for a pivot table cell.
+CELL-DATA is the list of RESULT objects to print."
+  (dolist (result cell-data)
+    (format out "~A</br>" (result-log-link result #'result-spec))))
+
 ;; This is how we print data in table data cells.
 (defun format-lib-results (out joined-lib-results)
   (dolist (joined-lib-result joined-lib-results)

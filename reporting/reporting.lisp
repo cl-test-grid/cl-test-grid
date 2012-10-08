@@ -61,7 +61,9 @@
                                                  (declare (ignore test-run))
                                                  (getf lib-result :status)))))
          (all-failures (my-time ("list-failures...")
-                         (list-failures db))))
+                         (list-failures db)))
+         (all-results (my-time ("list-results...")
+                        (list-results db))))
 
     (my-time ("test runs..")
       (with-report-file (out "test-runs-report.html")
@@ -95,12 +97,26 @@
                            all-failures
                            "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
                            "quicklisp 2012-09-09"))
+    (let ((new-ecl "ecl-12.7.1-e90b2f12-linux-x86-lisp-to-c")
+          (old-ecl "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"))
+      (print-compiler-diff "ecl-lisp-to-c.html"
+                           all-results
+                           "quicklisp 2012-09-09"
+                           new-ecl
+                           old-ecl))
+    (let ((new-ecl "ecl-12.7.1-e90b2f12-linux-x86-bytecode")
+          (old-ecl "ecl-12.7.1-ce653d88-linux-x86-bytecode"))
+      (print-compiler-diff "ecl-bytecode.html"
+                           all-results
+                           "quicklisp 2012-09-09"
+                           new-ecl
+                           old-ecl))
 
     (let ((last-abcl "abcl-1.1.0-dev-svn-14164-fasl39-linux-java")
           (abcl-1.0.1 "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
       (my-time ("ABCL diff...~%")
         (print-compiler-diff "abcl.html"
-                             all-failures
+                             all-results
                              "quicklisp 2012-09-09"
                              last-abcl
                              abcl-1.0.1))
@@ -130,4 +146,4 @@
                            "sbcl-1.0.57-linux-x86"
                            "quicklisp 2012-09-09"))
 
-    (print-demo-reports all-failures)))
+    (print-demo-reports all-failures all-results)))

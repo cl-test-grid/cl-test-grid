@@ -6,7 +6,7 @@
 
 (in-package #:test-grid-reporting)
 
-(defun print-demo-reports (all-failures)
+(defun print-demo-reports (all-failures all-results)
   (let ((some-failures (subset all-failures
                                (lambda (fail)
                                  (and (member (libname fail) '(:alexandria :let-plus))
@@ -29,7 +29,7 @@
   
   ;; diff, compare failures to find regressions  
   (print-compiler-diff "demo/abcl-diff.html"
-                       all-failures
+                       all-results
                        "quicklisp 2012-09-09"
                        "abcl-1.1.0-dev-svn-14157-fasl39-linux-java"
                        "abcl-1.0.1-svn-13750-13751-fasl38-linux-java")

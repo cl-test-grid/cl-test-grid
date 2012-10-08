@@ -25,11 +25,9 @@ reports-generated/<REPORT-FILE>."
                                   old-lisp-fails
                                   :test #'equal
                                   :key (lambda (fail)
-                                         (list (libname fail) (fail-spec fail))))))
+                                         (list (libname fail) (result-spec fail))))))
     (print-pivot report-file
                  diff
                  :rows '((libname string<))
                  :cols '((lib-world string>) (lisp string<))
-                 :cell-printer (lambda (out cell-data)
-                                 (dolist (fail cell-data)
-                                   (format out "~A</br>" (failure-log-link fail #'fail-spec)))))))
+                 :cell-printer #'results-cell-printer)))
