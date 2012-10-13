@@ -2,30 +2,41 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>CL Test Grid Pivot Report</title>
+    <title><!-- TMPL_VAR library-name --> | CL Test Grid</title>
     <link href="<!-- TMPL_VAR reports-root-dir-relative-path -->style.css" rel="stylesheet"/>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
     <script type="text/javascript" src="<!-- TMPL_VAR reports-root-dir-relative-path -->testgrid-lib.js"></script>
     <script type="text/javascript" src="<!-- TMPL_VAR reports-root-dir-relative-path -->jquery.thead-1.1.min.js"></script>
-
     <script type="text/javascript">
+
         $(document).ready(function () {
 
             var $table = $("table");
             // make the table header always visible, independently on scroll
             $table.thead();
             // highlight the row and column when mouse moves
-            var highlighter = new PivotHighlighter($table);
-
-            setupStatusTooltips();
+            $.each($table, function() {
+                var highlighter = new PivotHighlighter($(this));
+            });
         });
 
     </script>
 </head>
 <body>
+    <h2><!-- TMPL_VAR library-name --> results collected by cl-test-grid</h2>
+    <ul>
+        <li><a href="#results-for-last-two-qls">Results on the last two Quicklisp distributions</a></li>
+        <li><a href="#breakdown-by-testcases">Breakdown by testcases</a></li>
+    </ul>
+    <h3 id="results-for-last-two-qls">Results on the last two Quicklisp distributions</h3>
     <!-- jquery.thead for some reason wants the table to have a parent element with some CSS class -->
     <div class="dummy-class-for-jquery-thead"> 
-    <!-- TMPL_VAR the-table -->
+        <!-- TMPL_VAR results-table -->
+    </div>
+    <h3 id="breakdown-by-testcases">Breakdown by testcases: for every failed testcase
+        the lisp implmentations it fails on</h3>
+    <div class="dummy-class-for-jquery-thead"> 
+        <!-- TMPL_VAR resuts-by-testcases -->
     </div>
     <p><a href="<!-- TMPL_VAR reports-root-dir-relative-path -->results-overview.html" class="to-overview">To results overview</a></p>
     <p class="timestamp">Generated at: <!-- TMPL_VAR time --> GMT.</p>

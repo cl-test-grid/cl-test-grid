@@ -4,11 +4,6 @@
 
 (in-package #:test-grid-reporting)
 
-(defun list-props (object prop-readers)
-  (mapcar (lambda (prop-reader)
-            (funcall prop-reader object))
-          prop-readers))
-
 (defun group-by (items item-prop-readers)
   (let ((h (make-hash-table :test #'equal)))
     (dolist (item items)
@@ -50,16 +45,6 @@
    (equal (gethash '(6 9) groups)
           '((:x 6 :y 9)))))
 
-(defun distinct (objects object-prop-readers)
-  (remove-duplicates (mapcar (lambda (object) (list-props object object-prop-readers))
-                             objects)
-                     :test #'equal))
-
-(assert (alexandria:set-equal '((1) (7))
-                              (distinct '((:a 1 :b 2) (:a 1 :b 3) (:a 7 :b 1))
-                                        (list (test-grid-utils::plist-getter :a)))
-                              :test #'equal))
-
 (defun pivot-table-html2 (out
                           objects
                           row-field-getters row-fields-sort-predicates
@@ -96,3 +81,28 @@
           (princ "</td>" out))
         (format out "</tr>~%"))))
   (princ "</table>" out))
+
+(defun pivot-table-html3 (out objects &key rows cols cell-printer)
+  "Another version of PIVOT-TABLE-HTML, more convenient parameters."
+  (assert (every (lambda (r) (and (first r) (second r)))
+                 rows)
+          nil
+          "ROWS elements must have two elements: accessor function and sorting predicate")
+  (assert (every (lambda (c) (and (first c) (second c)))
+                 cols)
+          nil
+          "COLS elements must have two elements: accessor function and sorting predicate")
+  (let ((row-field-getters (mapcar (lambda (x) (coerce (first x) 'function)) rows))
+        (row-fields-sort-predicates (mapcar #'second rows))
+        (col-field-getters (mapcar (lambda (x) (coerce (first x) 'function)) cols))
+        (col-fields-sort-predicates (mapcar #'second cols)))
+    (pivot-table-html2 out
+                       objects
+                       row-field-getters row-fields-sort-predicates
+                       col-field-getters col-fields-sort-predicates
+                       cell-printer)))
+
+(defun pivot-table-html4 (objects &key rows cols cell-printer)
+  "Another version of PIVOT-TABLE-HTML, now a function - returns STRING"
+  (with-output-to-string (s)
+    (pivot-table-html3 s objects :rows rows :cols cols :cell-printer cell-printer)))

@@ -25,6 +25,7 @@
      (:file "pivot")
      (:file "pivot2")
      (:file "quicklisp-diff")
+     (:file "library-report")
      (:file "regressions")
      (:file "meta-info-from-quicklisp")
      (:file "dependencies-and-blockers")

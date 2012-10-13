@@ -361,27 +361,12 @@ Every subaddress represents some level of pivot groupping."
 (defun print-pivot (file-name
                     objects
                     &key rows cols cell-printer)
-  (assert (every (lambda (r) (and (first r) (second r)))
-                 rows)
-          nil
-          "ROWS elements must have two elements: accessor function and sorting predicate")
-  (assert (every (lambda (c) (and (first c) (second c)))
-                 cols)
-          nil
-          "COLS elements must have two elements: accessor function and sorting predicate")
-
-  (let ((row-field-getters (mapcar (lambda (x) (coerce (first x) 'function)) rows))
-        (row-fields-sort-predicates (mapcar #'second rows))
-        (col-field-getters (mapcar (lambda (x) (coerce (first x) 'function)) cols))
-        (col-fields-sort-predicates (mapcar #'second cols)))
-    (with-report-file (out file-name)
-      (pivot-report out (cl:with-output-to-string (str)
-                          (pivot-table-html2 str
-                                             objects
-                                             row-field-getters row-fields-sort-predicates
-                                             col-field-getters col-fields-sort-predicates
-                                             cell-printer))
-                    (reports-root-dir-relative-path file-name)))))
+  (with-report-file (out file-name)
+    (pivot-report out (pivot-table-html4 objects
+                                         :rows rows
+                                         :cols cols
+                                         :cell-printer cell-printer)
+                  (reports-root-dir-relative-path file-name))))
 
 (defun pivot-report-old (out
                          reports-root-dir-relative-path

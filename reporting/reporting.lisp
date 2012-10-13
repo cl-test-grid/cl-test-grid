@@ -41,6 +41,11 @@
 (defmacro with-report-file ((out-stream-var filename) &body body)
   `(with-report-file-impl ,filename #'(lambda (,out-stream-var) ,@body)))
 
+(defun save-report (file report-str)
+  (with-report-file (out file)
+    (write-sequence report-str out))
+  nil)
+
 ;;; =========== print all the reports at once =============
 
 (defun filter-lib-results (db predicate)
@@ -73,7 +78,7 @@
       (with-report-file (out "export.csv")
         (export-to-csv out filtered-db)))
 
-    (let* ((last-lib-worlds (largest 'lib-world filtered-db :count 3))
+    (let* ((last-lib-worlds (largest-old 'lib-world filtered-db :count 3))
            (joined-index (my-time ("build-joined-index...")
                            (build-joined-index filtered-db :where (lambda (record)
                                                                     (member (lib-world record)
@@ -97,14 +102,14 @@
                            all-failures
                            "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
                            "quicklisp 2012-09-09"))
-    (let ((new-ecl "ecl-12.7.1-e90b2f12-linux-x86-lisp-to-c")
+    (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c")
           (old-ecl "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"))
       (print-compiler-diff "ecl-lisp-to-c.html"
                            all-results
                            "quicklisp 2012-09-09"
                            new-ecl
                            old-ecl))
-    (let ((new-ecl "ecl-12.7.1-e90b2f12-linux-x86-bytecode")
+    (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-bytecode")
           (old-ecl "ecl-12.7.1-ce653d88-linux-x86-bytecode"))
       (print-compiler-diff "ecl-bytecode.html"
                            all-results
@@ -145,5 +150,7 @@
                            all-failures
                            "sbcl-1.0.57-linux-x86"
                            "quicklisp 2012-09-09"))
+    (my-time ("library reports...")
+      (print-library-reports all-results))
 
     (print-demo-reports all-failures all-results)))
