@@ -4,17 +4,6 @@
 
 (in-package #:test-grid-reporting)
 
-(defun print-library-reports (all-results)
-  (let* ((last-quicklisps (largest #'lib-world all-results :count 2))
-         (recent-results (subset all-results
-                                 (lambda (r) (member (lib-world r)
-                                                     last-quicklisps
-                                                     :test #'string=))))
-         (libnames (remove-duplicates (mapcar #'libname recent-results))))
-    (dolist (libname libnames)
-      (save-report (format nil "library/~(~A~).html" libname)
-                   (library-report recent-results libname "../")))))
-
 (defun library-report (all-results libname &optional (reports-root-dir-relative-path ""))
   (let* ((results (subset all-results (lambda (r) (eq libname (libname r)))))
          (test-case-results (subset all-results (lambda (r)
@@ -44,4 +33,33 @@
                :time (test-grid-agent::pretty-fmt-time (get-universal-time))
                :reports-root-dir-relative-path reports-root-dir-relative-path)
          :stream str)))))
+
+(defun print-library-index (libnames)
+  (let ((report
+         (with-output-to-string (s)
+           (format s "<html><head><title>Library Reports | CL Test Grid</title></head>~%")
+           (format s "  <body>~%")
+           (format s "    <h2>Library Reports</h2>~%")           
+           (format s "    <ul>~%")
+           (my-time ("library index body")
+             (format s "      ~{<li><a href=\"~(~a~).html\">~(~:*~a~)</a></li>~%~}"
+                     (sort (copy-list libnames) #'string<)))
+           (format s "    </ul>~%")
+           (format s "  </body>~%")
+           (format s "</html>~%")
+           )))
+    (save-report "library/index.html"
+                 report)))
+
+(defun print-library-reports (all-results)
+  (let* ((last-quicklisps (largest #'lib-world all-results :count 2))
+         (recent-results (subset all-results
+                                 (lambda (r) (member (lib-world r)
+                                                     last-quicklisps
+                                                     :test #'string=))))
+         (libnames (remove-duplicates (mapcar #'libname recent-results))))
+    (dolist (libname libnames)
+      (save-report (format nil "library/~(~A~).html" libname)
+                   (library-report recent-results libname "../")))
+    (print-library-index libnames)))
 
