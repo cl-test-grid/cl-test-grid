@@ -19,18 +19,17 @@
     hash))
 
 (defun load-failures-table-rows (failures)
-  (with-output-to-string (s)
-    ;; he-he, modifying global variable (to be refactored
-    (set-failed-systems (as-hash failures))
-    (dolist (fail failures)
-      (let ((system (system-name fail)))
-        (format s "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td></tr>~%"
-                (failure-log-link fail 'system-name)
-                (length (root-blockers system))
-                (length (blocked-exclusively system))
-                (length (project-names (blocked-exclusively system)))
-                (length (project-names (dependents system)))
-                (length (dependents system)))))))
+  (let ((failed-hash (as-hash failures)))
+    (with-output-to-string (s)
+      (dolist (fail failures)
+        (let ((system (system-name fail)))
+          (format s "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td></tr>~%"
+                  (failure-log-link fail 'system-name)
+                  (length (root-blockers system failed-hash))
+                  (length (blocked-exclusively system failed-hash))
+                  (length (project-names (blocked-exclusively system failed-hash)))
+                  (length (project-names (dependents system)))
+                  (length (dependents system))))))))
 
 (defun print-load-failures (report-file
                             all-failures

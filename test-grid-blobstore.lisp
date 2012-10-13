@@ -28,8 +28,10 @@ has a blobkey for every file.
 Signals an ERROR in case of problems."))
 
 (defgeneric submit-run-info (blobstore run-info)
-  "Submits test run result RUN-INFO (a lisp object)
-to central database.")
+  (:documentation
+   "Submits test run result RUN-INFO (a lisp object)
+to central database."))
 
 (defgeneric tell-admin (blobstore subject body)
-  "Sends message to admin.")
+  (:documentation
+   "Sends message to admin."))
