@@ -129,13 +129,13 @@
 
    - load failures + dependencies
 
-** TODO [24 h] library mainainer page
+** DONE different result-spec for known failures? and different color
+   CLOSED: [2012-10-09 Вт 08:22]
+** DONE library mainainer page
+   CLOSED: [2012-10-13 Сб 22:54]
    with reports about the test statuses
    for this single library on various platforms with
-   various quicklisp versions,
-   history of regressions (by quicklisp versions)
-
-   There is some draft (uncommited) code for this task.
+   various quicklisp versions.
 
 ** TODO [2 h] remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
 ** TODO [6 h] Prevent HTML injection via test-run-info
@@ -169,6 +169,7 @@
      - giving his ASDF system see what dependencies
        are broken on what platform
 
+** TODO [6 h] Document the RESULT objects instead of FAILURE. Link to the library reports.
 ** TODO terminology improvement
   - db format: rename?
                   :libname -> :project
@@ -202,17 +203,6 @@
    is a low priority anyway.
 
 * 0.7.0 Wrap-up the active development phase
-** TODO [24 h] document the code base
-** TODO [8 h] security: agent runs lot of code provided by unknown peple
-   Discuss with Zach, what we know about these people
-   and what level of confidence we have in their code.
-   This includes:
-   - confidence in their good intentions
-   - confidence their code don't open unintentional doors to the machine
-     (e.g. opens a socker, receives s-expression from it and executes)
-
-   Anyway, the final solution will most likely be to advice
-   contributors to run agent under a separate user on their OSes.
 ** TODO [40 h] Move online log storage to Amazon S3 from Google App Engine?
   We are already close to limit of free GAE resources
   (mostly on datastore write operations, several of which
@@ -243,6 +233,17 @@
      (optionally merged with the global db)
    - Or maybe instead create a server with accepts results
      and makes them available without participation of admin?
+** TODO [24 h] document the code base
+** TODO [8 h] security: agent runs lot of code provided by unknown peple
+   Discuss with Zach, what we know about these people
+   and what level of confidence we have in their code.
+   This includes:
+   - confidence in their good intentions
+   - confidence their code don't open unintentional doors to the machine
+     (e.g. opens a socker, receives s-expression from it and executes)
+
+   Anyway, the final solution will most likely be to advice
+   contributors to run agent under a separate user on their OSes.
 * 1.1.0 Install more lisps on my VPS
   I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
 ** DONE ABCL
