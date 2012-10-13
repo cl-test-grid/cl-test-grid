@@ -137,7 +137,8 @@
    for this single library on various platforms with
    various quicklisp versions.
 
-** TODO [2 h] remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
+** DONE remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
+   CLOSED: [2012-10-14 Вс 02:36]
 ** TODO [6 h] Prevent HTML injection via test-run-info
 ** TODO [4 h] document, for each CL community role, how he can benefit from testgrid
    - library mainaner:
@@ -190,18 +191,6 @@
         block this library.
         Look for help from http://chart.ravenbrook.com/ ?
 ** TODO has-regressions-p - cover all the possible cases by unit tests?
-** TODO Filters for pivot reports
-   Partially done - in a non interactive way.
-   I.e. I apply filters when generate reports to publish,
-   but there is no way to filter them on WEB. The
-   only way for user is to checkout lisp code and
-   use it's own filters. Not that bad way, especially
-   in the ideology that Lisp is the main interface to
-   test results.
-
-   Do we really need WEB UI for filters? If so, it
-   is a low priority anyway.
-
 * 0.7.0 Wrap-up the active development phase
 ** TODO [40 h] Move online log storage to Amazon S3 from Google App Engine?
   We are already close to limit of free GAE resources

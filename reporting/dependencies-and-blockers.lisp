@@ -54,41 +54,41 @@ and returns a hash table from system name to a list of its dependents."
   (remove-duplicates (mapcar #'project-name system-names)
                      :test #'string=))
 
-(dolist (fn '(dependencies dependents))
+;;; --- combine dependency info with failures ---
+
+(defun blockers (system-name failed-hash)
+  "SYSTEM-NAME is a string. FAILED-HASH is a hash table
+from system name to a boolean denotin whether the system load has failed."
+  (remove-if-not (lambda (dependency) (gethash dependency failed-hash))
+                 (dependencies system-name)))
+
+(defun root-blockers (system-name failed-hash)
+  "SYSTEM-NAME is a string. FAILED-HASH is a hash table
+from system name to a boolean denotin whether the system load has failed."
+  (remove-if-not (lambda (blocker-system) (null (blockers blocker-system failed-hash)))
+                 (blockers system-name failed-hash)))
+
+(defun blocked (system-name failed-hash)
+  "Returns ASDF system names blocked by ASFD system
+named SYSTEM-NAME. SYSTEM-NAME is a string. FAILED-HASH is a hash table
+from system name to a boolean denotin whether the system load has failed."
+  (when (gethash system-name failed-hash)
+    (dependents system-name)))
+
+(defun blocked-exclusively (system-name failed-hash)
+  "ASDF system names for which the SYSTEM-NAME is the only blocker.
+SYSTEM-NAME is a string. FAILED-HASH is a hash table
+from system name to a boolean denotin whether the system load has failed."
+  (when (gethash system-name failed-hash)
+    (let ((list-sys-name (list system-name)))
+      (remove-if-not (lambda (dep) (equal (root-blockers dep failed-hash)
+                                          list-sys-name))
+                     (dependents system-name)))))
+
+;;; --- memoize the functions for better performance ---
+
+(dolist (fn '(dependencies dependents blockers
+              root-blockers blocked blocked-exclusively))
   (fare-memoization:unmemoize fn)
   (fare-memoization:memoize fn))
 
-;;; --- combine dependency info with failures ---
-
-(defparameter *failed-systems* nil)
-
-(defun set-failed-systems (hash)
-  "Sets global hash table from system name to a bolean denoting
-wheter the system load is failed. This global table is used by the functions below"
-  (setf *failed-systems* hash)
-  (dolist (fn '(blockers root-blockers blocked blocked-exclusively))
-    (fare-memoization:unmemoize fn)
-    (fare-memoization:memoize fn)))
-
-(defun load-failed-p (system-name)
-  (assert *failed-systems* () "Please provide information about load failures via SET-FAILED-SYSTEMS.")
-  (gethash system-name *failed-systems*))
-
-(defun blockers (system-name)
-  (remove-if-not #'load-failed-p (dependencies system-name)))
-
-(defun root-blockers (system-name)
-  (remove-if-not (lambda (blocker-system) (null (blockers blocker-system)))
-                 (blockers system-name)))
-
-(defun blocked (system-name)
-  (when (load-failed-p system-name)
-    (assert (every #'load-failed-p (dependents system-name)))
-    (dependents system-name)))
-
-(defun blocked-exclusively (system-name)
-  (when (load-failed-p system-name)
-    (let ((list-sys-name (list system-name)))
-      (remove-if-not (lambda (dep) (equal (root-blockers dep)
-                                          list-sys-name))
-                      (dependents system-name)))))
