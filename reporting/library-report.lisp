@@ -21,7 +21,7 @@
                :resuts-by-testcases (cond ((not (member libname test-grid-testsuites:*all-libs*))
                                            "The library does not have a testsuite adapter for CL Test Grid.")
                                           ((null test-case-results)
-                                           "THere are no failed tescases.")
+                                           "There are no failed tescases.")
                                           (t (pivot-table-html4 test-case-results
                                                                 :cols '((lib-world string>))
                                                                 :rows `((,(lambda (r)
