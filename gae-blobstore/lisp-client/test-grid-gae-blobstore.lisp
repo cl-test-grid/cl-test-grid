@@ -90,14 +90,19 @@ a warning message, followed by the end of the file."
                                                        :filename (file-namestring (cdr elem))
                                                        :content-type "text/plain")))
                                        id-pathname-alist-part)))
-             (with-open-stream (in (drakma:http-request upload-url
-                                                        :method :post
-                                                        :content-length t
-                                                        :parameters post-params
-                                                        :want-stream t))
-               (log:info "next ~A files are uploaded" (length id-pathname-alist-part))
-               ;; And read the response
-               (test-grid-utils::safe-read in)))))
+             (multiple-value-bind (stream status-code headers uri stream2 must-close reason-phrase)
+                 (drakma:http-request upload-url
+                                      :method :post
+                                      :content-length t
+                                      :parameters post-params
+                                      :want-stream t)
+               (declare (ignore headers uri stream2 must-close))
+               (cond ((/= 200 status-code)
+                      (error "Error uploading files, the HTTP response code ~A: ~A" status-code reason-phrase))
+                     (t (with-open-stream (stream stream)
+                          (log:info "next ~A files are uploaded" (length id-pathname-alist-part))
+                          ;; And read the response
+                          (test-grid-utils::safe-read stream))))))))
     (let* ( ;;Split the files submitted into batches by < 500 elements
            ;; to workaround GAE blobstore issue: https://code.google.com/p/googleappengine/issues/detail?id=8032
            (batches (test-grid-utils::split-list id-pathname-alist 100))
