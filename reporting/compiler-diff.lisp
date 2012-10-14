@@ -5,27 +5,27 @@
 (in-package #:test-grid-reporting)
 
 (defun print-compiler-diff (report-file
-                            all-failures
+                            all-results
                             last-quicklisp
                             new-lisp old-lisp)
-  "Prints pivot with difference between failures
+  "Prints pivot with difference between results
 of two copilers - NEW-LISP and OLD-LISP - on the
 lib-world specified by LAST-QUICKLISP. The
 resulting .html file is save to
 reports-generated/<REPORT-FILE>."
-  (let* ((new-lisp-fails (subset all-failures
-                                 (lambda (failure)
-                                   (and (string= (lib-world failure) last-quicklisp)
-                                        (search new-lisp (lisp failure))))))
-         (old-lisp-fails (subset all-failures
-                                 (lambda (failure)
-                                   (and (string= (lib-world failure) last-quicklisp)
-                                        (search old-lisp (lisp failure))))))
-         (diff (fast-exclusive-or new-lisp-fails
-                                  old-lisp-fails
+  (let* ((new-lisp-results (subset all-results
+                                   (lambda (result)
+                                     (and (string= (lib-world result) last-quicklisp)
+                                          (search new-lisp (lisp result))))))
+         (old-lisp-results (subset all-results
+                                   (lambda (result)
+                                     (and (string= (lib-world result) last-quicklisp)
+                                          (search old-lisp (lisp result))))))
+         (diff (fast-exclusive-or new-lisp-results
+                                  old-lisp-results
                                   :test #'equal
-                                  :key (lambda (fail)
-                                         (list (libname fail) (result-spec fail))))))
+                                  :key (lambda (result)
+                                         (list (libname result) (result-spec result))))))
     (print-pivot report-file
                  diff
                  :rows '((libname string<))

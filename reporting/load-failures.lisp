@@ -4,24 +4,25 @@
 
 (in-package #:test-grid-reporting)
 
-(defun load-failures-of (all-failures lisp lib-world)
-  (remove-if-not (lambda (fail)
-                   (and (eq :load (car (fail-spec fail)))
-                        (search lisp (lisp fail))
-                        (string= lib-world (lib-world fail))))
-                 all-failures))
+(defun load-failures-of (all-results lisp lib-world)
+  (subset all-results
+          (lambda (result)
+            (and (eq :load (car (result-spec result)))
+                 (not (eq :ok (caddr (result-spec result))))
+                 (search lisp (lisp result))
+                 (string= lib-world (lib-world result))))))
 
-(defun as-hash (load-failures)
+(defun as-hash (load-fail-results)
   (let ((hash (make-hash-table :test #'equal)))
-    (dolist (load-fail load-failures)
+    (dolist (load-fail load-fail-results)
       (setf (gethash (system-name load-fail) hash)
             t))
     hash))
 
-(defun load-failures-table-rows (failures)
-  (let ((failed-hash (as-hash failures)))
+(defun load-failures-table-rows (load-fail-results)
+  (let ((failed-hash (as-hash load-fail-results)))
     (with-output-to-string (s)
-      (dolist (fail failures)
+      (dolist (fail load-fail-results)
         (let ((system (system-name fail)))
           (format s "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td></tr>~%"
                   (failure-log-link fail 'system-name)
@@ -32,16 +33,16 @@
                   (length (dependents system))))))))
 
 (defun print-load-failures (report-file
-                            all-failures
+                            all-results
                             lisp
                             lib-world)
-  (let ((load-failures (load-failures-of all-failures lisp lib-world)))
+  (let ((load-fail-results (load-failures-of all-results lisp lib-world)))
     (with-report-file (out report-file)
       (let ((html-template:*string-modifier* #'cl:identity))
         (html-template:fill-and-print-template (src-file "load-failures-report-template.html")
                                                (list :reports-root-dir-relative-path (reports-root-dir-relative-path report-file)
                                                      :lisp lisp
                                                      :lib-world lib-world
-                                                     :table-rows (load-failures-table-rows load-failures)
+                                                     :table-rows (load-failures-table-rows load-fail-results)
                                                      :time (test-grid-agent::pretty-fmt-time (get-universal-time)))
                                                :stream out)))))

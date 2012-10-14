@@ -5,37 +5,35 @@
 (in-package #:test-grid-reporting)
 
 (defun print-quicklisp-diff-report (report-file
-                                    all-failures
+                                    all-results
                                     new-quicklisp
                                     old-quicklisp)
-  (let* ((new-ql-fails (my-time ("last-ql-fails...")
-                         (subset all-failures
-                                 (lambda (failure)
-                                   (string= (lib-world failure) new-quicklisp)))))
-         (old-ql-fails (my-time ("prev-ql-fails...")
-                         (subset all-failures
-                                 (lambda (failure)
-                                   (string= (lib-world failure) old-quicklisp)))))
+  (let* ((new-ql-results (my-time ("last-ql-results...")
+                           (subset all-results
+                                   (lambda (result)
+                                     (string= (lib-world result) new-quicklisp)))))
+         (old-ql-results (my-time ("prev-ql-results...")
+                           (subset all-results
+                                   (lambda (result)
+                                     (string= (lib-world result) old-quicklisp)))))
          ;; only consider results for lisps which were tested on both quicklisp versions
-         (new-ql-lisps (remove-duplicates (mapcar #'lisp new-ql-fails) :test #'string=))
-         (old-ql-lisps (remove-duplicates (mapcar #'lisp old-ql-fails) :test #'string=))
+         (new-ql-lisps (remove-duplicates (mapcar #'lisp new-ql-results) :test #'string=))
+         (old-ql-lisps (remove-duplicates (mapcar #'lisp old-ql-results) :test #'string=))
          (common-lisps (intersection new-ql-lisps old-ql-lisps :test #'string=))
          (common-lisp-p (lambda (lisp) (member lisp common-lisps :test #'string=)))
          ;; now compute the diff between the results of two quicklisps,
          ;; considering only results from lisps tested on both versions.
          (diff (my-time ("fast-exclusive-or...")
-                 (fast-exclusive-or (subset new-ql-fails common-lisp-p :key #'lisp)
-                                    (subset old-ql-fails common-lisp-p :key #'lisp)
+                 (fast-exclusive-or (subset new-ql-results common-lisp-p :key #'lisp)
+                                    (subset old-ql-results common-lisp-p :key #'lisp)
                                     :test #'equal
-                                    :key (lambda (fail)
-                                           (list (libname fail)
-                                                 (lisp fail)
-                                                 (fail-spec fail)))))))
+                                    :key (lambda (result)
+                                           (list (libname result)
+                                                 (lisp result)
+                                                 (result-spec result)))))))
     (my-time ("print-pivot...")
       (print-pivot report-file
                    diff
                    :rows '((lisp string<) (libname string<))
                    :cols '((lib-world string<))
-                   :cell-printer (lambda (out cell-data)
-                                   (dolist (fail cell-data)
-                                     (format out "~A</br>" (failure-log-link fail #'fail-spec))))))))
+                   :cell-printer #'results-cell-printer))))
