@@ -137,7 +137,7 @@ Otherwise he may just ignore the condition."))
 ;;; Implementation
 ;;;
 
-;; excaping of parameters passed to
+;; escaping of parameters passed to
 ;; external-program:run is not required
 ;; by the external-program specification,
 ;; but sometimes necessary due to implementations
