@@ -73,7 +73,7 @@
     (system-name (load-result item))))
 
 (defmethod print-object ((result result) stream)
-  (print-unreadable-object (result stream)
+  (print-unreadable-object (result stream :type t :identity t)
     (format stream "~S ~S ~S ~S ~S"
             (lib-world result)
             (lisp result)

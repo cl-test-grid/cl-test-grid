@@ -65,8 +65,6 @@
                         (filter-lib-results db (lambda (lib-result test-run)
                                                  (declare (ignore test-run))
                                                  (getf lib-result :status)))))
-         (all-failures (my-time ("list-failures...")
-                         (list-failures db)))
          (all-results (my-time ("list-results...")
                         (list-results db))))
 
@@ -93,13 +91,13 @@
 
     (my-time ("Quicklisp diff...~%")
       (print-quicklisp-diff-report "quicklisp-diff.html"
-                                   all-failures
+                                   all-results
                                    "quicklisp 2012-09-09"
                                    "quicklisp 2012-08-11"))
 
     (my-time ("ECL load failures...~%")
       (print-load-failures "ecl-load-failures.html"
-                           all-failures
+                           all-results
                            "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
                            "quicklisp 2012-09-09"))
     (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c")
@@ -127,30 +125,30 @@
                              abcl-1.0.1))
       (my-time ("ABCL load failures...~%")
         (print-load-failures "abcl-load-failures.html"
-                             all-failures
+                             all-results
                              last-abcl
                              "quicklisp 2012-09-09")))
     (my-time ("CCL load failures...~%")
       (print-load-failures "ccl-load-failures.html"
-                           all-failures
+                           all-results
                            "ccl-1.8-f95-linux-x86"
                            "quicklisp 2012-09-09"))
     (my-time ("ACL load failures...~%")
       (print-load-failures "acl-load-failures.html"
-                           all-failures
+                           all-results
                            "acl-8.2a-linux-x86"
                            "quicklisp 2012-09-09"))
     (my-time ("CMUCL load failures...~%")
       (print-load-failures "cmucl-load-failures.html"
-                           all-failures
+                           all-results
                            "cmu-20c_release-20c__20c_unicode_-linux-x86"
                            "quicklisp 2012-09-09"))
     (my-time ("SBCL load failures...~%")
       (print-load-failures "sbcl-load-failures.html"
-                           all-failures
+                           all-results
                            "sbcl-1.0.57-linux-x86"
                            "quicklisp 2012-09-09"))
     (my-time ("library reports...")
       (print-library-reports all-results))
 
-    (print-demo-reports all-failures all-results)))
+    (print-demo-reports all-results)))
