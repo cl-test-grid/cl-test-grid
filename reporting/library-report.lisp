@@ -40,11 +40,11 @@
            (format s "<html><head><title>Library Reports | CL Test Grid</title></head>~%")
            (format s "  <body>~%")
            (format s "    <h2>Library Reports</h2>~%")           
-           (format s "    <ul>~%")
+           (format s "    <ol>~%")
            (my-time ("library index body")
              (format s "      ~{<li><a href=\"~(~a~).html\">~(~:*~a~)</a></li>~%~}"
                      (sort (copy-list libnames) #'string<)))
-           (format s "    </ul>~%")
+           (format s "    </ol>~%")
            (format s "  </body>~%")
            (format s "</html>~%")
            )))
