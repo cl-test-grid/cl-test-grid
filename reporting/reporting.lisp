@@ -105,15 +105,15 @@
       (print-compiler-diff "ecl-lisp-to-c.html"
                            all-results
                            "quicklisp 2012-09-09"
-                           new-ecl
-                           old-ecl))
+                           old-ecl
+                           new-ecl))
     (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-bytecode")
           (old-ecl "ecl-12.7.1-ce653d88-linux-x86-bytecode"))
       (print-compiler-diff "ecl-bytecode.html"
                            all-results
                            "quicklisp 2012-09-09"
-                           new-ecl
-                           old-ecl))
+                           old-ecl
+                           new-ecl))
 
     (let ((last-abcl "abcl-1.1.0-dev-svn-14164-fasl39-linux-java")
           (abcl-1.0.1 "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
@@ -121,8 +121,8 @@
         (print-compiler-diff "abcl.html"
                              all-results
                              "quicklisp 2012-09-09"
-                             last-abcl
-                             abcl-1.0.1))
+                             abcl-1.0.1
+                             last-abcl))
       (my-time ("ABCL load failures...~%")
         (print-load-failures "abcl-load-failures.html"
                              all-results
