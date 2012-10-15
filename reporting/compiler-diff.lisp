@@ -7,7 +7,7 @@
 (defun print-compiler-diff (report-file
                             all-results
                             last-quicklisp
-                            new-lisp old-lisp)
+                            old-lisp new-lisp)
   "Prints pivot with difference between results
 of two copilers - NEW-LISP and OLD-LISP - on the
 lib-world specified by LAST-QUICKLISP. The

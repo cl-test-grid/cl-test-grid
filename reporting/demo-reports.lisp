@@ -37,8 +37,8 @@
   (print-compiler-diff "demo/abcl-diff.html"
                        all-results
                        "quicklisp 2012-09-09"
-                       "abcl-1.1.0-dev-svn-14157-fasl39-linux-java"
-                       "abcl-1.0.1-svn-13750-13751-fasl38-linux-java")
+                       "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"
+                       "abcl-1.1.0-dev-svn-14157-fasl39-linux-java")
 
   (print-quicklisp-diff-report "demo/quicklisp-diff.html"
                                all-results
