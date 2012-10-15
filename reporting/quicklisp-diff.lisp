@@ -6,8 +6,8 @@
 
 (defun print-quicklisp-diff-report (report-file
                                     all-results
-                                    new-quicklisp
-                                    old-quicklisp)
+                                    old-quicklisp
+                                    new-quicklisp)
   (let* ((new-ql-results (my-time ("last-ql-results...")
                            (subset all-results
                                    (lambda (result)
