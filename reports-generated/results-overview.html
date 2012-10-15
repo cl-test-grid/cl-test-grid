@@ -111,7 +111,7 @@
 
 <ul class="table-of-contents">
     <li><a href="#accessing-db">Accessing the Test Results Database</a></li>
-    <li><a href="#failure-objects">FAILURE Objects</a></li>
+    <li><a href="#result-objects">RESULT Objects</a></li>
     <li><a href="#pivot-tables">Displaying Data - Pivot Tables</a></li>
     <li><a href="#comparing-results">Comparing Resutlts to Find Regressions</a></li>
     <li><a href="#combining-failures-and-dependencies">Combining Failures and Dependency Information</a></li>
@@ -140,144 +140,150 @@ CL-USER> (in-package #:test-grid-reporting)
 TEST-GRID-REPORTING> (defparameter *db* (test-grid-data:read-db))
 </pre></code>
 
-<h3 id="failure-objects">FAILURE Objects</h3>
+<h3 id="result-objects">RESULT Objects</h3>
 
 <p>In most cases we found it convenient to convert
-the database into a large list of <code>falure</code> objects:
+the database into a large list of <code>result</code> objects:
 <code><pre>
-TEST-GRID-REPORTING> (defparameter *all-failures* (list-failures *db*))</pre></code></p>
+TEST-GRID-REPORTING> (defparameter *all-results* (list-results *db*))</pre></code></p>
 
-<p>Having a list of <code>failures</code> it is easy to filter
+<p>Having a list of <code>result</code> it is easy to filter
 and match them using standard Common Lisp functions.</p>
 
-<p>The most interesting properties of the <code>falure</code> objects
+<p>The most interesting properties of the <code>result</code> objects
 are accessed using the following functions:
 <pre><code>
-(<b>fail-spec</b> failure)
-=> Failure description in one of the following forms:
+(<b>result-spec</b> result)
+=> Result description in one of the following forms:
 
-   <b>(:load "some-asdf-system-name" [:fail | :crash | :timeout])</b>
+   <b>(:load "some-asdf-system-name" [:ok | :fail | :crash | :timeout])</b>
 
-       Returned if the failure object represents failure of loading an ASDF system.
+       Returned if the result object represents result of loading an ASDF system.
 
-       Here the notation [:fail | :crash | :timeout] shoud be read as "one of :fail, :crash or :timeout".
+       Here the notation [:ok | :fail | :crash | :timeout] shoud be read as "one of :ok, :fail, :crash or :timeout".
+
+       :ok means the load operation succeeded;
 
        :fail means the load operation failed;
 
        :crash means the child lisp process loading asdf 
-              system exited without returning a result;
-
+            system exited without returning a result;
+            
        :timeout means that the child lisp process
-              hasn't finished in a specified timeout time.
+            hasn't finished in a specified timeout time.
 
-   <b>(:test-case "some-test-case-name" [:fail | :unexpected-ok])</b>
+   <b>(:test-case "some-test-case-name" [:fail | :known-fail | :unexpected-ok])</b>
 
-       Returned if the failure object represents failure of particular test case.
+       represents abnormal result of a single test case.
 
        :fail means the test case has failed;
 
-       :unexpected-ok means that the testcase completed
-                      successfully, but the library developers
-                      have this testcase marked as a known failure
-                      (known failures is a feature provided
-                      by some test frameworks; it may be used
-                      by the developers, for example, to mark
-                      test cases which are impossible to fix right now,
-                      maybe due to lack of support or bugs
-                      in CL implemntatons, 3rd party libraries, or similar).
+       :known-fail also means that the test case has failed, but
+            the library developers have this testcase
+            marked as a known failure (known failures is a feature
+            provided by some test frameworks; it may be used
+            by the developers, for example, to mark
+            test cases which are impossible to fix right now,
+            maybe due to lack of support or bugs
+            in CL implemntatons, 3rd party libraries, or similar);
+            
+       :unexpected-ok means the testcase marked as known failure
+            has not failed.
 
-   <b>(:whole-test-suite [:no-resource | :fail | :crash | :timeout])</b>
+   <b>(:whole-test-suite [:ok | :no-resource | :fail | :crash | :timeout])</b>
 
        Result for a whole test suite.
 
+       :ok None of the testcases has failed.
+
        :fail Either some test cases failed but the test
-             framework does not allow to distinguish
-             particular test case, or some problem
-             prevented the test suite from running at all.
-             Example of such a problem may be that the
-             testsuite or one of it's dependencies
-             doesn't compile/load due to errors
-             in lisp code; or absense of necessary
-             foreign library on the test system.
+            framework does not allow to distinguish
+            particular test case, or some problem
+            prevented the test suite from running at all.
+            Example of such a problem may be that the
+            testsuite or one of it's dependencies
+            doesn't compile/load due to errors
+            in lisp code; or absense of necessary
+            foreign library on the test system.
 
        :no-resource This status is designed to represent
-             situations when testsuite can not be run due
-             to absense of necessary enviromnent.
+            situations when testsuite can not be run due
+            to absense of necessary enviromnent.
 
-             For example, CFFI test suite needs a small
-             C library to be build. On Windows user must
-             do it manually. If this library is not found,
-             testgrid adapter of the CFFI test suite returns :no-resource.
+            For example, CFFI test suite needs a small
+            C library to be build. On Windows user must
+            do it manually. If this library is not found,
+            testgrid adapter of the CFFI test suite returns :no-resource.
 
-             Or, external-program test suite can only be
-             run on *nix platforms. On Windows testgrid
-             adapter returns :no-resource.
+            Or, external-program test suite can only be
+            run on *nix platforms. On Windows testgrid
+            adapter returns :no-resource.
 
-             The :no-resource handling in testsuite adapters
-             is optional, as every testsuite may have different
-             requirements.
+            The :no-resource handling in testsuite adapters
+            is optional, as every testsuite may have different
+            requirements.
 
-             Today, most testsuite adapters in testgrid
-             do not implemente such a handling, and
-             in case of any problems when running
-             the tests :fail is recorded.
+            Today, most testsuite adapters in testgrid
+            do not implemente such a handling, and
+            in case of any problems when running
+            the tests :fail is recorded.
 
        :crash means the child lisp process running the test suite
-              exited without returning a result;
+            exited without returning a result;
         
        :timeout means that the child lisp process
-              hasn't finished in a specified timeout time.
+            hasn't finished in a specified timeout time.
 
-(<b>libname</b> failure)
+(<b>libname</b> result)
 => Name of the library tested - a keyword, like :babel, :alexandria, etc.
 
-(<b>lisp</b> failure)
+(<b>lisp</b> result)
 => Lisp implementation identifier - a string, for example "clisp-2.49-unix-x86_64",
    "cmu-20c_release-20c__20c_unicode_-linux-x86", "sbcl-1.0.54-linux-x64"
 
-(<b>lib-world</b> failure)
+(<b>lib-world</b> result)
 => A string naming the set of libraries and their versions used during testing,
    for example "quicklisp 2012-07-03", "quicklisp 2012-08-11".
 
-(<b>system-name</b> failure)
-=> If the failure descibes ASDF system load result, then the
+(<b>system-name</b> result)
+=> If the result descibes ASDF system load result, then the
    name of that ASDF system - a string, like "arnesi", "anaphora".
    Otherwize NIL.
 
-(<b>log-uri</b> failure)
+(<b>log-uri</b> result)
 => URI of the stored online output produced by the child lisp process
    performed the test suite or tested the ASDF system load.
 </pre></code>
 </p>
 
-<p>For example, lets find all the alexandria failures on quickisp 2012-09-09:
+<p>For example, lets find all the alexandria results on quickisp 2012-09-09:
 <code><pre>
-TEST-GRID-REPORTING> (remove-if-not (lambda (fail)
-                                      (and (eq :alexandria (libname fail))
-                                           (string= "quicklisp 2012-09-09" (lib-world fail))))
-                                    *all-failures*)
+TEST-GRID-REPORTING> (remove-if-not (lambda (result)
+                                      (and (eq :alexandria (libname result))
+                                           (string= "quicklisp 2012-09-09" (lib-world result))))
+                                    *all-results*)
 
-=> (#&lt;"quicklisp 2012-09-09" "acl-8.2a-linux-x86" :ALEXANDRIA (:TEST-CASE "copy-hash-table.1" :FAIL) "http://cl-test-grid.appspot.com/blob?key=392081"&gt;
-    #&lt;"quicklisp 2012-09-09" "acl-8.2a-linux-x86" :ALEXANDRIA (:TEST-CASE "type=.3" :FAIL) "http://cl-test-grid.appspot.com/blob?key=392081"&gt;
-    #&lt;"quicklisp 2012-09-09" "acl-8.2a-linux-x86" :ALEXANDRIA (:TEST-CASE "type=.4" :FAIL) "http://cl-test-grid.appspot.com/blob?key=392081"&gt;
+=> (#&lt;RESULT "quicklisp 2012-09-09" "abcl-1.0.1-svn-13750-13751-fasl38-macosx-java" :ALEXANDRIA (:WHOLE-TEST-SUITE :FAIL) "http://cl-test-grid.appspot.com/blob?key=388372" #x2106FA376D&gt;
+    #&lt;RESULT "quicklisp 2012-09-09" "ecl-12.7.1-dfc94901-linux-x86-lisp-to-c" :ALEXANDRIA (:LOAD "alexandria" :OK) "http://cl-test-grid.appspot.com/blob?key=389242" #x2106FD890D&gt;
+    #&lt;RESULT "quicklisp 2012-09-09" "ecl-12.7.1-dfc94901-linux-x86-lisp-to-c" :ALEXANDRIA (:LOAD "alexandria-tests" :OK) "http://cl-test-grid.appspot.com/blob?key=386272" #x2106FD887D&gt;
     ...)
 </pre></code>
 
 </p>
 <p>
 For better readability, package <code>test-grid-reporting</code>
-defines the following function instead of <code>cl:remove-if-not</code>:
+defines the following function instead of <code style="white-space: nowrap">cl:remove-if-not</code>:
 <code><pre>
 (defun subset (superset predicate &key key)
   (remove-if-not predicate superset :key key))
 </code></pre>
 Example:
 <code><pre>
-TEST-GRID-REPORTING> (defparameter *some-failures*
-                       (subset *all-failures*
-                               (lambda (fail)
-                                 (and (member (libname fail) '(:alexandria :let-plus))
-                                      (member (lib-world fail)
+TEST-GRID-REPORTING> (defparameter *some-results*
+                       (subset *all-results*
+                               (lambda (result)
+                                 (and (member (libname result) '(:alexandria :let-plus))
+                                      (member (lib-world result)
                                               '("quicklisp 2012-09-09" "quicklisp 2012-08-11")
                                               :test #'string=)))))
 </code></pre>
@@ -286,31 +292,52 @@ TEST-GRID-REPORTING> (defparameter *some-failures*
 <h3 id="pivot-tables">Displaying Data - Pivot Tables</h3>
 
 <p>
-A convenient way to overview the results found is to
-layout them into a table with sorted rows and columns
-and thus grouping the results into groups and subgroups
-according values of the properties selected for the rows and
-columns.</p>
+To understand a large result set it is necessary to group
+resuls into groups and further soubroups.</p>
 
-</>We have tools for that:
+<p>Pivot tables provide more or less universal solution for
+grouping and sorting data according to values of selected
+properties of data objects.</p>
+
+<p>Lets layout the <code>*some-results*</code> into a pivot:
 
 <code><pre>
-TEST-GRID-REPORTING> (print-pivot "demo/some-failures.html"
-                                  *some-failures*
+TEST-GRID-REPORTING> (print-pivot "demo/some-results.html"
+                                  *some-results*
                                   :rows '((lib-world string>) (lisp string<))
                                   :cols '((libname string<))
                                   :cell-printer (lambda (out cell-data)
-                                                  (dolist (fail cell-data)
+                                                  (dolist (result cell-data)
                                                     (format out
                                                             "&lt;a href=\"~a\"&gt;~a&lt;/a&gt;&lt;/br&gt;" 
-                                                            (log-uri fail)
-                                                            (fail-spec fail)))))
+                                                            (log-uri result)
+                                                            (result-spec result)))))
 </code></pre>
 
-Please review the resulting file: <a href="demo/some-failures.html">cl-test-grid/reports-generated/demo/some-failures.html</a>.
-It is easy to see failures of each library grouped by quicklisp and lisp implementation.
-Clicking the failure description refers to the log file, where the details may be found.
-</p>
+Please review the resulting file: <a href="demo/some-results.html">cl-test-grid/reports-generated/demo/some-results.html</a>.
+You may see that the table is build according to the parameters we specified: row headers contain
+<code style="white-space: no-wrap">lib-world</code> and <code>lisp</code> values, column headers contain
+<code>libname</code>. The soring corresponds to what is specified for every field.</p>
+
+<p>The <code style="white-space: no-wrap">:cell-printer</code> parameter is
+a function responsible for printing set of results falling into a single pivot cell.
+The function we pass prints results in form of HTML links, so that
+clicking the resutl refers to the log file, where the details may be found.</p>
+
+<p>Such a <code style="white-space: no-wrap">:cell-printer</code> function
+is often useful, therefore <code style="white-space: no-wrap">test-grid-reporting</code>
+defines ready to use function <code style="white-space: no-wrap">results-cell-printer</code>.
+So we can write instead:
+<code><pre>
+TEST-GRID-REPORTING> (print-pivot "demo/some-results2.html"
+                                  *some-results*
+                                  :rows '((lib-world string&gt;) (lisp string&lt;))
+                                  :cols '((libname string&lt;))
+                                  :cell-printer #'results-cell-printer)
+</code></pre>
+Please review the resulting file: <a href="demo/some-results2.html">cl-test-grid/reports-generated/demo/some-results2.html</a>.
+As you see, it is the same table, but <code style="white-space: no-wrap">results-cell-printer</code> 
+takes care to colorize the results.</p>
 
 <h3 id="comparing-results">Comparing Resutlts to Find Regressions</h3>
 
@@ -319,7 +346,7 @@ to ensure there is no regressions in the new version.</p>
 
 <p>This is easy to do using the tools introduced above. The apporach:
 <ol>
-    <li>select two subsets of failures: of the old compiler and of the new one</li>
+    <li>select two subsets of results: of the old compiler and of the new one</li>
     <li>compute <code>exclusive-or</code> of these two subsets</li>
     <li>print the resut as a pivot where results of two compilers
         are represented side by side</li>
@@ -338,38 +365,40 @@ is one of <code>cl:eq</code>, <code>cl:eql</code>, <code>cl:equal</code> or <cod
 and some intermediate development version:
 <code><pre>
 TEST-GRID-REPORTING> (print-compiler-diff "demo/abcl-diff.html"
-                                          *all-failures*
+                                          *all-results*
                                           "quicklisp 2012-09-09"
                                           "abcl-1.1.0-dev-svn-14157-fasl39-linux-java"
                                           "abcl-1.0.1-svn-13750-13751-fasl38-linux-java")
 </code></pre>
 
 The resulting report is stored in <a href="demo/abcl-diff.html">cl-test-grid/reports-generated/demo/abcl-diff.html</a>.
-On the left column are the failures happened for the old release, but not happened for the new release
-(i.e. improvements). On the right column the failures happened for the new version, but not
-happened for the old release (regressions).</p>
+On the left column are the results collected from the old release, but found in the new release.
+On the right column the results collected for the new version, but not
+found for the old release.</p>
+
+<p>If the left column has green result and the right has red result, it is a regression</p>
+<p>If the left column has red result and the right has green result, it is an improvement</p>
 
 <p>Lets compare two versions of Quicklisp.</p>
 
-<p>The same approach: <code>exclusive-or</code> of two sets of failures: for old
+<p>The same approach: <code>exclusive-or</code> of two sets of results: for old
 Quicklisp version and for new one.</p>
 
 <p>The source code: <a href="https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/quicklisp-diff.lisp">cl-test-grid/reporting/quicklisp-diff.lisp</a>.
-As you can see, additional care is taken to ensure only failures
+As you can see, additional care is taken to ensure only results
 of CL implementations tested on both Quicklisp versions are
 considered in the report</p>
 
 <p>
 <code><pre>
 TEST-GRID-REPORTING> (print-quicklisp-diff-report "demo/quicklisp-diff.html"
-                                                  *all-failures*
+                                                  *all-results*
                                                   "quicklisp 2012-09-09"
                                                   "quicklisp 2012-08-11")
 </code></pre>
 The resulting report is stored in <a href="demo/quicklisp-diff.html">cl-test-grid/reports-generated/demo/quicklisp-diff.html</a>.
-On the left column are the failures happened for the old quicklisp version, but not happened for the new version
-(i.e. improvements). On the right column the failures happened for the new version, but not
-happened for the old version (regressions).</p>
+On the left column are the results collected for the old quicklisp version, but not found in the new version.
+On the right column the results collected for the new version, but not found for the old version.</p>
 
 <h3> Move Pivot Reports Examples - Testsuite Results </h3>
 
@@ -542,7 +571,7 @@ the most importatnt to fix.</p>
     blocks them exclusively)</li>
 </ul></p>
 
-<p>For example, on particular version of ECL closer-mop fails to load,
+<p>For example, on particular (old) version of ECL closer-mop failed to load,
 and there are 123 other ASDF systems (related to 59 projects),
 which depend on closer-mop and closer-mop is the only failing
 dependency for them (in other words, closer-mop blocks them exclusively).</p>
@@ -554,7 +583,7 @@ in this case we will at least reveal these problems).</p>
 <p>Here is how to build such a report:
 <code><pre>
 TEST-GRID-REPORTING> (print-load-failures "demo/ecl-load-failures.html"
-                                          *all-failures*
+                                          *all-results*
                                           "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
                                           "quicklisp 2012-09-09")
 </code></pre>
@@ -583,7 +612,7 @@ to sort by multiple columns).</p>
     <a href="sbcl-load-failures.html">SBCL</a>
 </p>
 
-<p>Note, there is no way (or at least non trivial) to extract the
+<p>Note, there is no way (or at least it is not trivial) to extract the
 dependency information 100% precise. ASDF systems are just lisp code,
 sometimes they contain reader conditionals, sometimes
 <code>asdf:load-op</code> invocations, instead of just putting the systems
