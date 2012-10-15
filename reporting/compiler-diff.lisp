@@ -25,9 +25,16 @@ reports-generated/<REPORT-FILE>."
                                   old-lisp-results
                                   :test #'equal
                                   :key (lambda (result)
-                                         (list (libname result) (result-spec result))))))
+                                         (list (libname result) (result-spec result)))))
+         ;; we can not be sure that (string<  old-lisp new-lisp) == t,
+         ;; so create another comparator fuction whch guarantees that
+         ;; old-lisp is always in the left column.
+         (two-lisps (list old-lisp new-lisp))
+         (lisp-comparator (lambda (lisp-a lisp-b)
+                            (< (position lisp-a two-lisps :test #'string=)
+                               (position lisp-b two-lisps :test #'string=)))))
     (print-pivot report-file
                  diff
                  :rows '((libname string<))
-                 :cols '((lib-world string>) (lisp string<))
+                 :cols `((lib-world string>) (lisp ,lisp-comparator))
                  :cell-printer #'results-cell-printer)))
