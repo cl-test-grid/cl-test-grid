@@ -24,7 +24,13 @@
                                    (format out
                                            "<a href=\"~a\">~a</a></br>"
                                            (log-uri result)
-                                           (result-spec result))))))
+                                           (result-spec result)))))
+
+    (print-pivot "demo/some-results2.html"
+                 some-results
+                 :rows '((lib-world string>) (lisp string<))
+                 :cols '((libname string<))
+                 :cell-printer #'results-cell-printer))
 
 
   ;; diff, compare results to find regressions
