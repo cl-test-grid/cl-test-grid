@@ -42,8 +42,8 @@
 
   (print-quicklisp-diff-report "demo/quicklisp-diff.html"
                                all-results
-                               "quicklisp 2012-09-09"
-                               "quicklisp 2012-08-11")
+                               "quicklisp 2012-08-11"
+                               "quicklisp 2012-09-09")
 
   ;; failures by dependencies
 
