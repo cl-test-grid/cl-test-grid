@@ -36,7 +36,7 @@
 
 (defparameter *last-ecl-version* "bca1f405")
 
-(format t "*** overview of all the results of the last ECl on the lates Quicklisp...~%")
+(format t "*** overview of all the results of the last ECL on the lates Quicklisp...~%")
 ;;; This table will include all the ECL kinds
 ;;; (bytecode and lisp-to-c, linux, windows, etc.)
 ;;; Every ECL will have a separate column.
