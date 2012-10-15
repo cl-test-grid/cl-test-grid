@@ -60,14 +60,14 @@
   (print-compiler-diff "ecl/ecl-diff-lisp-to-c.html"
                        *all-results*
                        *last-quicklisp*
-                       new-ecl-lisp-to-c
-                       old-ecl-lisp-to-c)
+                       old-ecl-lisp-to-c
+                       new-ecl-lisp-to-c)
   
   (print-compiler-diff "ecl/ecl-diff-bytecode.html"
                        *all-results*
                        *last-quicklisp*
-                       new-ecl-bytecode
-                       old-ecl-bytecode)
+                       old-ecl-bytecode
+                       new-ecl-bytecode)
   
   (format t "*** load failures + dependencies...~%")
   
