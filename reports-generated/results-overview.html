@@ -295,7 +295,7 @@ TEST-GRID-REPORTING> (defparameter *some-results*
 To understand a large result set it is necessary to group
 resuls into groups and further soubroups.</p>
 
-<p>Pivot tables provide more or less universal solution for
+<p>Pivot tables provide a more or less universal solution for
 grouping and sorting data according to values of selected
 properties of data objects.</p>
 
@@ -321,7 +321,7 @@ You may see that the table is build according to the parameters we specified: ro
 
 <p>The <code style="white-space: no-wrap">:cell-printer</code> parameter is
 a function responsible for printing set of results falling into a single pivot cell.
-The function we pass prints results in form of HTML links, so that
+The function we pass prints results in the form of HTML links, so that
 clicking the resutl refers to the log file, where the details may be found.</p>
 
 <p>Such a <code style="white-space: no-wrap">:cell-printer</code> function
@@ -342,7 +342,7 @@ takes care to colorize the results.</p>
 <h3 id="comparing-results">Comparing Resutlts to Find Regressions</h3>
 
 <p>Lets say we want to compare new version of a compiler with an old version,
-to ensure there is no regressions in the new version.</p>
+to ensure there are no regressions in the new version.</p>
 
 <p>This is easy to do using the tools introduced above. The apporach:
 <ol>
@@ -356,7 +356,7 @@ to ensure there is no regressions in the new version.</p>
 The function <code>compiler-diff</code> implements this approach.
 See its source code in <a href="https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/compiler-diff.lisp">cl-test-grid/reporting/compiler-diff.lisp</a>.
 Note, it calls <code>fast-exclusive-or</code>. This function has exactly the
-same prototype as <code>cl:set-exclusive-or</code>,
+same prototype as <code style="white-space: no-wrap">cl:set-exclusive-or</code>,
 but takes advantage of hash tables if the <code>:test</code> parameter
 is one of <code>cl:eq</code>, <code>cl:eql</code>, <code>cl:equal</code> or <code>cl:equalp</code>.
 </p>
@@ -372,7 +372,7 @@ TEST-GRID-REPORTING> (print-compiler-diff "demo/abcl-diff.html"
 </code></pre>
 
 The resulting report is stored in <a href="demo/abcl-diff.html">cl-test-grid/reports-generated/demo/abcl-diff.html</a>.
-On the left column are the results collected from the old release, but found in the new release.
+On the left column are the results collected from the old release, but not found in the new release.
 On the right column the results collected for the new version, but not
 found for the old release.</p>
 
