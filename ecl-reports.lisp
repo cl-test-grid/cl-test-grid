@@ -12,6 +12,7 @@
   (pushnew this-file-dir asdf:*central-registry* :test #'equal))
 
 (ql:quickload :test-grid-reporting)
+(ql:quickload :local-result-store)
 
 ;; The test-grid-reporting package does 
 ;; not export any public API yet,
@@ -22,13 +23,15 @@
 (in-package :test-grid-reporting)
 
 (format t "*** reading the test results database...~%")
-;;; Temporary, for the sake of demostration,
-;;; this code uses the official test results
-;;; file - please run
-;;;     git clone git@github.com:cl-test-grid/cl-test-grid-results.git
-;;; Later we will change the code to use local file
-;;; storage of ECL test results.
-(defparameter *db* (test-grid-data:read-db))
+
+(defparameter *db*
+  (list :version 4
+        :runs (local-result-store:list-test-run-results #P"your/local-resuts/directory/"))
+  ;; alternatively, if you want to use the oficcial resutls DB,
+  ;; first git clone git@github.com:cl-test-grid/cl-test-grid-results.git
+  ;; and use:
+  ;; (test-grid-data:read-db)
+  )
 
 (defparameter *all-results* (list-results *db*))
 
