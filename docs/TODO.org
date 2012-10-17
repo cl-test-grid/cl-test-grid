@@ -139,6 +139,15 @@
 
 ** DONE remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
    CLOSED: [2012-10-14 Вс 02:36]
+** DONE Document the RESULT objects instead of FAILURE. Link to the library reports.
+   CLOSED: [2012-10-15 Пн 14:17]
+** DONE generate reports for quicklisp 2012-10-13
+   CLOSED: [2012-10-17 Ср 03:27]
+** DONE fix the quicklisp diff report so that table cell which don't have a counterpart are not displayed
+   CLOSED: [2012-10-17 Ср 03:27]
+   I.e. if a library was testsed on that compiler in new quicklisp,
+   but was not in the previous quicklisp, exclude this row from the report.
+** TODO widely announce library reports, so that the developers know where to find test results
 ** TODO [6 h] Prevent HTML injection via test-run-info
 ** TODO [4 h] document, for each CL community role, how he can benefit from testgrid
    - library mainaner:
@@ -170,7 +179,8 @@
      - giving his ASDF system see what dependencies
        are broken on what platform
 
-** TODO [6 h] Document the RESULT objects instead of FAILURE. Link to the library reports.
+** TODO [1 h] link to the library reports from the Results Overview page
+** TODO [4 h] file system results storage for Juan Jose
 ** TODO terminology improvement
   - db format: rename?
                   :libname -> :project
@@ -192,6 +202,13 @@
         Look for help from http://chart.ravenbrook.com/ ?
 ** TODO has-regressions-p - cover all the possible cases by unit tests?
 * 0.7.0 Wrap-up the active development phase
+** TODO [40+ h] Immediate test results avaiability, without waiting for admin
+   - Store test results locally?
+   - Provide a script example, whcih after completing the tests
+     generates necessary reports from local test results
+     (optionally merged with the global db)
+   - Or maybe instead create a server with accepts results
+     and makes them available without participation of admin?
 ** TODO [40 h] Move online log storage to Amazon S3 from Google App Engine?
   We are already close to limit of free GAE resources
   (mostly on datastore write operations, several of which
@@ -215,13 +232,6 @@
   MD5 for every log before submit and compare with
   ETag returned by S3 in HTTP header? Can it help?
 
-** TODO [40+ h] Immediate test results avaiability, without waiting for admin
-   - Store test results locally?
-   - Provide a script example, whcih after completing the tests
-     generates necessary reports from local test results
-     (optionally merged with the global db)
-   - Or maybe instead create a server with accepts results
-     and makes them available without participation of admin?
 ** TODO [24 h] document the code base
 ** TODO [8 h] security: agent runs lot of code provided by unknown peple
    Discuss with Zach, what we know about these people

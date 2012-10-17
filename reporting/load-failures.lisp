@@ -37,6 +37,8 @@
                             lisp
                             lib-world)
   (let ((load-fail-results (load-failures-of all-results lisp lib-world)))
+    (unless load-fail-results
+      (cerror "Build the empty report." "No load failures for the ~A and ~A found." lisp lib-world))
     (with-report-file (out report-file)
       (let ((html-template:*string-modifier* #'cl:identity))
         (html-template:fill-and-print-template (src-file "load-failures-report-template.html")
