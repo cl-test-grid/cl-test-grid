@@ -66,7 +66,10 @@
                                                  (declare (ignore test-run))
                                                  (getf lib-result :status)))))
          (all-results (my-time ("list-results...")
-                        (list-results db))))
+                        (list-results db)))
+         (last-two-quicklisps (largest #'lib-world all-results :count 2))
+         (new-quicklisp (first last-two-quicklisps))
+         (prev-quicklisp (second last-two-quicklisps)))
 
     (my-time ("test runs..")
       (with-report-file (out "test-runs-report.html")
@@ -92,62 +95,72 @@
     (my-time ("Quicklisp diff...~%")
       (print-quicklisp-diff-report "quicklisp-diff.html"
                                    all-results
-                                   "quicklisp 2012-08-11"
-                                   "quicklisp 2012-09-09"))
+                                   prev-quicklisp
+                                   new-quicklisp))
 
-    (my-time ("ECL load failures...~%")
-      (print-load-failures "ecl-load-failures.html"
+    (my-time ("ECL bytecode load failures...~%")
+      (print-load-failures "ecl-load-failures-bytecode.html"
                            all-results
-                           "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
-                           "quicklisp 2012-09-09"))
-    (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c")
-          (old-ecl "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"))
-      (print-compiler-diff "ecl-lisp-to-c.html"
+                           "ecl-12.7.1-bca1f405-linux-x86-bytecode"
+                           new-quicklisp))
+    (my-time ("ECL lisp-to-c load failures...~%")
+      (print-load-failures "ecl-load-failures-lisp-to-c.html"
                            all-results
-                           "quicklisp 2012-09-09"
-                           old-ecl
-                           new-ecl))
-    (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-bytecode")
-          (old-ecl "ecl-12.7.1-ce653d88-linux-x86-bytecode"))
-      (print-compiler-diff "ecl-bytecode.html"
-                           all-results
-                           "quicklisp 2012-09-09"
-                           old-ecl
-                           new-ecl))
+                           "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c"
+                           new-quicklisp))
 
-    (let ((last-abcl "abcl-1.1.0-dev-svn-14164-fasl39-linux-java")
+    ;; old ECL version hasn't (yet) been tested on the
+    ;; new quicklisp dist version, so we have nothing to
+    ;; compare with
+    ;;
+    ;; (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c")
+    ;;       (old-ecl "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"))
+    ;;   (print-compiler-diff "ecl-lisp-to-c.html"
+    ;;                        all-results
+    ;;                        new-quicklisp
+    ;;                        old-ecl
+    ;;                        new-ecl))
+    ;; (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-bytecode")
+    ;;       (old-ecl "ecl-12.7.1-ce653d88-linux-x86-bytecode"))
+    ;;   (print-compiler-diff "ecl-bytecode.html"
+    ;;                        all-results
+    ;;                        new-quicklisp
+    ;;                        old-ecl
+    ;;                        new-ecl))
+
+    (let ((last-abcl "abcl-1.1.0-dev-svn-14200-fasl39-linux-java")
           (abcl-1.0.1 "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
       (my-time ("ABCL diff...~%")
         (print-compiler-diff "abcl.html"
                              all-results
-                             "quicklisp 2012-09-09"
+                             new-quicklisp
                              abcl-1.0.1
                              last-abcl))
       (my-time ("ABCL load failures...~%")
         (print-load-failures "abcl-load-failures.html"
                              all-results
                              last-abcl
-                             "quicklisp 2012-09-09")))
+                             new-quicklisp)))
     (my-time ("CCL load failures...~%")
       (print-load-failures "ccl-load-failures.html"
                            all-results
                            "ccl-1.8-f95-linux-x86"
-                           "quicklisp 2012-09-09"))
+                           new-quicklisp))
     (my-time ("ACL load failures...~%")
       (print-load-failures "acl-load-failures.html"
                            all-results
                            "acl-8.2a-linux-x86"
-                           "quicklisp 2012-09-09"))
+                           new-quicklisp))
     (my-time ("CMUCL load failures...~%")
       (print-load-failures "cmucl-load-failures.html"
                            all-results
                            "cmu-20c_release-20c__20c_unicode_-linux-x86"
-                           "quicklisp 2012-09-09"))
+                           new-quicklisp))
     (my-time ("SBCL load failures...~%")
       (print-load-failures "sbcl-load-failures.html"
                            all-results
                            "sbcl-1.0.57-linux-x86"
-                           "quicklisp 2012-09-09"))
+                           new-quicklisp))
     (my-time ("library reports...")
       (print-library-reports all-results))
 
