@@ -4,6 +4,33 @@
 
 (in-package #:test-grid-reporting)
 
+(defun result-spec-test (result)
+  "Consider result-spec as a pair of test and outcome.
+For example (:load \"some-system\" :ok),
+here (:load \"some-system\") is the test and :ok is the outcome.
+Or (:whole-test-suite :ok) - :whole-test-suite is a test
+and :ok is an outcome.
+
+Returns test part of the result-spec."
+
+  (case (car (result-spec result))
+    (:whole-test-suite :whole-test-sute)
+    (otherwise (subseq (result-spec result) 0 2)))
+
+  ;; TODO: the result-spec syntax is irregular
+  ;; because test is sometime specified by two values -
+  ;; (:load "some-system"), and sometimes just as
+  ;; :whole-test-suite. For better regularity
+  ;; it would be good to add test suite name
+  ;; (actuall the project name, because
+  ;; we merge all the test suites of a project
+  ;; into a single testsuite).
+  ;;
+  ;; In short. Consider changing
+  ;; (:whole-test-site :ok) to
+  ;; (:whole-test-suite :alexandria :ok).
+  )
+
 (defun print-quicklisp-diff-report (report-file
                                     all-results
                                     old-quicklisp
@@ -16,16 +43,20 @@
                            (subset all-results
                                    (lambda (result)
                                      (string= (lib-world result) old-quicklisp)))))
-         ;; only consider results for lisps which were tested on both quicklisp versions
-         (new-ql-lisps (remove-duplicates (mapcar #'lisp new-ql-results) :test #'string=))
-         (old-ql-lisps (remove-duplicates (mapcar #'lisp old-ql-results) :test #'string=))
-         (common-lisps (intersection new-ql-lisps old-ql-lisps :test #'string=))
-         (common-lisp-p (lambda (lisp) (member lisp common-lisps :test #'string=)))
+         ;; on consider result of lisp/libraries/tests performed on both quicklisps
+         (new-ql-tests (group-by new-ql-results (list #'lisp #'libname #'result-spec-test)))
+         (old-ql-tests (group-by old-ql-results (list #'lisp #'libname #'result-spec-test)))
+         (tested-on-both-lib-worlds-p (lambda (result)
+                                        (let ((key (list (lisp result)
+                                                         (libname result)
+                                                         (result-spec-test result))))
+                                          (and (gethash key new-ql-tests)
+                                               (gethash key old-ql-tests)))))
          ;; now compute the diff between the results of two quicklisps,
          ;; considering only results from lisps tested on both versions.
          (diff (my-time ("fast-exclusive-or...")
-                 (fast-exclusive-or (subset new-ql-results common-lisp-p :key #'lisp)
-                                    (subset old-ql-results common-lisp-p :key #'lisp)
+                 (fast-exclusive-or (subset new-ql-results tested-on-both-lib-worlds-p)
+                                    (subset old-ql-results tested-on-both-lib-worlds-p)
                                     :test #'equal
                                     :key (lambda (result)
                                            (list (libname result)
