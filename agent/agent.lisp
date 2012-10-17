@@ -21,11 +21,17 @@
    (work-dir :initform (default-work-dir))
    ;; own slots
    (persistence :type persistence :accessor persistence)
-   (blobstore :accessor blobstore)
+   (blobstore :accessor blobstore :initform (make-gae-blobstore))
    (project-lister :type project-lister :accessor project-lister)))
 
 (defmethod make-agent ()
   (make-instance 'agent-impl))
+
+(defun make-gae-blobstore ()
+  (test-grid-gae-blobstore:make-blob-store :base-url
+                                           ;; during development of GAE blob storage
+                                           ;; :base-url may be "http://localhost:8080"
+                                           "http://cl-test-grid.appspot.com"))
 
 ;;; Working directory structure
 (defun test-output-base-dir (agent)
@@ -254,12 +260,7 @@ the PREDICATE."
       (log:config :daily (log-file agent) :immediate-flush)
       (let ((*response-file-temp-dir* (work-dir agent)))
         ;; finish the agent initialization
-        (setf (persistence agent) (init-persistence (persistence-file agent))
-              (blobstore agent) (test-grid-gae-blobstore:make-blob-store
-                                 :base-url
-                                 ;; during development of GAE blob storage
-                                 ;; :base-url may be "http://localhost:8080"
-                                 "http://cl-test-grid.appspot.com"))
+        (setf (persistence agent) (init-persistence (persistence-file agent)))
         (check-config agent)
         (ensure-has-id agent)
         (say-hello-to-admin agent)
