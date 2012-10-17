@@ -30,8 +30,10 @@
 (assert (string= "../../" (reports-root-dir-relative-path "demo/subdir/abc.html")))
 
 (defun with-report-file-impl (filename handler-func)
-  (let ((reports-dir (reports-dir)))
-    (with-open-file (out (merge-pathnames filename reports-dir)
+  (let* ((reports-dir (reports-dir))
+         (output-file (merge-pathnames filename reports-dir)))
+    (ensure-directories-exist output-file)
+    (with-open-file (out output-file
                          :direction :output
                          :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                          :if-exists :supersede
