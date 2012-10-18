@@ -1,19 +1,20 @@
 * Collaborative testing of Common Lisp libraries.
 
-Test Results:
+  Test Results:
+
 - for library developer: [[http://common-lisp.net/project/cl-test-grid/library/][status of your library on different lisps]]
-- for lisp implementation developer: 
-  + compare test results of two versions of your lisp implementation
+- for lisp implementation developer:
+  - compare test results of two versions of your lisp implementation
     example: [[http://common-lisp.net/project/cl-test-grid/abcl.html][diff between two versions of ABCL]]
-  + see what libraries are the most important to support  
-    * examples: 
+  - see what libraries are the most important to support  
+    - examples: 
       [[http://common-lisp.net/project/cl-test-grid/abcl-load-failures.html][ABCL]]
       [[http://common-lisp.net/project/cl-test-grid/acl-load-failures.html][ACL]]
       [[http://common-lisp.net/project/cl-test-grid/ccl-load-failures.html][CCL]]
       [[http://common-lisp.net/project/cl-test-grid/cmucl-load-failures.html][CMUCL]]
       [[http://common-lisp.net/project/cl-test-grid/ecl-load-failures.html][ECL]]
       [[http://common-lisp.net/project/cl-test-grid/sbcl-load-failures.html][SBCL]]
-    * [[http://common-lisp.net/project/cl-test-grid/#combining-failures-and-dependencies][explanation]]
+    - [[http://common-lisp.net/project/cl-test-grid/#combining-failures-and-dependencies][explanation]]
 - for Quicklisp maintainer: [[http://common-lisp.net/project/cl-test-grid/quicklisp-diff.html][compare test results of two quicklisp dist versions on various lisps]]
 - more: [[http://common-lisp.net/project/cl-test-grid/][work with the results database to build custom reports]]
 
