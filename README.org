@@ -1,6 +1,6 @@
 * Collaborative testing of Common Lisp libraries.
 
-*Test Results*
+*Test Results:*
 
 - for library developer: [[http://common-lisp.net/project/cl-test-grid/library/][status of your library on different lisps]]
 - for lisp implementation developer:
