@@ -5,7 +5,7 @@
 - for library developer: [[http://common-lisp.net/project/cl-test-grid/library/][status of your library on different lisps]]
 - for lisp implementation developer:
   - compare test results of two versions of your lisp implementation
-    example: [[http://common-lisp.net/project/cl-test-grid/abcl.html][diff between two versions of ABCL]]
+    - example: [[http://common-lisp.net/project/cl-test-grid/abcl.html][diff between two versions of ABCL]]
   - see what libraries are the most important to support  
     - examples: 
       [[http://common-lisp.net/project/cl-test-grid/abcl-load-failures.html][ABCL]]
