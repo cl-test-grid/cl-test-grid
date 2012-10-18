@@ -244,7 +244,7 @@ the PREDICATE."
                                           (user-email agent))
                                   "hello"))
 
-(defmethod main (agent)
+(defmethod main (agent &key quicklisp-dir lib-world)
   ;; setup logging for unhandled errors and warnings
   (handler-bind
       ((serious-condition (lambda (c)
@@ -264,10 +264,11 @@ the PREDICATE."
         (check-config agent)
         (ensure-has-id agent)
         (say-hello-to-admin agent)
-        (let* ((quicklisp-version (update-testing-quicklisp agent))
-               (lib-world (format nil "quicklisp ~A" quicklisp-version)))
-          (setf (project-lister agent) (init-project-lister (preferred-lisp agent)
-                                                            (private-quicklisp-dir agent)))
+        (let* ((quicklisp-dir (or quicklisp-dir (private-quicklisp-dir agent)))
+               (lib-world (or lib-world (let ((quicklisp-version (update-testing-quicklisp agent)))
+                                          (format nil "quicklisp ~A" quicklisp-version)))))
+          (setf (project-lister agent)
+                (init-project-lister (preferred-lisp agent) quicklisp-dir))
           ;; now do the work
           (run-tests agent lib-world)))))
   (log:info "Agent is done. Bye."))
