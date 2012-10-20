@@ -22,8 +22,7 @@
         ;; (this allows us to ensure the libraries are freshly recompiled
         ;; at every test run, if every test run specifies different
         ;; temporary directory for .fasl files.
-        (lib-dir (merge-pathnames (make-pathname :directory '(:relative "dists" "quicklisp" "software"))
-                                  private-quicklisp-dir))
+        (lib-dir private-quicklisp-dir)
         (libs-output-dir (merge-pathnames (make-pathname :directory '(:relative "private-quicklisp"))
                                           asdf-output-root-dir))
 

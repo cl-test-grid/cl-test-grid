@@ -29,7 +29,7 @@
 
 (in-package #:test-grid-agent)
 
-(defparameter +api-version+ '(1 . 3)
+(defparameter +api-version+ '(1 . 2)
   "Current version of the test-grid-agent API.")
 
 (defgeneric api-compatible-p (version-required &optional version-provided)
@@ -61,10 +61,4 @@ VERSION-PROVIDED defaults to TEST-GRID-AGENT:+API-VERSION+"))
 
 (defgeneric make-agent ())
 
-(defgeneric main (agent &key quicklisp-dir lib-world)
-  (:documentation
-   "Runs the AGENT. QUICKLISP-DIR and LIB-WORLD allow you to
-specify a customly patched version of Quicklisp located
-in the QUICKLISP-DIR directory on the file system
-and the LIB-WOLD identifier for it which will be
-recorded in test results."))
+(defgeneric main (agent))

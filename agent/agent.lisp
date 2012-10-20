@@ -22,7 +22,10 @@
    ;; own slots
    (persistence :type persistence :accessor persistence)
    (blobstore :accessor blobstore :initform (make-gae-blobstore))
-   (project-lister :type project-lister :accessor project-lister)))
+   (project-lister :type project-lister :accessor project-lister)
+   ;; custom-lib-world may be a plist in the form
+   ;; (:directory <pathname designator> :id <string>)
+   (custom-lib-world :type list :accessor custom-lib-world :initform nil)))
 
 (defmethod make-agent ()
   (make-instance 'agent-impl))
@@ -49,7 +52,9 @@
   (merge-pathnames relative-path (work-dir agent)))
 
 (defun private-quicklisp-dir (agent)
-  (workdir-child agent #P"quicklisp/"))
+  (if (custom-lib-world agent)
+      (getf (custom-lib-world agent) :directory)
+      (workdir-child agent #P"quicklisp/")))
 
 (defun persistence-file (agent)
   (workdir-child agent "persistence.lisp"))
@@ -59,6 +64,9 @@
   (merge-pathnames file-name (src-dir)))
 
 (defun update-testing-quicklisp (agent)
+  "Ensures the private quicklisp of the agent
+is updated to the recent version. Returns
+lib-world identifier of that quicklisp."
   (log:info "Ensuring the quicklisp used to download the libraries being tested is updated to the recent version...")
   (let ((quicklisp-version
          (with-response-file (response-file)
@@ -68,7 +76,7 @@
                                       `(cl-user::set-response ,response-file
                                                               (cl-user::do-quicklisp-update ,(private-quicklisp-dir agent)))))))
     (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
-    quicklisp-version))
+    (format nil "quicklisp ~A" quicklisp-version)))
 
 ;;; Configuration check functions
 (defun lisp-process-echo (lisp-exe str-to-echo)
@@ -244,7 +252,7 @@ the PREDICATE."
                                           (user-email agent))
                                   "hello"))
 
-(defmethod main (agent &key quicklisp-dir lib-world)
+(defmethod main (agent)
   ;; setup logging for unhandled errors and warnings
   (handler-bind
       ((serious-condition (lambda (c)
@@ -264,11 +272,28 @@ the PREDICATE."
         (check-config agent)
         (ensure-has-id agent)
         (say-hello-to-admin agent)
-        (let* ((quicklisp-dir (or quicklisp-dir (private-quicklisp-dir agent)))
-               (lib-world (or lib-world (let ((quicklisp-version (update-testing-quicklisp agent)))
-                                          (format nil "quicklisp ~A" quicklisp-version)))))
-          (setf (project-lister agent)
-                (init-project-lister (preferred-lisp agent) quicklisp-dir))
+        (setf (project-lister agent)
+              (init-project-lister (preferred-lisp agent) (private-quicklisp-dir agent)))
+        (let ((lib-world (or (getf (custom-lib-world agent) :id)
+                             (update-testing-quicklisp agent))))
           ;; now do the work
           (run-tests agent lib-world)))))
   (log:info "Agent is done. Bye."))
+
+
+;;; test-patched-quicklisp
+
+;; with-value: is there a standard tool for this?
+(defmacro with-value ((place value) &body body)
+  (let ((old (gensym "old-value-")))
+    `(let ((,old ,place))
+       (unwind-protect
+            (progn
+              (setf ,place ,value)
+              ,@body)
+         (setf ,place ,old)))))
+
+(defun test-patched-quicklisp (agent quicklisp-dir lib-world-id)
+  (with-value ((custom-lib-world agent)
+               (list :directory quicklisp-dir :id lib-world-id))
+    (main agent)))

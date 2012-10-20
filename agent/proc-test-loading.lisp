@@ -16,8 +16,7 @@
   :ok)
 
 (defun test-loading-main (log-file system-name private-quicklisp-dir asdf-output-root-dir)
-  (let ((lib-dir (merge-pathnames (make-pathname :directory '(:relative "dists" "quicklisp" "software"))
-                                  private-quicklisp-dir))
+  (let ((lib-dir private-quicklisp-dir)
         (libs-output-dir (merge-pathnames (make-pathname :directory '(:relative "private-quicklisp"))
                                           asdf-output-root-dir)))
 
