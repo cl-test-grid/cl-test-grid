@@ -25,6 +25,6 @@
   (declare (ignore run-info))
   (log:info "fake-blobstore.submit-run-info called"))
 
-(defmethod tell-admin ((blobstore fake-blobstore) subject body)
+(defmethod test-grid-blobstore:tell-admin ((blobstore fake-blobstore) subject body)
   (declare (ignore subject body))
   (log:info "fake-blobstore.tell-admin called"))
