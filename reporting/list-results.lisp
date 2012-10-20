@@ -39,7 +39,7 @@
 
 (defun asdf-load-results (lib-result)
   (mapcar (lambda (load-result)
-            (make-instance 'result 
+            (make-instance 'result
                            :lib-result lib-result
                            :result-spec (list :load
                                               (system-name load-result)
@@ -66,8 +66,8 @@
   (if (load-result item)
       (log-byte-length (load-result item))
       (log-byte-length (lib-result item))))
-(defmethod contact-email ((item failure))
-  (contact-email (lib-result result)))
+(defmethod contact-email ((item result))
+  (contact-email (lib-result item)))
 (defmethod system-name ((item result))
   (when (load-result item)
     (system-name (load-result item))))
