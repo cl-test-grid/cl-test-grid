@@ -28,7 +28,7 @@
 
 (defparameter *db*
   (list :version 4
-        :runs (local-result-store:list-test-run-results *local-db-path*)
+        :runs (local-result-store:list-test-run-results *local-db-path*))
   ;; alternatively, if you want to use the oficcial resutls DB,
   ;; first git clone git@github.com:cl-test-grid/cl-test-grid-results.git
   ;; and use:
