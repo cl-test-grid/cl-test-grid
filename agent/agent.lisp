@@ -138,22 +138,29 @@ lib-world identifier of that quicklisp."
 
 (defparameter +implementation-identifier-timeout+ (* 3 60))
 
-(defgeneric implementation-identifier (lisp-exe)
-  (:method ((lisp-exe lisp-exe:lisp-exe))
-    (with-response-file (response-file)
-      (lisp-exe:run-with-timeout +implementation-identifier-timeout+
-                                 lisp-exe
-                                 `(load ,(truename (src-file "proc-common.lisp")))
-                                 `(load ,(truename (src-file "proc-implementation-identifier.lisp")))
-                                 `(cl-user::set-response ,response-file
-                                                         (funcall (read-from-string
-                                                                   "implementation-identifier::implementation-identifier")))))))
-(defmethod implementation-identifier ((lisp-exe lisp-exe:ecl))
-  ;; append type of compiler (bytecode or lisp-to-c)
-  ;; to the implementation identifier
-  (format nil "~A-~A"
-          (call-next-method)
-          (string-downcase (lisp-exe:compiler lisp-exe))))
+(defun implementation-identifier (lisp-exe)
+  (let ((identifier
+         (with-response-file (response-file)
+           (lisp-exe:run-with-timeout +implementation-identifier-timeout+
+                                      lisp-exe
+                                      `(load ,(truename (src-file "proc-common.lisp")))
+                                      `(load ,(truename (src-file "proc-implementation-identifier.lisp")))
+                                      `(cl-user::set-response ,response-file
+                                                              (funcall (read-from-string
+                                                                        "implementation-identifier::implementation-identifier")))))))
+    ;; For ECL append type of compiler (bytecode or lisp-to-c)
+    ;; to the implementation identifier.
+    ;; Note, this can not be done by making
+    ;; the IMPLEMENTATION-IDENTIFIER a generic
+    ;; function and defining special method for ECL,
+    ;; because we memoize IMPLEMENTAION-IDENTIFIER function,
+    ;; and there is no portable way to memoize
+    ;; generic functions.
+    (if (typep lisp-exe 'lisp-exe:ecl)
+        (format nil "~A-~A"
+                identifier
+                (string-downcase (lisp-exe:compiler lisp-exe)))
+        identifier)))
 
 ;; note: not thread-safe
 (fare-memoization:memoize 'implementation-identifier)
