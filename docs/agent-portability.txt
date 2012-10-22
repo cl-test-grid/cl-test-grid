@@ -45,6 +45,7 @@ When it starts child CCL process to update quicklisp, the CCL crashes.
 
 Allegro - problem with memoizing generic a function:
 https://groups.google.com/forum/?fromgroups=#!topic/cl-test-grid/Vnl3kHJbQ0M
+The issue is fixed since then, but no further testing of agent was done.
 
     alisp -qq -L run-agent.lisp
 
