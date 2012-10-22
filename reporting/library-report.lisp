@@ -19,7 +19,7 @@
                                                  :rows '((lisp string<))
                                                  :cell-printer #'results-cell-printer)
                :resuts-by-testcases (cond ((not (member libname test-grid-testsuites:*all-libs*))
-                                           "The library does not have a testsuite adapter for CL Test Grid.")
+                                           "The library does not have a <a href=\"https://github.com/cl-test-grid/cl-test-grid#adding-testsuite-of-your-library\">testsuite adapter</a> for CL Test Grid.")
                                           ((null test-case-results)
                                            "There are no failed tescases.")
                                           (t (pivot-table-html4 test-case-results
@@ -39,7 +39,7 @@
          (with-output-to-string (s)
            (format s "<html><head><title>Library Reports | CL Test Grid</title></head>~%")
            (format s "  <body>~%")
-           (format s "    <h2>Library Reports</h2>~%")           
+           (format s "    <h2>Library Reports</h2>~%")
            (format s "    <ol>~%")
            (my-time ("library index body")
              (format s "      ~{<li><a href=\"~(~a~).html\">~(~:*~a~)</a></li>~%~}"

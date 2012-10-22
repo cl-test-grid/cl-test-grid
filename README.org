@@ -306,16 +306,30 @@
 
    - ...
   
-** Adding testsuite of your library
-   It is quite easy - few lines of code. 
-   
-   Look how the library tests are started in the asdf:perform method 
-   for asdf:test-op defined in the library .asd file. Then use the
-   same approach to define a method test-grid::libtest eql specialized 
-   for that library and send us this code. 
+** Adding testsuites of your library
 
-   See examples for the already added libraries in the 
-   [[https://github.com/cl-test-grid/cl-test-grid/blob/master/testsuites/testsuites.lisp][testsuites/testsuites.lisp]].
+   It's necessary to contact the cl-test-grid mailing list
+   and add a method for the =libtest= generic function to this file:
+   [[https://github.com/cl-test-grid/cl-test-grid/blob/master/testsuites/testsuites.lisp][testsuites/testsuites.lisp]]. The =libtest= function converts
+   results of library test suite to a unified format
+   understood by test-grid.
+
+   If you use some of the popular CL test frameworks,
+   the implementation is usually simple, like this:
+
+   #+BEGIN_SRC common-lisp
+   (defmethod libtest ((library-name (eql :cl-containers)))
+     ;; The test framework used: lift.
+     (quicklisp:quickload :cl-containers-test)
+     (run-lift-test-suite :cl-containers-test))
+   #+END_SRC
+   
+   If you are not the library author and don't know how
+   it's test suite is run, look how the library tests are
+   started in the =asdf:perform= method for =asdf:test-op=
+   defined in the library .asd file.
+
+   In any case, contact the mailing list, we will help.
 
 ** More
    Lot of things may be done in this project. But the project
