@@ -306,7 +306,7 @@
 
    - ...
   
-** Adding testsuites of your library
+** Adding testsuite of your library
 
    It's necessary to contact the cl-test-grid mailing list
    and add a method for the =libtest= generic function to this file:
