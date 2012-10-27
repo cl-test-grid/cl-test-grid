@@ -279,10 +279,11 @@ the PREDICATE."
         (check-config agent)
         (ensure-has-id agent)
         (say-hello-to-admin agent)
-        (setf (project-lister agent)
-              (init-project-lister (preferred-lisp agent) (private-quicklisp-dir agent)))
         (let ((lib-world (or (getf (custom-lib-world agent) :id)
                              (update-testing-quicklisp agent))))
+          (setf (project-lister agent)
+                (init-project-lister (preferred-lisp agent)
+                                     (private-quicklisp-dir agent)))
           ;; now do the work
           (run-tests agent lib-world)))))
   (log:info "Agent is done. Bye."))
