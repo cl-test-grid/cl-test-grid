@@ -285,7 +285,7 @@ Every subaddress represents some level of pivot groupping."
                (helper (gethash cell-addr col-spans)))
           (when (not (printed helper))
             (let ((colspan (span helper))
-                  (text (string-downcase (car (last cell-addr)))))
+                  (text (format nil "~(~A~)" (car (last cell-addr)))))
               ;; Heuristic to determine if we need to rotate
               ;; the column headers: more than 7 columns, and it is the
               ;; last row of column headers.
