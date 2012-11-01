@@ -4,7 +4,8 @@
 ;;;;
 ;;;; Example file for how to configure and run cl-test-grid agent.
 ;;;; This file supposes that Quicklisp is available.
-;;;; Load it the file by:
+;;;;
+;;;; Load the file by:
 ;;;;        (load "run-agent.lisp")
 ;;;;
 
@@ -67,7 +68,7 @@ run-agent.sample.lisp for a fresh example)."
       ;; task in a separate lisp process (for example, updating
       ;; the private quicklisp installation we run tests on).
       ;; Almost always preferred lisp is the same lisp that runs
-      ;; the agent process itselft (i.e. the lisp which runs this script).
+      ;; the agent process itself (i.e. the lisp which runs this script).
       (test-grid-agent:preferred-lisp *agent*) *ccl-1.8-x86*
 
       ;; Please provide your email so that we know who is submitting the test results.
