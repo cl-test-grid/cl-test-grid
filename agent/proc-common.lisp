@@ -17,7 +17,7 @@
 
 (defun catching-problems (body-func on-problem-func)
   "Runs BODY-FUNC and returns it's result. But if BODY-FUNC causes any
-problems (signals SERIOS-CONDITION or enter debugger),
+problems (signals SERIOS-CONDITION or enters debugger),
 logs the problem description to *STANDARD-OUTPUT* and
 invokes ON-PROBLEM-FUNC."
   (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
