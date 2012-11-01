@@ -147,7 +147,10 @@
    CLOSED: [2012-10-17 Ср 03:27]
    I.e. if a library was testsed on that compiler in new quicklisp,
    but was not in the previous quicklisp, exclude this row from the report.
-** TODO widely announce library reports, so that the developers know where to find test results
+** DONE widely announce library reports, so that the developers know where to find test results
+   CLOSED: [2012-10-23 Вт 05:40]
+** DONE file system results storage for Juan Jose
+   CLOSED: [2012-10-23 Вт 05:40]
 ** TODO [6 h] Prevent HTML injection via test-run-info
 ** TODO [4 h] document, for each CL community role, how he can benefit from testgrid
    - library mainaner:
@@ -180,7 +183,6 @@
        are broken on what platform
 
 ** TODO [1 h] link to the library reports from the Results Overview page
-** TODO [4 h] file system results storage for Juan Jose
 ** TODO terminology improvement
   - db format: rename?
                   :libname -> :project
@@ -353,7 +355,8 @@
    items in the diff report (what previous was a load failure
    now becomes :no-resource - not a failure).
 ** TODO test run duration should be decreased by the time of hibernation
-** TODO memoization of the implementation-identifier generic function is not portable
+** DONE memoization of the implementation-identifier generic function is not portable
+   CLOSED: [2012-10-23 Вт 05:58]
    in particular, it's known that fare-memoization can't memoize it on ACL,
    see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
 ** TODO when logging the name of a library currently being tested, log also it's number in the
@@ -371,7 +374,6 @@
    producer task sees them). Admin should be BCC'ed in these emails.
    Should it be a single email for all contributors and the mailing list,
    or each contributor should be emailed individually?
-** TODO a parameter to the main function: limit the maximum time the agent works
 ** DONE ensure the tesg-grid-testsuites code is recompiled when necessary
    CLOSED: [2012-08-15 Ср 19:11]
    The libraries being tested are recompiled at every test run.
@@ -413,7 +415,8 @@
    implement a shell script killtree.sh <pid> which uses
    ps to find all descendents and kill them. Portable format
    of ps arguments should be used.
-** TODO move test-grid::print-log-footer to the test-grid-agent package,
+** DONE move test-grid::print-log-footer to the test-grid-agent package,
+   CLOSED: [2012-10-23 Вт 05:59]
    and call it only form the agent process, not from the child, test suite
    running, process.
 ** TODO consider what test suite timeout value is the best (30 mins currently)
@@ -504,11 +507,6 @@
    list of library versions in this ql version
    (like this: http://www.quicklisp.org/beta/releases.html, but
    it's only for the latest QL).
-** TODO report overview: change "represents every test run as a separate row"  :report:overview:
-   to
-   "represents every <tt>test-grid:run-tests</tt> as a separate row"
-   (after user will know this command from the main project description)
-   ?
 ** TODO Description of CSV report may link to an example of the CSV report  :report:overview:
    imported to a Google Spreadsheet
    with pivot calculating avearage duration of 
@@ -518,10 +516,8 @@
    (or maybe just print the test run info to the log, like a header;
     but it is a duplication and also we will have invonviniences
     if we want to modify this infromation in the lob BLOB)
-** TODO reduce non cl-test-grid output in the console (quicklisp output,
-   compiler output, etc), so that cl-test-grid messages to the user
-   are better visible.
-** TODO Limit library output file size (how?).
+** TODO Limit library output file size stored on file system (how?).
+   Note, the size of file submitted online is limited already
 ** TODO finalize the terminology we use in the code
    to refer our main data:
    - test status for a particular library

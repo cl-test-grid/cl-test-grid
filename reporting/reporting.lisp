@@ -130,18 +130,18 @@
     ;;                        old-ecl
     ;;                        new-ecl))
 
-    (let ((last-abcl "abcl-1.1.0-dev-svn-14200-fasl39-linux-java")
-          (abcl-1.0.1 "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
+    (let ((new-abcl "abcl-1.1.0-dev-svn-14213-fasl39-linux-java")
+          (old-abcl "abcl-1.1.0-dev-svn-14200-fasl39-linux-java"))
       (my-time ("ABCL diff...~%")
         (print-compiler-diff "abcl.html"
                              all-results
                              new-quicklisp
-                             abcl-1.0.1
-                             last-abcl))
+                             old-abcl
+                             new-abcl))
       (my-time ("ABCL load failures...~%")
         (print-load-failures "abcl-load-failures.html"
                              all-results
-                             last-abcl
+                             new-abcl
                              new-quicklisp)))
     (my-time ("CCL load failures...~%")
       (print-load-failures "ccl-load-failures.html"

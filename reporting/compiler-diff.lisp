@@ -33,7 +33,7 @@ reports-generated/<REPORT-FILE>."
                                   :key (lambda (result)
                                          (list (libname result) (result-spec result)))))
          ;; we can not be sure that (string< old-lisp new-lisp) == t,
-         ;; so create another comparator fuction whch guarantees that
+         ;; so create another comparator function whch guarantees that
          ;; the old-lisp is always in the left column.
          (two-lisps (list old-lisp new-lisp))
          (lisp-comparator (lambda (lisp-a lisp-b)
