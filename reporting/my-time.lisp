@@ -6,7 +6,7 @@
 
 (defmacro my-time ((title) &body body)
   "Ensure meaningful title is printed before the
-timing (CCL's TIME prings the code, but SBCL's prints nothing before
+timing (CCL's TIME prints the code, but SBCL's prints nothing before
 the timing, so it's difficult to see what is what when many TIME
 calls are used in the code."
   `(progn
