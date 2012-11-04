@@ -47,7 +47,7 @@ VERSION-PROVIDED defaults to TEST-GRID-AGENT:+API-VERSION+"))
    ;; The lisp-exe considered as more reliable on this OS,
    ;; and supporting more libraries. Used run various small
    ;; lisp programs like quicklisp update.
-   (preferred-lisp :type (or null lisp-exe) :accessor preferred-lisp :initform nil)
+   (preferred-lisp :type (or null lisp-exe:lisp-exe) :accessor preferred-lisp :initform nil)
    (user-email :type (or null string) :accessor user-email :initform nil)
    ;; pathname-designator for the working directory,
    ;; defaults to <source code root>/work-dir/agent

@@ -28,10 +28,10 @@
     ((:module "agent"
       :serial t
       :components
-      ((:file "package")
-       #+ccl
+      (#+ccl
        (:file "lisp-exe-ccl") 
        (:file "lisp-exe") 
+       (:file "package")
        (:file "with-response-file")
        (:file "complete-test-run")
        (:file "persistence")
