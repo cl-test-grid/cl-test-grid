@@ -336,7 +336,7 @@ remains running)."
   ;; real work - lisp.exe. On unix-like systems
   ;; lisp.exe is started using execv which replaces
   ;; the parent process by child process, so CLISP
-  ;; is runnin in a single process.
+  ;; is running in a single process.
   ;;
   ;; Still, killing the process tree is desirable,
   ;; in case the test suite starts some other programs
