@@ -204,6 +204,8 @@
         Look for help from http://chart.ravenbrook.com/ ?
 ** TODO has-regressions-p - cover all the possible cases by unit tests?
 * 0.7.0 Wrap-up the active development phase
+** TODO [0.5 h] Increase load timeout 2 times. Consider increasing test timeout.
+** TODO [1 h] Add CCL command line parameter to limit heap size when running agent to run-agent.sh.sample, run-agent.bat.sample
 ** TODO [40+ h] Immediate test results avaiability, without waiting for admin
    - Store test results locally?
    - Provide a script example, whcih after completing the tests
