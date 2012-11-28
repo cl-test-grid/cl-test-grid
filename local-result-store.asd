@@ -9,6 +9,7 @@
                #:test-grid-data
                #:test-grid-utils
                #:test-grid-agent ; just to reuse test-grid-agent::fmt-time
-               #:cl-fad)
+               #:cl-fad
+               #:log4cl)
   :components
   ((:file "local-result-store")))
