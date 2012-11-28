@@ -58,6 +58,8 @@
   (lib-world (lib-result item)))
 (defmethod libname ((item result))
   (libname (lib-result item)))
+(defmethod test-run-time ((item result))
+  (test-run-time (lib-result item)))
 (defmethod log-blob-key ((item result))
   (if (load-result item)
       (log-blob-key (load-result item))
