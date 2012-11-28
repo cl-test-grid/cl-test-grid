@@ -70,6 +70,7 @@
                                 (getf run-descr :lisp)
                                 (test-grid-agent::fmt-time (getf run-descr :time))))
          (out-file (merge-pathnames out-file-name (results-directory blobstore))))
+    (log:info "storing copy of test results locally, in the file ~A" out-file)
     (ensure-directories-exist out-file)
     (with-open-file (out out-file
                          :direction :output
