@@ -7,7 +7,7 @@
 #      '-' means no test suite,
 #      '+' means test suite added to test grid
 #      '+2' test suite exists, but adding it to test
-#          grid will teke some effors. It is not
+#          grid will take some effotrs. It is not
 #          added now, but may be added later.
 #  - project name (the items are sorted by project name,
 #                  although the sorging was performed
@@ -16,7 +16,7 @@
 #  - version of Quicklisp when the project test suite
 #    was reviewed
 #  - Optional description of the issues with the test
-#    suite (in parentesis, may span onver several lines)
+#    suite (in parenthesis, may span over several lines)
 #
 
 + alexandria 2010-11-10

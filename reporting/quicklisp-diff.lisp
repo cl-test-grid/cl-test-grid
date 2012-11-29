@@ -43,13 +43,27 @@ Returns test part of the result-spec."
                            (subset all-results
                                    (lambda (result)
                                      (string= (lib-world result) old-quicklisp)))))
-         ;; on consider result of lisp/libraries/tests performed on both quicklisps
-         (new-ql-tests (group-by new-ql-results (list #'lisp #'libname #'result-spec-test)))
-         (old-ql-tests (group-by old-ql-results (list #'lisp #'libname #'result-spec-test)))
+         ;; Only consider results of lisp/libraries/tests
+         ;; performed on both quicklisps, so that set-exclusive-or
+         ;; computed below contains results because test has different
+         ;; outcome on two quicklisp, but not because one of the quicklisps
+         ;; doesn't have this combination tested at all.
+         ;;
+         ;; Also, it is convenient to consider only results tested on the
+         ;; same machines, because different machines may have/have not
+         ;; native libraries installed, have different default locale
+         ;; (which affects source code reading of some libraries).
+         ;; As we don't have any real identifier for machine, we approximate
+         ;; it by user contact email - combined with lisp implementation identifier,
+         ;; which includes OS and platform, the chances are high that the same
+         ;; combination is from the same machine.
+         (new-ql-tests (group-by new-ql-results (list #'lisp #'libname #'result-spec-test #'contact-email)))
+         (old-ql-tests (group-by old-ql-results (list #'lisp #'libname #'result-spec-test #'contact-email)))
          (tested-on-both-lib-worlds-p (lambda (result)
                                         (let ((key (list (lisp result)
                                                          (libname result)
-                                                         (result-spec-test result))))
+                                                         (result-spec-test result)
+                                                         (contact-email result))))
                                           (and (gethash key new-ql-tests)
                                                (gethash key old-ql-tests)))))
          ;; now compute the diff between the results of two quicklisps,

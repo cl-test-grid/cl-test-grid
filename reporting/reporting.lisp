@@ -100,70 +100,74 @@
                                    prev-quicklisp
                                    new-quicklisp))
 
-    (my-time ("ECL bytecode load failures...~%")
-      (print-load-failures "ecl-load-failures-bytecode.html"
-                           all-results
-                           "ecl-12.7.1-bca1f405-linux-x86-bytecode"
-                           new-quicklisp))
-    (my-time ("ECL lisp-to-c load failures...~%")
-      (print-load-failures "ecl-load-failures-lisp-to-c.html"
-                           all-results
-                           "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c"
-                           new-quicklisp))
-
-    ;; old ECL version hasn't (yet) been tested on the
-    ;; new quicklisp dist version, so we have nothing to
-    ;; compare with
-    ;;
-    ;; (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c")
-    ;;       (old-ecl "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"))
-    ;;   (print-compiler-diff "ecl-lisp-to-c.html"
-    ;;                        all-results
-    ;;                        new-quicklisp
-    ;;                        old-ecl
-    ;;                        new-ecl))
-    ;; (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-bytecode")
-    ;;       (old-ecl "ecl-12.7.1-ce653d88-linux-x86-bytecode"))
-    ;;   (print-compiler-diff "ecl-bytecode.html"
-    ;;                        all-results
-    ;;                        new-quicklisp
-    ;;                        old-ecl
-    ;;                        new-ecl))
-
-    (let ((new-abcl "abcl-1.1.0-dev-svn-14213-fasl39-linux-java")
-          (old-abcl "abcl-1.1.0-dev-svn-14200-fasl39-linux-java"))
-      (my-time ("ABCL diff...~%")
-        (print-compiler-diff "abcl.html"
-                             all-results
-                             new-quicklisp
-                             old-abcl
-                             new-abcl))
-      (my-time ("ABCL load failures...~%")
-        (print-load-failures "abcl-load-failures.html"
-                             all-results
-                             new-abcl
-                             new-quicklisp)))
-    (my-time ("CCL load failures...~%")
-      (print-load-failures "ccl-load-failures.html"
-                           all-results
-                           "ccl-1.8-f95-linux-x86"
-                           new-quicklisp))
-    (my-time ("ACL load failures...~%")
-      (print-load-failures "acl-load-failures.html"
-                           all-results
-                           "acl-8.2a-linux-x86"
-                           new-quicklisp))
-    (my-time ("CMUCL load failures...~%")
-      (print-load-failures "cmucl-load-failures.html"
-                           all-results
-                           "cmu-20c_release-20c__20c_unicode_-linux-x86"
-                           new-quicklisp))
-    (my-time ("SBCL load failures...~%")
-      (print-load-failures "sbcl-load-failures.html"
-                           all-results
-                           "sbcl-1.0.57-linux-x86"
-                           new-quicklisp))
     (my-time ("library reports...")
       (print-library-reports all-results))
 
-    (print-demo-reports all-results)))
+    (print-demo-reports all-results)
+    (print-compiler-reports all-results new-quicklisp)))
+
+(defun print-compiler-reports (all-results new-quicklisp)
+  (my-time ("ECL bytecode load failures...~%")
+    (print-load-failures "ecl-load-failures-bytecode.html"
+                         all-results
+                         "ecl-12.7.1-9e0d6e50-linux-x64-bytecode"
+                         new-quicklisp))
+  (my-time ("ECL lisp-to-c load failures...~%")
+    (print-load-failures "ecl-load-failures-lisp-to-c.html"
+                         all-results
+                         "ecl-12.7.1-9e0d6e50-linux-x64-lisp-to-c"
+                         new-quicklisp))
+
+  ;; old ECL version hasn't (yet) been tested on the
+  ;; new quicklisp dist version, so we have nothing to
+  ;; compare with
+  ;;
+  ;; (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c")
+  ;;       (old-ecl "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"))
+  ;;   (print-compiler-diff "ecl-lisp-to-c.html"
+  ;;                        all-results
+  ;;                        new-quicklisp
+  ;;                        old-ecl
+  ;;                        new-ecl))
+  ;; (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-bytecode")
+  ;;       (old-ecl "ecl-12.7.1-ce653d88-linux-x86-bytecode"))
+  ;;   (print-compiler-diff "ecl-bytecode.html"
+  ;;                        all-results
+  ;;                        new-quicklisp
+  ;;                        old-ecl
+  ;;                        new-ecl))
+
+  (let ((new-abcl "abcl-1.1.0-dev-svn-14231-fasl39-linux-java")
+        (old-abcl "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
+    (my-time ("ABCL diff...~%")
+      (print-compiler-diff "abcl.html"
+                           all-results
+                           new-quicklisp
+                           old-abcl
+                           new-abcl))
+    (my-time ("ABCL load failures...~%")
+      (print-load-failures "abcl-load-failures.html"
+                           all-results
+                           new-abcl
+                           new-quicklisp)))
+  (my-time ("CCL load failures...~%")
+    (print-load-failures "ccl-load-failures.html"
+                         all-results
+                         "ccl-1.8-f95-linux-x86"
+                         new-quicklisp))
+  (my-time ("ACL load failures...~%")
+    (print-load-failures "acl-load-failures.html"
+                         all-results
+                         "acl-8.2a-linux-x86"
+                         new-quicklisp))
+  ;; CMUCL results are not yet collected
+  ;; (my-time ("CMUCL load failures...~%")
+  ;;   (print-load-failures "cmucl-load-failures.html"
+  ;;                        all-results
+  ;;                        "cmu-20c_release-20c__20c_unicode_-linux-x86"
+  ;;                        new-quicklisp))
+  (my-time ("SBCL load failures...~%")
+    (print-load-failures "sbcl-load-failures.html"
+                         all-results
+                         "sbcl-1.1.1-linux-x86"
+                         new-quicklisp)))
