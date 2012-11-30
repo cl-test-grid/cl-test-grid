@@ -95,9 +95,10 @@
   and loading of every ASDF system found in Quicklisp,
   and also testsuites of some of the libraries.
 
-  We have so far considered 113 libraries. 56 of these libraries
-  have appropriate test suites (fully automated, no user
-  interaction is needed) which are added to the cl-test-grid.
+  For testsuites we have so far considered 114 libraries.
+  57 of these libraries have appropriate test suites
+  (fully automated, no user interaction is needed) which
+  are added to the cl-test-grid.
   
   Test-grid-agent may be run manually from command line or
   configured as a periodical task with cron or similar service.

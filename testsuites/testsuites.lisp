@@ -85,7 +85,8 @@ just passed to the QUICKLISP:QUICKLOAD."
     :let-plus              :data-sift           :cl-num-utils        :ieee-floats
     :cl-project            :trivial-http        :cl-store            :hu.dwim.stefil
     :kmrcl                 :cxml-stp            :hu.dwim.walker      :hu.dwim.defclass-star
-    :bknr-datastore        :yaclml              :com.google.base     :external-program)
+    :bknr-datastore        :yaclml              :com.google.base     :external-program
+    :cl-mustache)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -854,3 +855,10 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;
 ;;   (combine-extended-libresult (run-lift-test-suite :weblocks-suite)
 ;;                               (run-lift-test-suite :store-suite)))
+
+(defmethod libtest ((library-name (eql :cl-mustache)))
+  ;; test framework used: cl-test-more
+  (running-cl-test-more-suite "cl-mustache"
+                              #'(lambda ()
+                                  (quicklisp:quickload :cl-mustache-test)
+                                  (funcall (read-from-string "mustache-test:run")))))
