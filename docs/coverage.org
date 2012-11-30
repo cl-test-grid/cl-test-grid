@@ -56,6 +56,7 @@
 + cl-json 2010-11-10
 + cl-interpol 2012-03-07
 +2 cl-libxml2 2012-03-07 (depends on a foreign library)
++ cl-mustache
 +2 cl-mysql 2012-03-07 (depends on libmysql dll, and requires
                         a running mySql server)
 + cl-num-utils 2012-03-07
