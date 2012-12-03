@@ -56,7 +56,9 @@
   (declare (ignore unused-args))
   "javascript:alert('The blobstore key is not specified, seems like the library log was not submitted to the online storage')")
 
-(defparameter *no-blob-key-printer* (lambda (&rest unused) (break)))
+(defparameter *no-blob-key-printer* (lambda (result)
+                                      (cerror "Result ~S has no blob key"
+                                              (list-props result (list #'lisp #'libname #'lib-world)))))
 ;(defparameter *no-blob-key-printer* 'no-blob-key-js-alert)
 ;(defparameter *no-blob-key-printer* 'lib-log-local-uri)
 
