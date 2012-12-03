@@ -8,12 +8,13 @@
   (mapcan #'results (list-lib-results db)))
 
 (defun results (lib-result)
-  (nconc (testsuite-results lib-result)
-         (asdf-load-results lib-result)))
+  (append (testsuite-results lib-result)
+          (asdf-load-results lib-result)))
 
 (defun testsuite-results (lib-result)
   (let* ((suite-status (status lib-result))
          (suite-results (etypecase suite-status
+                          (null '())
                           (keyword (list (list :whole-test-suite suite-status)))
                           (list (let* ((failures (getf suite-status :failed-tests))
                                        (expected-to-fail (getf suite-status :known-to-fail)))
@@ -37,7 +38,7 @@
                                                  (as-results unexpected-oks :unexpected-ok))))))))))
     (mapcar (lambda (suite-result)
               (make-instance 'result :lib-result lib-result :result-spec suite-result))
-            suite-results))))
+            suite-results)))
 
 (defun asdf-load-results (lib-result)
   (mapcar (lambda (load-result)
