@@ -137,7 +137,7 @@
   ;;                        old-ecl
   ;;                        new-ecl))
 
-  (let ((new-abcl "abcl-1.1.0-dev-svn-14231-fasl39-linux-java")
+  (let ((new-abcl "abcl-1.2.0-dev-svn-14300-fasl39-linux-x86")
         (old-abcl "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
     (my-time ("ABCL diff...~%")
       (print-compiler-diff "abcl.html"
