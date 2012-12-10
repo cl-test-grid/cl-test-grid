@@ -17,15 +17,20 @@
 
 ;;; Agent implementation class
 (defclass agent-impl (agent)
-  ( ;; initial values for the base class slots
-   (work-dir :initform (default-work-dir))
-   ;; own slots
-   (persistence :type persistence :accessor persistence)
+  ((persistence :type persistence :accessor persistence)
+   (results-receiver :type (function (list)) ; function of one argument - test run
+                     :accessor results-receiver)
    (blobstore :accessor blobstore :initform (make-gae-blobstore))
    (project-lister :type project-lister :accessor project-lister)
    ;; custom-lib-world may be a plist in the form
    ;; (:directory <pathname designator> :id <string>)
    (custom-lib-world :type list :accessor custom-lib-world :initform nil)))
+
+(defmethod initialize-instance :after ((agent agent-impl) &key)
+  (setf (work-dir agent) (default-work-dir)
+        (results-receiver agent) (lambda (test-run)
+                                   (test-grid-blobstore:submit-run-info (blobstore agent)
+                                                                        test-run))))
 
 (defmethod make-agent ()
   (make-instance 'agent-impl))
@@ -235,8 +240,10 @@ the PREDICATE."
                                                       (make-run lib-world (implementation-identifier lisp)))
                                                   agent
                                                   lisp
-                                                  (project-names (project-lister agent)))))
-              (submit-test-run-results (blobstore agent) results-dir)
+                                                  ;(project-names (project-lister agent))
+                                                  '(:alexandria)
+                                                  )))
+              (submit-test-run-results agent results-dir)
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
           continue)))))
