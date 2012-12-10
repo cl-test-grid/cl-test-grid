@@ -19,7 +19,7 @@
 
 (in-package #:test-grid-storage)
 
-(defgeneric make-replica -snapshot-file)
+(defgeneric make-replica (name local-snapshot-file))
 (defgeneric name (replica))
 
 (defclass replica (sptm::replica) ())
