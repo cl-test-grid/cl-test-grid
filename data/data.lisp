@@ -4,7 +4,9 @@
 
 (defpackage #:test-grid-data
   (:use :cl)
-  (:export #:read-db))
+  (:export
+   #:read-db
+   #:add-test-run))
 
 (in-package #:test-grid-data)
 
@@ -16,8 +18,14 @@
 (defvar *standard-db-file*
   (merge-pathnames #P"../../cl-test-grid-results/db.lisp" (src-dir)))
 
+;;; DB operations
+
 (defun add-run (run-info &optional (db *db*))
+  "Deprecated. Modifies DB destructively."
   (push run-info (getf db :runs)))
+
+(defun new-db ()
+  (list :version 4 :runs nil))
 
 (defun print-list-elements (destination list separator elem-printer)
   (let ((maybe-separator ""))
@@ -25,6 +33,51 @@
       (format destination maybe-separator)
       (funcall elem-printer elem)
       (setf maybe-separator separator))))
+
+(defun updated-plist (plist prop new-value)
+  (let ((new (copy-list plist)))
+    (setf (getf new prop) new-value)
+    new))
+
+(assert (= 2 (getf (updated-plist '(:a 1 :b 1) :a 2)
+                   :a)))
+
+(defun add-test-run (db test-run)
+  ;; If DB is NIL, create new DB automatically
+  ;; it is convenient because allows to execute
+  ;; add-test-run transactions on test-grid-storage
+  ;; without checking, if DB was already initialized.
+  (let ((db (or db (new-db))))
+    (updated-plist db :runs (cons test-run (getf db :runs)))))
+
+(defun test-run-matcher (descr-key-val-plist)
+  (let ((key-val-alist (alexandria:plist-alist descr-key-val-plist)))
+    (lambda (test-run)
+      (let ((descr (test-grid-data::run-descr test-run)))
+        (every (lambda (key-val-cons)
+                 (equal (getf descr (car key-val-cons))
+                        (cdr key-val-cons)))
+               key-val-alist)))))
+
+(defun remove-test-runs (db &rest descr-key-val-plist)
+  (updated-plist db :runs (remove-if (test-run-matcher descr-key-val-plist)
+                                     (getf db :runs))))
+
+(defun remove-lib-result (db
+                          test-run-descr-key-val-plist
+                          libname)
+  (let* ((matcher (test-run-matcher test-run-descr-key-val-plist))
+         (new-test-runs (mapcar (lambda (test-run)
+                                  (if (funcall matcher test-run)
+                                      (updated-plist test-run :results
+                                                     (remove-if (lambda (lib-result)
+                                                                  (eq libname (getf lib-result :libname)))
+                                                                (getf test-run :results)))
+                                      test-run))
+                                (getf db :runs))))
+    (updated-plist db :runs new-test-runs)))
+
+;;; DB printing
 
 (defun print-list (destination list separator elem-printer)
   (format destination "(")
@@ -108,20 +161,23 @@
                            (format out ")")))
   (format out "))"))
 
+(defun print-db (out db &optional (indent 0))
+  (format out "(:version ~a~%" (getf db :version))
+  (format out "~v,0t :runs (" indent)
+  (print-list-elements out
+                       (getf db :runs)
+                       (format nil "~%~v,0t" (+ indent 8))
+                       #'(lambda (test-run)
+                           (print-test-run out test-run (+ indent 8))))
+  (format out "))"))
+
 (defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
   (with-open-file (out stream-or-path
                        :direction :output
                        :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                        :if-exists :supersede
                        :if-does-not-exist :create)
-    (format out "(:version ~a~%" (getf db :version))
-    (format out " :runs (")
-    (print-list-elements out
-                         (getf db :runs)
-                         "~%~8t"
-                         #'(lambda (test-run)
-                             (print-test-run out test-run 8)))
-    (format out "))")))
+    (print-db out db)))
 
 (defun read-db (&optional (stream-or-path *standard-db-file*))
   (with-open-file (in stream-or-path
