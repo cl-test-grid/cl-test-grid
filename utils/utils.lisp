@@ -125,11 +125,12 @@ Examples:
 
 (defun write-to-file (obj file)
   "Write to file the lisp object OBJ in a format acceptable to READ."
-  (with-open-file (out file
-                       :direction :output
-                       :if-exists :supersede
-                       :if-does-not-exist :create)
-    (pprint obj out))
+  (with-standard-io-syntax
+    (with-open-file (out file
+                         :direction :output
+                         :if-exists :supersede
+                         :if-does-not-exist :create)
+      (pprint obj out)))
   obj)
 
 ;; based on
