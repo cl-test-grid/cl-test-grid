@@ -24,7 +24,7 @@
   (push run-info (getf db :runs)))
 
 (defun make-db (&optional test-runs)
-  (list :version 4 :runs test-runs))
+  (list :schema 5 :runs test-runs))
 
 (defparameter *db* (make-db))
 
@@ -194,4 +194,5 @@
  2 - routes and closure-template are renamed back to cl-routes and cl-closure-template
  3 - bknr.datastore is renamed to bknr-datastore, in order to match the Quicklisp release name
  4 - the :load-failed status of testsutes is replaced by just :fail
+ 5 - the :version field of DB is renamed to :schema
 |#
