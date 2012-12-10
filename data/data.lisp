@@ -5,12 +5,11 @@
 (defpackage #:test-grid-data
   (:use :cl)
   (:export
+   #:make-db
    #:read-db
    #:add-test-run))
 
 (in-package #:test-grid-data)
-
-(defparameter *db* '(:version 0 :runs ()))
 
 (defun src-dir()
   (asdf:system-relative-pathname :test-grid-data #P"data/"))
@@ -24,8 +23,10 @@
   "Deprecated. Modifies DB destructively."
   (push run-info (getf db :runs)))
 
-(defun new-db ()
-  (list :version 4 :runs nil))
+(defun make-db (&optional test-runs)
+  (list :version 4 :runs test-runs))
+
+(defparameter *db* (make-db))
 
 (defun print-list-elements (destination list separator elem-printer)
   (let ((maybe-separator ""))
@@ -43,12 +44,11 @@
                    :a)))
 
 (defun add-test-run (db test-run)
-  ;; If DB is NIL, create new DB automatically
-  ;; it is convenient because allows to execute
+  ;; If DB is NIL, creates new DB automatically.
+  ;; This is convenient because allows to execute
   ;; add-test-run transactions on test-grid-storage
-  ;; without checking, if DB was already initialized.
-  (let ((db (or db (new-db))))
-    (updated-plist db :runs (cons test-run (getf db :runs)))))
+  ;; without checking, whether DB has already been initialized.
+  (make-db (cons test-run (getf db :runs))))
 
 (defun test-run-matcher (descr-key-val-plist)
   (let ((key-val-alist (alexandria:plist-alist descr-key-val-plist)))

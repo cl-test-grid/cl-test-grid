@@ -27,8 +27,7 @@
 (defparameter *local-db-path* (truename (ensure-directories-exist #p"ecl-reports/local-results/")))
 
 (defparameter *db*
-  (list :version 4
-        :runs (local-result-store:list-test-run-results *local-db-path*))
+  (test-grid-data:make-db (local-result-store:list-test-run-results *local-db-path*))
   ;; alternatively, if you want to use the oficcial resutls DB,
   ;; first git clone git@github.com:cl-test-grid/cl-test-grid-results.git
   ;; and use:
