@@ -26,8 +26,6 @@
 (defun make-db (&optional test-runs)
   (list :schema 5 :runs test-runs))
 
-(defparameter *db* (make-db))
-
 (defun print-list-elements (destination list separator elem-printer)
   (let ((maybe-separator ""))
     (dolist (elem list)
