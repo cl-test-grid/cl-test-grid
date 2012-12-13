@@ -20,6 +20,10 @@
   ((persistence :type persistence :accessor persistence)
    (results-receiver :type (function (list)) ; function of one argument - test run
                      :accessor results-receiver)
+   (results-storage-name :type string
+                         :accessor results-storage-name
+                         :initarg :results-storage-name
+                         :initform "main")
    (blobstore :accessor blobstore :initform (make-gae-blobstore))
    (project-lister :type project-lister :accessor project-lister)
    ;; custom-lib-world may be a plist in the form
@@ -29,6 +33,9 @@
 (defmethod initialize-instance :after ((agent agent-impl) &key)
   (setf (work-dir agent) (default-work-dir)
         (results-receiver agent) (lambda (test-run)
+                                   (test-grid-storage:add-test-run (results-storage-name agent)
+                                                                   test-run)
+                                   ;; temporary keep submitting via the old chanell too, just for sure
                                    (test-grid-blobstore:submit-run-info (blobstore agent)
                                                                         test-run))))
 
