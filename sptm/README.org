@@ -104,10 +104,10 @@
    [[./example.lisp]]
    
 ** API and the Source Code
-   - [[./versioned-data.lisp]] - start here. Defines a two-slot class =versioned-data=
-     which can annotate arbitrary data with a =fixnum= version. Also defines
-     a protocol (set of generic functions) for transaction log. Then, based
-     on the transaction log protocol defines the main functions to
+   - [[./versioned-data.lisp]] - start here. Defines a two-slot class
+     =versioned-data= which can annotate arbitrary data with a =fixnum= version.
+     Also defines a protocol (set of generic functions) for transaction log.
+     Then, based on the transaction log protocol defines the main functions to
      operate on =versioned-data= via transaction log: =roll-forward=, 
      =execute-transactions=, =record-transaction=.
    - [[./aws-transaction-log.lisp]] - implements the transaction log protocol using
