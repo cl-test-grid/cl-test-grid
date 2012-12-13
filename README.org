@@ -102,7 +102,7 @@
   
   Test-grid-agent may be run manually from command line or
   configured as a periodical task with cron or similar service.
-  Each test suite is run in a separate lisp process
+  Each test suite is run in a separate lisp process.
   Quicklisp is used to download the libraries to be tested 
   (test-grid-agent bootstraps a private quicklisp and have no
   interference with a quicklisp installation user might have
