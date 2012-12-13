@@ -4,8 +4,8 @@
 
   Operates via transaction log stored on Amazon Web Services (S3 and SimpleDB).
 
-** Informal Description of the Ideas.
-*** In-Memory Persistence.
+** Informal Description of the Ideas
+*** In-Memory Persistence
    This idea is also known as Prevalence and there is a Common Lisp
    library [[http://common-lisp.net/project/cl-prevalence/][cl-prevalence]].
    
@@ -102,7 +102,7 @@
 
 ** Example
    [[./example.lisp]]
-
+   
 ** API and the Source Code
    - [[./versioned-data.lisp]] - start here. Defines a two-slot class =versioned-data=
      which can annotate arbitrary data with a =fixnum= version. Also defines
@@ -130,11 +130,11 @@
    - Create a SimpleDB domain. Note, Amazon doesn't like dashes in S3
      domain names, so use "yourdomain", but  not "your-domain". The following
      call may be used to create a domain on desired SimpleDB endpoing host:
-     #+BEGIN_SRC common-lisp
+#+BEGIN_SRC common-lisp
        (sptm::create-simpledb-domain "yourdomain"
                                      '(:credentials ("YOUR-ACCESS-KEY-ID" "YOUR-SECRET-ACCESS-KEY")
                                        :host "sdb.eu-west-1.amazonaws.com"))
-     #+END_SRC     
+#+END_SRC     
    - [Optional] If you provide access to the log to 3rd parties, you
      may want to provide this access via separate user account created in
      Amazon Identity Manager (so called IAM users). That way you may quickly
