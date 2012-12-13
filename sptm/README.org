@@ -61,7 +61,7 @@
    to the online log. Then cl-test-grid admin executes all these transactions
    on his machine and so receives the data collected.
      
-*** Concurrency Control.
+*** Concurrency Control
 
    In cl-prevalence transactions in different application threads
    may be serialized using global lock.
