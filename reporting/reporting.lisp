@@ -51,13 +51,13 @@
 ;;; =========== print all the reports at once =============
 
 (defun filter-lib-results (db predicate)
-  (list :version (getf db :version)
-        :runs (mapcar (lambda (run)
-                        (list :descr (getf run :descr)
-                              :results (remove-if-not (lambda (lib-result)
-                                                        (funcall predicate lib-result run))
-                                                      (getf run :results))))
-                      (getf db :runs))))
+  (test-grid-data::updated-plist db :runs
+                                 (mapcar (lambda (run)
+                                           (test-grid-data::updated-plist run :results
+                                                                          (remove-if-not (lambda (lib-result)
+                                                                                           (funcall predicate lib-result run))
+                                                                                         (getf run :results))))
+                                         (getf db :runs))))
 
 (defun generate-reports (db)
   (let* (;; Old reports can work only with lib-result objects representing
@@ -137,7 +137,7 @@
   ;;                        old-ecl
   ;;                        new-ecl))
 
-  (let ((new-abcl "abcl-1.1.0-dev-svn-14231-fasl39-linux-java")
+  (let ((new-abcl "abcl-1.2.0-dev-svn-14300-fasl39-linux-x86")
         (old-abcl "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
     (my-time ("ABCL diff...~%")
       (print-compiler-diff "abcl.html"

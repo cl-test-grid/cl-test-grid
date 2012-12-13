@@ -11,7 +11,7 @@
 (asdf:defsystem #:test-grid-testsuites
   :version "0.3.1"
   :serial t
-  :depends-on (#:quicklisp #:test-grid-data #:test-grid-utils #:rt-api #:lift-api #:fiveam-api #:eos-api #:stefil-api)
+  :depends-on (#:quicklisp #:test-grid-utils #:rt-api #:lift-api #:fiveam-api #:eos-api #:stefil-api)
   :components
   ((:module "testsuites"
     :serial t

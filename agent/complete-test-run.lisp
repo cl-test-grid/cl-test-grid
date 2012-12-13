@@ -361,11 +361,11 @@ results in this directory are tested."
     (save-run-info run-info test-run-dir)
     run-info))
 
-(defun submit-test-run-results (blobstore test-run-dir)
+(defun submit-test-run-results (agent test-run-dir)
   (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
-  (let* ((run-info (submit-logs blobstore test-run-dir)))
+  (let* ((run-info (submit-logs (blobstore agent) test-run-dir)))
     (log:info "The log files are submitted. Submitting the test run info...")
-    (test-grid-blobstore:submit-run-info blobstore run-info)
+    (funcall (results-receiver agent) run-info)
     (log:info "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.")
     run-info))
 

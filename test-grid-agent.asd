@@ -16,6 +16,7 @@
                #:test-grid-testsuites
                #:test-grid-blobstore
                #:test-grid-gae-blobstore
+               #:test-grid-storage
                #:alexandria
                #:external-program
                #:trivial-features

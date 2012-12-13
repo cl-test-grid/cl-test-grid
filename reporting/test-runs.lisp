@@ -38,9 +38,7 @@ values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :FAIL, :NO-RESOURSE, :KNOWN-FAIL.
                    :known-fail)
                   (t :fail))))))
 
-(defun test-runs-table-html (&optional
-                             (db test-grid-data::*db*)
-                             (status-renderer 'render-single-letter-status))
+(defun test-runs-table-html (db &optional (status-renderer 'render-single-letter-status))
   (with-output-to-string (out)
     (write-line "<table cellspacing=\"1\" class=\"tablesorter\">" out)
 
