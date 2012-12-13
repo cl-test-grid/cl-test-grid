@@ -160,7 +160,7 @@
   (format out "))"))
 
 (defun print-db (out db &optional (indent 0))
-  (format out "(:version ~a~%" (getf db :version))
+  (format out "(:schema ~a~%" (getf db :schema))
   (format out "~v,0t :runs (" indent)
   (print-list-elements out
                        (getf db :runs)
