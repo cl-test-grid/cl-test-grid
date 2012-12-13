@@ -130,10 +130,9 @@
    - Create a SimpleDB domain. Note, Amazon doesn't like dashes in S3
      domain names, so use "yourdomain", but  not "your-domain". The following
      call may be used to create a domain on desired SimpleDB endpoing host:
-#+BEGIN_SRC lisp
+#+BEGIN_SRC common-lisp
        (sptm::create-simpledb-domain "yourdomain"
-                                     '(:credentials ("YOUR-ACCESS-KEY-ID" "YOUR-SECRET-ACCESS-KEY")
-                                       :host "sdb.eu-west-1.amazonaws.com"))
+           '(:credentials ("YOUR-ACCESS-KEY-ID" "YOUR-SECRET-ACCESS-KEY") :host "sdb.eu-west-1.amazonaws.com"))
 #+END_SRC     
    - [Optional] If you provide access to the log to 3rd parties, you
      may want to provide this access via separate user account created in
