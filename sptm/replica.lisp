@@ -8,6 +8,7 @@
   ((vdata
     :type versioned-data
     :accessor vdata
+    :initarg :vdata
     :initform (make-instance 'versioned-data))
    (transaction-log
     :accessor transaction-log
@@ -52,8 +53,8 @@
              (probe-file (local-snapshot-file replica)))
     (read-local-snapshot replica))
   (let* ((cur-vdata (vdata replica))
-         (new-vdata (roll-forward cur-vdata
-                                  (transaction-log replica)
+         (new-vdata (roll-forward (transaction-log replica)
+                                  cur-vdata
                                   (transaction-checker replica))))
     (when (not (eq new-vdata (vdata replica)))
       (setf (vdata replica) new-vdata)
@@ -65,7 +66,7 @@
 (defun repli-exec (replica func-symbol args)
   (unless (funcall (transaction-checker replica) func-symbol)
     (cerror "Continue, appying this forbidden function."
-            "You are trying to execute and record to the transaction log a function, forbidded by transaction-checker of this replica."))
+            "You are trying to execute and record to the transaction log a function, forbidden by transaction-checker of this replica."))
   (let ((new-vdata (exec-transaction (transaction-log replica)
                                      (vdata replica)
                                      func-symbol

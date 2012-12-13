@@ -9,7 +9,6 @@
     :initarg :duration-seconds
     :accessor duration-seconds))
   (:default-initargs
-   :host "sdb.amazonaws.com"
    :api-version "2009-04-15"))
 
 ;;; signalling errors of REST responses
@@ -21,10 +20,36 @@
          (zaws:reason-phrase response)
          (zaws:content-string response)))
 
-;;; select function, returns list of items
-;;; each item has ITEM-NAME and 
+;;; All the functions below accept parameter OPTIONS,
+;;; which is a plist with :credentials property holding
+;;; the Amazon Web Service credentials, and
+;;; any other keywords arguments which may be passed
+;;; to MAKE-INSTANCE for SIMPLEDB-REQUEST.
+;;;
+;;; Here is how OPTIONS are handled:
+(defmacro with-sdb-credentials ((options) &body body)
+  `(let ((zaws:*credentials* (getf ,options :credentials)))
+     ,@body))
+
+(defun submit-sdb-request (options action param-key-vals)
+  (let ((request (apply #'make-instance
+                        'simpledb-request
+                        :action action
+                        :action-parameters (apply #'zaws:make-parameters param-key-vals)
+                        :allow-other-keys t
+                        options)))
+    (with-sdb-credentials (options)
+      (zaws:submit request))))
+
+;;; SELECT function, returns a list of items.
+;;; Each item has ITEM-NAME and 
 ;;; attributes. Attribute values
 ;;; may be retrieved using ITEM-ATTR.
+;;;
+;;; Note, we do not support the ability of SimpleDB
+;;; to store several values of the same attributes.
+;;; We always store only single value for an attribute
+;;; and our SELECT function relies on this.
 
 (zaws-xml:defbinder select-response
   ("SelectResponse"
@@ -48,39 +73,58 @@
                              :test #'string=)
                        (error "Attribute ~S not found: ~S" attribute-name item))))
 
-(defun submit-select (query &key ((:credentials zaws:*credentials*) zaws:*credentials*) next-token)
+(defun submit-select (query options &key next-token)
   "Returns the response XML parsed by zaws-xml into bindings according to the select-response binder
 defined above."
-  (let ((response (zaws:submit (make-instance 'simpledb-request
-                                              :action "Select"
-                                              :action-parameters (append
-                                                                  (zaws:make-parameters "ConsistentRead" "true"
-                                                                                        "SelectExpression" query)
-                                                                  (when next-token 
-                                                                    (list (cons "NextToken" next-token))))))))
+  (let ((response (submit-sdb-request options
+                                      "Select"
+                                      (append (list "ConsistentRead" "true"
+                                                    "SelectExpression" query)
+                                              (when next-token
+                                                (list "NextToken" next-token))))))
     (if (= 200 (zaws:status-code response))
         (zaws-xml:xml-bind 'select-response                        
                            (zaws:content-string response))
         (report-aws-error response))))
 
-(defun select (query &key ((:credentials zaws:*credentials*) zaws:*credentials*))
-  (zaws-xml:bvalue :items (submit-select query)))
+(defun select (query options)
+  (zaws-xml:bvalue :items (submit-select query options)))
 
-(defun select-all (query &key ((:credentials zaws:*credentials*) zaws:*credentials*))
+(defun select-all (query options)
+  "The function allows to overcome the Amazon SimpleDB limitation
+that SELECT response returns at maximum 2500 items.
+
+Repeats the specified query while the repsonse contains NextToken
+element (the NextToken received is posted with every subsequent response).
+
+It is important to know how the 'limit' argument of SELECT query
+and the NextToken response element interoperate.
+
+Suppose we have 10 items in the domain 'mydomain' and 
+execute query 'select * from mydomain limit 2'.
+
+The SELECT-ALL for this query will return 10 items,
+and will need to submit this query 5 times to Amazon.
+
+This is because NextToken is always added to response
+if there are more items matching the select, even if
+the response alreay delivered limit of items.
+I.e. limit serves as a maximum batch size."
   (let ((next-token nil)
         (results '()))
-    (loop (let ((bindings (submit-select query :next-token next-token)))
+    (loop (let ((bindings (submit-select query options :next-token next-token)))
             (setf results (nconc (zaws-xml:bvalue :items bindings) results)
                   next-token (zaws-xml:bvalue :next-token bindings))
             (when (null next-token)
               (return results))))))
 
-(defun delete-item (domain item-name &key ((:credentials zaws:*credentials*) zaws:*credentials*))
-  (let* ((request (make-instance 'simpledb-request
-                                 :action "DeleteAttributes"
-                                 :action-parameters (zaws:make-parameters "DomainName" domain
-                                                                          "ItemName" item-name)))
-         (response (zaws:submit request)))
+(defun delete-item (domain item-name options)
+  (let ((response (submit-sdb-request options "DeleteAttributes" (list "DomainName" domain
+                                                                       "ItemName" item-name))))
     (unless (= 200 (zaws:status-code response))
       (report-aws-error response))))
 
+(defun create-simpledb-domain (domain-name options)
+  (let* ((response (submit-sdb-request options "CreateDomain" (list "DomainName" domain-name))))
+    (unless (= 200 (zaws:status-code response))
+      (report-aws-error response))))

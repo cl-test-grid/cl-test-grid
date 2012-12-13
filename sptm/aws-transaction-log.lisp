@@ -2,6 +2,65 @@
 ;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;; See LICENSE for details.
 
+#|
+
+Implementation of a transaction log stored in Amazon S3 bucket and SimpleDB domain.
+
+Transaction log has name, which allows to distinguish it's records from other
+transaction logs and so to share the same S3 bucket and SimpleDB domain between
+several logs.
+
+Transaction record consists of one SimpleDB item and one S3 object.
+The SimpleDB item has name in the form <log-name>-<transaction-version>-tx
+and has a single attribute "s3objectname". The value of "s3objectname" is
+the name of the S3 object.
+
+S3 objects are named as <log-name>-<timestamp>.<random suffix>.
+The random suffic allows to ensure the name is unique.
+
+The content of the S3 object are serialized function name and arguments.
+
+Smapshot records are organized similary, with different naming convention:
+SimpleDB records are named <log-name>-<transaction-version>-tx and
+S3 objects <log-name>-snaphot-<version>.
+
+Here is an example of a transaction log named "demo" with several
+transactions and snapshots:
+
+                 SimpleDB                       |                        S3
+------------------------------------------------|--------------------------------------------------------
+item name               s3objectname attribute  | object name             object content
+------------------------------------------------|--------------------------------------------------------
+demo-000000001-tx       demo-20121209035233.B7W | demo-20121209035233.B7W (STPM-EXAMPLE::DEPOSIT (:A 2))
+demo-000000002-tx       demo-20121209035235.0R4 | demo-20121209035235.0R4 (STPM-EXAMPLE::DEPOSIT (:A 3))
+demo-000000002-snapshot demo-snapshot-000000002 | demo-snapshot-000000002 (:A (:BALANCE 5) :B (:BALANCE 0))
+demo-000000003-tx       demo-20121213145601.ZSR | demo-20121213145601.ZSR (STPM-EXAMPLE::TRANSFER (:A :B 3))
+demo-000000003-snapshot demo-snapshot-000000003 | demo-snapshot-000000003 (:A (:BALANCE 2) :B (:BALANCE 3))
+
+
+The distribution of transaction log records into S3 object and SimpleDB
+item is necessary because SimpleDB attribute values have limited size
+and we can not be sure serialized function with argumetns will fit
+into this size (the limit is 1 KB, while in cl-test-grid the size of serialized
+and gzipped transaction add-test-run may be > 50 KB).
+
+SimpleDB on the other hand provides us with "compare and set" semantics
+we need for the optimistic concurrency - the PutAttributes request
+may be parametrized so that it fails if someone has already created
+the same item.
+
+Transaction commit consists of:
+1. Generate unique S3 object name
+2. Serialize funcall and store in this S3 object
+3. Try to create SimpleDB item referring the S3 object
+   and with item name according to the next DB version.
+   If such record has been created by concurrent transaction,
+   the SimpleDB request fails, and we pull all the new changes
+   from the transaction log, execute the function on new data,
+   and retry the step 3.
+
+|#
+
 (in-package #:sptm)
 
 (defclass aws-transaction-log ()
@@ -20,7 +79,15 @@
    (simpledb-domain :type string
                     :accessor simpledb-domain
                     :initarg :simpledb-domain
-                    :initform (error ":simpledb-domain is required"))))
+                    :initform (error ":simpledb-domain is required"))
+   (simpledb-endpoint-host :type string
+                           :accessor simpledb-endpoint-host
+                           :initarg :simpledb-endpoint-host
+                           :initform "sdb.amazonaws.com")))
+
+(defun simpledb-options (log)
+  (list :credentials (credentials log)
+        :host (simpledb-endpoint-host log)))
 
 (zaws-xml:defbinder error-response
   ("Response"
@@ -47,14 +114,16 @@
   "999999999")
 
 (defun parse-version-number (simpledb-item-name)
-  (let* ((name-start (1+ (search "-" simpledb-item-name)))
-         (name-end (search "-" simpledb-item-name :start2 name-start)))
+  (let* ((name-end (search "-" simpledb-item-name :from-end t))
+         (name-start (1+ (search "-" simpledb-item-name :end2 name-end :from-end t))))
     (parse-integer simpledb-item-name
                    :start name-start
                    :end name-end)))
 
 (assert (= 132 (parse-version-number "test-000000132-tx")))
 (assert (= 132 (parse-version-number "test-000000132-snapshot")))
+(assert (= 132 (parse-version-number "name-with-dash-000000132-tx")))
+(assert (= 132 (parse-version-number "name-with-dash-000000132-snapshot")))
 
 (defgeneric serialize-to-string (log object)
   (:method ((log aws-transaction-log) object)
@@ -106,18 +175,16 @@
     name))
 
 (defmethod commit-version ((log aws-transaction-log) version-number s3-object-name)
-  (let* ((zaws:*credentials* (credentials log))
-         (request (make-instance 'simpledb-request
-                                 :action "PutAttributes"
-                                 :action-parameters (zaws:make-parameters "DomainName" (simpledb-domain log)
-                                                                          "ItemName" (format nil "~A-~A-tx"
-                                                                                             (name log)
-                                                                                             (version-str version-number))
-                                                                          "Attribute.1.Name" "s3objectname"
-                                                                          "Attribute.1.Value" s3-object-name
-                                                                          "Expected.1.Exists" "false"
-                                                                          "Expected.1.Name" "s3objectname")))
-         (response (zaws:submit request)))
+  (let* ((response (submit-sdb-request (simpledb-options log)
+                                       "PutAttributes"
+                                       (list "DomainName" (simpledb-domain log)
+                                             "ItemName" (format nil "~A-~A-tx"
+                                                                (name log)
+                                                                (version-str version-number))
+                                             "Attribute.1.Name" "s3objectname"
+                                             "Attribute.1.Value" s3-object-name
+                                             "Expected.1.Exists" "false"
+                                             "Expected.1.Name" "s3objectname"))))
     (cond
       ((conditional-check-failed-p response) nil)
       ((= 200 (zaws:status-code response)))
@@ -146,8 +213,8 @@
 (defmethod func ((transaction aws-transaction))
   (first (s3-object-content transaction)))
 
-(defmethod args ((transaction aws-transaction) data)
-  (cons data (second (s3-object-content transaction))))
+(defmethod args ((transaction aws-transaction))
+  (second (s3-object-content transaction)))
 
 (defun s3-object-content (aws-transaction)
   (when (null (slot-value aws-transaction 's3-object-content))
@@ -167,21 +234,23 @@
                           :s3-object-name (item-attr item "s3objectname"))))
     (mapcar #'make-transaction
             (select-all (format nil
-                                "select * from cltestgrid where itemName() like '%-tx' and itemName() > '~A-~A-tx' and itemName() < '~A-~A-tx' order by itemName() limit 2500"
+                                "select * from ~A where itemName() like '%-tx' and itemName() > '~A-~A-tx' and itemName() < '~A-~A-tx' order by itemName() limit 2500"
+                                (simpledb-domain log)
                                 (name log)
                                 (version-str after-version)
                                 (name log)
                                 (max-version-str))          
-                        :credentials (credentials log)))))
+                        (simpledb-options log)))))
 
 (defun border-transaction-item (log max-or-min)
   (first (select (format nil
-                         "select * from cltestgrid where itemName() like '~A-%' and itemName() like '%-tx' order by itemName() ~A limit 1"
+                         "select * from ~A where itemName() like '~A-%' and itemName() like '%-tx' order by itemName() ~A limit 1"
+                         (simpledb-domain log)
                          (name log)
                          (ecase max-or-min
                            (:max "desc")
                            (:min "asc")))
-                 :credentials (credentials log))))
+                 (simpledb-options log))))
 
 (defun min-transaction-item (log)
   (border-transaction-item log :min))
@@ -205,9 +274,10 @@
 
 (defun last-snapshot-item (log)
   (first (select (format nil
-                         "select * from cltestgrid where itemName() like '~A-%' and itemName() like '%-snapshot' order by itemName() desc limit 1"
+                         "select * from ~A where itemName() like '~A-%' and itemName() like '%-snapshot' order by itemName() desc limit 1"
+                         (simpledb-domain log)
                          (name log))
-                 :credentials (credentials log))))
+                 (simpledb-options log))))
 
 (defmethod snapshot-version ((log aws-transaction-log))
   (let ((item (last-snapshot-item log)))
@@ -247,29 +317,28 @@
                     :content-encoding "gzip"
                     :credentials (credentials log))
 
-    (let* ((zaws:*credentials* (credentials log))
-           (request (make-instance 'simpledb-request
-                                   :action "PutAttributes"
-                                   :action-parameters (zaws:make-parameters "DomainName" (simpledb-domain log)
-                                                                            "ItemName" snapshot-db-name
-                                                                            "Attribute.1.Name" "s3objectname"
-                                                                            "Attribute.1.Value" snapshot-s3-name
-                                                                            "Attribute.1.Replace" "true")))
-           (response (zaws:submit request)))
+    (let* ((response (submit-sdb-request (simpledb-options log)
+                                         "PutAttributes"
+                                         (list "DomainName" (simpledb-domain log)
+                                               "ItemName" snapshot-db-name
+                                               "Attribute.1.Name" "s3objectname"
+                                               "Attribute.1.Value" snapshot-s3-name
+                                               "Attribute.1.Replace" "true"))))
       (unless (= 200 (zaws:status-code response))
         (report-aws-error response)))))
 
 (defun delete-records (log &key (from-version 0) (below-version nil))
   (dolist (item (select-all (format nil
-                                    "select * from cltestgrid where itemName() >= '~A-~A' and itemName() < '~A-~A' order by itemName() limit 2500"
+                                    "select * from ~A where itemName() >= '~A-~A' and itemName() < '~A-~A' order by itemName() limit 2500"
+                                    (simpledb-domain log)
                                     (name log)
                                     (version-str from-version)
                                     (name log)
                                     (if below-version (version-str below-version) (max-version-str)))
-                            :credentials (credentials log)))
+                            (simpledb-options log)))
     (zs3:delete-object (s3-bucket log)
                        (item-attr item "s3objectname")
                        :credentials (credentials log))
     (delete-item (simpledb-domain log)
                  (item-name item)
-                 :credentials (credentials log))))
+                 (simpledb-options log))))

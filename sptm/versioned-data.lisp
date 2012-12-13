@@ -24,12 +24,13 @@
 
 (defgeneric version (transaction))
 (defgeneric func (transaction))
-(defgeneric args (transaction cur-data))
+(defgeneric args (transaction))
 
 (defmethod apply-transaction ((d versioned-data) transaction)
   (make-instance 'versioned-data
                  :data (apply (func transaction)
-                              (args transaction (data d)))
+                              (data d)
+                              (args transaction))
                  :version (version transaction)))
 
 ;;; transaction log
@@ -51,7 +52,7 @@ Signals error in case of problems."))
 
 ;;; play transaction log
 
-(defmethod roll-forward (versioned-data log &optional (transaction-checker (constantly 't)))
+(defmethod roll-forward (log versioned-data &optional (transaction-checker (constantly 't)))
   (assert
    ;; if there are transactions in the log,
    ;; their db versions start not later
@@ -83,9 +84,47 @@ Signals error in case of problems."))
 
 ;;; perform new transactions
 
+(defmethod exec-transaction (log vdata func-symbol args &optional (transaction-checker (constantly t)))
+  "Apply the specified function to (DATA VDATA) and the specified ARGS,
+and try to commit the transaction to the transaction log as version (1+ (VERSION VDATA)).
+
+If a record for this new version already exists in the transaction log,
+pull all the new changes from transaction log and apply them to VDATA.
+Then repeat the whole process.
+
+Returns the new VERSIONED-DATA holding the return value of the function
+and the version at which the transaction was commited to the LOG."
+  (let ((new-data (apply func-symbol (data vdata) args))
+        (fcall (persist-funcall log func-symbol args)))
+    (loop
+         (if (commit-version log (1+ (version vdata)) fcall)
+             (return (make-instance 'versioned-data
+                                    :version (1+ (version vdata))
+                                    :data new-data))
+             (setf vdata (roll-forward log vdata transaction-checker)
+                   new-data (apply func-symbol (data vdata) args))))))
+
 (defmethod record-transaction (log                               
                                func-symbol
                                args-without-data-arg)
+  "Not all transactions have consistency requirements.
+
+For example SPTM-EXAMPLE:WITHDRAW transaction has a consistency
+requirement - it signals an error if the account doesn't have
+enough funds.
+
+On the other hand TEST-GRID-DATA:ADD-TEST-RUN just adds
+an element to the list of test runs and it doesn't care what
+is the previous content of this list.
+
+The transactions without consistency requirements are safe
+to record in transaction log at whatever the next version
+is available. They don't need to be executed locally first
+on the synchronized version of data.
+
+RECORD-TRANSACTION function serves exactly this purpose - 
+records function call to the transaction log as the
+next available version."
   (let ((last-version (if (empty-p log)
                           1
                           (max-transaction-version log)))
@@ -94,25 +133,3 @@ Signals error in case of problems."))
        until (commit-version log ver funcall-name)
        finally (return ver))))
 
-(defmethod exec-transaction (log vdata func-symbol args)
-  (let ((new-data (apply func-symbol (data vdata) args))
-        (fcall (persist-funcall log func-symbol args)))
-    (loop
-         (if (commit-version log (1+ (version vdata)) fcall)
-             (return (make-instance 'versioned-data
-                                    :version (1+ (version vdata))
-                                    :data new-data))
-             (setf vdata (roll-forward vdata log)
-                   new-data (apply func-symbol (data vdata) args))))))
-
-;;; convinience
-
-(defun initial-value (db value)
-  "This function is expected to be often used
-in the first transaction, to initialize the persistent
-data to some data structure. Just returns the VALUE, 
-so that after such transaction the persistent data
-is initialized to this VALUE."
-  (unless (null db)
-    (error "DB is already initialized to some value"))
-  value)

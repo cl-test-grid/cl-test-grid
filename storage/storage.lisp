@@ -68,6 +68,7 @@
       (format out ")")))
   replica)
 
+;; convenience method to record the most often used transaction
 (defun add-test-run (storage-name test-run)
   (let ((log (make-transaction-log storage-name)))
     (sptm::record-transaction log 'test-grid-data::add-test-run (list test-run))))
