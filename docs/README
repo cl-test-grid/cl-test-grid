@@ -25,5 +25,5 @@ issues-found.org - Information about all the bug reports
 agent-portability.txt - Notes about running test grid agent
             on various CL implementations.
 
-design-desitions.org - Explanation of some desicions, which 
+design-decisions.org - Explanation of some decisions, which 
             are not obvious and self-explaining by the source code.
