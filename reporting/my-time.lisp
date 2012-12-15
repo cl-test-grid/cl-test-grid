@@ -11,5 +11,5 @@ the timing, so it's difficult to see what is what when many TIME
 calls are used in the code."
   `(progn
      (format t ,title)
-     (fresh-line)  
+     (fresh-line)
      (time ,@body)))

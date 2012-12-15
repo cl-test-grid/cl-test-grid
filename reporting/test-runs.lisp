@@ -14,7 +14,10 @@
     (with-output-to-string (out)
       (loop for char across libname
          do (princ maybeBr out)
-           (princ (if (char= char #\-) #\| char) out)
+           (princ (if (char= char #\-)
+                      #\|
+                      (html-template:escape-string-all (string char)))
+                  out)
            (setf maybeBr "<br/>")))))
 
 ;; example:
@@ -53,9 +56,9 @@ values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :FAIL, :NO-RESOURSE, :KNOWN-FAIL.
             (lib-statuses (test-grid-data::run-results run)))
         (format out "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td>"
                 (test-grid-agent::pretty-fmt-time (getf run-descr :time))
-                (getf run-descr :lib-world)
-                (getf run-descr :lisp)
-                (getf (getf run-descr :contact) :email))
+                (html-template:escape-string-all (princ-to-string (getf run-descr :lib-world)))
+                (html-template:escape-string-all (princ-to-string (getf run-descr :lisp)))
+                (html-template:escape-string-all (princ-to-string (getf (getf run-descr :contact) :email))))
         (dolist (lib test-grid-testsuites::*all-libs*)
           (format out "<td>~A</td>"
                   (funcall status-renderer run (find lib lib-statuses

@@ -49,11 +49,11 @@
    The functions must be ready to receive arguments deserialized from log/snapshot,
    therefore we typically want to pass some string/numeric IDs as arguments,
    not whole object references. For example =add-order= accepts user ID as
-   the parameter, but not a =user= object. Othersize we might end up
+   the parameter, but not a =user= object. Otherwize we might end up
    dealing with many copies of the same =user= object, duplicated by
    deserialization.
    
-   In contrast to cl-prevalence, in SPTM transaction log and snapshots
+   In contrast to cl-prevalence, in SPTM the transaction log and snapshots
    are stored online and may be used by several processes to share data.
    
    For example cl-test-grid agents on different machines collect test
@@ -69,7 +69,7 @@
    But in SPTM the transactions are executed in different processes
    runing on different machines over Internet. How to synchronize them?
    
-   Here we use ideas from optimistic concurrency approach in Clojure
+   Here we use ideas from optimistic concurrency approach in Clojure's
    software transactional memory.
 
    It has similarities with Prevalence - the data modifications are expressed as
@@ -97,8 +97,8 @@
 
    If the log is writable by untrasted parties, we can protect ourselves with
    a =transaction-checker= - a predicate on the function name. SPTM API
-   accepts such a predicate as a parameter and uses it to verifies that
-   transactions use only allowed functions before executing the transactions.
+   accepts such a predicate as a parameter and uses it to verify that
+   transactions refer only allowed functions before executing the transactions.
 
 ** Example
    [[./example.lisp]]

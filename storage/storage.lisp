@@ -4,7 +4,7 @@
 
 (defpackage #:test-grid-storage
   (:use :cl)
-  (:import-from #:sptm #:sync #:data #:version)
+  (:import-from #:sptm #:data #:version #:sync #:read-local-snapshot)
   (:export
    ;; replica creation
    #:make-replica
@@ -14,6 +14,7 @@
    #:version
    ;; replica operations
    #:sync
+   #:read-local-snapshot
    ;; convenience method to record the most often used transaction
    #:add-test-run))
 
