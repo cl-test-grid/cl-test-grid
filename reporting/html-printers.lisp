@@ -32,14 +32,18 @@
       (let ((status (aggregated-status (getf lib-test-result :status))))
         (format nil "<a class=\"test-status ~A\" href=\"~A\">~A</a>"
                 (status-css-class status)
-                (log-uri (make-instance 'joined-lib-result :lib-result lib-test-result :test-run test-run))
-                (single-letter-status status)))))
+                (html-template:escape-string-all (log-uri (make-instance 'joined-lib-result
+                                                                         :lib-result lib-test-result
+                                                                         :test-run test-run)))
+                (html-template:escape-string-all (single-letter-status status))))))
 
 ;; todo: this should be a blobstore method, but
 ;; until we move the reporting to a separate
 ;; asdf system, we don't want the dependency
 ;; on blobstore here.
 (defun blob-uri (blob-key)
+  (unless (every #'digit-char-p blob-key)
+    (error "BLOB-KEY must only consist of digits to prevent URI injection (as we haven't implemented URL-encoding): ~A" blob-key))
   (format nil "~A/blob?key=~A"
           "http://cl-test-grid.appspot.com" blob-key))
 
@@ -50,7 +54,7 @@
   (format nil "file://~A~A"
           (test-grid-agent::run-directory (test-grid-data::run-descr (test-run joined-lib-result))
                                           *local-test-runs-dir*)
-          (string-downcase (libname joined-lib-result))))
+          (html-template:escape-string-all (string-downcase (libname joined-lib-result)))))
 
 (defun no-blob-key-js-alert (&rest unused-args)
   (declare (ignore unused-args))
@@ -68,24 +72,27 @@
         (blob-uri blob-key)
         (funcall *no-blob-key-printer* result))))
 
+(defun fields-to-string (object fields)
+  (format nil "~{~a~^, ~}" (list-props object fields)))
+
 (defun log-link (lib-result &rest fields)
   "Generate HTML link to the online test suite log
 for the LIB-RESULT. The FIELDS specifies set of fields
 to include in to the text of the link, defaults to STATUS"
   (setf fields (or fields '(status)))
-  (format nil "<a class=\"~a\" href=\"~a\">~{~a~^, ~}</a>"
+  (format nil "<a class=\"~a\" href=\"~a\">~a</a>"
           (status-css-class (status lib-result))
-          (log-uri lib-result)
-          (mapcar (alexandria:rcurry 'funcall lib-result) fields)))
+          (html-template:escape-string-all (log-uri lib-result))
+          (html-template:escape-string-all (fields-to-string lib-result fields))))
 
 (defun failure-log-link (failure &rest fields)
   "Generate HTML link to the online test suite log
 for the RESULT. The FIELDS specifies set of fields
-to include in to the text of the link, defaults to STATUS"
+to include in to the text of the link, defaults to FAIL-SPEC"
   (setf fields (or fields '(fail-spec)))
-  (format nil "<a href=\"~a\">~{~a~^, ~}</a>"
-          (log-uri failure)
-          (mapcar (alexandria:rcurry 'funcall failure) fields)))
+  (format nil "<a href=\"~a\">~a</a>"
+          (html-template:escape-string-all (log-uri failure))
+          (html-template:escape-string-all (fields-to-string failure fields))))
 
 (defun result-css-class (result)
   (let ((status (ecase (first (result-spec result))
@@ -99,9 +106,6 @@ to include in to the text of the link, defaults to STATUS"
       (:timeout  "timeout-status")
       (:no-resource "no-resource-status"))))
 
-(defun fields-to-string (object fields)
-  (format nil "~{~a~^, ~}" (list-props object fields)))
-
 (defun result-log-link (result &rest fields)
   "Generate HTML link to the online test suite log
 for the RESULT. The FIELDS specifies set of fields
@@ -109,8 +113,8 @@ to include in to the text of the link, defaults to RESULT-SPEC"
   (setf fields (or fields '(result-spec)))
   (format nil "<a class=\"~a\" href=\"~a\">~a</a>"
           (result-css-class result)
-          (log-uri result)
-          (fields-to-string result fields)))
+          (html-template:escape-string-all (log-uri result))
+          (html-template:escape-string-all (fields-to-string result fields))))
 
 (defun results-cell-printer (out cell-data &rest fields)
   "Convenient for the most cases printer of

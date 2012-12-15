@@ -241,7 +241,7 @@ Every subaddress represents some level of pivot groupping."
       (when (not (printed helper))
         (format out "<th rowspan=\"~A\" ~A>~A</th>"
                 rowspan maybe-css-class
-                (string-downcase (car (last subaddr))))
+                (html-template:escape-string-all (string-downcase (car (last subaddr)))))
         (setf (printed helper) t)))))
 
 ;; Two alternative ways of column headers printing.
@@ -249,7 +249,9 @@ Every subaddress represents some level of pivot groupping."
 ;; This is used when we have enough horizontal space:
 ;; just a usual <th> element.
 (defun print-usual-col-header (colspan text out)
-  (format out "<th colspan=\"~A\">~A</th>" colspan text))
+  (format out "<th colspan=\"~A\">~A</th>"
+          colspan
+          (html-template:escape-string-all text)))
 
 ;; When we need to save horizontal space, we print
 ;; column headers rotated, so that headers do not
