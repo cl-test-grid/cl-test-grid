@@ -366,7 +366,7 @@ results in this directory are tested."
   (let* ((run-info (submit-logs (blobstore agent) test-run-dir)))
     (log:info "The log files are submitted. Submitting the test run info...")
     (funcall (results-receiver agent) run-info)
-    (log:info "Done. The test results are submitted. They will be reviewed by admin soon and added to the central database.")
+    (log:info "Done. The test results are submitted.")
     run-info))
 
 (defun submitted-p (test-run)
