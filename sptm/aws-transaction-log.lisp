@@ -258,19 +258,22 @@ Transaction commit consists of:
 (defun max-transaction-item (log)
   (border-transaction-item log :max))
 
-(defmethod min-transaction-version ((log aws-transaction-log))
-  (let ((item (or (min-transaction-item log)
-                  (error "min-transaction-version is invoked on emtpy log"))))
-    (parse-version-number (item-name item))))
+(defun handle-if-absent (if-absent-val error-msg &rest error-args)
+  (case if-absent-val
+    (:error (apply #'error error-msg error-args))
+    (otherwise if-absent-val)))
 
-(defmethod max-transaction-version ((log aws-transaction-log))
-  (let ((item (or (max-transaction-item log)
-                  (error "max-transaction-version is invoked on emtpy log"))))
-    (parse-version-number (item-name item))))
+(defmethod min-transaction-version ((log aws-transaction-log) &key (if-absent :error))
+  (let ((item (min-transaction-item log)))
+    (if item
+        (parse-version-number (item-name item))
+        (handle-if-absent if-absent "Unable to return min transaction version as there is no transaction records for the transaction log ~A" log))))
 
-(defmethod empty-p ((log aws-transaction-log))
-  (null (min-transaction-item log)))
-
+(defmethod max-transaction-version ((log aws-transaction-log) &key (if-absent :error))
+  (let ((item (max-transaction-item log)))
+    (if item
+        (parse-version-number (item-name item))
+        (handle-if-absent if-absent "Unable to return max transaction version as there is no transaction records for the transaction log ~A" log))))
 
 (defun last-snapshot-item (log)
   (first (select (format nil
@@ -279,22 +282,21 @@ Transaction commit consists of:
                          (name log))
                  (simpledb-options log))))
 
-(defmethod snapshot-version ((log aws-transaction-log))
+(defmethod snapshot-version ((log aws-transaction-log) &key (if-absent :error))
   (let ((item (last-snapshot-item log)))
     (if item
         (parse-version-number (item-name item))
-        0)))
+        (handle-if-absent if-absent "Unable to return snapshot version as there is no shapshot for the transaction log ~A" log))))
 
 (defmethod get-snapshot ((log aws-transaction-log))
-  (let ((item (last-snapshot-item log)))
-    (if item
-        (make-instance 'versioned-data
-                       :version (parse-version-number (item-name item))
-                       :data (deserialize-from-string log
-                                                      (gunzip-string (zs3:get-vector (s3-bucket log)
-                                                                                     (item-attr item "s3objectname")
-                                                                                     :credentials (credentials log)))))
-        (make-instance 'versioned-data))))
+  (let ((item (or (last-snapshot-item log)
+                  (error "There is no snapshot for the transaction log ~A" log))))
+    (make-instance 'versioned-data
+                   :version (parse-version-number (item-name item))
+                   :data (deserialize-from-string log
+                                                  (gunzip-string (zs3:get-vector (s3-bucket log)
+                                                                                 (item-attr item "s3objectname")
+                                                                                     :credentials (credentials log)))))))
 
 (defmethod save-snapshot ((log aws-transaction-log) versioned-data)
   (let* (;; simple DB item name according the same pattern as transaction item

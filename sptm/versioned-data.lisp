@@ -22,9 +22,19 @@
 
 ;;; transactions
 
-(defgeneric version (transaction))
-(defgeneric func (transaction))
-(defgeneric args (transaction))
+(defgeneric version (transaction)
+  (:documentation "The version the data will have after
+the transaction is applied."))
+
+(defgeneric func (transaction)
+  (:documentation "Symbol fbound to a function. The function should accept
+the value of (data versioned-data) as the first argument and and number
+of other arguments. The return value of the function is new version
+of data."))
+
+(defgeneric args (transaction)
+  (:documentation "The list of values to be passed to the function
+as the arguments except for the first argument."))
 
 (defmethod apply-transaction ((d versioned-data) transaction)
   (make-instance 'versioned-data
@@ -35,52 +45,96 @@
 
 ;;; transaction log
 
-(defgeneric empty-p (log)) ;; todo: rename to has-transactions-p
-(defgeneric min-transaction-version (log))
-(defgeneric max-transaction-version (log))
-(defgeneric list-transactions (log after-version))
-(defgeneric snapshot-version (log))
-(defgeneric get-snapshot (log))
-(defgeneric save-snapshot (log versioned-data))
+(defgeneric min-transaction-version (log &key if-absent)
+  (:documentation "The minimal version of transactions
+stored in the transaction log.
+
+ >= 1
+
+Absense of transactions in the transaction log handled
+according the IF-ABSENT argument. If it is :ERROR (the default),
+then error is signalled. When IF-ABSEND is any other value,
+the value is just returned."))
+
+(defgeneric max-transaction-version (log &key if-absent)
+  (:documentation "The maximum version of transactions
+stored in the transaction log.
+
+ >= 1
+
+Absense of transactions in the log is handled according
+to IF-ABSENT the same way as described for MIN-TRANSACTION-VERSION."))
+
+(defgeneric list-transactions (log after-version)
+  (:documentation "List of all transactions in the log
+having version > AFTER-VERSION. The transactions
+are odered ascendingly by version."))
+
+;; Transaction log provides the following two functions
+;; for commiting transactions. Two functions allow transaction
+;; log to store the function name and arguments a speparate
+;; storage, and for the caller of these two functions to
+;; avoid repeated transfer of function name and arguments
+;; in case of concurrency collision.
+;;
+;; First save the function name and arguments using
+;; the PERSIST-FUNCALL. Then pass the return value of PRESIST-FUNCALL
+;; to the COMMIT-VERSION. In case of concurrency collision COMMIT-VERSION
+;; returns false and we can retry the transaction locally and
+;; call COMMIT-VERSION again, without repeating PRESIST-FUNCALL.
 (defgeneric persist-funcall (log func-symbol args-without-data-arg))
 (defgeneric commit-version (log version-number presist-funcall-result)
   (:documentation
    "Returns true if the version is commited successfully, 
 false if the version is not commited due to concurrency
-conflict (somebody else already commited such version).
+collision (someone else already commited such version).
 Signals error in case of problems."))
+
+(defgeneric snapshot-version (log &key if-absent)
+  (:documentation "The maximum version of the VERSIONED-DATA saved by
+SAVE-SNAPSHOT.
+
+Absense of any snapshots log is handled according
+to IF-ABSENT the same way as described for MIN-TRANSACTION-VERSION."))
+
+(defgeneric get-snapshot (log)
+  (:documentation
+   "Returns the VERSIONED-DATA with the maximum version
+of the saved by SAVE-SNAPSHOT. Signals an error if
+there is no saved snapshots."))
+
+(defgeneric save-snapshot (log versioned-data))
 
 ;;; play transaction log
 
 (defmethod roll-forward (log versioned-data &optional (transaction-checker (constantly 't)))
-  (assert
-   ;; if there are transactions in the log,
-   ;; their db versions start not later
-   ;; than right after the db version of
-   ;; snapshot
-   (or (empty-p log)
-       (>= (snapshot-version log)
-           (1- (min-transaction-version log)))))
-  
-  (if (empty-p log)
-      (if (> (snapshot-version log)
-             (version versioned-data))
-          (get-snapshot log)
-          versioned-data)
-      (let ((cur-vdata (if (< (version versioned-data)
-                              (1- (min-transaction-version log)))
-                           ;; Our versioned-data is so outdated, that transaction
-                           ;; log doesn't have all the transactions necessary to roll forward.
-                           (get-snapshot log)
-                           versioned-data)))
-        (assert (>= (version cur-vdata) (1- (min-transaction-version log))))
-        (flet ((apply-transaction* (vdata transaction)
-                 (unless (funcall transaction-checker (func transaction))
-                   (error "The transaction ~A retrieved from transaction log specifies function ~S forbidden by the transaction checker"
-                          transaction (func transaction)))
-                 (apply-transaction vdata transaction)))
-          (reduce #'apply-transaction* (list-transactions log (version cur-vdata))
-                  :initial-value cur-vdata)))))
+  (assert (>= (version versioned-data) 0))
+
+  (let ((min-tx-ver (min-transaction-version log :if-absent :absent)))
+    (if (eq :absent min-tx-ver)
+        ;; The log doesn't have transaction records
+        ;; Check if a snaphost is present that is later
+        ;; than our version of data.
+        (if (> (snapshot-version log :if-absent 0)
+               (version versioned-data))
+            (get-snapshot log)
+            versioned-data)
+        (let ((cur-vdata (if (< (version versioned-data)
+                                (1- min-tx-ver))
+                             ;; Our versioned-data is so outdated, that transaction
+                             ;; log doesn't have all the transactions necessary to roll forward.
+                             ;;
+                             ;; Then we start from scratch. There must be a snaphsot.
+                             (get-snapshot log)
+                             versioned-data)))
+          (assert (>= (version cur-vdata) (1- min-tx-ver)))
+          (flet ((apply-transaction* (vdata transaction)
+                   (unless (funcall transaction-checker (func transaction))
+                     (error "The transaction ~A retrieved from transaction log specifies function ~S forbidden by the transaction checker"
+                            transaction (func transaction)))
+                   (apply-transaction vdata transaction)))
+            (reduce #'apply-transaction* (list-transactions log (version cur-vdata))
+                    :initial-value cur-vdata))))))
 
 ;;; perform new transactions
 
@@ -118,18 +172,15 @@ an element to the list of test runs and it doesn't care what
 is the previous content of this list.
 
 The transactions without consistency requirements are safe
-to record in transaction log at whatever the next version
+to record into transaction log at whatever the next version
 is available. They don't need to be executed locally first
 on the synchronized version of data.
 
 RECORD-TRANSACTION function serves exactly this purpose - 
-records function call to the transaction log as the
+records function call to the transaction log at the
 next available version."
-  (let ((last-version (if (empty-p log)
-                          1
-                          (max-transaction-version log)))
+  (let ((last-version (max-transaction-version log :if-absent 0))
         (funcall-name (persist-funcall log func-symbol args-without-data-arg)))
     (loop for ver from (1+ last-version)
        until (commit-version log ver funcall-name)
        finally (return ver))))
-
