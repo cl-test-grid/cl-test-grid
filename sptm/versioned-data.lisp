@@ -8,7 +8,8 @@
   ((version :type fixnum
             :accessor version
             :initform 0
-            :initarg :version)
+            :initarg :version
+            :documentation "Must be >= 0")
    (data :type t
          :accessor data
          :initform nil
@@ -107,34 +108,45 @@ there is no saved snapshots."))
 
 ;;; play transaction log
 
-(defmethod roll-forward (log versioned-data &optional (transaction-checker (constantly 't)))
-  (assert (>= (version versioned-data) 0))
+(defmethod roll-forward (log versioned-data &optional (transaction-checker (constantly 't)))  
+  ;; wrappers around basic transaction log functions
+  (flet ((apply-transaction* (vdata transaction)
+           (unless (funcall transaction-checker (func transaction))
+             (error "The transaction ~A retrieved from transaction log specifies function ~S forbidden by the transaction checker"
+                    transaction (func transaction)))
+           (log:info "executing transaction ~A ~S" (version transaction) (func transaction))
+           (apply-transaction vdata transaction))
+         (list-transactions* (log version)
+           (let ((transactions (list-transactions log version)))
+             (log:info "~A new transactions found after version ~A" (length transactions) version)
+             transactions))
+         (get-snapshot* (log)
+           (let ((snapshot (get-snapshot log)))
+             (log:info "retrieved snapshot of version ~A" (version snapshot))
+             snapshot)))
 
-  (let ((min-tx-ver (min-transaction-version log :if-absent :absent)))
-    (if (eq :absent min-tx-ver)
-        ;; The log doesn't have transaction records
-        ;; Check if a snaphost is present that is later
-        ;; than our version of data.
-        (if (> (snapshot-version log :if-absent 0)
-               (version versioned-data))
-            (get-snapshot log)
-            versioned-data)
-        (let ((cur-vdata (if (< (version versioned-data)
-                                (1- min-tx-ver))
-                             ;; Our versioned-data is so outdated, that transaction
-                             ;; log doesn't have all the transactions necessary to roll forward.
-                             ;;
-                             ;; Then we start from scratch. There must be a snaphsot.
-                             (get-snapshot log)
-                             versioned-data)))
-          (assert (>= (version cur-vdata) (1- min-tx-ver)))
-          (flet ((apply-transaction* (vdata transaction)
-                   (unless (funcall transaction-checker (func transaction))
-                     (error "The transaction ~A retrieved from transaction log specifies function ~S forbidden by the transaction checker"
-                            transaction (func transaction)))
-                   (apply-transaction vdata transaction)))
-            (reduce #'apply-transaction* (list-transactions log (version cur-vdata))
-                    :initial-value cur-vdata))))))
+    (assert (>= (version versioned-data) 0))
+
+    (let ((min-tx-ver (min-transaction-version log :if-absent :absent)))
+      (if (eq :absent min-tx-ver)
+          ;; The log doesn't have transaction records
+          ;; Check if a snaphost is present that is later
+          ;; than our version of data.
+          (if (> (snapshot-version log :if-absent 0)
+                 (version versioned-data))
+              (get-snapshot* log)
+              versioned-data)
+          (let* ((cur-vdata (if (< (version versioned-data)
+                                   (1- min-tx-ver))
+                                ;; Our versioned-data is so outdated, that transaction
+                                ;; log doesn't have all the transactions necessary to roll forward.
+                                ;;
+                                ;; Then we start from scratch. There must be a snaphsot.
+                                (get-snapshot* log)
+                                versioned-data))
+                 (transactions (list-transactions* log (version cur-vdata))))
+            (assert (>= (version cur-vdata) (1- min-tx-ver)))
+            (reduce #'apply-transaction* transactions  :initial-value cur-vdata))))))
 
 ;;; perform new transactions
 
