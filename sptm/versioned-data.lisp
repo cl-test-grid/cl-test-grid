@@ -38,6 +38,9 @@ of data."))
 as the arguments except for the first argument."))
 
 (defmethod apply-transaction ((d versioned-data) transaction)
+  (unless (= (version transaction) (1+ (version d)))
+    (error "Trying to execute transaction of version ~A on data of version ~A: ~A"
+           (version transaction) (version d) transaction))
   (make-instance 'versioned-data
                  :data (apply (func transaction)
                               (data d)
@@ -62,6 +65,8 @@ the value is just returned."))
 stored in the transaction log.
 
  >= 1
+ >= MIN-TRANSACTION-VERSION (if both are not absent)
+
 
 Absense of transactions in the log is handled according
 to IF-ABSENT the same way as described for MIN-TRANSACTION-VERSION."))
@@ -69,7 +74,12 @@ to IF-ABSENT the same way as described for MIN-TRANSACTION-VERSION."))
 (defgeneric list-transactions (log after-version)
   (:documentation "List of all transactions in the log
 having version > AFTER-VERSION. The transactions
-are odered ascendingly by version."))
+are odered ascendingly by version.
+
+For transaction log to be consistent, all transactions
+between MIN-TRANSACTION-VERSION and MAX-TRANSACTION-VERSION
+must present in the log, there should not be gaps
+in the transaction chain."))
 
 ;; Transaction log provides the following two functions
 ;; for commiting transactions. Two functions allow transaction
@@ -96,7 +106,13 @@ Signals error in case of problems."))
 SAVE-SNAPSHOT.
 
 Absense of any snapshots log is handled according
-to IF-ABSENT the same way as described for MIN-TRANSACTION-VERSION."))
+to IF-ABSENT the same way as described for MIN-TRANSACTION-VERSION.
+
+Snapshot should always present if MIN-TRANSACTION-VERSION > 1.
+
+For transaction log to be consistent, it's data must be so that
+MIN-TRANSACTION-VERSION - 1 <= SNAPSHOT-VERSION <= MAX-TRANSACTION-VERSION
+in case all these versions are not absent."))
 
 (defgeneric get-snapshot (log)
   (:documentation
@@ -105,6 +121,44 @@ of the saved by SAVE-SNAPSHOT. Signals an error if
 there is no saved snapshots."))
 
 (defgeneric save-snapshot (log versioned-data))
+
+
+;;; transaction log consistency check
+
+(defun check-consistency (log)
+  (let ((min-tx-ver (min-transaction-version log :if-absent :absent))
+        (max-tx-ver (max-transaction-version log :if-absent :absent))
+        (snapshot-ver (snapshot-version log :if-absent :absent)))
+    (unless (or (eq min-tx-ver :absent)
+                (>= min-tx-ver 1))
+      (error "Invalid min-transaction-version: ~A" min-tx-ver))
+    (unless (or (eq max-tx-ver :absent)
+                (>= max-tx-ver 1))
+      (error "Invalid max-transaction-version: ~A" max-tx-ver))
+    (unless (or (and (eq min-tx-ver :absent)
+                     (eq max-tx-ver :absent))
+                (>= max-tx-ver min-tx-ver))
+      (error "MIN-TRANSACTOIN-VERSION and MAX-TRANSACTION-VERSION are inconsistend: ~A ~A"
+             min-tx-ver max-tx-ver))
+    (unless (or (eq min-tx-ver :absent)
+                (= min-tx-ver 1)
+                (not (eq snapshot-ver :absent)))
+      (error "Snaphost is absent while MIN-TRANSACTION-VERSION is ~A" min-tx-ver))
+    (unless (or (eq min-tx-ver :absent)
+                (eq snapshot-ver :absent)
+                (and (>= (1- min-tx-ver) snapshot-ver)
+                     (<= snapshot-ver max-tx-ver)))
+      (error "SNAPSHOT-VERSION is not between the MIN-TRANSACTION-VERSION - 1 and MAX-TRANSACTION-VERSION: ~A - 1 <= ~A <= ~A failed"
+             min-tx-ver snapshot-ver max-tx-ver))
+    (reduce (lambda (prev-version transaction)
+              (unless (= (version transaction)
+                         (1+ prev-version))
+                (error "There is a gap in the transaction chain between versions ~A and ~A"
+                       prev-version (version transaction)))
+              (version transaction))
+            (list-transactions log (1- min-tx-ver))
+            :initial-value (1- min-tx-ver))
+    t))
 
 ;;; play transaction log
 
