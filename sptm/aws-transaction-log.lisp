@@ -16,12 +16,12 @@ and has a single attribute "s3objectname". The value of "s3objectname" is
 the name of the S3 object.
 
 S3 objects are named as <log-name>-<timestamp>.<random suffix>.
-The random suffic allows to ensure the name is unique.
+The random suffix allows to ensure the name is unique.
 
 The content of the S3 object are serialized function name and arguments.
 
 Smapshot records are organized similary, with different naming convention:
-SimpleDB records are named <log-name>-<transaction-version>-tx and
+SimpleDB records are named <log-name>-<transaction-version>-snapshot and
 S3 objects <log-name>-snaphot-<version>.
 
 Here is an example of a transaction log named "demo" with several
@@ -40,7 +40,7 @@ demo-000000003-snapshot demo-snapshot-000000003 | demo-snapshot-000000003 (:A (:
 
 The distribution of transaction log records into S3 object and SimpleDB
 item is necessary because SimpleDB attribute values have limited size
-and we can not be sure serialized function with argumetns will fit
+and we can't be sure the serialized function with argumetns will fit
 into this size (the limit is 1 KB, while in cl-test-grid the size of serialized
 and gzipped transaction add-test-run may be > 50 KB).
 
