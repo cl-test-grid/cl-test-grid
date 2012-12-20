@@ -11,7 +11,8 @@
                #:gzip-stream
                #:babel
                #:alexandria
-               #:test-grid-utils)
+               #:test-grid-utils
+               #:log4cl)
   :components
   ((:module "sptm"
     :serial t
