@@ -200,9 +200,18 @@ there is no saved snapshots."))
                                 versioned-data))
                  (transactions (list-transactions* log (version cur-vdata))))
             (assert (>= (version cur-vdata) (1- min-tx-ver)))
-            (reduce #'apply-transaction* transactions  :initial-value cur-vdata))))))
+            (reduce #'apply-transaction* transactions :initial-value cur-vdata))))))
 
 ;;; perform new transactions
+
+(defun commit-version* (log version-number persist-funcall-result)
+  "Wraps COMMIT-VERSION with logging"
+  (log:info "commiting version ~A..." version-number)
+  (let ((result (commit-version log version-number persist-funcall-result)))
+    (if result
+        (log:info "committed version ~A successfully" version-number)
+        (log:info "concurrency collision, version ~A is already used" version-number))
+    result))
 
 (defmethod exec-transaction (log vdata func-symbol args &optional (transaction-checker (constantly t)))
   "Apply the specified function to (DATA VDATA) and the specified ARGS,
@@ -217,7 +226,7 @@ and the version at which the transaction was commited to the LOG."
   (let ((new-data (apply func-symbol (data vdata) args))
         (fcall (persist-funcall log func-symbol args)))
     (loop
-         (if (commit-version log (1+ (version vdata)) fcall)
+         (if (commit-version* log (1+ (version vdata)) fcall)
              (return (make-instance 'versioned-data
                                     :version (1+ (version vdata))
                                     :data new-data))
@@ -248,5 +257,5 @@ next available version."
   (let ((last-version (max-transaction-version log :if-absent 0))
         (funcall-name (persist-funcall log func-symbol args-without-data-arg)))
     (loop for ver from (1+ last-version)
-       until (commit-version log ver funcall-name)
+       until (commit-version* log ver funcall-name)
        finally (return ver))))
