@@ -38,19 +38,23 @@
     (setf (vdata replica)
           (make-instance 'versioned-data
                          :version (getf plist :version)
-                         :data (getf plist :data)))
-      (log:info "read local snapshot of version ~A from ~A"
-                (version replica)
-                (truename (local-snapshot-file replica))))
+                         :data (getf plist :data))))
   replica)
 
+(defmethod read-local-snapshot :after ((replica replica))
+  (log:info "read local snapshot of version ~A from ~A"
+            (version replica)
+            (truename (local-snapshot-file replica))))
+
 (defmethod save-local-snapshot ((replica replica))
-  (log:info "saving local snapshot to ~A" (local-snapshot-file replica))
   (let ((versioned-data (vdata replica)))
     (test-grid-utils::write-to-file (list :version (version versioned-data)
                                           :data (data versioned-data))
                                     (local-snapshot-file replica)))
   replica)
+
+(defmethod save-local-snapshot :before ((replica replica))
+  (log:info "saving local snapshot to ~A" (local-snapshot-file replica)))
 
 (defun sync (replica)
   (when (and (zerop (version replica))

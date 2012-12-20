@@ -101,24 +101,24 @@
    transactions refer only allowed functions before executing the transactions.
 
 ** Example
-   [[./example.lisp]]
+   /example.lisp/
    
 ** API and the Source Code
-   - [[./versioned-data.lisp]] - start here. Defines a two-slot class
+   - /versioned-data.lisp/ - start here. Defines a two-slot class
      =versioned-data= which can annotate arbitrary data with a =fixnum= version.
      Also defines a protocol (set of generic functions) for transaction log.
      Then, based on the transaction log protocol defines the main functions to
      operate on =versioned-data= via transaction log: =roll-forward=, 
      =execute-transactions=, =record-transaction=.
-   - [[./aws-transaction-log.lisp]] - implements the transaction log protocol using
+   - /aws-transaction-log.lisp/ - implements the transaction log protocol using
      Amazon Web Services: S3 and SimpleDB.
-   - [[./replica.lisp]] - convenience class =replica=, combines transaction log,
+   - /replica.lisp/ - convenience class =replica=, combines transaction log,
      versioned-data and a local snapshot of the versioned-data, stored in a file.
-   - [[./amazon-simple-db.lisp]] - private tools to work with Amazon SimpleDB.
+   - /amazon-simple-db.lisp/ - private tools to work with Amazon SimpleDB.
 
 ** Storage Space at Amazon
    You may use the demonstrational S3 bucket and SimpleDB domain as shown
-   in the example.lisp. Many independent transaction logs may be stored
+   in the /example.lisp/. Many independent transaction logs may be stored
    on the same storage - just give every transaction log different name.
    The function =sptm-example::make-demo-transaction-log= demonstrates how to do this.
 
@@ -200,7 +200,7 @@
     executing any transactions, is always created with
     =data= slot initialized to a fresh database. All the
     further transactions can expect the database to be
-    initialized. This little trick is used in example.lisp.
+    initialized. This little trick is used in /example.lisp/.
     
 *** The Default Serialization is via =cl:write= / =cl:read=.
 
