@@ -1,3 +1,4 @@
+
 * SPTM - Shared Persistent Transactional Memory
   Simple online storage for lisp data, using the ideas of in-memory 
   persistence and optimistic concurrency control.
@@ -101,7 +102,7 @@
    transactions refer only allowed functions before executing the transactions.
 
 ** Example
-   /example.lisp/
+   See /example.lisp/.
    
 ** API and the Source Code
    - /versioned-data.lisp/ - start here. Defines a two-slot class
