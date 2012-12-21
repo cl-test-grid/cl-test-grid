@@ -92,12 +92,12 @@ In the form (\"Access Key Id\" \"Secret Access Key\").")
                       (make-instance 'sptm::versioned-data :version 0 :data (new-db))                    
                       'transaction-allowed-p))
 
-;; Now *d* as a versioned-data instance holding the
+;; Now *d* is a versioned-data instance holding the
 ;; latest data. Examine it:
 (sptm::version *d*)
 (sptm::data *d*)
 
-;; Execute some transactions. Use can do
+;; Execute some transactions. You can do
 ;; it from different lisp processes and see how
 ;; data is synchronized.
 (setf *d* (sptm::exec-transaction *log* *d*
