@@ -118,25 +118,6 @@
                          "ecl-12.7.1-9e0d6e50-linux-x64-lisp-to-c"
                          new-quicklisp))
 
-  ;; old ECL version hasn't (yet) been tested on the
-  ;; new quicklisp dist version, so we have nothing to
-  ;; compare with
-  ;;
-  ;; (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-lisp-to-c")
-  ;;       (old-ecl "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"))
-  ;;   (print-compiler-diff "ecl-lisp-to-c.html"
-  ;;                        all-results
-  ;;                        new-quicklisp
-  ;;                        old-ecl
-  ;;                        new-ecl))
-  ;; (let ((new-ecl "ecl-12.7.1-bca1f405-linux-x86-bytecode")
-  ;;       (old-ecl "ecl-12.7.1-ce653d88-linux-x86-bytecode"))
-  ;;   (print-compiler-diff "ecl-bytecode.html"
-  ;;                        all-results
-  ;;                        new-quicklisp
-  ;;                        old-ecl
-  ;;                        new-ecl))
-
   (let ((new-abcl "abcl-1.2.0-dev-svn-14300-fasl39-linux-x86")
         (old-abcl "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
     (my-time ("ABCL diff...~%")
