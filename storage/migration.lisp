@@ -2,14 +2,15 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 ;;;;
-;;;; The "main" test grid result storage is intended for storing
+;;;; The test grid result storage named "main" is intended for storing
 ;;;; results of the last 3 quicklisps. When the test-grid-storage
 ;;;; is introduced, we start from populating it with test results
-;;;; for the last 3 quicklisp releases from the test-grid-results
-;;;; repository.
+;;;; for the last 3 quicklisp releases from the db.lisp s-expression file
+;;;; stored in test-grid-results git repository.
 ;;;;
-;;;; The script below does this.
-;;;; The script is executed at 2012-12-14. I am not going
+;;;; The script below performs exactly this.
+;;;;
+;;;; The script was executed at 2012-12-14. I am not going
 ;;;; to maintain it afterwards.
 
 (in-package #:cl-user)

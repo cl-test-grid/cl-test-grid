@@ -217,7 +217,7 @@ upon the BODY completion runs the BODY again."
                                                                    ,system-name
                                                                    ,private-quicklisp-dir
                                                                    ,asdf-output-dir)))))
-                        (log:info "Testing loading of system ~A..." system-name)
+                        (log:info "Testing load of system ~A..." system-name)
                         (print-loadtest-log-header system-name run-descr logfile)
                         (lisp-exe:run-with-timeout +loadtest-timeout-seconds+ lisp-exe code)))
                   (no-response (condition)
