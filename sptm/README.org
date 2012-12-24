@@ -85,9 +85,10 @@
 
    If during the commit attempt it is determined that another transaction(s)
    has commited since our transaction has started, the value computed by
-   the function is rejected, the data is updated to reflect the changes
+   the function is discarded, the data is updated to reflect the changes
    made by concurrent (remote in case of SPTM) transactions,
-   and our transaction is restarted again.
+   and our transaction is restarted again - execute the function and try
+   to commit.
 
    This protocol guarantees that everyone replaying the transaction log
    executes the functions on exactly the same data as the process
@@ -102,7 +103,7 @@
    transactions refer only allowed functions before executing the transactions.
 
 ** Example
-   See /example.lisp/.
+   Please see /example.lisp/.
    
 ** API and the Source Code
    - /versioned-data.lisp/ - start here. Defines a two-slot class
@@ -110,7 +111,7 @@
      Also defines a protocol (set of generic functions) for transaction log.
      Then, based on the transaction log protocol defines the main functions to
      operate on =versioned-data= via transaction log: =roll-forward=, 
-     =execute-transactions=, =record-transaction=.
+     =execute-transaction=, =record-transaction=.
    - /aws-transaction-log.lisp/ - implements the transaction log protocol using
      Amazon Web Services: S3 and SimpleDB.
    - /replica.lisp/ - convenience class =replica=, combines transaction log,
