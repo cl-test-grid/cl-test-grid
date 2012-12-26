@@ -31,6 +31,9 @@
       <fileset dir="${appengine.sdk}/lib/user">
         <include name="appengine-api-*.jar" />
       </fileset>
+      <fileset dir="${java.libs}">
+        <include name="commons-fileupload-1.0.jar" />
+      </fileset>
     </copy>
   </target>
 
