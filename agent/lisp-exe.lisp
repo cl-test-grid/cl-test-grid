@@ -347,7 +347,7 @@ remains running)."
   (handler-case
       (external-program:signal-process lisp-process 9)
     (serious-condition (c)
-      ;; If the process already terminates, when we ask CCL to kill it,
+      ;; If the process is already terminated, when we ask CCL to kill it,
       ;; CCL signals a SIMPLE-ERROR "No such process".
       ;; see http://trac.clozure.com/ccl/ticket/1015
       ;;
