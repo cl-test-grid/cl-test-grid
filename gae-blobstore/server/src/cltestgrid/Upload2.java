@@ -106,25 +106,21 @@ public class Upload2 extends HttpServlet {
     1. A stream writting directly to a CloudStorage blob.
        Unfortunatelly, saving to CloudStorage is quite slow, 
        and if we save the files one by one, the request handling
-       takes too long and exceedes the 30 timeout. In result
+       takes too long and exceedes the 30 seconds timeout. In result
        Google App Engine kills our servlet. This happens even
-       if the submit consists of 10-15 files.
-    2. Therefore we provide temporary ByteArrayOutputStream
+       if the submit consists of just 10-15 files.
+    2. Therefore we provide a temporary ByteArrayOutputStream
        for every file. This allows us to quickly parse the HTTP request
        into separate files, and then start multiple therads writting
        the files into CloudStorage. This scheme allows to handle 300-500
        files submitted in one request.
        As we accumulate all the files in memory, we impose a limit on
-       file size and total number of files submitted in one request.
+       the file size and total number of files submitted in one request.
 
     ---------------------------------
 
     Hooking into FileUpload is done by suppying our custom FileItem implementation -
     MyFileItem. This is done via our custom factory - MyFileItemFactory. 
-
-    Commons FileUpload stores the file content to FileItem.getOutputStream(),
-    and we arrange that MyFileItem.getOutputStream is backed by a newly
-    created Cloud Storage blob.
 
   */
 
@@ -182,7 +178,7 @@ public class Upload2 extends HttpServlet {
               saveBlob(blobName, item.contentType, item.dataCollector.toByteArray());        
               // Saving blob may throw a LockException due to CloudStorage issue
               // http://code.google.com/p/googleappengine/issues/detail?id=8592
-              // Therefore provide two restarts for this case:
+              // Therefore retry two times in case of LockException:
             } catch (com.google.appengine.api.files.LockException e) {                
               try {
                 log.log(Level.WARNING, "retry saving blob " + blobName + " because of LockException when saving it first time", e);
@@ -208,7 +204,6 @@ public class Upload2 extends HttpServlet {
     } catch (InterruptedException e) {
       throw new RuntimeException("Interrupted while saving blobs", e);
     }
-
   }
 
   private static final boolean isMultipartContent(HttpServletRequest request) {
