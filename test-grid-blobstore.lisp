@@ -1,3 +1,10 @@
+;;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
+;;;; See LICENSE for details.
+
+;;;; Deprecated. This interface will be removed soon and all the code
+;;;; will work with test-grid-gae-blobstore directly.
+
 (defpackage #:test-grid-blobstore
   (:use :cl)
   (:export #:submit-files

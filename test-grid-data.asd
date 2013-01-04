@@ -9,4 +9,5 @@
   :components 
   ((:module "data"
     :serial t
-    :components ((:file "data")))))
+    :components ((:file "data")
+                 (:file "blobs")))))

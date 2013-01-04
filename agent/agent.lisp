@@ -18,7 +18,7 @@
 ;;; Agent implementation class
 (defclass agent-impl (agent)
   ((persistence :type persistence :accessor persistence)
-   (results-receiver :type (function (list)) ; function of one argument - test run
+   (results-receiver :type (function (list lisp-exe)) ; function of two arguments - test run and the lisp-exe produced it
                      :accessor results-receiver)
    (result-storage-name :type string
                         :accessor result-storage-name
@@ -30,11 +30,40 @@
    ;; (:directory <pathname designator> :id <string>)
    (custom-lib-world :type list :accessor custom-lib-world :initform nil)))
 
+;;; Now the LISPS property of agent may contain
+;;; not only LISP-EXE as elements, but also
+;;; lists in the form (LISP-EXE "storage1" ... "storageN")
+;;;
+;;; If the LISP-EXE is specified alone, it's test results
+;;; will be submitted to the storage specified by the
+;;; RESULTS-STORAGE-NAME agent property.
+;;;
+;;; If the LISP-EXE is specified together with storage
+;;; names, then the results are submitted to these storages,
+;;; and RESULTS-STORAGE-NAME is not used.
+;;;
+;;; Three functions below help to work with this specification.
+
+(defun just-lisp-exe (lisp-spec)
+  (typecase lisp-spec
+    (list (car lisp-spec))
+    (t lisp-spec)))
+
+(defun lisp-exes (agent)
+  (mapcar #'just-lisp-exe (lisps agent)))
+
+(defun result-storages-for-lisp (agent lisp-exe)
+  (let ((lisp-spec (find lisp-exe (lisps agent) :key #'just-lisp-exe)))
+    (if (listp lisp-spec)
+        (cdr lisp-spec)
+        (list (result-storage-name agent)))))
+;;; --- end of lisp specifications handling ---
+
 (defmethod initialize-instance :after ((agent agent-impl) &key)
   (setf (work-dir agent) (default-work-dir)
-        (results-receiver agent) (lambda (test-run)
-                                   (test-grid-storage:add-test-run (result-storage-name agent)
-                                                                   test-run)
+        (results-receiver agent) (lambda (test-run lisp-exe)
+                                   (dolist (storage (result-storages-for-lisp agent lisp-exe))
+                                     (test-grid-storage:add-test-run storage test-run))
                                    ;; temporary keep submitting via the old chanell too, just for sure
                                    (test-grid-blobstore:submit-run-info (blobstore agent)
                                                                         test-run))))
@@ -141,7 +170,7 @@ lib-world identifier of that quicklisp."
   (log:info "Checking external process functionality for the preffered lisp ~A..."
             (preferred-lisp agent))
   (check-lisp (preferred-lisp agent))
-  (dolist (lisp (lisps agent))
+  (dolist (lisp (lisp-exes agent))
     (log:info "Checking external process functionality for ~A..." lisp)
     (check-lisp lisp)
     (log:info "~A OK" lisp))
@@ -207,10 +236,10 @@ the PREDICATE."
 ;;; Main program
 
 (defun run-tests (agent lib-world)
-  (divide-into (lisps agent) (lambda (lisp)
-                               (tested-p (persistence agent)
-                                         lib-world
-                                         (implementation-identifier lisp)))
+  (divide-into (lisp-exes agent) (lambda (lisp)
+                                   (tested-p (persistence agent)
+                                             lib-world
+                                             (implementation-identifier lisp)))
       (done-lisps pending-lisps)
     (when done-lisps
       (log:info "Skipping the lisps already tested on ~A: ~S"
@@ -248,7 +277,7 @@ the PREDICATE."
                                                   agent
                                                   lisp
                                                   (project-names (project-lister agent)))))
-              (submit-test-run-results agent results-dir)
+              (submit-test-run-results agent results-dir lisp)
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
           continue)))))

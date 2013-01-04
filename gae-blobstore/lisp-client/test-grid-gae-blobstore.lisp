@@ -2,7 +2,8 @@
 
 (defpackage #:test-grid-gae-blobstore
   (:use :cl)
-  (:export #:make-blob-store))
+  (:export #:make-blob-store
+           #:delete-blobs))
 
 (in-package #:test-grid-gae-blobstore)
 
@@ -144,3 +145,14 @@ a warning message, followed by the end of the file."
     (when (not (eq :ok (with-input-from-string (s response)
                          (test-grid-utils::safe-read s))))
       (error "Error sending message to admin. Unexpected response: ~A." response))))
+
+(defun delete-blobs (blobstore blob-keys)
+  ;; todo: split work into batches, to avoid timeout on the server side
+  (multiple-value-bind (body status-code headers uri stream2 must-close reason-phrase)
+      (drakma:http-request (format nil "~A/delete-blobs" (base-url blobstore))
+                           :method :post
+                           :parameters `(("keys" . ,(format nil "~{~A~^,~}" blob-keys))))
+    (declare (ignore headers uri stream2 must-close))
+    (if (/= 200 status-code)
+        (error "Error uploading files, the HTTP response code ~A: ~A" status-code reason-phrase)
+        body)))

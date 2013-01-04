@@ -361,11 +361,11 @@ results in this directory are tested."
     (save-run-info run-info test-run-dir)
     run-info))
 
-(defun submit-test-run-results (agent test-run-dir)
+(defun submit-test-run-results (agent test-run-dir lisp-exe)
   (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
   (let* ((run-info (submit-logs (blobstore agent) test-run-dir)))
     (log:info "The log files are submitted. Submitting the test run info...")
-    (funcall (results-receiver agent) run-info)
+    (funcall (results-receiver agent) run-info lisp-exe)
     (log:info "Done. The test results are submitted.")
     run-info))
 
