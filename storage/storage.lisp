@@ -41,7 +41,7 @@
                  :credentials *cl-test-grid-user-credentials*))
 
 (defun transaction-allowed-p (func-symbol)
-  (member func-symbol '(sptm::initial-value test-grid-data:add-test-run)))
+  (member func-symbol '(test-grid-data:add-test-run test-grid-data:remove-test-runs)))
 
 (defmethod make-replica (name local-snapshot-file)
   (make-instance 'replica

@@ -7,7 +7,8 @@
   (:export
    #:make-db
    #:read-db
-   #:add-test-run))
+   #:add-test-run
+   #:remove-test-runs))
 
 (in-package #:test-grid-data)
 

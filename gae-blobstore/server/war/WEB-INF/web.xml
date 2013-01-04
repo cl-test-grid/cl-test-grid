@@ -50,6 +50,17 @@
     <url-pattern>/tell-admin</url-pattern>
   </servlet-mapping>
 
+<!--
+  <servlet>
+    <servlet-name>delete-blobs</servlet-name>
+    <servlet-class>cltestgrid.DeleteBlobs</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>delete-blobs</servlet-name>
+    <url-pattern>/delete-blobs</url-pattern>
+  </servlet-mapping>
+-->
+
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>all</web-resource-name>
