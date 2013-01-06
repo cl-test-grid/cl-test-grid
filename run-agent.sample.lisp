@@ -67,9 +67,9 @@ run-agent.sample.lisp for a fresh example)."
       ;; uses when it needs to perform some auxiliary
       ;; task in a separate lisp process (for example, updating
       ;; the private quicklisp installation we run tests on).
-      ;; Almost always preferred lisp is the same lisp that runs
-      ;; the agent process itself (i.e. the lisp which runs this script).
-      (test-grid-agent:preferred-lisp *agent*) *ccl-1.8-x86*
+      ;; Untill quicklisp issue https://github.com/quicklisp/quicklisp-client/issues/71
+      ;; is resolved, we suggest to not use CCL here.
+      (test-grid-agent:preferred-lisp *agent*) *sbcl*
 
       ;; Please provide your email so that we know who is submitting the test results.
       ;; Also the email will be published in the online reports, and the library
