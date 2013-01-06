@@ -8,6 +8,9 @@
 
 (in-package :cl-user)
 
+;;; Configure away the normal ASDF source registry, so we only use Quicklisp.
+(asdf:initialize-source-registry `(:source-registry :ignore-inherited-configuration))
+
 (defun test-loading (system-name)
   (catching-problems (lambda ()
                        (ql:quickload system-name))
