@@ -6,6 +6,9 @@
 
 (in-package :cl-user)
 
+;;; Configure away the normal ASDF source registry, so we only use Quicklisp.
+(asdf:initialize-source-registry `(:source-registry :ignore-inherited-configuration))
+
 (let* ((this-file (load-time-value (or *load-truename* #.*compile-file-pathname*)))
        (this-file-dir (make-pathname :directory (pathname-directory this-file))))
 
