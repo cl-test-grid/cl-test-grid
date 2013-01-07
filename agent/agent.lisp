@@ -215,7 +215,7 @@ the PREDICATE."
       (if (funcall predicate elem)
           (push elem positive)
           (push elem negative)))
-    (values positive negative)))
+    (values (reverse positive) (reverse negative))))
 
 (multiple-value-bind (p n) (divide '(1 2 3) #'oddp)
   (assert (alexandria:set-equal p '(1 3)))
