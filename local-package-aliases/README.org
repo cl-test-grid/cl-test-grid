@@ -111,10 +111,12 @@ is compiled, use the =:acound-compile= argument:
    desired short names/nicknames. Portable. To make the renaming
    local it is expected to be used with the ASDF's =:acound-compile= argument.
 
-** There were discussions to develop a CL language extension
+** CL language extensions
+
+   There were discussions to develop a CL language extension
    and propose it to CL vendors. The extension might be
-   a hook called by cl to resolve package prefix. I.e. when
-   it encounteres token like =pkg:symbol= it calls the hook
+   a hook called by CL to resolve package prefix. I.e. when
+   it encounteres a token like =pkg:symbol= it calls the hook
    with "pkg" string. Such hook may be called =*package-prefix-resolver*=.
    Alternatively the hook may be passed the full token "pkg:symbol".
    Such hook may be named =*parse-token-hook*=.
