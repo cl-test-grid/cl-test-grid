@@ -155,7 +155,8 @@ is compiled, use the =:acound-compile= argument:
 
 ** Conclusion
    The local-package-aliases approach with reader macro seems
-   a decent approach.
+   to be a decent approach, especiall as the syntax change
+   only affects packages having aliases.
 
    It is comparable by convenience with package-renaming.
 
