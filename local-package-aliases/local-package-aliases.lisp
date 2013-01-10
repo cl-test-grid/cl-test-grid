@@ -1,8 +1,12 @@
+;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8;  -*-
+;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
+;;; See LICENSE for details.
+
 (defpackage local-package-aliases
   (:use #:cl)
   (:shadow #:set)
   (:export #:set
-           #:aliasing-readtable
+           #:set-aliasing-reader
            #:call-with-aliasing-readtable))
 
 (in-package #:local-package-aliases)
@@ -27,25 +31,35 @@ The hash-table of local aliases maps string alias to a package designator.")
   (let ((alias-table (alias-table-for package)))
     (and alias-table (> (hash-table-count alias-table) 0))))
 
-(defun set-local-aliases (&rest package-alias-pairs)
-  "PACKAGE-ALIAS-PAIRS is a list in the form (PACKAGE-DESIGNATOR ALIAS-STRING ...)"
+(defun set-alias-table-for (for-package &rest package-alias-pairs)
+  "PACKAGE-ALIAS-PAIRS is a list in the form (package-designator alias-string package-designator alias-string ...)"
   (let ((aliases-table (make-hash-table :test #'equal)))
     (loop for (package alias) on package-alias-pairs by #'cddr
          do (setf (gethash (string alias) aliases-table) package))
-    (setf (gethash *package* *package-to-aliases-map*) aliases-table)))
+    (setf (gethash for-package *package-to-aliases-map*) aliases-table)))
 
 (defmacro set (&rest package-alias-pairs)
   (let ((args (loop for (package alias) on package-alias-pairs by #'cddr
                  nconcing (list (if (symbolp package) (list 'quote package) package)
                                 (string alias)))))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (set-local-aliases ,@args))))
+       (set-alias-table-for *package* ,@args))))
 
 (defun find-aliased-package (alias)
   (or (gethash alias
                (or (gethash *package* *package-to-aliases-map*)
                    (err "There is no alias ~A in the package ~A" alias *package*)))
       (err "There is no alias ~A in the package ~A" alias *package*)))
+
+(defun aliases-of (package in-package)
+  (let ((alias-table (alias-table-for in-package))
+        aliases)
+    (when alias-table
+      (maphash (lambda (alias aliased-package-designator)
+                 (when (eq package (find-package aliased-package-designator))
+                   (push alias aliases)))
+               alias-table))
+    aliases))
 
 ;;; reader macro 
 
@@ -108,13 +122,30 @@ The hash-table of local aliases maps string alias to a package designator.")
         (with-input-from-string (s (string char))
           (read (make-concatenated-stream s stream) t nil t)))))
 
+
+(defun set-aliasing-reader (to-readtable &optional (macro-char #\$) default-readtable)
+  "Modifies TO-READTABLE so that MACRO-CHAR at the beginning a token in
+form $ALIAS:SYMBOL or $ALIAS::SYMBOL is used to refere other packages,
+according to the aliases set in the current packges by LOCAL-PACKAGE-ALIASES:SET.
+
+The DEFAULT-READTABLE is used when the current package has no aliases.
+In this case the hangler for MACRO-CHAR is retrieved from DEFAULT-READTABLE
+and temporary applied to the current readtable using CL:SET-SYNTAX-FROM-CHAR.
+
+The default value for DEFAULT-READTABLE is copy of TO-READTABLE before
+it's syntax is modified."
+
+  (when (not default-readtable)
+    (setf default-readtable (copy-readtable to-readtable)))
+  (set-macro-character macro-char
+                       (lambda (stream char)
+                         (read-package-aliased-symbol stream char default-readtable))
+                         t
+                         to-readtable))
+
 (defun aliasing-readtable (&optional (prototype-readtable *readtable*) (macro-char #\$))
   (let ((readtable (copy-readtable prototype-readtable)))
-    (set-macro-character macro-char
-                         (lambda (stream char)
-                           (read-package-aliased-symbol stream char prototype-readtable))
-                         t
-                         readtable)
+    (set-aliasing-reader readtable macro-char)
     readtable))
 
 (defun call-with-aliasing-readtable (thunk)
