@@ -156,11 +156,14 @@ is compiled, use the =:acound-compile= argument:
    a decent approach.
 
    It is comparable by convenience with package-renaming.
-   Advantabe of local-package-aliases is that it may be enabled
+
+   Advantage of local-package-aliases is that it may be enabled
    once and forewer in the Lisp initialization file, while
    packag-renaming will require you to manually rename packages
-   every time you switch projects or subsystems. On the other
-   hand, if you renamed packages during Lisp session, SLIME
+   every time you switch projects or subsystems during or at the beginning
+   of Lisp session.
+   
+   On the other hand, if you renamed packages during Lisp session, SLIME
    symbol completion will work out of box for the new package names;
    while for local-package-aliases solution with $ reader macro
    SLIME symbol completion doesn't work (currently at least).
