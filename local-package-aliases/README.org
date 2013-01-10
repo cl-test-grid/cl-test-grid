@@ -16,8 +16,7 @@
 
   (defpackage some-application (:use cl))
   (in-package :some-application)
-  (local-package-aliases:set :com.my-company.some-library :lib
-                             :some.other.library :olib)
+  (local-package-aliases:set :com.my-company.some-library :lib :some.other.library :olib)
 
   (read-from-string "$lib:func")
   ;; => COM.MY-COMPANY.SOME-LIBRARY:FUNC
@@ -35,7 +34,7 @@
   ;; The $ reader macro is non-terminating,
   ;; therefore it is only activated when $
   ;; is on the beginning of a token.
-  ;; $ in the middle of a token has not special
+  ;; $ in the middle of a token has no special
   ;; effect.
   (in-package :some-application)
 
@@ -44,10 +43,10 @@
 
   ;; The $ designates alias reference only if the
   ;; current package has aliases defined. If there
-  ;; is not aliases in the current package, then
+  ;; is no aliases in the current package, then
   ;; $ is interpreted as usually:
 
-  (local-package-aliases:set)
+  (local-package-aliases:set) ;; installs empty aliases table
   (read-from-string "$-a-sybmol")
   ;; => $-A-SYMBOL
 
@@ -56,12 +55,13 @@
   ;; => $-A-SYMBOL
 
   ;; Therefore it is safe to enable $ macro
-  ;; globally, for example from init file,
+  ;; globally, for example from Lisp init file,
   ;; without affecting the code using $ for other
   ;; purposes.
 #+END_SRC
 
-To enable the $ macro in your lisp session:
+To enable the $ macro in your lisp session (may be put into
+the lisp initialization file):
 #+BEGIN_SRC common-lisp
   (local-package-aliases:set-aliasing-reader *readtable*)
 #+END_SRC
@@ -79,11 +79,11 @@ To make the $ macro enabled when your ASDF system
 is compiled, use the =:acound-compile= argument:
 
 #+BEGIN_SRC common-lisp
-  (asdf:defsystem #:some-application
-    :depends-on (#:local-package-aliases
-                 #:com.my-company.some-library)
-    :around-compile "local-package-aliases:call-with-aliasing-readtable"
-    :components ((:file "some-application")))
+(asdf:defsystem #:some-application
+  :depends-on (#:local-package-aliases
+               #:com.my-company.some-library)
+  :around-compile "local-package-aliases:call-with-aliasing-readtable"
+  :components ((:file "some-application")))
 #+END_SRC
 
 
