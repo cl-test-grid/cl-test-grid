@@ -116,10 +116,15 @@ is compiled, use the =:acound-compile= argument:
    There were discussions to develop a CL language extension
    and propose it to CL vendors. The extension might be
    a hook called by CL to resolve package prefix. I.e. when
-   it encounteres a token like =pkg:symbol= it calls the hook
-   with "pkg" string. Such hook may be called =*package-prefix-resolver*=.
-   Alternatively the hook may be passed the full token "pkg:symbol".
+   CL encounteres a token like =pkg:symbol= it calls the hook
+   with "pkg" string and the hook should return a package object
+   or maybe just a string designating real package name.
+   Such hook may be called =*package-prefix-resolver*=.
+
+   Alternatively the hook may be passed the full token "pkg:symbol"
+   and be responsible to resolve both package name and symbol.
    Such hook may be named =*parse-token-hook*=.
+
    There were considerations whether these hooks should be called only
    form reader or by =cl:find-sybmol= and other functions.
    Sketch for a CDR: http://paste.lisp.org/display/133561
@@ -156,7 +161,8 @@ is compiled, use the =:acound-compile= argument:
 ** Conclusion
    The local-package-aliases approach with reader macro seems
    to be a decent approach, especially as the syntax change
-   only affects packages having aliases.
+   only affects packages with explicitly configured aliasing
+   maps.
 
    It is comparable by convenience with package-renaming.
 
@@ -166,16 +172,16 @@ is compiled, use the =:acound-compile= argument:
    every time you switch projects or subsystems during or at the beginning
    of Lisp session.
    
-   On the other hand, if you renamed packages during Lisp session, SLIME
-   symbol completion will work out of box for the new package names;
+   On the other hand, when package renaming is applied during Lisp session,
+   SLIME symbol completion will work out of box for the new package names;
    while for local-package-aliases solution with $ reader macro
    SLIME symbol completion doesn't work (currently at least).
 
-   In my opinion package aliasing deserves to be introduced
-   as a CL extension into all implementations.
+   In my opinion a form of package aliasing deserves to be
+   introduced as a CL extension into all implementations.
 
-   The extension may be specific, targeting only package
-   aliases (like cl-package-aliases project does).
+   The language extension may be specific, targeting only package
+   aliases (like cl-package-aliases project proposes).
    It will encourage consistent coding practice accross
    all the CL programs.
 
