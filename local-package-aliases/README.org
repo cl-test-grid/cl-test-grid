@@ -79,11 +79,11 @@ To make the $ macro enabled when your ASDF system
 is compiled, use the =:acound-compile= argument:
 
 #+BEGIN_SRC common-lisp
-;; (asdf:defsystem #:some-application
-;;   :depends-on (#:local-package-aliases
-;;                #:com.my-company.some-library)
-;;   :around-compile "local-package-aliases:call-with-aliasing-readtable"
-;;   :components ((:file "some-application")))
+;    (asdf:defsystem #:some-application
+;      :depends-on (#:local-package-aliases
+;                   #:com.my-company.some-library)
+;      :around-compile "local-package-aliases:call-with-aliasing-readtable"
+;      :components ((:file "some-application")))
 #+END_SRC
 
 
