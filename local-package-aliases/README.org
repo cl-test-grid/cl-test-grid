@@ -94,10 +94,10 @@ is compiled, use the =:acound-compile= argument:
   The solutions vary in:
   - whether the aliases only honored by reader, or they also
     affect functions like =cl:find-package=, =cl:find-symbol=
-  - is the solution portable common lisp or it relies on patches
+  - is the solution a portable Common Lisp or it relies on patches
     or language extensions
   - whether the aliases are scoped to a package, or somehow else
-  - wheter the solution is specific about aliasing scheme,
+  - whether the solution is specific about aliasing scheme,
     or it's a lower-level tool allowing to build various
     aliasing approaches.
 
