@@ -42,11 +42,11 @@
   ;; => JUST-A-$-SYMBOL
 
   ;; The $ designates alias reference only if the
-  ;; current package has aliases defined. If there
-  ;; is no aliases in the current package, then
+  ;; current package has alias mapping defined. If there
+  ;; is no alias mapping in the current package, then
   ;; $ is interpreted as usually:
 
-  (local-package-aliases:set) ;; installs empty aliases table
+  (local-package-aliases:set) ;; installs empty aliases mapping
   (read-from-string "$-a-sybmol")
   ;; => $-A-SYMBOL
 
