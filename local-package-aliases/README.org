@@ -149,7 +149,7 @@ is compiled, use the =:acound-compile= argument:
    functions of the CL reader, such as =reat-token=.
 
    If speak about pluggable reader, it's necessary to mention
-   the reader-interseption project:
+   the reader-interception project:
    http://common-lisp.net/cgi-bin/gitweb.cgi?p=users/frideau/reader-interception.git;a=tree;js=1
    
    It's a portable solution allowing to plug-in your own reader.
