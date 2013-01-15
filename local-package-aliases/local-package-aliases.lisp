@@ -152,3 +152,30 @@ it's syntax is modified."
   "Convenience function to use in ASDF's :around-compile argument."
   (let ((*readtable* (aliasing-readtable)))
     (funcall thunk)))
+
+(defun call-with-nicknames (alias-table fn)
+  (let ((old-names '()))
+    (unwind-protect
+         (progn
+           (when alias-table
+             ;; add every alias as a nickname to the corresponding package
+             (maphash (lambda (alias package-designator)
+                        (let ((package (find-package package-designator)))
+                          (when package
+                            (push (cons (package-name package)
+                                        (package-nicknames package))
+                                  old-names)
+                            (rename-package package
+                                            (package-name package)
+                                            (cons (format nil "$~A" alias)
+                                                  (package-nicknames package))))))
+                      alias-table))
+           (funcall fn))
+      ;; Restore the original nicknames.
+      ;; Do this in reverse order to handle correctly
+      ;; the case when alias-table refers the same
+      ;; package several times.
+      (dolist (old-name-nicknames (reverse old-names))
+        (rename-package (car old-name-nicknames)
+                        (car old-name-nicknames)
+                        (cdr old-name-nicknames))))))
