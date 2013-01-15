@@ -1,6 +1,7 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 
 (defpackage #:test-grid-gae-blobstore
+  (:nicknames #:tg-gae-blobstore)
   (:use :cl)
   (:export #:make-blob-store
            #:delete-blobs))
