@@ -110,12 +110,12 @@
   (my-time ("ECL bytecode load failures...~%")
     (print-load-failures "ecl-load-failures-bytecode.html"
                          all-results
-                         "ecl-12.12.1-unknown-linux-x64-bytecode"
+                         "ecl-12.12.1-unknown-linux-x86-bytecode"
                          new-quicklisp))
   (my-time ("ECL lisp-to-c load failures...~%")
     (print-load-failures "ecl-load-failures-lisp-to-c.html"
                          all-results
-                         "ecl-12.12.1-unknown-linux-x64-lisp-to-c"
+                         "ecl-12.12.1-unknown-linux-x86-lisp-to-c"
                          new-quicklisp))
 
   (let ((new-abcl "abcl-1.2.0-dev-svn-14300-fasl39-linux-x86")
