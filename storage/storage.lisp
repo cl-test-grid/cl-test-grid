@@ -3,6 +3,7 @@
 ;;; See LICENSE for details.
 
 (defpackage #:test-grid-storage
+  (:nicknames :tg-storage)
   (:use :cl)
   (:import-from #:sptm #:data #:version #:sync #:read-local-snapshot)
   (:export

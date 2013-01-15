@@ -3,4 +3,5 @@
 ;;;; See LICENSE for details.
 
 (defpackage #:test-grid-reporting
+  (:nicknames #:tg-reporting #:tg-rep)
   (:use :cl))
