@@ -3,6 +3,7 @@
 ;;;; See LICENSE for details.
 
 (defpackage #:test-grid-data
+  (:nicknames :tg-data)
   (:use :cl)
   (:export
    #:make-db
