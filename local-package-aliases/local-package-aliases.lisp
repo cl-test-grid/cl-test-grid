@@ -1,5 +1,5 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8;  -*-
-;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
+;;; Copyright (C) 2012 Anton Vodonosov (avodonosov@yandex.ru)
 ;;; See LICENSE for details.
 
 (defpackage local-package-aliases
@@ -154,6 +154,9 @@ it's syntax is modified."
     (funcall thunk)))
 
 (defun call-with-nicknames (alias-table fn)
+  "Helper function useful to hook into SLIME
+in order to provide completion, go-to-definition,
+function parameters help and other SLIME support."
   (let ((old-names '()))
     (unwind-protect
          (progn
