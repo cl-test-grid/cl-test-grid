@@ -147,13 +147,23 @@ a warning message, followed by the end of the file."
                          (test-grid-utils::safe-read s))))
       (error "Error sending message to admin. Unexpected response: ~A." response))))
 
+(defparameter *logs-to-keep*
+  (list))
+
 (defun delete-blobs (blobstore blob-keys)
-  ;; todo: split work into batches, to avoid timeout on the server side
-  (multiple-value-bind (body status-code headers uri stream2 must-close reason-phrase)
-      (drakma:http-request (format nil "~A/delete-blobs" (base-url blobstore))
-                           :method :post
-                           :parameters `(("keys" . ,(format nil "~{~A~^,~}" blob-keys))))
-    (declare (ignore headers uri stream2 must-close))
-    (if (/= 200 status-code)
-        (error "Error uploading files, the HTTP response code ~A: ~A" status-code reason-phrase)
-        body)))
+  (flet ((delete-batch (blob-keys)
+           (multiple-value-bind (body status-code headers uri stream2 must-close reason-phrase)
+               (drakma:http-request (format nil "~A/delete-blobs" (base-url blobstore))
+                                    :method :post
+                                    :parameters `(("keys" . ,(format nil "~{~A~^,~}" blob-keys))))
+             (declare (ignore headers uri stream2 must-close))
+             (if (/= 200 status-code)
+                 (error "Error deleting blobs, the HTTP response code ~A: ~A" status-code reason-phrase)
+                 body))))
+    (let* ((filtered-keys (set-difference blob-keys *logs-to-keep* :test #'string=))
+           (total (length filtered-keys))
+           (done 0))
+      (dolist (batch (test-grid-utils::split-list filtered-keys 50))
+        (delete-batch batch)
+        (incf done (length batch))
+        (log:info "~A/~A blobs deleted" done total)))))
