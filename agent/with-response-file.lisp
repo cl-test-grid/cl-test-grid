@@ -41,7 +41,7 @@ java.lang.Throwable#getCause in Java)"))
                                      (random #.(1- (expt 2 64)))))
          (response-file (if *response-file-temp-dir*
                             (merge-pathnames response-file-name *response-file-temp-dir*)
-                            (progn (log:warn "~A is not set, temporary resposne file will be created in the default directory."
+                            (progn (log:warn "~A is not set, temporary response file will be created in the default directory."
                                              '*response-file-temp-dir*)
                                    response-file-name))))
     (unwind-protect (progn (funcall body-func response-file)
