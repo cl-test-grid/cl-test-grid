@@ -10,10 +10,12 @@ reporting code we will consider below.
 
 Do the following:
 
-``` common-lisp
+``` shell
 $ git clone git@github.com:cl-test-grid/cl-test-grid.git
 $ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
+```
 
+``` common-lisp
 CL-USER> (pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
 CL-USER> (ql:quickload :test-grid-reporting)
 CL-USER> (in-package #:test-grid-reporting)
