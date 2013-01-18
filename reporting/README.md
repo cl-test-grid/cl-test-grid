@@ -42,12 +42,17 @@ are accessed using the following functions:
   - `(:load "some-asdf-system-name" [:ok | :fail | :crash | :timeout])`
     Returned if the result object represents result of loading an ASDF system.
     Here the notation `[:ok | :fail | :crash | :timeout]` shoud be read as "one of `:ok`, `:fail`, `:crash` or `:timeout`".
-    - `:ok` means the load operation succeeded;
-    - `:fail` means the load operation failed;
-    - `:crash` means the child lisp process loading asdf
-               system exited without returning a result;            
-    - `:timeout` means that the child lisp process
-                 hasn't finished in a specified timeout time.
+    
+    `:ok` means the load operation succeeded;
+
+    `:fail` means the load operation failed;
+
+    `:crash` means the child lisp process loading asdf
+             system exited without returning a result;            
+
+    `:timeout` means that the child lisp process
+               hasn't finished in a specified timeout time.
+
   - =(:test-case "some-test-case-name" [:fail | :known-fail | :unexpected-ok])= ::
     Represents abnormal result of a single test case.
     - =:fail= :: means the test case has failed;
