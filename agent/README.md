@@ -91,7 +91,7 @@ startup time, which becomes significant in our use case
 as we run every test suite or ASDF system compilation
 in a fresh lisp process).
 
-*Caveat of killing the agent:* if you killed the agent process
+**Caveat of killing the agent:** if you killed the agent process
 (without rebooting the machine), the subordinate process
 running current testsute or compiling current ASDF system
 remains alive. Typically it takes less than a minute for
@@ -111,7 +111,7 @@ Agent operates sequentially.
 
 During its work, agent keeps it's working data in
 a directory specified by the cofiguration property
-- =work-dir= - Defaults to the /<cl-test-grid source code root>/work-dir/agent/
+- `work-dir` - Defaults to the _<cl-test-grid source code root>/work-dir/agent/_
 
 The agent takes measures to ensure there is only
 one agent instance using this working directory.
@@ -125,7 +125,7 @@ and exists.
 
 The port number is specified by the configuration
 property
-- =singleton-lock-port= defaults to 7685.
+- `singleton-lock-port` defaults to 7685.
 
 If you want to run several agent processes
 and distirbute testing work between them,
