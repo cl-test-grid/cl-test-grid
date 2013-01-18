@@ -187,16 +187,16 @@ TEST-GRID-REPORTING> (print-pivot "demo/some-results.html"
 
 Please review the resulting file: [cl-test-grid/reports-generated/demo/some-results.html](http://common-lisp.net/project/cl-test-grid/demo/some-results.html).
 You may see that the table is build according to the parameters we specified: row headers contain
-`lib-world and `lisp` values, column headers contain `libname`.
+`lib-world` and `lisp` values, column headers contain `libname`.
 The soring corresponds to what is specified for every field.
 
 The `:cell-printer` parameter is a function responsible for printing set of
 results falling into a single pivot cell. The function we pass prints results
-in the form of HTML links, so that clicking the resutl refers to the log file,
+in the form of HTML links, so that clicking the result refers to the log file,
 where the details may be found.
 
-Such a `:cell-printer` function is often useful, therefore `test-grid-reporting
-defines ready to use function `results-cell-printer. So we can write instead:
+Such a `:cell-printer` function is often useful, therefore `test-grid-reporting`
+defines a ready to use function `results-cell-printer`. So we can write instead:
 ``` common-lisp
 TEST-GRID-REPORTING> (print-pivot "demo/some-results2.html"
                                   *some-results*
