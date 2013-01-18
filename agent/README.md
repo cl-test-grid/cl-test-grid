@@ -111,7 +111,7 @@ Agent operates sequentially.
 
 During its work, agent keeps it's working data in
 a directory specified by the cofiguration property
-- `work-dir` - Defaults to the _<cl-test-grid source code root>/work-dir/agent/_
+- `work-dir` - Defaults to the _&lt;cl-test-grid source code root&gt;/work-dir/agent/_
 
 The agent takes measures to ensure there is only
 one agent instance using this working directory.
