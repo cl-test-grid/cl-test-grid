@@ -208,4 +208,63 @@ Please review the resulting file: [cl-test-grid/reports-generated/demo/some-resu
 As you see, it is the same table, but `results-cell-printer` 
 takes care to colorize the results.
 
+Comparing Resutlts to Find Regressions
+======================================
+
+Lets say we want to compare new version of a compiler with an old version,
+to ensure there are no regressions in the new version.
+
+This is easy to do using the tools introduced above. The apporach:
+- select two subsets of results: of the old compiler and of the new one<
+- compute `exclusive-or` of these two subsets
+- print the resut as a pivot where results of two compilers
+        are represented side by side
+
+The function `compiler-diff` implements this approach.
+See its source code in [cl-test-grid/reporting/compiler-diff.lisp](https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/compiler-diff.lisp).
+Note, it calls `fast-exclusive-or`. This function has exactly the
+same prototype as 'cl:set-exclusive-or',
+but takes advantage of hash tables if the ':test' parameter
+is one of 'cl:eq', 'cl:eql', 'cl:equal' or 'cl:equalp'.
+
+Lets use 'compiler-diff' to compare two versions of ABCL: old release 1.0.1
+and some intermediate development version:
+``` common-lisp
+TEST-GRID-REPORTING> (print-compiler-diff "demo/abcl-diff.html"
+                                          *all-results*
+                                          "quicklisp 2012-09-09"
+                                          "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"
+                                          "abcl-1.1.0-dev-svn-14157-fasl39-linux-java")
+```
+
+The resulting report is stored in [cl-test-grid/reports-generated/demo/abcl-diff.html](http://common-lisp.net/project/cl-test-grid/demo/abcl-diff.html).
+On the left column are the results collected from the old release, but not found in the new release.
+On the right column the results collected for the new version, but not
+found for the old release.
+
+If the left column has green result and the right has red result, it is a regression.
+If the left column has red result and the right has green result, it is an improvement.
+
+Lets compare two versions of Quicklisp.
+
+The same approach: 'exclusive-or' of two sets of results: for old
+Quicklisp version and for new one.
+
+The source code: [cl-test-grid/reporting/quicklisp-diff.lisp](https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/quicklisp-diff.lisp).
+As you can see, additional care is taken to compare only results
+of CL implementation/library/test which were preformed on both
+Quicklisp versions and on the same machine.
+
+``` common-lisp
+TEST-GRID-REPORTING> (print-quicklisp-diff-report "demo/quicklisp-diff.html"
+                                                  *all-results*
+                                                  "quicklisp 2012-08-11"
+                                                  "quicklisp 2012-09-09")
+```
+The resulting report is stored in [cl-test-grid/reports-generated/demo/quicklisp-diff.html](http://common-lisp.net/project/cl-test-grid/demo/quicklisp-diff.html).
+On the left column are the results collected for the old quicklisp version, but not found in the new version.
+On the right column the results collected for the new version, but not found for the old version.
+
+
+
 
