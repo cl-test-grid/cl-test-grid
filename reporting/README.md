@@ -269,7 +269,7 @@ On the right column the results collected for the new version, but not found for
 http://common-lisp.net/project/cl-test-grid/testsuites-pivots.html presents results
 of all possible pivots of the testsuites tested by testgrid. 
 We do not refer you to the source code of these reports, as they are somewhat
-outdated - do not include of ASDF systems loading.
+outdated - do not include results of ASDF systems loading.
 
 Combining Failures and Dependency Information
 =============================================
@@ -331,5 +331,5 @@ sometimes they contain reader conditionals, sometimes
 `asdf:load-op` invocations, instead of just putting the systems
 into `:depends-on` or `:defsystem-depend-on`. But the information
 we can gather is enough to make useful observations. We retrieve
-the dependency information from _quicklisp/dists/quicklisp/systems.txt_
+the dependency information from the _quicklisp/dists/quicklisp/systems.txt_
 index file.
