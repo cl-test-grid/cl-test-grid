@@ -88,46 +88,44 @@ are accessed using the following functions:
                foreign library on the test system.
 
        `:no-resource` This status is designed to represent
-                      situations when testsuite can not be run due
-                      to absense of necessary enviromnent.
+               situations when testsuite can not be run due
+               to absense of necessary enviromnent.
 
-                      For example, CFFI test suite needs a small
-                      C library to be build. On Windows user must
-                      do it manually. If this library is not found,
-                      testgrid adapter of the CFFI test suite returns :no-resource.
-                      
-                      Or, external-program test suite can only be
-                      run on *nix platforms. On Windows testgrid
-                      adapter returns :no-resource.
+               For example, CFFI test suite needs a small
+               C library to be build. On Windows user must
+               do it manually. If this library is not found,
+               testgrid adapter of the CFFI test suite returns :no-resource.
+               
+               Or, external-program test suite can only be
+               run on *nix platforms. On Windows testgrid
+               adapter returns :no-resource.
 
-                      The :no-resource handling in testsuite adapters
-                      is optional, as every testsuite may have different
-                      requirements.
+               The :no-resource handling in testsuite adapters
+               is optional, as every testsuite may have different
+               requirements.
 
-                      Today, most testsuite adapters in testgrid
-                      do not implemente such a handling, and
-                      in case of any problems when running
-                      the tests :fail is recorded.
+               Today, most testsuite adapters in testgrid
+               do not implemente such a handling, and
+               in case of any problems when running
+               the tests :fail is recorded.
 
        `:crash` means the child lisp process running the test suite
-                     exited without returning a result;
+               exited without returning a result;
 
        `:timeout` means that the child lisp process
-                  hasn't finished in a specified timeout time.
+               hasn't finished in a specified timeout time.
 
-- =(libname result)= :: Name of the library tested - a keyword, like :babel, :alexandria, etc.
+- `(libname result)` Name of the library tested - a keyword, like `:babel`, `:alexandria`, etc.
 
-- =(lisp result)= :: Lisp implementation identifier - a string, for example "clisp-2.49-unix-x86_64",
-   "cmu-20c_release-20c__20c_unicode_-linux-x86", "sbcl-1.0.54-linux-x64"
+- `(lisp result)` Lisp implementation identifier - a string, for example `"clisp-2.49-unix-x86_64"`,
+   `"cmu-20c_release-20c__20c_unicode_-linux-x86"`, `"sbcl-1.0.54-linux-x64"`
 
-- =(lib-world result)= :: A string naming the set of libraries and their versions used during testing,
-  for example "quicklisp 2012-07-03", "quicklisp 2012-08-11".
+- `(lib-world result)` A string naming the set of libraries and their versions used during testing,
+  for example `"quicklisp 2012-07-03"`, `"quicklisp 2012-08-11"`.
 
-- =(system-name result)= :: If the result descibes ASDF system load result, then the
-  name of that ASDF system - a string, like "arnesi", "anaphora".
+- `(system-name result)` If the result descibes ASDF system load result, then the
+  name of that ASDF system - a string, like `"arnesi"`, `"anaphora"`.
   Otherwize =NIL=.
 
-- =(log-uri result)= :: URI of the stored online output produced by the child lisp process
+- `(log-uri result)` URI of the stored online output produced by the child lisp process
   performed the test suite or tested the ASDF system load.
-
-#+END_SRC common-lisp
