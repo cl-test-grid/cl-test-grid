@@ -159,3 +159,53 @@ TEST-GRID-REPORTING> (defparameter *some-results*
                                               :test #'string=)))))
 ```
 
+Displaying Data - Pivot Tables
+==============================
+
+To understand a large result set it is necessary to group
+resuls into groups and further soubroups.
+
+Pivot tables provide a more or less universal solution for
+grouping and sorting data according to values of selected
+properties of data objects.
+
+Lets layout the `*some-results*` into a pivot:
+
+
+``` common-lisp
+TEST-GRID-REPORTING> (print-pivot "demo/some-results.html"
+                                  *some-results*
+                                  :rows '((lib-world string>) (lisp string<))
+                                  :cols '((libname string<))
+                                  :cell-printer (lambda (out cell-data)
+                                                  (dolist (result cell-data)
+                                                    (format out
+                                                            "<a href=\"~A\">~A</a></br>" 
+                                                            (log-uri result)
+                                                            (result-spec result)))))
+```
+
+Please review the resulting file: [cl-test-grid/reports-generated/demo/some-results.html](http://common-lisp.net/project/cl-test-grid/demo/some-results.html).
+You may see that the table is build according to the parameters we specified: row headers contain
+`lib-world and `lisp` values, column headers contain `libname`.
+The soring corresponds to what is specified for every field.
+
+The `:cell-printer` parameter is a function responsible for printing set of
+results falling into a single pivot cell. The function we pass prints results
+in the form of HTML links, so that clicking the resutl refers to the log file,
+where the details may be found.
+
+Such a `:cell-printer` function is often useful, therefore `test-grid-reporting
+defines ready to use function `results-cell-printer. So we can write instead:
+``` common-lisp
+TEST-GRID-REPORTING> (print-pivot "demo/some-results2.html"
+                                  *some-results*
+                                  :rows '((lib-world string&gt;) (lisp string&lt;))
+                                  :cols '((libname string&lt;))
+                                  :cell-printer #'results-cell-printer)
+```
+Please review the resulting file: [cl-test-grid/reports-generated/demo/some-results2.html](http://common-lisp.net/project/cl-test-grid/demo/some-results2.html)
+As you see, it is the same table, but `results-cell-printer` 
+takes care to colorize the results.
+
+
