@@ -200,8 +200,8 @@ defines ready to use function `results-cell-printer. So we can write instead:
 ``` common-lisp
 TEST-GRID-REPORTING> (print-pivot "demo/some-results2.html"
                                   *some-results*
-                                  :rows '((lib-world string&gt;) (lisp string&lt;))
-                                  :cols '((libname string&lt;))
+                                  :rows '((lib-world string>) (lisp string<))
+                                  :cols '((libname string<))
                                   :cell-printer #'results-cell-printer)
 ```
 Please review the resulting file: [cl-test-grid/reports-generated/demo/some-results2.html](http://common-lisp.net/project/cl-test-grid/demo/some-results2.html)
