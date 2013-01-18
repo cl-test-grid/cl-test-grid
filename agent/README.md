@@ -139,8 +139,3 @@ Getting assistance
 
 Feel free to contact us if you have any questions or
 difficulties (see the mailing list address below).
-
-We are looking for contributors who would agree to run
-`test-grid-agent` periodically (ideally once a day, but even
-once a month is OK).
-
