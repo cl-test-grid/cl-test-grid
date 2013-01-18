@@ -1,15 +1,16 @@
-* Accessing the Test Results Database
+Accessing the Test Results Database
+===================================
 
 All the test grid results are stored in a plain s-expression
 file. It is published in a separate git repository at
-[[https://github.com/cl-test-grid/cl-test-grid-results]]
+https://github.com/cl-test-grid/cl-test-grid-results
 
-The =test-grid-reporting= package contains the
+The `test-grid-reporting` package contains the
 reporting code we will consider below.
 
 Do the following:
 
-#+BEGIN_SRC common-lisp
+``` common-lisp
 $ git clone git@github.com:cl-test-grid/cl-test-grid.git
 $ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
 
@@ -17,9 +18,10 @@ CL-USER> (pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
 CL-USER> (ql:quickload :test-grid-reporting)
 CL-USER> (in-package #:test-grid-reporting)
 TEST-GRID-REPORTING> (defparameter *db* (test-grid-data:read-db))
-#+END_SRC
+```
 
-* =RESULT= Objects
+`RESULT` Objects
+==================
 
 In most cases we found it convenient to convert
 the database into a large list of =result= objects:
@@ -96,7 +98,7 @@ are accessed using the following functions:
 - =(libname result)= :: Name of the library tested - a keyword, like :babel, :alexandria, etc.
 
 - =(lisp result)= :: Lisp implementation identifier - a string, for example "clisp-2.49-unix-x86_64",
-   "cmu-20c_release-20c__20c_unicode_-linux-x86", ="sbcl-1.0.54-linux-x64"=
+   "cmu-20c_release-20c__20c_unicode_-linux-x86", "sbcl-1.0.54-linux-x64"
 
 - =(lib-world result)= :: A string naming the set of libraries and their versions used during testing,
   for example "quicklisp 2012-07-03", "quicklisp 2012-08-11".
