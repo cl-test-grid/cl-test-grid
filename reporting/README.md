@@ -40,6 +40,7 @@ are accessed using the following functions:
 
 - `(result-spec result)` Result description in one of the following forms:
     - `(:load "some-asdf-system-name" [:ok | :fail | :crash | :timeout])`
+
        Returned if the result object represents result of loading an ASDF system.
        Here the notation `[:ok | :fail | :crash | :timeout]` shoud be read as "one of `:ok`, `:fail`, `:crash` or `:timeout`".
     
@@ -53,55 +54,67 @@ are accessed using the following functions:
        `:timeout` means that the child lisp process
                   hasn't finished in a specified timeout time.
 
-  - =(:test-case "some-test-case-name" [:fail | :known-fail | :unexpected-ok])= ::
-    Represents abnormal result of a single test case.
-    - =:fail= :: means the test case has failed;
-    - =:known-fail= :: also means that the test case has failed, but
-                       the library developers have this testcase
-                       marked as a known failure (known failures is a feature
-                       provided by some test frameworks; it may be used
-                       by the developers, for example, to mark
-                       test cases which are impossible to fix right now,
-                       maybe due to lack of support or bugs
-                       in CL implemntatons, 3rd party libraries, or similar);
-    - =:unexpected-ok= :: means the testcase marked as known failure has not failed.
-  - =(:whole-test-suite [:ok | :no-resource | :fail | :crash | :timeout])= ::
+    - `(:test-case "some-test-case-name" [:fail | :known-fail | :unexpected-ok])`
+
+        Represents abnormal result of a single test case.
+
+        `:fail` means the test case has failed;
+
+        `:known-fail` also means that the test case has failed, but
+                      the library developers have this testcase
+                      marked as a known failure (known failures is a feature
+                      provided by some test frameworks; it may be used
+                      by the developers, for example, to mark
+                      test cases which are impossible to fix right now,
+                      maybe due to lack of support or bugs
+                      in CL implemntatons, 3rd party libraries, or similar);
+
+        `:unexpected-ok` means the testcase marked as known failure has not failed.
+
+    - `(:whole-test-suite [:ok | :no-resource | :fail | :crash | :timeout])`
+
        Result for a whole test suite.
-       - =:ok= :: None of the testcases has failed.
-       - =:fail= :: Either some test cases failed but the test
-            framework does not allow to distinguish
-            particular test case, or some problem
-            prevented the test suite from running at all.
-            Example of such a problem may be that the
-            testsuite or one of it's dependencies
-            doesn't compile/load due to errors
-            in lisp code; or absense of necessary
-            foreign library on the test system.
-       - =:no-resource= :: This status is designed to represent
-                           situations when testsuite can not be run due
-                           to absense of necessary enviromnent.
 
-                           For example, CFFI test suite needs a small
-                           C library to be build. On Windows user must
-                           do it manually. If this library is not found,
-                           testgrid adapter of the CFFI test suite returns :no-resource.
-                           
-                           Or, external-program test suite can only be
-                           run on *nix platforms. On Windows testgrid
-                           adapter returns :no-resource.
+       `:ok` None of the testcases has failed.
 
-                           The :no-resource handling in testsuite adapters
-                           is optional, as every testsuite may have different
-                           requirements.
+       `:fail` Either some test cases failed but the test
+               framework does not allow to distinguish
+               particular test case, or some problem
+               prevented the test suite from running at all.
+               Example of such a problem may be that the
+               testsuite or one of it's dependencies
+               doesn't compile/load due to errors
+               in lisp code; or absense of necessary
+               foreign library on the test system.
 
-                           Today, most testsuite adapters in testgrid
-                           do not implemente such a handling, and
-                           in case of any problems when running
-                           the tests :fail is recorded.
-       - =:crash= :: means the child lisp process running the test suite
+       `:no-resource` This status is designed to represent
+                      situations when testsuite can not be run due
+                      to absense of necessary enviromnent.
+
+                      For example, CFFI test suite needs a small
+                      C library to be build. On Windows user must
+                      do it manually. If this library is not found,
+                      testgrid adapter of the CFFI test suite returns :no-resource.
+                      
+                      Or, external-program test suite can only be
+                      run on *nix platforms. On Windows testgrid
+                      adapter returns :no-resource.
+
+                      The :no-resource handling in testsuite adapters
+                      is optional, as every testsuite may have different
+                      requirements.
+
+                      Today, most testsuite adapters in testgrid
+                      do not implemente such a handling, and
+                      in case of any problems when running
+                      the tests :fail is recorded.
+
+       `:crash` means the child lisp process running the test suite
                      exited without returning a result;
-       - =:timeout= :: means that the child lisp process
-                       hasn't finished in a specified timeout time.
+
+       `:timeout` means that the child lisp process
+                  hasn't finished in a specified timeout time.
+
 - =(libname result)= :: Name of the library tested - a keyword, like :babel, :alexandria, etc.
 
 - =(lisp result)= :: Lisp implementation identifier - a string, for example "clisp-2.49-unix-x86_64",
