@@ -331,5 +331,5 @@ sometimes they contain reader conditionals, sometimes
 `asdf:load-op` invocations, instead of just putting the systems
 into `:depends-on` or `:defsystem-depend-on`. But the information
 we can gather is enough to make useful observations. We retrieve
-the dependency information from quicklisp/dists/quicklisp/systems.txt
+the dependency information from _quicklisp/dists/quicklisp/systems.txt_
 index file.
