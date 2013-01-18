@@ -129,3 +129,33 @@ are accessed using the following functions:
 
 - `(log-uri result)` URI of the stored online output produced by the child lisp process
   performed the test suite or tested the ASDF system load.
+
+For example, lets find all the alexandria results on quickisp 2012-09-09:
+``` common-lisp
+TEST-GRID-REPORTING> (remove-if-not (lambda (result)
+                                      (and (eq :alexandria (libname result))
+                                           (string= "quicklisp 2012-09-09" (lib-world result))))
+                                    *all-results*)
+
+=> (#<RESULT "quicklisp 2012-09-09" "abcl-1.0.1-svn-13750-13751-fasl38-macosx-java" :ALEXANDRIA (:WHOLE-TEST-SUITE :FAIL) "http://cl-test-grid.appspot.com/blob?key=388372" #x2106FA376D>
+    #<RESULT "quicklisp 2012-09-09" "ecl-12.7.1-dfc94901-linux-x86-lisp-to-c" :ALEXANDRIA (:LOAD "alexandria" :OK) "http://cl-test-grid.appspot.com/blob?key=389242" #x2106FD890D>
+    #<RESULT "quicklisp 2012-09-09" "ecl-12.7.1-dfc94901-linux-x86-lisp-to-c" :ALEXANDRIA (:LOAD "alexandria-tests" :OK) "http://cl-test-grid.appspot.com/blob?key=386272" #x2106FD887D>
+    ...)
+```
+For better readability, package `test-grid-reporting`
+defines the following function instead of `cl:remove-if-not`:
+``` common-lisp
+(defun subset (superset predicate &key key)
+  (remove-if-not predicate superset :key key))
+```
+Example:
+``` common-lisp
+TEST-GRID-REPORTING> (defparameter *some-results*
+                       (subset *all-results*
+                               (lambda (result)
+                                 (and (member (libname result) '(:alexandria :let-plus))
+                                      (member (lib-world result)
+                                              '("quicklisp 2012-09-09" "quicklisp 2012-08-11")
+                                              :test #'string=)))))
+```
+
