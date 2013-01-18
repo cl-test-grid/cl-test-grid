@@ -266,5 +266,70 @@ On the left column are the results collected for the old quicklisp version, but 
 On the right column the results collected for the new version, but not found for the old version.
 
 
+http://common-lisp.net/project/cl-test-grid/testsuites-pivots.html presents results
+of all possible pivots of the testsuites tested by testgrid. 
+We do not refer you to the source code of these reports, as they are somewhat
+outdated - do not include of ASDF systems loading.
 
+Combining Failures and Dependency Information
+=============================================
 
+When some ASDF system fails to load, it blocks all other
+systems depending on it.
+
+We can build a report showing which ASDF systems are
+the most importatnt to fix.
+
+The most fruitful systems to fix are those which:
+  - fail by themselves, i.e. don't have failing dependencies
+  - have many other systems depending on the given system
+  - in particular, these depending systems have the given system
+    as the only failed dependency (we say that the given system
+    blocks them exclusively)
+
+For example, on particular (old) version of ECL closer-mop failed to load,
+and there are 123 other ASDF systems (related to 59 projects),
+which depend on closer-mop and closer-mop is the only failing
+dependency for them (in other words, closer-mop blocks them exclusively).
+
+This means that fixing closer-mop is likely to fix 123 other ASDF
+systems (unless these other systems have their own problems,
+in this case we will at least reveal these problems).
+
+Here is how to build such a report:
+``` common-lisp
+TEST-GRID-REPORTING> (print-load-failures "demo/ecl-load-failures.html"
+                                          *all-results*
+                                          "ecl-12.7.1-ce653d88-linux-x86-lisp-to-c"
+                                          "quicklisp 2012-09-09")
+```
+
+The report is stored at 
+[cl-test-grid/reports-generated/demo/ecl-load-failures.html](http://common-lisp.net/project/cl-test-grid/demo/ecl-load-failures.html)
+
+The default sorting is
+- number of root-blocker-systems desc,
+- number projects of systems blocked exclusively asc
+- system name desc.
+
+I.e. the default sorting places the most fruitful systems at the top.
+
+You may change sorting by clicking columns (holding Shift
+to sort by multiple columns).
+
+The reports for some CL implementations we have tested:
+[ABCL](http://common-lisp.net/project/cl-test-grid/abcl-load-failures.html)
+[ACL](http://common-lisp.net/project/cl-test-grid/acl-load-failures.html)
+[CCL](http://common-lisp.net/project/cl-test-grid/ccl-load-failures.html)
+[CMUCL](http://common-lisp.net/project/cl-test-grid/cmucl-load-failures.html)
+[ECL](http://common-lisp.net/project/cl-test-grid/ecl-load-failures.html)
+[SBCL](http://common-lisp.net/project/cl-test-grid/sbcl-load-failures.html)
+
+Note, there is no way (or at least it is not trivial) to extract the
+dependency information 100% precise. ASDF systems are just lisp code,
+sometimes they contain reader conditionals, sometimes
+`asdf:load-op` invocations, instead of just putting the systems
+into `:depends-on` or `:defsystem-depend-on`. But the information
+we can gather is enough to make useful observations. We retrieve
+the dependency information from quicklisp/dists/quicklisp/systems.txt
+index file.
