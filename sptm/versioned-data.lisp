@@ -29,7 +29,7 @@ the transaction is applied."))
 
 (defgeneric func (transaction)
   (:documentation "Symbol fbound to a function. The function should accept
-the value of (data versioned-data) as the first argument and and number
+the value of (data versioned-data) as the first argument and any number
 of other arguments. The return value of the function is new version
 of data."))
 
@@ -57,7 +57,7 @@ stored in the transaction log.
 
 Absense of transactions in the transaction log handled
 according the IF-ABSENT argument. If it is :ERROR (the default),
-then error is signalled. When IF-ABSEND is any other value,
+then error is signalled. When IF-ABSENT is any other value,
 the value is just returned."))
 
 (defgeneric max-transaction-version (log &key if-absent)
