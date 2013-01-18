@@ -35,6 +35,7 @@
        (:file "package")
        (:file "with-response-file")
        (:file "complete-test-run")
+       (:file "submit-results")
        (:file "persistence")
        (:file "fake-blobstore")
        (:file "as-singleton-agent")

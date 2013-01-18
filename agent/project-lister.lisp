@@ -25,7 +25,7 @@
   (mapcar #'first (project-systems-alist project-lister)))
 
 (defmethod project-systems ((project-lister project-lister) project-name)
-  (rest (assoc project-name
+  (rest (assoc (string-downcase project-name)
                (project-systems-alist project-lister)
                :test #'string=)))
 
