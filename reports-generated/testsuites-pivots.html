@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Testsuites Results - CL Test Grid</title>
+
+    <style type="text/css">
+      
+        body {
+          width: 100ex;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        h1 a {
+          text-decoration: none;
+        }
+        
+        .test-table {
+          border-spacing: 0px;
+        }
+
+        .test-table td {
+          font-weight: bold;
+          border-color: black;
+        }
+
+        .test-table .ok {
+          color: green;
+        }
+
+        .test-table .fail {
+          color: red;
+        }
+
+        .test-table .no-resource {
+          color: gray;
+        }
+
+        .test-table td {
+          padding: 3px;
+        }
+
+        table.links-to-pivots td {
+          padding: 4px 6px;
+          text-align: center;
+        }
+
+        .links-to-pivots table {
+          display: inline-table;
+          border-width: 2px 1px 1px 2px; /* right and bottom are 
+                                            1px because TH also has 1px 
+                                            at these sides and together
+                                            they form 2px
+                                         */
+
+          border-style: solid;
+          border-color: #0000EE;
+          border-spacing: 0;
+          color: #0000EE;
+        }
+
+        .links-to-pivots table td, .links-to-pivots table th{
+          border: solid #0000EE;
+          border-width: 0 1px 1px 0;
+          padding: 2px 0.5ex;
+          text-align: left;
+          font-weight: bold;
+        }
+
+        .links-to-pivots a {
+          text-decoration: none;
+        }
+
+        pre {
+            margin-left: 4ex;
+        }
+        
+    </style>
+
+    <script type="text/javascript" id="js"> 
+
+      /**
+       * IE, unlike other browsers, doesn't support
+       * tables (even with style "display: inline-table",
+       * even in HTML5) inside the <A> tag. We fix this 
+       * by providing javascript onclick handler for the 
+       * tables; the handler delegates the click to the 
+       * first found parent <A> element.
+       */
+      function ieTableAnchorFix(table) {
+        if (navigator.userAgent.indexOf('MSIE') >= 0) {
+          var parent = table.parentNode;
+          while (parent && String(parent.nodeName).toUpperCase() != 'A') {
+            parent = parent.parentNode;
+          }
+          if (parent) {
+            parent.click();
+          }
+          return false;
+        } else {
+          return true;
+        }
+      }
+    </script>
+
+</head>
+<body>
+
+<h1><a href="http://github.com/cl-test-grid/cl-test-grid">CL Test Grid</a> Testsuites Results</h1>
+
+<h3> Move Pivot Reports Examples - Testsuite Results </h3>
+
+<p>These pivot reports arrange results of all the testsuites
+run on the last 3 Quicklisp versions into a tables similar to this:</p>
+
+<table border="1" align="center" class="test-table">
+  <tr>
+    <td>&nbsp;</td><td>&nbsp;</td><td>sbcl-1-win</td><td>sbcl-1-linux</td><td>clisp-win</td>
+  </tr>
+  <tr>
+    <td rowspan="3">quicklisp distro 1</td><td>flexi-stream</td><td class="ok">ok</td><td class="fail">fail</td><td class="ok">ok</td>
+  </tr>
+  <tr>
+    <td>drakma</td><td class="fail">fail</td><td class="ok">ok</td><td class="no-resource">no-resource</td>
+  </tr>
+  <tr>
+    <td>babel</td><td class="ok">ok</td><td class="ok">ok</td><td class="fail">fail</td>
+  </tr>
+  <tr>
+    <td rowspan="3">quicklisp distro 2</td><td>flexi-stream</td><td class="ok">ok</td><td class="fail">fail</td><td class="ok">ok</td>
+  </tr>
+  <tr>
+    <td>drakma</td><td class="fail">fail</td><td class="ok">ok</td><td class="no-resource">no-resource</td>
+  </tr>
+  <tr>
+    <td>babel</td><td class="ok">ok</td><td class="ok">ok</td><td class="fail">fail</td>
+  </tr>
+  <tr>
+    <td rowspan="3">quicklisp distro 3</td><td>flexi-stream</td><td class="ok">ok</td><td class="fail">fail</td><td class="ok">ok</td>
+  </tr>
+  <tr>
+    <td>drakma</td><td class="fail">fail</td><td class="ok">ok</td><td class="no-resource">no-resource</td>
+  </tr>
+  <tr>
+    <td>babel</td><td class="ok">ok</td><td class="ok">ok</td><td class="fail">fail</td>
+  </tr>  
+</table>
+
+<p>Depending on what fields we choose for rows and columns, 
+12 possible pivot variants are possible (the links are clickable):</p>
+
+<table class="links-to-pivots" align="center">
+  <tr>
+    <td>
+      <a href="pivot_lib_ql-lisp.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>ql</td></tr>
+          <tr><td>&nbsp;</td><td>lisp</td></tr>
+          <tr><td>lib</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_lib_lisp-ql.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>lisp</td></tr>
+          <tr><td>&nbsp;</td><td>ql</td></tr>
+          <tr><td>lib</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_ql_lib-lisp.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>lib</td></tr>
+          <tr><td>&nbsp;</td><td>lisp</td></tr>
+          <tr><td>ql</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_ql_lisp-lib.html" >
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>lisp</td></tr>
+          <tr><td>&nbsp;</td><td>lib</td></tr>
+          <tr><td>ql</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_lisp_lib-ql.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>lib</td></tr>
+          <tr><td>&nbsp;</td><td>ql</td></tr>
+          <tr><td>lisp</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_lisp_ql-lib.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>ql</td></tr>
+          <tr><td>&nbsp;</td><td>lib</td></tr>
+          <tr><td>lisp</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="pivot_lib-ql_lisp.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>&nbsp;</td><td>lisp</td></tr>
+          <tr><td>lib</td><td>ql</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_lib-lisp_ql.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>&nbsp;</td><td>ql</td></tr>
+          <tr><td>lib</td><td>lisp</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_ql-lib_lisp.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>&nbsp;</td><td>lisp</td></tr>
+          <tr><td>ql</td><td>lib</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_ql-lisp_lib.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>&nbsp;</td><td>lib</td></tr>
+          <tr><td>ql</td><td>lisp</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_lisp-lib_ql.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>&nbsp;</td><td>ql</td></tr>
+          <tr><td>lisp</td><td>lib</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+    <td>
+      <a href="pivot_lisp-ql_lib.html">
+        <table onclick="return ieTableAnchorFix(this)">
+          <tr><td>&nbsp;</td><td>&nbsp;</td><td>lib</td></tr>
+          <tr><td>lisp</td><td>ql</td><td>&nbsp;</td></tr>
+        </table>
+      </a>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

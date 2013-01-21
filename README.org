@@ -94,9 +94,9 @@
     versions, or compare two versions a lisp implementation
     on the same Quicklisp.
 
-  The tests are run by a lisp program called test-grid-agent.
+  The tests are run by a lisp program called =test-grid-agent=.
   User configures it with a list of CL implementations installed
-  on his machine, and test-grid-agent runs tests of common lisp
+  on his machine, and =test-grid-agent= runs tests of common lisp
   libraries on these implementations.
 
   The tests performed by agent include:
@@ -135,7 +135,7 @@
 
   The issue tracker at https://bugs.launchpad.net/common-lisp/
   is used to record the bugs we submitted to various CL projects.
-  We do it to avoid duplicated bug reports.
+  We record bugs there to avoid duplicated bug reports.
 
   cl-test-grid consists of the following components:
   - =test-grid-agent= - the program able to run tests an upload the results online
@@ -146,7 +146,7 @@
     stored online at Amazon Web Services
   - =test-grid-reporting= - tools to generate reports from test results
   - =test-grid-data= - support code for test results datastructures shared between other
-    components; =data= is produced by =agent=, stored in storage and used by reporting
+    components; =data= is produced by =agent=, stored in =storage= and used by =reporting=
   - =test-grid-gae-blobstore= - online storage for test logs; runs on Google App Engine
   - =test-grid-utils= - utilities.
 
