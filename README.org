@@ -135,7 +135,7 @@
 
   The issue tracker at https://bugs.launchpad.net/common-lisp/
   is used to record the bugs we submitted to various CL projects.
-  We do it to avoid duplicated bug reports.
+  We record bugs there to avoid duplicated bug reports.
 
   cl-test-grid consists of the following components:
   - =test-grid-agent= - the program able to run tests an upload the results online
