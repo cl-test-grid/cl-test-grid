@@ -146,7 +146,7 @@
     stored online at Amazon Web Services
   - =test-grid-reporting= - tools to generate reports from test results
   - =test-grid-data= - support code for test results datastructures shared between other
-    components; =data= is produced by =agent=, stored in storage and used by reporting
+    components; =data= is produced by =agent=, stored in =storage= and used by =reporting=
   - =test-grid-gae-blobstore= - online storage for test logs; runs on Google App Engine
   - =test-grid-utils= - utilities.
 
