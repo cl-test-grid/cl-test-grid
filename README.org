@@ -16,7 +16,7 @@
       [[http://common-lisp.net/project/cl-test-grid/sbcl-load-failures.html][SBCL]]
     - [[https://github.com/cl-test-grid/cl-test-grid/tree/dev/reporting#combining-failures-and-dependency-information][eplanation]]
 - for Quicklisp maintainer: [[http://common-lisp.net/project/cl-test-grid/quicklisp-diff.html][compare test results of two quicklisp dist versions on various lisps]]
-- more: [[http://common-lisp.net/project/cl-test-grid/][work with the results database to build custom reports]]
+- more: [[https://github.com/cl-test-grid/cl-test-grid/tree/master/reporting][work with the results database to build custom reports]]
 
 *[[https://bugs.launchpad.net/common-lisp][Bugs Reported]]*
 
@@ -74,8 +74,8 @@
 
 * The Implementation Idea
   Everyone can run a simple command which will run tests 
-  of Common Lisp libraries and upload results to 
-  the central server. 
+  of Common Lisp libraries and publishes results
+  online.
 
   That way, instead of setting up a central build farm with 
   all the possible hardware/OS/Lisp implementation combinations,
@@ -86,61 +86,73 @@
   by providing required building blocks).
 
 * Status
-  We have a lisp program called test-grid-agent. User configures
-  it with a list of CL implementations installed on his machine,
-  and the test-grid-agent runs tests of common lisp libraries
-  on these implementations.
+  We provide tools to:
+  - run tests
+  - publish results online and access them programmatically
+  - perform massive comparison of results and print HTML
+    resports. For example, compare results of two Quicklisp
+    versions, or compare two versions a lisp implementation
+    on the same Quicklisp.
 
-  The tests performed by agent include fresh recompilation
-  and loading of every ASDF system found in Quicklisp,
-  and also testsuites of some of the libraries.
+  The tests are run by a lisp program called test-grid-agent.
+  User configures it with a list of CL implementations installed
+  on his machine, and test-grid-agent runs tests of common lisp
+  libraries on these implementations.
 
-  For testsuites we have so far considered 114 libraries.
+  The tests performed by agent include:
+  - fresh recompilation and loading of every ASDF system found in Quicklisp;
+  - also testsuites of some of the libraries.
+
+  For testsuites we have so far considered 114 libraries,
+  starting from more often downloaded ones.
   57 of these libraries have appropriate test suites
   (fully automated, no user interaction is needed) which
   are added to the cl-test-grid.
   
-  Test-grid-agent may be run manually from command line or
-  configured as a periodical task with cron or similar service.
-  Each test suite is run in a separate lisp process.
-  Quicklisp is used to download the libraries to be tested 
-  (test-grid-agent bootstraps a private quicklisp and have no
-  interference with a quicklisp installation user might have
-  on his computer). The agent remembers what lisp implementations
-  where already tested on what quicklisp distros, and doesn't repeat
-  the work it has already done.
+  The test results represented as lisp data are stored online
+  in so called test-grid-storage. By default test-grid-storage
+  named "main" is where the test results are published.
 
-  The test results including:
-  - compile/load statuses of ASDF systems of every project in Quicklisp,
-  - results of the test suites (OK or a list of FAILed test cases)
-  for the tested lisp implementations / quicklisp distros
-  are uploaded to admin and then published as a plain lisp
-  data file in a separate git repository:
+  You may also chose other storage name if you want to do some private
+  testing and don't want to mix your results with "main" results.
+  The use cases for this are pre-release testing of CL implementations,
+  ASDF, or patches to particular libraries.
+
+  The test-grid-storage named "main" is intended to contain resutls
+  for the last 3 Quicklisp distros and is cleared periodically.
+  Old results are archvied in a plain lisp file in a separate git repository:
   https://github.com/cl-test-grid/cl-test-grid-results.
-  Besides this, we store online the output produced by the
-  lisp processes when running test suites or compiling ASDF systems.
+
+  Besides this, we store online the output produced by
+  each lisp process running test suites or compiling ASDF systems.
   The logs are referenced from the test results lisp data.
   This allows interested parties to navigate to the corresponding
   log to study the failure details.
 
-  Having the pure lisp data it is easy to extract useful
-  information from it. For example, compare how two versions
-  of particular lisp implementation behave and detect
-  regressions between them; detect regressions between
-  Quicklisp distibutions, find out status of particular
-  library on all the tested lisp implementations.
+  Some HTML reports are demonstrated above, in the Test Results
+  section. For more information about reporting may be found
+  in the =test-gird-reporting= module documentation.
 
-  Some HTML reports deomostrating this are published here:
-  [[http://common-lisp.net/project/cl-test-grid/]]. Clicking test 
-  status (OK/FAIL) in any report refers to the corresponding
-  log file with the failure details.
+  The issue tracker at https://bugs.launchpad.net/common-lisp/
+  is used to record the bugs we submitted to various CL projects.
+  We do it to avoid duplicated bug reports.
 
-  Our current task in progress is to precisely document
-  the data collected by agent, and provide more report
-  examples demostrating how to analyze the data.
-  
-  Meantime, feel free to send plain english queries
-  to the mailing list.
+  cl-test-grid consists of the following components:
+  - =test-grid-agent= - the program able to run tests an upload the results online
+  - =test-grid-testsuites= - testgrid adapters for testsuites of all the included
+    libraries; used by agent
+  - =test-grid-storage= - online storage for test results; based on =sptm=
+  - =sptm= - simple in-memory persistence for lisp data based on transaction log
+    stored online at Amazon Web Services
+  - =test-grid-reporting= - tools to generate reports from test results
+  - =test-grid-data= - support code for test results datastructures shared between other
+    components; data is produced by agent, stored in storage and used by reporting
+  - =test-grid-gae-blobstore= - online storage for test logs; runs on Google App Engine
+  - =test-grid-utils= - utilities.
+
+  The packages also have have nicknames prefixed with tg- : tg-agent, tg-testsuites, and so on.
+
+  More detailed documentation for most of the modules may be found in the module subdirectory.
 
 * Participation
 ** Running tests
@@ -150,27 +162,6 @@
    =test-grid-agent= periodically (ideally once a day, but even
    once a month is OK).
 
-** Discussing the project
-   Feedback, discussions of the approach and suggestion
-   for the open problems are very welcome.
-
-   Everyone interested is invited to the "mailing list" - 
-   [[http://groups.google.com/group/cl-test-grid]].
-
-   Examples of the problems which need solution:
-
-   - Currently we run tests only on the quicklisp release.
-     But it is very desirable to run tests on the latest
-     library versions from the source control too. For 
-     example if we found a bug and the library author has 
-     fixed  it, he might want to issue a request to cl-test-grid
-     to run tests of the recent version of his library
-     on all the platforms available. This feature would
-     also help to ensure quicklisp distro quality before 
-     releasing the distro.
-
-   - ...
-  
 ** Adding testsuite of your library
 
    It's necessary to contact the cl-test-grid mailing list
@@ -196,12 +187,8 @@
 
    In any case, contact the mailing list, we will help.
 
-** More
-   Lot of things may be done in this project. But the project
-   has no independent value, it is only useful if it helps
-   to improve the CL ecosystem quality. Fixing bugs in the
-   CL libraries, writing more tests is the most important.
-
+* Mailing lisp
+  [[http://groups.google.com/group/cl-test-grid]]
 * TODO fix in this README:
   Terminology - I say "quicklisp distro", but if be precise,
   quicklisp calls it "quicklisp distro version". But
