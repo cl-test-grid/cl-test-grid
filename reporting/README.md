@@ -1,24 +1,46 @@
 Accessing the Test Results Database
 ===================================
 
-All the test grid results are stored in a plain s-expression
-file. It is published in a separate git repository at
-https://github.com/cl-test-grid/cl-test-grid-results
-
 The `test-grid-reporting` package contains the
-reporting code we will consider below.
-
-Do the following:
+reporting code we will consider below. The package
+doesn't export public functions, so lets enter it:
 
 ``` shell
 $ git clone git@github.com:cl-test-grid/cl-test-grid.git
-$ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
 ```
 
 ``` common-lisp
 CL-USER> (pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
 CL-USER> (ql:quickload :test-grid-reporting)
 CL-USER> (in-package #:test-grid-reporting)
+```
+
+To access test results from the `test-grid-storage` named "main"
+you may do the following:
+
+``` common-lisp
+TEST-GRID-REPORTING> (defparameter *db-snapshot-file*
+                       (asdf:system-relative-pathname :test-grid-storage
+                                                      "db-main.lisp"))
+TEST-GRID-REPORTING> (defparameter *r* (tg-storage:make-replica "main" *db-snapshot-file*))
+;; Incrementally syncronise the local replica with the online db
+;; first time it loads the full db and it may take a minute or two;
+;; you may observe progress in the REPL buffer.
+;; Next time syncronisations only fetch new changes and are performed faster.
+TEST-GRID-REPORTING> (tg-storage:sync *r*)
+TEST-GRID-REPORTING> (defparameter *db* (tg-storage:data *r*))
+```
+
+If you want to work with old test results archived in a plain s-expression
+file at https://github.com/cl-test-grid/cl-test-grid-results:
+
+Do the following:
+
+``` shell
+$ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
+```
+
+``` common-lisp
 TEST-GRID-REPORTING> (defparameter *db* (test-grid-data:read-db))
 ```
 

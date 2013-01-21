@@ -110,15 +110,15 @@
   are added to the cl-test-grid.
   
   The test results represented as lisp data are stored online
-  in so called test-grid-storage. By default test-grid-storage
+  in so called =test-grid-storage=. By default =test-grid-storage=
   named "main" is where the test results are published.
 
-  You may also chose other storage name if you want to do some private
+  You may also choose other storage name if you want to do some private
   testing and don't want to mix your results with "main" results.
   The use cases for this are pre-release testing of CL implementations,
   ASDF, or patches to particular libraries.
 
-  The test-grid-storage named "main" is intended to contain resutls
+  The =test-grid-storage= named "main" is intended to contain resutls
   for the last 3 Quicklisp distros and is cleared periodically.
   Old results are archvied in a plain lisp file in a separate git repository:
   https://github.com/cl-test-grid/cl-test-grid-results.
@@ -130,7 +130,7 @@
   log to study the failure details.
 
   Some HTML reports are demonstrated above, in the Test Results
-  section. For more information about reporting may be found
+  section. More information about reporting may be found
   in the =test-gird-reporting= module documentation.
 
   The issue tracker at https://bugs.launchpad.net/common-lisp/
@@ -146,11 +146,11 @@
     stored online at Amazon Web Services
   - =test-grid-reporting= - tools to generate reports from test results
   - =test-grid-data= - support code for test results datastructures shared between other
-    components; data is produced by agent, stored in storage and used by reporting
+    components; =data= is produced by =agent=, stored in storage and used by reporting
   - =test-grid-gae-blobstore= - online storage for test logs; runs on Google App Engine
   - =test-grid-utils= - utilities.
 
-  The packages also have have nicknames prefixed with tg- : tg-agent, tg-testsuites, and so on.
+  The packages also have have nicknames prefixed with =tg-= : =tg-agent=, =tg-testsuites=, and so on.
 
   More detailed documentation for most of the modules may be found in the module subdirectory.
 
