@@ -43,8 +43,8 @@ So, the steps:
 2. `cd cl-test-grid`
 3. `cp run-agent.sh.sample run-agent.sh; chmod +x run-agent.sh`
 4. `cp run-agent.sample.lisp run-agent.lisp`
-5. Edit the /run-agent.sh/ (edit one line - the path to CCL).
-6. Edit the /run-agent.lisp/ (paths to the lisp implementations, your email)
+5. Edit the _run-agent.sh_ (edit one line - the path to CCL).
+6. Edit the _run-agent.lisp_ (paths to the lisp implementations, your email)
 7. `./run-agent.sh`
 
 Next time all you need is to just invoke `./run-agent.sh`. It will update the 
