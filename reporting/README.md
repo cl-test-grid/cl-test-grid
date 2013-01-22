@@ -1,6 +1,3 @@
-Accessing the Test Results Database
-===================================
-
 The `test-grid-reporting` package contains the
 reporting code we will consider below. The package
 doesn't export public functions, so lets enter it:
@@ -14,11 +11,15 @@ CL-USER> (pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
 CL-USER> (ql:quickload :test-grid-reporting)
 CL-USER> (in-package #:test-grid-reporting)
 ```
+Accessing the Test Results Database
+===================================
 
 To access test results from the `test-grid-storage` named "main"
 you may do the following:
 
 ``` common-lisp
+TEST-GRID-REPORTING> (ql:quickload :test-grid-storage)
+
 TEST-GRID-REPORTING> (defparameter *db-snapshot-file*
                        (asdf:system-relative-pathname :test-grid-storage
                                                       "db-main.lisp"))
