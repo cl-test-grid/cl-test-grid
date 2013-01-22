@@ -3,9 +3,12 @@ and a lisp client for its HTTP interface.
 
 It provides:
 - Online storage of the library test logs;
-- Submit point of the test run results lisp data
-  (and forwarding them to the admin by email).
+- Submit point of the test run results lisp data,
+  and forwarding them to the admin by email
+  (deprecated feature, since we started do submit results
+  to test-grid-storage).
 
-The serer side is implemented on Java (just
-few lines; maybe sometime we will be able
-to use ABCL instead).
+The serer side is implemented on Java (few small
+servlets; maybe sometime we will be able
+to use ABCL instead, or just move the functionality
+to Heroku + Amazon S3 and use any Lisp).
