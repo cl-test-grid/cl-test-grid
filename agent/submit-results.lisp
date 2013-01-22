@@ -23,8 +23,8 @@
                                                (cons (pathname-name log-file) log-file)))
                                            (getf lib-result :load-results))))
                                 (test-grid-data::run-results run-info)))
-         (log-name-to-blobkey-alist (test-grid-blobstore:submit-files blobstore
-                                                                      submit-params)))
+         (log-name-to-blobkey-alist (test-grid-gae-blobstore:submit-files2 blobstore
+                                                                           submit-params)))
     (flet ((get-blob-key (log-name)
                  (or (cdr (assoc log-name log-name-to-blobkey-alist :test #'string=))
                      (error "blobstore didn't returned blob key for the log file ~A" log-name))))

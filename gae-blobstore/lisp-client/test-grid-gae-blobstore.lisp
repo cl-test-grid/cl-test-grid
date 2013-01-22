@@ -4,6 +4,7 @@
   (:nicknames #:tg-gae-blobstore)
   (:use :cl)
   (:export #:make-blob-store
+           #:submit-files2
            #:delete-blobs))
 
 (in-package #:test-grid-gae-blobstore)
