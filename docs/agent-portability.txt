@@ -7,8 +7,10 @@ The command line to start agent with CCL:
 
     lx86cl --load run-agent.lisp --eval "(quit)"
 
-SBCL works on linux (tested with SBCL 1.0.57),
-but doesn't work on windows (problem with external-program library).
+SBCL doesn't work on windows at all (problem with external-program library).
+On linux with SBCL we have problem when killing test-suite processes
+if the test suite hangs (also probably external-program problem, tested with SBCL 1.0.57),
+Anyway, here are the SBCL parameters:
 
     export SBCL_HOME=/home/testgrid/lisps/sbcl-1.0.57/lib/sbcl
     /home/testgrid/lisps/sbcl-1.0.57/bin/sbcl --load run-agent.lisp --eval "(quit)"
@@ -17,7 +19,6 @@ but doesn't work on windows (problem with external-program library).
 CLISP 2.49 Windows - Doesn't work.
 (Something seems to be wrong in external-program
 with passing program parameters)
-Anyway, here are the CLISP parameters:
 
     clisp -x (load "run-agent.lisp")'
 
