@@ -36,7 +36,6 @@
        (:file "complete-test-run")
        (:file "submit-results")
        (:file "persistence")
-       (:file "fake-blobstore")
        (:file "as-singleton-agent")
        (:file "generate-id")
        (:file "project-lister")
