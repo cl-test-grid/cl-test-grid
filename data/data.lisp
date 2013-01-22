@@ -7,6 +7,7 @@
   (:use :cl)
   (:export
    #:make-db
+   #:join-dbs
    #:read-db
    #:add-test-run
    #:remove-test-runs))
@@ -27,6 +28,13 @@
 
 (defun make-db (&optional test-runs)
   (list :schema 5 :runs test-runs))
+
+(defun join-dbs (&rest dbs)
+  (reduce (lambda (db1 db2)
+            (make-db (append (getf db1 :runs)
+                             (getf db2 :runs))))
+          (cdr dbs)
+          :initial-value (car dbs)))
 
 (defun print-list-elements (destination list separator elem-printer)
   (let ((maybe-separator ""))
