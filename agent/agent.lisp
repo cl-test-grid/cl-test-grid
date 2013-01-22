@@ -65,8 +65,8 @@
                                    (dolist (storage (result-storages-for-lisp agent lisp-exe))
                                      (test-grid-storage:add-test-run storage test-run))
                                    ;; temporary keep submitting via the old chanell too, just for sure
-                                   (test-grid-blobstore:submit-run-info (blobstore agent)
-                                                                        test-run))))
+                                   (tg-gae-blobstore:submit-run-info (blobstore agent)
+                                                                     test-run))))
 
 (defmethod make-agent ()
   (make-instance 'agent-impl))
@@ -294,11 +294,11 @@ the PREDICATE."
 
 (defun say-hello-to-admin (agent)
   (log:info "sending hello message to admin")
-  (test-grid-blobstore:tell-admin (blobstore agent)
-                                  (format nil "[agent hello] from ~A (~A)"
-                                          (get-agent-id (persistence agent))
-                                          (user-email agent))
-                                  "hello"))
+  (tg-gae-blobstore:tell-admin (blobstore agent)
+                               (format nil "[agent hello] from ~A (~A)"
+                                       (get-agent-id (persistence agent))
+                                       (user-email agent))
+                               "hello"))
 
 (defmethod main (agent)
   ;; setup logging for unhandled errors and warnings

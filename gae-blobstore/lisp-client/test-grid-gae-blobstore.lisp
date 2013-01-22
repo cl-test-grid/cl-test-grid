@@ -4,10 +4,45 @@
   (:nicknames #:tg-gae-blobstore)
   (:use :cl)
   (:export #:make-blob-store
+           #:submit-files
            #:submit-files2
+           #:submit-run-info
+           #:tell-admin
            #:delete-blobs))
 
 (in-package #:test-grid-gae-blobstore)
+
+(defgeneric submit-files (blobstore id-pathname-alist)
+  (:documentation
+   "Submits the files to the blobstore. Returns blob keys
+for every submitted file (the blobkey is used for later
+references to the file in the blobstore).
+
+Example:
+ (submit-files my-blobstore '((:flexi-streams . #P\"flexi-streams.log\")
+                              (:cl-ppcre . #P\"cl-ppcre.log\")))
+  => ((:flexi-streams . \"nFeUku39YtilF6s8zkXTlg\")
+      (:cl-ppcre . \"nG9B8tHEquLEPhsL3t8wcA\"))
+
+The ID in the ID-PATHNAME-ALIST may be either a string or a symbol,
+and must be unique when compared case insensitively.
+
+If the function returns without errors, it is guaranteed
+that all the files are submitted and the return value
+has a blobkey for every file.
+
+Signals an ERROR in case of problems."))
+
+(defgeneric submit-run-info (blobstore run-info)
+  (:documentation
+   "Submits test run result RUN-INFO (a lisp object)
+to central database."))
+
+(defgeneric tell-admin (blobstore subject body)
+  (:documentation
+   "Sends message to admin."))
+
+;;; Implementation
 
 (defclass blobstore ()
   ((base-url :reader base-url
@@ -155,7 +190,7 @@ and writting the file to that stream."
                      :batch-size batch-size))
 
 ;; old version of log submittion
-(defmethod test-grid-blobstore:submit-files ((blobstore blobstore) id-pathname-alist)
+(defmethod submit-files ((blobstore blobstore) id-pathname-alist)
   ;; Google App Engine Blobstore does not allow to submit blobs to a constant URL,
   ;; we need to perform a separate request to our servlet, which will
   ;; generate an URL where we can upload files.
@@ -170,8 +205,8 @@ and writting the file to that stream."
 ;; (submit-files2 (make-blob-store :base-url "http://7.cl-test-grid.appspot.com")
 ;;                '((:test . #P"C:\\Users\\anton\\projects\\cl-test-grid2\\work\\test.txt")))
 
-;; (test-grid-blobstore:submit-files (make-blob-store :base-url "http://7.cl-test-grid.appspot.com")
-;;                                   '((:test . #P"C:\\Users\\anton\\projects\\cl-test-grid2\\work\\test.txt")))
+;; (submit-files (make-blob-store :base-url "http://7.cl-test-grid.appspot.com")
+;;               '((:test . #P"C:\\Users\\anton\\projects\\cl-test-grid2\\work\\test.txt")))
 
 ;; (submit-files2 (make-blob-store :base-url "http://7.cl-test-grid.appspot.com")
 ;;                (mapcar (lambda (file)
@@ -179,7 +214,7 @@ and writting the file to that stream."
 ;;                        (cl-fad:list-directory #P"C:\\Users\\anton\\projects\\cl-test-grid2\\work\\test\\1"))
 ;;                :batch-size 500)
 
-(defmethod test-grid-blobstore:submit-run-info ((blobstore blobstore) run-info)
+(defmethod submit-run-info ((blobstore blobstore) run-info)
   (assert (not (null run-info)))
   (let ((response (drakma:http-request (format nil "~A/submit-run-info" (base-url blobstore))
                                        :method :post
@@ -188,7 +223,7 @@ and writting the file to that stream."
                          (test-grid-utils::safe-read s))))
       (error "Error submitting run info to the server. Unexpected response: ~A." response))))
 
-(defmethod test-grid-blobstore:tell-admin ((blobstore blobstore) subject body)
+(defmethod tell-admin ((blobstore blobstore) subject body)
   (assert (not (null subject)))
   (setf body (or body ""))
   (let ((response (drakma:http-request (format nil "~A/tell-admin" (base-url blobstore))

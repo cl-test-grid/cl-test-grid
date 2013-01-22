@@ -14,7 +14,6 @@
   :depends-on (#:test-grid-utils
                #:test-grid-data
                #:test-grid-testsuites
-               #:test-grid-blobstore
                #:test-grid-gae-blobstore
                #:test-grid-storage
                #:alexandria
