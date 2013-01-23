@@ -63,7 +63,7 @@ run-agent.sample.lisp for a fresh example)."
                                             *ecl-bytecode*
                                             *ecl-lisp-to-c*
                                             *acl*
-                                            ;; pre-release version of SBCL goes to storage
+                                            ;; pre-release version of SBCL goes to test-grid-storage
                                             ;; named "sbcl" instead of the default storage "main"
                                             (list *sbcl-git* "sbcl"))
 
