@@ -42,6 +42,7 @@ run-agent.sample.lisp for a fresh example)."
 (defparameter *ccl-1.8-x86-64* (make-instance 'lisp-exe:ccl
                                               :exe-path "/home/testgrid/lisps/ccl-1.8/wx86cl64"))
 (defparameter *sbcl* (make-instance 'lisp-exe:sbcl :exe-path "/home/testgrid/lisps/sbcl-1.0.57/bin/sbcl"))
+(defparameter *sbcl-git* (make-instance 'lisp-exe:sbcl :exe-path "/home/testgrid/lisps/sbcl-git-bin/run.sh"))
 (defparameter *cmucl* (make-instance 'lisp-exe:cmucl :exe-path "/home/testgrid/lisps/cmucl-20c/bin/lisp"))
 ;; ECL provides two compilers: bytecode compiler and lisp to C compiler.
 ;; What compiler to test is specified explicitly as a parameter
@@ -61,7 +62,10 @@ run-agent.sample.lisp for a fresh example)."
                                             *ccl-1.8-x86-64* *sbcl*
                                             *ecl-bytecode*
                                             *ecl-lisp-to-c*
-                                            *acl*)
+                                            *acl*
+                                            ;; pre-release version of SBCL goes to storage
+                                            ;; named "sbcl" instead of the default storage "main"
+                                            (list *sbcl-git* "sbcl"))
 
       ;; Preferred lisp is the lisp implementation the agent
       ;; uses when it needs to perform some auxiliary
