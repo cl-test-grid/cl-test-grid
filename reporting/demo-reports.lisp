@@ -2,7 +2,7 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
-;;;; The reports described on the results-overview.html.
+;;;; The reports described on the reporting/README.md.
 
 (in-package #:test-grid-reporting)
 
