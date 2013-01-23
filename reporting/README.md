@@ -246,11 +246,11 @@ This is easy to do using the tools introduced above. The apporach:
 The function `compiler-diff` implements this approach.
 See its source code in [cl-test-grid/reporting/compiler-diff.lisp](https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/compiler-diff.lisp).
 Note, it calls `fast-exclusive-or`. This function has exactly the
-same prototype as 'cl:set-exclusive-or',
-but takes advantage of hash tables if the ':test' parameter
-is one of 'cl:eq', 'cl:eql', 'cl:equal' or 'cl:equalp'.
+same prototype as `cl:set-exclusive-or`,
+but takes advantage of hash tables if the `:test` parameter
+is one of `cl:eq`, `cl:eql`, `cl:equal` or `cl:equalp`.
 
-Lets use 'compiler-diff' to compare two versions of ABCL: old release 1.0.1
+Lets use 1compiler-diff` to compare two versions of ABCL: old release 1.0.1
 and some intermediate development version:
 ``` common-lisp
 TEST-GRID-REPORTING> (print-compiler-diff "demo/abcl-diff.html"
@@ -270,7 +270,7 @@ If the left column has red result and the right has green result, it is an impro
 
 Lets compare two versions of Quicklisp.
 
-The same approach: 'exclusive-or' of two sets of results: for old
+The same approach: `exclusive-or` of two sets of results: for old
 Quicklisp version and for new one.
 
 The source code: [cl-test-grid/reporting/quicklisp-diff.lisp](https://github.com/cl-test-grid/cl-test-grid/blob/master/reporting/quicklisp-diff.lisp).
