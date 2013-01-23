@@ -42,8 +42,10 @@
 ;; asdf system, we don't want the dependency
 ;; on blobstore here.
 (defun blob-uri (blob-key)
-  (unless (every #'digit-char-p blob-key)
-    (error "BLOB-KEY must only consist of digits to prevent URI injection (as we haven't implemented URL-encoding): ~A" blob-key))
+  (unless (every (lambda (char)
+                   (find char "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+                 blob-key)
+    (error "BLOB-KEY must only consist of digits or letters to prevent URI injection (as we haven't implemented URL-encoding): ~A" blob-key))
   (format nil "~A/blob?key=~A"
           "http://cl-test-grid.appspot.com" blob-key))
 
