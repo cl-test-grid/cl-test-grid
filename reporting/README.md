@@ -24,10 +24,10 @@ TEST-GRID-REPORTING> (defparameter *db-snapshot-file*
                        (asdf:system-relative-pathname :test-grid-storage
                                                       "db-main.lisp"))
 TEST-GRID-REPORTING> (defparameter *r* (tg-storage:make-replica "main" *db-snapshot-file*))
-;; Incrementally syncronise the local replica with the online db
-;; first time it loads the full db and it may take a minute or two;
+;; Incrementally synchronize the local replica with the online db.
+;; First time it loads the full db and may take a minute or two;
 ;; you may observe progress in the REPL buffer.
-;; Next time syncronisations only fetch new changes and are performed faster.
+;; Next time synchronization only fetches new changes and is performed faster.
 TEST-GRID-REPORTING> (tg-storage:sync *r*)
 TEST-GRID-REPORTING> (defparameter *db* (tg-storage:data *r*))
 ```
