@@ -10,6 +10,7 @@
    #:join-dbs
    #:read-db
    #:add-test-run
+   #:add-test-runs
    #:remove-test-runs))
 
 (in-package #:test-grid-data)
@@ -57,6 +58,13 @@
   ;; add-test-run transactions on test-grid-storage
   ;; without checking, whether DB has already been initialized.
   (make-db (cons test-run (getf db :runs))))
+
+(defun add-test-runs (db test-runs)
+  ;; If DB is NIL, creates new DB automatically.
+  ;; This is convenient because allows to execute
+  ;; add-test-run transactions on test-grid-storage
+  ;; without checking, whether DB has already been initialized.
+  (make-db (append test-runs (getf db :runs))))
 
 (defun test-run-matcher (descr-key-val-plist)
   (let ((key-val-alist (alexandria:plist-alist descr-key-val-plist)))
