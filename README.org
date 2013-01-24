@@ -14,7 +14,7 @@
       [[http://common-lisp.net/project/cl-test-grid/cmucl-load-failures.html][CMUCL]]
       [[http://common-lisp.net/project/cl-test-grid/ecl-load-failures.html][ECL]]
       [[http://common-lisp.net/project/cl-test-grid/sbcl-load-failures.html][SBCL]]
-    - [[https://github.com/cl-test-grid/cl-test-grid/tree/dev/reporting#combining-failures-and-dependency-information][eplanation]]
+    - [[https://github.com/cl-test-grid/cl-test-grid/tree/dev/reporting#combining-failures-and-dependency-information][explanation]]
 - for Quicklisp maintainer: [[http://common-lisp.net/project/cl-test-grid/quicklisp-diff.html][compare test results of two quicklisp dist versions on various lisps]]
 - more: [[https://github.com/cl-test-grid/cl-test-grid/tree/master/reporting][work with the results database to build custom reports]]
 
