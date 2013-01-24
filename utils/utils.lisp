@@ -1,6 +1,7 @@
 ;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: test-grid; Base: 10; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 
 (defpackage #:test-grid-utils
+  (:nicknames :tg-utils)
   (:use :cl)
   (:export #:set=))
 
