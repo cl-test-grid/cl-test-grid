@@ -4,14 +4,20 @@
 
 (in-package #:test-grid-reporting)
 
-(defun print-contributors (lib-world)
-  (dolist (run (getf (test-grid-data::read-db)
-                     :runs))
-    (let ((descr (test-grid-data::run-descr run)))
-      (when (string= lib-world (getf descr :lib-world))
-        (format t "~A ~A~%" 
-                (getf descr :lisp)
-                (getf (getf descr :contact) :email))))))
+(defun print-contributors (db lib-world)
+  (let ((result))
+    (dolist (run (getf db :runs))
+      (let ((descr (test-grid-data::run-descr run)))
+        (when (string= lib-world (getf descr :lib-world))
+          (push (list (getf descr :lisp)
+                      (getf (getf descr :contact) :email))
+                result))))
+    (format t "cl-test-grid@googlegroups.com~{,~A~}~%"
+            (remove-duplicates (sort (mapcar #'second result) #'string<)
+                               :test #'string=))
+    (format t "[cl-test-grid] test results summary~%~%")
 
-;; usage
-;;(print-contributors "quicklisp 2012-07-03")
+    (format t "Test results summary for ~A:~%~%" lib-world)
+    (format t "~{~{~A ~A~}~%~}"
+            (sort result (obj-comparator #'first #'string<
+                                         #'second #'string<)))))
