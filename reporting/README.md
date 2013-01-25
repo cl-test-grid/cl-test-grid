@@ -1,6 +1,5 @@
 The `test-grid-reporting` package contains the
-reporting code we will consider below. The package
-doesn't export public functions, so lets enter it:
+reporting code we will consider below. 
 
 ``` shell
 $ git clone git@github.com:cl-test-grid/cl-test-grid.git
@@ -11,6 +10,11 @@ CL-USER> (pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
 CL-USER> (ql:quickload :test-grid-reporting)
 CL-USER> (in-package #:test-grid-reporting)
 ```
+The package doesn't export public functions, so lets enter it:
+``` common-lisp
+CL-USER> (in-package #:test-grid-reporting)
+```
+
 Accessing the Test Results Database
 ===================================
 
@@ -32,10 +36,8 @@ TEST-GRID-REPORTING> (tg-storage:sync *r*)
 TEST-GRID-REPORTING> (defparameter *db* (tg-storage:data *r*))
 ```
 
-If you want to work with old test results archived in a plain s-expression
-file at https://github.com/cl-test-grid/cl-test-grid-results:
-
-Do the following:
+Or, if you want to work with old test results archived in a plain s-expression
+file at https://github.com/cl-test-grid/cl-test-grid-results do the following:
 
 ``` shell
 $ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
