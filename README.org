@@ -101,7 +101,7 @@
 
   The tests performed by agent include:
   - fresh recompilation and loading of every ASDF system found in Quicklisp;
-  - also testsuites of some of the libraries.
+  - testsuites of some of the libraries.
 
   For testsuites we have so far considered 114 libraries,
   starting from more often downloaded ones.
