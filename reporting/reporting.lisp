@@ -53,25 +53,24 @@
 (defun filter-lib-results (db predicate)
   (test-grid-data::updated-plist db :runs
                                  (mapcar (lambda (run)
-                                           (test-grid-data::updated-plist run :results
-                                                                          (remove-if-not (lambda (lib-result)
-                                                                                           (funcall predicate lib-result run))
-                                                                                         (getf run :results))))
+                                           (tg-data::updated-plist run :results
+                                                                   (remove-if-not  (lambda (lib-result)
+                                                                                     (funcall predicate lib-result run))
+                                                                                   (getf run :results))))
                                          (getf db :runs))))
 
 (defun generate-reports (db)
-  (let* (;; Old reports can work only with lib-result objects representing
+  (let* ((all-results (my-time ("list-results...")
+                        (list-results db)))
+         (last-three-quicklisps (largest #'lib-world all-results :count 3))
+         (new-quicklisp (first last-three-quicklisps))
+         (prev-quicklisp (second last-three-quicklisps))
+         ;; Old reports can work only with lib-result objects representing
          ;; testsuite results, but not load tests.
          ;; Compute filtered DB where only testsuite results are persent.
-         (filtered-db (my-time ("filter-lib-results...")
-                        (filter-lib-results db (lambda (lib-result test-run)
-                                                 (declare (ignore test-run))
-                                                 (getf lib-result :status)))))
-         (all-results (my-time ("list-results...")
-                        (list-results db)))
-         (last-two-quicklisps (largest #'lib-world all-results :count 2))
-         (new-quicklisp (first last-two-quicklisps))
-         (prev-quicklisp (second last-two-quicklisps)))
+         (filtered-db (filter-lib-results db (lambda (lib-result test-run)
+                                               (declare (ignore test-run))
+                                               (getf lib-result :status)))))
 
     (my-time ("test runs..")
       (with-report-file (out "test-runs-report.html")
@@ -81,18 +80,8 @@
       (with-report-file (out "export.csv")
         (export-to-csv out filtered-db)))
 
-    (let* ((last-lib-worlds (largest-old 'lib-world filtered-db :count 3))
-           (joined-index (my-time ("build-joined-index...")
-                           (build-joined-index filtered-db :where (lambda (record)
-                                                                    (member (lib-world record)
-                                                                            last-lib-worlds
-                                                                            :test #'string=))))))
-      (my-time ("pivot reports...~%")
-        (print-old-pivots joined-index))
-
-      (my-time ("old Quicklisp diff report...~%")
-        (with-report-file (out "quicklisp-diff-old.html")
-          (print-all-quicklisps-diff-report out joined-index))))
+    (my-time ("old pivot reports...~%")
+      (print-old-pivots filtered-db last-three-quicklisps))
 
     (my-time ("Quicklisp diff...~%")
       (print-quicklisp-diff-report "quicklisp-diff.html"
@@ -103,7 +92,6 @@
     (my-time ("library reports...")
       (print-library-reports all-results))
 
-    (print-demo-reports all-results)
     (print-compiler-reports all-results new-quicklisp)))
 
 (defun print-compiler-reports (all-results new-quicklisp)

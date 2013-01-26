@@ -22,7 +22,6 @@
      (:file "test-runs")
      (:file "csv")
      (:file "pivot")
-     (:file "pivot2")
      (:file "quicklisp-diff")
      (:file "library-report")
      (:file "regressions")

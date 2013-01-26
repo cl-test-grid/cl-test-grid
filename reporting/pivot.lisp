@@ -4,139 +4,53 @@
 
 (in-package #:test-grid-reporting)
 
-;; ========= Pivot Reports ==================
+;;; Pivot is essentially a grouping of items into cells.
+;;; Groupping is done by values of properties chosen for rows
+;;; and columns. Note that rotation of a pivot - i.e. moving
+;;; a field from rows to columns doesn't affect the grouping,
+;;; it is the same cells rotated.
 
-;; Conceptualy, test results are objects with various fields:
-;; :libname, :lib-world, :lisp, :log-byte-size, :test-duration,
-;; :log-byte-length, etc.
-;;
-;; To build pivot reports, we need to access the
-;; results for the report table cells. Every table
-;; cell is lying on the crossing of the table rows
-;; and columns.
-;;
-;; In other words, we need to access test results for every
-;; combination of values for the fields we put into rows
-;; and columsn headers.
-;;
-;; Currently we want only 3 properties in the row or column
-;; headers: :lib-world, :lisp, :libname.
-;;
-;; Let's build the index - a hash table where keys are
-;; 3 element lists representing a particular combination
-;; of lib-world, libname and lisp; and the hash table value is
-;; a list of test results for that combination:
-;;
-;; ("sbcl-win-1" "quicklisp 1" "alexandria")     -> (<test results>)
-;; ("sbcl-win-1" "quicklisp 1" "babel")          -> (<test results>)
-;; ("sbcl-linux-1" "quicklisp 1" "alexandria")   -> (<test results>)
-;; ("sbcl-linux-1" "quicklisp 2" "alexandria")   -> (<test results>)
-;; ("clisp-win-1" "quicklisp 2" "flexi-streams") -> (<test results>)
-;; ...
-;;
+(defun group-by (items item-prop-readers)
+  (let ((h (make-hash-table :test #'equal)))
+    (dolist (item items)
+      (let ((key (list-props item item-prop-readers)))
+        (push item (gethash key h))))
+    h))
 
-(defun build-joined-index (db &key where)
-  (let ((all-results (make-hash-table :test 'equal)))
-    (do-results (record db :where where)
-      (push record
-            (gethash (list (lisp record) (lib-world record) (libname record))
-                     all-results)))
-    all-results))
+(let ((groups (group-by '((:x 1 :y 2)
+                          (:x 3 :y 2)
+                          (:x 3 :y 7))
+                        (list (test-grid-utils::plist-getter :x)))))
+  (assert
+   (alexandria:set-equal (gethash '(3) groups)
+                         '((:x 3 :y 2)
+                           (:x 3 :y 7))
+                         :test #'equal))
+  (assert
+   (alexandria:set-equal (gethash '(1) groups)
+                         '((:x 1 :y 2))
+                         :test #'equal)))
 
-;; The pivot reports code below does not know exact form
-;; of the index key - in what order lib-world, lisp and libname
-;; values are specified in the key. Moreover, the pivot reports code
-;; does not know we chosen only these 3 properties for the pivot table
-;; headers - it receives the property names for row and column headers
-;; as parameters. All what the pivot code below knows, is that the
-;; index is a hash table where keys store field values somehow,
-;; and that the hash tabble values are lists of results.
-;;
-;; To abstract away the index format we provide the following functions:
+(let ((groups (group-by '((:x 1 :y 2)
+                          (:x 5 :y 8)
+                          (:x 5 :y 8)
+                          (:x 6 :y 9))
+                        (list
+                         (test-grid-utils::plist-getter :x)
+                         (test-grid-utils::plist-getter :y)))))
+  (assert
+   (equal (gethash '(1 2) groups)
+          '((:x 1 :y 2))))
 
-(defun make-index-key ()
-  (make-sequence 'list 3))
+  (assert
+   (alexandria:set-equal (gethash '(5 8) groups)
+                         '((:x 5 :y 8)
+                           (:x 5 :y 8))
+                         :test #'equal))
+  (assert
+   (equal (gethash '(6 9) groups)
+          '((:x 6 :y 9)))))
 
-(defun make-fields-values-setter (fields)
-  "Returns a function accepting index key
-as the first parameter, list of field values the second parameters,
-and destructively modifies the index key by setting the field
-values in it. Names of fields to modify in the index key,
-and their order is specified by FIELDS."
-  (let ((index-key-setters (list :lisp #'(lambda (index-key lisp)
-                                           (setf (first index-key) lisp))
-                                 :lib-world #'(lambda (index-key lib-world)
-                                                (setf (second index-key) lib-world))
-                                 :libname #'(lambda (index-key libname)
-                                              (setf (third index-key) libname)))))
-    (flet ((field-setter (field)
-             (or (getf index-key-setters field)
-                 (error "field ~A is unknown" field))))
-      (let ((setters (mapcar #'field-setter fields)))
-        #'(lambda (index-key field-vals)
-            (mapc #'(lambda (setter field-val)
-                      (funcall setter index-key field-val))
-                  setters
-                  field-vals)
-            index-key)))))
-
-(defun make-fields-values-getter (fields)
-  "Returns a function accepting and index key as a parameter,
-and returning a list of field values from that index key.
-The field names to retrieve, and their order in the
-returned list is specified by FIELDS."
-  (let ((index-key-getters (list :lisp #'first
-                                 :lib-world #'second
-                                 :libname #'third)))
-    (flet ((field-getter (field)
-             (or (getf index-key-getters field)
-                 (error "field ~A is unknown" field))))
-      (let ((getters (mapcar #'field-getter fields)))
-        #'(lambda (index-key)
-            (mapcar #'(lambda (getter)
-                        (funcall getter index-key))
-                    getters))))))
-
-;; Lets introduce a notion of row and columns addresses.
-;; An address is a list with values for the fields
-;; we put into the row or column header.
-;;
-;; For example, if we want a privot report with lisp
-;; implementations as columns, and lisp-world and
-;; library name as rows, then we may have column
-;; addresses like
-;;   ("sbcl-win-1.0.55")
-;;   ("clisp-win-2.49")
-;;   ("abcl-1.1")
-;; and row addresses like
-;;   ("quickisp 2012-02-03" "alexandria")
-;;   ("quickisp 2012-02-03" "babel")
-;;   ("quickisp 2012-03-03" "cl-json")
-;;
-;; Order of values in the address depends on the order
-;; of grouping we chosen for pivot reports. In the above
-;; row addresses lib-worlds are larger groups, and for
-;; every lib-world we enumerate library names. In another
-;; pivot report we may want other way around: to first group
-;; data by libnames, and then subdivide these groups by
-;; lib-worlds. In this case row addresses would be
-;;   ("alexandria" "quickisp 2011-12-07" )
-;;   ("alexandria" "quickisp 2012-01-03" )
-;;   ("alexandria" "quickisp 2012-02-03" )
-;;   ("babel" "quickisp 2011-12-07" )
-;;   ("babel" "quickisp 2012-02-03" )
-;;
-
-(defun distinct-addresses (joined-index address-fields)
-  (let ((distinct (make-hash-table :test #'equal))
-        (fields-getter (make-fields-values-getter address-fields)))
-    (maphash #'(lambda (index-key unused-index-value)
-                 (declare (ignore unused-index-value))
-                 (setf (gethash (funcall fields-getter index-key)
-                                distinct)
-                       t))
-             joined-index)
-    (test-grid-utils::hash-table-keys distinct)))
 
 ;; Take into account the specifics of HTML tables - the
 ;; headers which group several rows or columns, will
@@ -164,14 +78,43 @@ returned list is specified by FIELDS."
 ;;
 ;; When printing the table row by row, cell by cell, we need to know
 ;; what will be rowspan or colspan for particular <th> cell,
-;; and whether the row we are currently printing should have the 
+;; and whether the row we are currently printing should have the
 ;; <th rowspan="Y"> element, or the TH was already printed in a
-;; previous row in the same group. (Similar for <th colspan="X"> 
+;; previous row in the same group. (Similar for <th colspan="X">
 ;; elements in the rolumn headers).
 ;;
 ;; Lets precalculate some usefull information, which will allow
 ;; us to make the correct decision.
 ;;
+;; We use a notion of row and columns addresses.
+;; An address is a list with values for the fields
+;; we put into the row or column header.
+;;
+;; For example, if we want a privot report with lisp
+;; implementations as columns, and lisp-world and
+;; library name as rows, then we may have column
+;; addresses like
+;;   ("sbcl-win-1.0.55")
+;;   ("clisp-win-2.49")
+;;   ("abcl-1.1")
+;; and row addresses like
+;;   ("quickisp 2012-02-03" "alexandria")
+;;   ("quickisp 2012-02-03" "babel")
+;;   ("quickisp 2012-03-03" "cl-json")
+;;
+;; Order of values in the address depends on the order
+;; of grouping we chosen for pivot reports. In the above
+;; row addresses lib-worlds are larger groups, and for
+;; every lib-world we enumerate library names. In another
+;; pivot report we may want other way around: to first group
+;; data by libnames, and then subdivide these groups by
+;; lib-worlds. In this case row addresses would be
+;;   ("alexandria" "quickisp 2011-12-07" )
+;;   ("alexandria" "quickisp 2012-01-03" )
+;;   ("alexandria" "quickisp 2012-02-03" )
+;;   ("babel" "quickisp 2011-12-07" )
+;;   ("babel" "quickisp 2012-02-03" )
+
 ;; A helper function:
 (defun subaddrs (row-address)
   "Subaddress is a prefix of row or column address.
@@ -182,12 +125,12 @@ Every subaddress represents some level of pivot groupping."
                (subaddrs '(1 2 3))))
 
 ;; Note, that every address of length N has
-;; N subaddresses. 
+;; N subaddresses.
 ;; E.g. (length (subaddrs '("x" "y" "z"))) == 3.
 ;;
-;; And note also that every subadderss is a column 
+;; And note also that every subadderss is a column
 ;; in a row header, or a row in a column header.
-;; 
+;;
 ;; [     ql  ]
 ;; [     lisp]
 ;; [ lib     ]
@@ -197,12 +140,12 @@ Every subaddress represents some level of pivot groupping."
 ;; and row headers need only one column.
 ;;
 ;; Column addresses contains two components:
-;; quicklisp name and lisp name: 
+;; quicklisp name and lisp name:
 ;; ("quicklisp 2012-01-08" "ccl-1"),
-;; ("quicklisp 2012-01-08" "clisp-2"), 
+;; ("quicklisp 2012-01-08" "clisp-2"),
 ;; and the table column headers occupy two rows.
 
-;; For every subaddress (group) we calculate it's span 
+;; For every subaddress (group) we calculate it's span
 ;; (number of rows/columns in the group),
 ;; and store a flag, whether we already printed
 ;; the <th>.
@@ -305,14 +248,17 @@ Every subaddress represents some level of pivot groupping."
       (format out "</tr>~%"))
     (format out "</thead>~%")))
 
-(defun pivot-table-html (out
-                         joined-index
-                         row-fields row-fields-sort-predicates
-                         col-fields col-fields-sort-predicates
-                         cell-formatter)
+;;; Several versions of pivot-table-html, different in how the
+;;; the parameters are specified.
 
-  (assert (= (length row-fields) (length row-fields-sort-predicates)))
-  (assert (= (length col-fields) (length col-fields-sort-predicates)))
+(defun pivot-table-html2 (out
+                          objects
+                          row-field-getters row-fields-sort-predicates
+                          col-field-getters col-fields-sort-predicates
+                          cell-formatter)
+
+  (assert (= (length row-field-getters) (length row-fields-sort-predicates)))
+  (assert (= (length col-field-getters) (length col-fields-sort-predicates)))
 
   (princ "<table border=\"1\" class=test-table>" out)
 
@@ -322,34 +268,50 @@ Every subaddress represents some level of pivot groupping."
          (col-comparator #'(lambda (cola colb)
                              (test-grid-utils::list< col-fields-sort-predicates
                                                cola colb)))
-         (rows (sort (distinct-addresses joined-index row-fields)
+         (rows (sort (distinct objects row-field-getters)
                      row-comparator))
          (row-spans (calc-spans rows))
-         (cols (sort (distinct-addresses joined-index col-fields)
+         (cols (sort (distinct objects col-field-getters)
                      col-comparator))
-         ;; this index key will be destructively modified
-         ;; when we need to access the data, to avoid
-         ;; consing of creation of new indexe every time
-         ;; (is it a prelimenary optimization?)
-         (index-key (make-index-key))
-         (rows-fields-setter (make-fields-values-setter row-fields))
-         (cols-fields-setter (make-fields-values-setter col-fields)))
+         (cells (group-by objects (append row-field-getters col-field-getters))))
 
-    (print-col-headers (length row-fields) (length col-fields) cols out)
-    (flet ((test-results-by-row-col (row-addr col-addr)
-             (funcall rows-fields-setter index-key row-addr)
-             (funcall cols-fields-setter index-key col-addr)
-             (gethash index-key joined-index)))
+    (print-col-headers (length row-field-getters) (length col-field-getters) cols out)
+    (flet ((cell-objects (row-addr col-addr)
+             (gethash (append row-addr col-addr) cells)))
       (dolist (row rows)
         (princ "<tr>" out)
         (print-row-header row row-spans out)
         (dolist (col cols)
-          (let ((lib-results (test-results-by-row-col row col)))
-            (princ "<td>" out)
-            (funcall cell-formatter out lib-results)
-            (princ "</td>" out)))
+          (princ "<td>" out)
+          (funcall cell-formatter out (cell-objects row col))
+          (princ "</td>" out))
         (format out "</tr>~%"))))
   (princ "</table>" out))
+
+(defun pivot-table-html3 (out objects &key rows cols cell-printer)
+  "Another version of PIVOT-TABLE-HTML, more convenient parameters."
+  (assert (every (lambda (r) (and (first r) (second r)))
+                 rows)
+          nil
+          "ROWS elements must have two elements: accessor function and sorting predicate")
+  (assert (every (lambda (c) (and (first c) (second c)))
+                 cols)
+          nil
+          "COLS elements must have two elements: accessor function and sorting predicate")
+  (let ((row-field-getters (mapcar (lambda (x) (coerce (first x) 'function)) rows))
+        (row-fields-sort-predicates (mapcar #'second rows))
+        (col-field-getters (mapcar (lambda (x) (coerce (first x) 'function)) cols))
+        (col-fields-sort-predicates (mapcar #'second cols)))
+    (pivot-table-html2 out
+                       objects
+                       row-field-getters row-fields-sort-predicates
+                       col-field-getters col-fields-sort-predicates
+                       cell-printer)))
+
+(defun pivot-table-html4 (objects &key rows cols cell-printer)
+  "Another version of PIVOT-TABLE-HTML, now a function - returns STRING"
+  (with-output-to-string (s)
+    (pivot-table-html3 s objects :rows rows :cols cols :cell-printer cell-printer)))
 
 (defun pivot-report (out pivot-table reports-root-dir-relative-path)
   (let ((html-template:*string-modifier* #'cl:identity))
@@ -359,7 +321,6 @@ Every subaddress represents some level of pivot groupping."
                                                  :reports-root-dir-relative-path reports-root-dir-relative-path)
                                            :stream out)))
 
-;; New pivot report printing function
 (defun print-pivot (file-name
                     objects
                     &key rows cols cell-printer)
@@ -370,71 +331,74 @@ Every subaddress represents some level of pivot groupping."
                                          :cell-printer cell-printer)
                   (reports-root-dir-relative-path file-name))))
 
-(defun pivot-report-old (out
-                         reports-root-dir-relative-path
-                         joined-index
-                         row-fields row-fields-sort-predicates
-                         col-fields col-fields-sort-predicates
-                         &optional (cell-formatter #'format-lib-results))
-"Deprecated. Use PIVOT-REPORT."
-  (pivot-report out
-                (with-output-to-string (str)
-                  (pivot-table-html str
-                                    joined-index
-                                    row-fields row-fields-sort-predicates
-                                    col-fields col-fields-sort-predicates
-                                    cell-formatter))
-                reports-root-dir-relative-path))
+(defun print-old-pivots (db quicklisps)
+  (let* ((results (list-lib-results db
+                                    :where (lambda (lib-result)
+                                             (member (lib-world lib-result)
+                                                     quicklisps
+                                                     :test #'string=)))))
+    (print-pivot "pivot_ql_lisp-lib.html"
+                  results
+                  :rows '((lib-world string>))
+                  :cols '((lisp string<) (libname string<))
+                  :cell-printer #'format-lib-results)
+    (print-pivot "pivot_ql_lib-lisp.html"
+                  results
+                  :rows '((lib-world string>))
+                  :cols '((libname string<) (lisp string<))
+                  :cell-printer #'format-lib-results)
 
-(defun print-old-pivots (joined-index)
-  (flet ((print-report (filename
-                        row-fields row-fields-sort-predicates
-                        col-fields col-fields-sort-predicates)
-           (with-report-file (out filename)
-             (pivot-report-old out
-                               (reports-root-dir-relative-path filename)
-                               joined-index
-                               row-fields row-fields-sort-predicates
-                               col-fields col-fields-sort-predicates))))
+    (print-pivot "pivot_lisp_lib-ql.html"
+                  results
+                  :rows '((lisp string<))
+                  :cols '((libname string<) (lib-world string>))
+                  :cell-printer #'format-lib-results)
+    (print-pivot "pivot_lisp_ql-lib.html"
+                  results
+                  :rows '((lisp string<))
+                  :cols '((lib-world string>) (libname string<))
+                  :cell-printer #'format-lib-results)
 
-    (print-report "pivot_ql_lisp-lib.html"
-                  '(:lib-world) (list #'string>)
-                  '(:lisp :libname) (list #'string< #'string<))
-    (print-report "pivot_ql_lib-lisp.html"
-                  '(:lib-world) (list #'string>)
-                  '(:libname :lisp) (list #'string< #'string<))
+    (print-pivot "pivot_lib_lisp-ql.html"
+                  results
+                  :rows '((libname string<))
+                  :cols '((lisp string<) (lib-world string>))
+                  :cell-printer #'format-lib-results)
+    (print-pivot "pivot_lib_ql-lisp.html"
+                  results
+                  :rows '((libname string<))
+                  :cols '((lib-world string>) (lisp string<))
+                  :cell-printer #'format-lib-results)
 
-    (print-report "pivot_lisp_lib-ql.html"
-                  '(:lisp) (list #'string<)
-                  '(:libname :lib-world) (list #'string< #'string>))
-    (print-report "pivot_lisp_ql-lib.html"
-                  '(:lisp) (list #'string<)
-                  '(:lib-world :libname) (list #'string> #'string<))
+    (print-pivot "pivot_ql-lisp_lib.html"
+                  results
+                  :rows '((lib-world string>) (lisp string<))
+                  :cols '((libname string<))
+                  :cell-printer #'format-lib-results)
+    (print-pivot "pivot_ql-lib_lisp.html"
+                  results
+                  :rows '((lib-world string>) (libname string<))
+                  :cols '((lisp string<))
+                  :cell-printer #'format-lib-results)
 
-    (print-report "pivot_lib_lisp-ql.html"
-                  '(:libname) (list #'string<)
-                  '(:lisp :lib-world) (list #'string< #'string>))
-    (print-report "pivot_lib_ql-lisp.html"
-                  '(:libname) (list #'string<)
-                  '(:lib-world :lisp) (list #'string> #'string<))
+    (print-pivot "pivot_lisp-lib_ql.html"
+                  results
+                  :rows '((lisp string<) (libname string<))
+                  :cols '((lib-world string>))
+                  :cell-printer #'format-lib-results)
+    (print-pivot "pivot_lisp-ql_lib.html"
+                  results
+                  :rows '((lisp string<) (lib-world string>))
+                  :cols '((libname string<))
+                  :cell-printer #'format-lib-results)
 
-    (print-report "pivot_ql-lisp_lib.html"
-                  '(:lib-world :lisp) (list #'string> #'string<)
-                  '(:libname) (list #'string<))
-    (print-report "pivot_ql-lib_lisp.html"
-                  '(:lib-world :libname) (list #'string> #'string<)
-                  '(:lisp) (list #'string<))
-
-    (print-report "pivot_lisp-lib_ql.html"
-                  '(:lisp :libname) (list #'string< #'string<)
-                  '(:lib-world) (list #'string>))
-    (print-report "pivot_lisp-ql_lib.html"
-                  '(:lisp :lib-world) (list #'string< #'string>)
-                  '(:libname) (list #'string<))
-
-    (print-report "pivot_lib-lisp_ql.html"
-                  '(:libname :lisp) (list #'string< #'string<)
-                  '(:lib-world) (list #'string>))
-    (print-report "pivot_lib-ql_lisp.html"
-                  '(:libname :lib-world) (list #'string< #'string>)
-                  '(:lisp) (list #'string<))))
+    (print-pivot "pivot_lib-lisp_ql.html"
+                  results
+                  :rows '((libname string<) (lisp string<))
+                  :cols '((lib-world string>))
+                  :cell-printer #'format-lib-results)
+    (print-pivot "pivot_lib-ql_lisp.html"
+                  results
+                  :rows '((libname string<) (lib-world string>))
+                  :cols '((lisp string<))
+                  :cell-printer #'format-lib-results)))
