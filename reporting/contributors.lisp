@@ -5,6 +5,8 @@
 (in-package #:test-grid-reporting)
 
 (defun print-contributors (db lib-world)
+  "Helper function to print email with
+test results summary for particular lib-world."
   (let ((result))
     (dolist (run (getf db :runs))
       (let ((descr (test-grid-data::run-descr run)))
