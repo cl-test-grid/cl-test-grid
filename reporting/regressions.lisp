@@ -2,6 +2,13 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
+;;;; Compare results and determine if one result has regressions comparing to
+;;;; another result.
+;;;;
+;;;; The code in this file is outdated. It was working when test results
+;;;; contained only testsuite results, but not load results.
+;;;; Keeping the code in the hope to adopt it to the current results.
+
 (in-package #:test-grid-reporting)
 
 ;;; Alternative representation of a library test status.
