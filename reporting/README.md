@@ -8,7 +8,6 @@ $ git clone git@github.com:cl-test-grid/cl-test-grid.git
 ``` common-lisp
 CL-USER> (pushnew "cl-test-grid/" asdf:*central-registry* :test #'equal)
 CL-USER> (ql:quickload :test-grid-reporting)
-CL-USER> (in-package #:test-grid-reporting)
 ```
 The package doesn't export public functions, so lets enter it:
 ``` common-lisp
