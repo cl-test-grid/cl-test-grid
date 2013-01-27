@@ -1,4 +1,6 @@
-;;; -*- Mode: LISP; Syntax: COMMON-LISP; Package: test-grid; Base: 10; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+;;;; -*- Mode: LISP; Syntax: COMMON-LISP; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
+;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
+;;;; See LICENSE for details.
 
 (defpackage #:test-grid-utils
   (:nicknames :tg-utils)
@@ -27,22 +29,42 @@
      (do-plist-impl ,plist (lambda (,key ,val) ,@body))
      ,result))
 
-(defun plist-comparator (&rest props-and-preds)
-  (lambda (plist-a plist-b)
-    (do-plist (prop pred props-and-preds)
-      ;; iterate over all the property/predicate pairs
-      ;; "compare" the values of the current property
-      ;; in both plists
-      (let ((val-a (getf plist-a prop))
-            (val-b (getf plist-b prop)))
-        (if (funcall pred val-a val-b)
-            (return t))
-        ;; Ok, val-a is not less than val-b (as defined by our predicate).
-        ;; Lets check if they are equal. If the reverse comparation [val-b less val-a]
-        ;; is also false, then they are equal, and we proceed to the next
-        ;; property/predicate pair.
-        (when (funcall pred val-b val-a)
-          (return nil))))))
+(defun map-plist (fn plist)
+  (let ((result))
+    (do-plist (key val plist)
+      (push (funcall fn key val)
+            result))
+    (nreverse result)))
+
+(defun lexicographical-comparator (predicates)
+  (lambda (obj1 obj2)
+    (dolist (pred predicates)
+      (when (funcall pred obj1 obj2)
+        (return t))
+      ;; Ok, obj1 should not go before the obj2,
+      ;; accroding to the current predicate.
+      ;; Lets check other way around:
+      (when (funcall pred obj2 obj1)
+        (return nil))
+      ;; obj2 is not before the obj1 either (they are equal).
+      ;; Proceed to the remaining predicates.
+      )))
+
+(defun field-comparator (accessor predicate)
+  (lambda (obj1 obj2)
+    (funcall predicate
+             (funcall accessor obj1)
+             (funcall accessor obj2))))
+
+(defun property-comparator (prop predicate)
+  (field-comparator (plist-getter prop) predicate))
+
+(defun obj-comparator (&rest accessors-and-predicates)
+  (lexicographical-comparator (map-plist #'field-comparator
+                                         accessors-and-predicates)))
+
+(defun plist-comparator (&rest props-and-predicates)
+  (funcall #'obj-comparator (map-plist #'property-comparator props-and-predicates)))
 
 ;; examples:
 #|
