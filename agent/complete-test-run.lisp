@@ -22,13 +22,30 @@ performed in the current lisp system."
              "~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D"
              year month date hour min sec)))
 
+(defun os-windows-p ()
+  ;; :windows feature is put into *features* by trivial-features
+  (member :windows *features*))
+
+(defun implementation-type (impl-identifier)
+  (subseq impl-identifier 0 (position #\- impl-identifier)))
+
 (defun name-run-directory (run-descr)
   "Generate name for the directory where test run
 data (libraries test suites output and the run results) will be saved."
-  (format nil
-          "~A-~A"
-          (fmt-time (getf run-descr :time))
-          (getf run-descr :lisp)))
+  (if (os-windows-p)
+      ;; On windows shorten the directory name by using only implementation type
+      ;; insteaf of full implementation identifier. Shorter name helps
+      ;; to prevent problems with too long .fasl file names,
+      ;; because windows has max path length of 256 chars.
+      (format nil
+              "~A.~(~A~)-~A"
+              (fmt-time (getf run-descr :time))
+              (elt (generate-id) 3) ;; some random char to make it more unique
+              (implementation-type (getf run-descr :lisp)))
+      (format nil
+              "~A-~A"
+              (fmt-time (getf run-descr :time))
+              (getf run-descr :lisp))))
 
 (defun run-directory (run-descr base-dir)
   (merge-pathnames (make-pathname
