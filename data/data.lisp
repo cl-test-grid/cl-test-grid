@@ -134,12 +134,12 @@
 (defun print-test-run (out test-run &optional (indent 0))
   (let ((descr (getf test-run :descr)))
     (format out
-            "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact (:email ~s))~%"
+            "(:descr (:lisp ~s :lib-world ~s :time ~s :run-duration ~s :contact-email ~s)~%"
             (getf descr :lisp)
             (getf descr :lib-world)
             (getf descr :time)
             (getf descr :run-duration)
-            (getf (getf descr :contact) :email)))
+            (getf descr :contact-email)))
   (format out "~v,0t:results (" (1+ indent))
   (print-list-elements out
                        (sort (copy-list (getf test-run :results))
@@ -201,14 +201,3 @@
                       :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                       )
     (test-grid-utils::safe-read in)))
-
-
-#|
- DB version change history:
- 0 - initial
- 1 - cl-routes and cl-closure-template are renamed to routes and closure-template
- 2 - routes and closure-template are renamed back to cl-routes and cl-closure-template
- 3 - bknr.datastore is renamed to bknr-datastore, in order to match the Quicklisp release name
- 4 - the :load-failed status of testsutes is replaced by just :fail
- 5 - the :version field of DB is renamed to :schema
-|#

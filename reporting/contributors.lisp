@@ -12,7 +12,7 @@ test results summary for particular lib-world."
       (let ((descr (test-grid-data::run-descr run)))
         (when (string= lib-world (getf descr :lib-world))
           (push (list (getf descr :lisp)
-                      (getf (getf descr :contact) :email))
+                      (getf descr :contact-email))
                 result))))
     (format t "cl-test-grid@googlegroups.com~{,~A~}~%"
             (remove-duplicates (sort (mapcar #'second result) #'string<)

@@ -10,4 +10,5 @@
   ((:module "data"
     :serial t
     :components ((:file "data")
+                 (:file "schema-changes")
                  (:file "blobs")))))

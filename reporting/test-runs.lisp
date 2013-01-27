@@ -58,7 +58,7 @@ values: :OK, :UNEXPECTED-OK, :CRASH, :TIMEOUT, :FAIL, :NO-RESOURSE, :KNOWN-FAIL.
                 (test-grid-agent::pretty-fmt-time (getf run-descr :time))
                 (html-template:escape-string-all (princ-to-string (getf run-descr :lib-world)))
                 (html-template:escape-string-all (princ-to-string (getf run-descr :lisp)))
-                (html-template:escape-string-all (princ-to-string (getf (getf run-descr :contact) :email))))
+                (html-template:escape-string-all (princ-to-string (getf run-descr :contact-email))))
         (dolist (lib test-grid-testsuites::*all-libs*)
           (format out "<td>~A</td>"
                   (funcall status-renderer run (find lib lib-statuses

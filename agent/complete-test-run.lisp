@@ -11,7 +11,7 @@ performed in the current lisp system."
         :lib-world lib-world
         :time (get-universal-time)
         :run-duration :unknown
-        :contact (list :email user-email)))
+        :contact-email user-email))
 
 (defun fmt-time (universal-time &optional destination)
   "The preferred time format used in the cl-test-grid project."
@@ -126,7 +126,7 @@ as the system load status.")
       (format stream "  library:           ~A~%" libname)
       (format stream "  lib-world:         ~A~%" (getf run-descr :lib-world))
       (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
-      (format stream "  contributor email: ~A~%" (getf (getf run-descr :contact) :email))
+      (format stream "  contributor email: ~A~%" (getf run-descr :contact-email))
       (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
       (format stream "============================================================~%"))))
 
@@ -218,7 +218,7 @@ upon the BODY completion runs the BODY again."
       (format stream "  system:            ~A~%" system-name)
       (format stream "  lib-world:         ~A~%" (getf run-descr :lib-world))
       (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
-      (format stream "  contributor email: ~A~%" (getf (getf run-descr :contact) :email))
+      (format stream "  contributor email: ~A~%" (getf run-descr :contact-email))
       (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
       (format stream "============================================================~%"))))
 
@@ -313,7 +313,7 @@ results in this directory are tested."
 
 (defun complete-test-run2 (description run-dir quicklisp-dir lisp-exe &key project-names helper-lisp-exe)
   (unless (getf description :lib-world) (error "please specify :lib-world in the description"))
-  (unless (getf (getf description :contact) :email) (error "lease specify :contact (:email ...) in the description"))
+  (unless (getf description :contact-email) (error "lease specify :contact-email in the description"))
   (let* ((*response-file-temp-dir* (or *response-file-temp-dir* run-dir))
          (run-info-file (run-info-file run-dir))
          (saved-test-run (when (probe-file run-info-file)

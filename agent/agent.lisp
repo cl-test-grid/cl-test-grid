@@ -262,7 +262,7 @@ the PREDICATE."
                            :lib-world lib-world
                            :time (get-universal-time)
                            :run-duration :unknown
-                           :contact (list :email (user-email agent))))))
+                           :contact-email (user-email agent)))))
         (dolist (lisp pending-lisps)
           (handler-bind
               ((serious-condition (lambda (c)
