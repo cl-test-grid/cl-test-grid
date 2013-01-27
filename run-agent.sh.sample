@@ -1,4 +1,6 @@
 #!/bin/sh
+# Ensure the current directory is where this file is located
+cd "`dirname $0`"
 
 # Update to the recent cl-test-grid version (required).
 git pull
