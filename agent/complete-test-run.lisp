@@ -53,6 +53,9 @@ data (libraries test suites output and the run results) will be saved."
                          :if-does-not-exist :create)
       (test-grid-data::print-test-run out test-run))))
 
+(defun test-run-log-dir (run-directory)
+  (merge-pathnames "logs/" run-directory))
+
 (defun lib-log-name (lib-name)
   (substitute #\- #\.
               ;; Substitute dots by hypens because CCL
@@ -63,7 +66,8 @@ data (libraries test suites output and the run results) will be saved."
               (string-downcase lib-name)))
 
 (defun lib-log-file (test-run-directory lib-name)
-  (merge-pathnames (lib-log-name lib-name) test-run-directory))
+  (merge-pathnames (lib-log-name lib-name)
+                   (test-run-log-dir test-run-directory)))
 
 (defparameter +libtest-timeout-seconds+ #.(* 15 60)
   "Maximum number of seconds we give each library test suite
@@ -256,7 +260,8 @@ upon the BODY completion runs the BODY again."
                       (string-downcase system-name))))
 
 (defun loadtest-log-file (test-run-directory system-name)
-  (merge-pathnames (loadtest-log-name system-name) test-run-directory))
+  (merge-pathnames (loadtest-log-name system-name)
+                   (test-run-log-dir test-run-directory)))
 
 (defun as-keyword (string-designator)
   (read-from-string (format nil ":~A" string-designator)))
@@ -310,7 +315,7 @@ results in this directory are tested."
 (defun complete-test-run-impl (test-run run-dir quicklisp-dir lisp-exe project-names project-systems-fn)
   (let* ((*response-file-temp-dir* (or *response-file-temp-dir* run-dir))
          (run-descr (test-grid-data::run-descr test-run))
-         (asdf-output-dir (merge-pathnames "asdf-output/" run-dir))
+         (asdf-output-dir (merge-pathnames "fasl/" run-dir))
          (lib-results (getf test-run :results))
          (start-time (get-universal-time))
          (prev-duration (if (numberp (getf run-descr :run-duration))
@@ -359,7 +364,7 @@ results in this directory are tested."
           (incf done))
         (log:info "The test results were saved to: ~%~A." (truename run-dir))
         (when project-names
-          (check-asdf-output "private-quicklisp/"))
+          (check-asdf-output "ql/"))
         (when (intersection project-names test-grid-testsuites:*all-libs* :test #'string=)
           (check-asdf-output "test-grid/"))
         (cl-fad:delete-directory-and-files asdf-output-dir :if-does-not-exist :ignore)

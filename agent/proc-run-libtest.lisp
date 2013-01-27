@@ -25,9 +25,8 @@
         ;; (this allows us to ensure the libraries are freshly recompiled
         ;; at every test run, if every test run specifies different
         ;; temporary directory for .fasl files.
-        (lib-dir private-quicklisp-dir)
-        (libs-output-dir (merge-pathnames (make-pathname :directory '(:relative "private-quicklisp"))
-                                          asdf-output-root-dir))
+        (quicklisp-output-dir (merge-pathnames (make-pathname :directory '(:relative "ql"))
+                                               asdf-output-root-dir))
 
         ;; The .fasl files of test-grid-testsuites also stored in custom
         ;; output directory.
@@ -35,7 +34,7 @@
         (test-grid-output-dir (merge-pathnames (make-pathname :directory '(:relative "test-grid"))
                                                asdf-output-root-dir)))
 
-    (add-asdf-output-translation lib-dir libs-output-dir)
+    (add-asdf-output-translation private-quicklisp-dir quicklisp-output-dir)
     (add-asdf-output-translation test-grid-dir test-grid-output-dir)))
 
 (defun run-libtest (libname)
