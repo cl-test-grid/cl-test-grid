@@ -114,16 +114,26 @@ Transaction commit consists of:
   "999999999")
 
 (defun parse-version-number (simpledb-item-name)
-  (let* ((name-end (search "-" simpledb-item-name :from-end t))
-         (name-start (1+ (search "-" simpledb-item-name :end2 name-end :from-end t))))
+  (let* ((version-end (search "-" simpledb-item-name :from-end t))
+         (version-start (1+ (search "-" simpledb-item-name :end2 version-end :from-end t))))
     (parse-integer simpledb-item-name
-                   :start name-start
-                   :end name-end)))
+                   :start version-start
+                   :end version-end)))
 
 (assert (= 132 (parse-version-number "test-000000132-tx")))
 (assert (= 132 (parse-version-number "test-000000132-snapshot")))
 (assert (= 132 (parse-version-number "name-with-dash-000000132-tx")))
 (assert (= 132 (parse-version-number "name-with-dash-000000132-snapshot")))
+
+(defun parse-log-name (simpledb-item-name)
+  (let* ((version-end (search "-" simpledb-item-name :from-end t))
+         (name-end (search "-" simpledb-item-name :end2 version-end :from-end t)))
+    (subseq simpledb-item-name 0 name-end)))
+
+(assert (string= "test" (parse-log-name "test-000000132-tx")))
+(assert (string= "test" (parse-log-name "test-000000132-snapshot")))
+(assert (string= "name-with-dash" (parse-log-name "name-with-dash-000000132-tx")))
+(assert (string= "name-with-dash" (parse-log-name "name-with-dash-000000132-snapshot")))
 
 (defgeneric serialize-to-string (log object)
   (:method ((log aws-transaction-log) object)
@@ -344,3 +354,11 @@ Transaction commit consists of:
     (delete-item (simpledb-domain log)
                  (item-name item)
                  (simpledb-options log))))
+
+(defun list-logs (simpledb-endpoint-host simpledb-domain credentials)
+  "Names of all the logs stored on the given Amazon Simple DB."
+  (remove-duplicates (mapcar (alexandria:compose #'parse-log-name #'item-name)
+                             (sptm::select-all (format nil "select itemname() from ~A limit 2500" simpledb-domain)
+                                               (list :credentials credentials
+                                                     :host simpledb-endpoint-host)))
+                     :test #'string=))
