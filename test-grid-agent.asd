@@ -23,7 +23,8 @@
                #:log4cl
                #:fare-memoization
                #:usocket
-               #:trivial-backtrace)
+               #:trivial-backtrace
+               #:trivial-features)
   :components 
     ((:module "agent"
       :serial t
