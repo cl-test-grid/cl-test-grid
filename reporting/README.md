@@ -134,10 +134,10 @@ are accessed using the following functions:
          the tests :fail is recorded.
 
        `:crash` means the child lisp process running the test suite
-         exited without returning a result;
+         terminated without returning a result;
 
        `:timeout` means that the child lisp process
-         hasn't finished in a specified timeout time.
+         hasn't finished in a specified timeout.
 
 - `(libname result)` Name of the library tested - a keyword, like `:babel`, `:alexandria`, etc.
 
