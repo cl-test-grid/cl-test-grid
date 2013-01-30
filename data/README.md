@@ -28,7 +28,7 @@ Represents test results of some libraries on a single lisp implementation.
 - `:libname` Name of the library tested - a keyword, like `:babel`, `:alexandria`.
 - `:status` Result of the library test suite. Present only if the library has testsuite adapter for cl-test-grid.
     Possible values: 
-    - `:ok' None of the testcases has failed.
+    - `:ok` None of the testcases has failed.
 
     - `:fail` Either some test cases failed but the test
               framework does not allow to distinguish
