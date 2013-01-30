@@ -26,7 +26,7 @@ Represents test results of some libraries on a single lisp implementation.
 
 **Library result**
 - `:libname` Name of the library tested - a keyword, like `:babel`, `:alexandria`.
-- `:status` Result of the library test suite.
+- `:status` Result of the library test suite. Present only if the library has testsuite adapter for cl-test-grid.
     Possible values: 
     - `:ok' None of the testcases has failed.
 
@@ -71,18 +71,21 @@ Represents test results of some libraries on a single lisp implementation.
     - An extended test status object
 
 - `:test-duration` Number of seconds taken by the library testsuite.
+    Present only if the `:status` present.
     Often a fractional number, for example `3519/500`. Includes
     time taken by `ql:quickload` of the required systems.
 - `:log-blob-key` String key under which the testsuite log is available online
+    Present only if the `:status` present.
     at cl-test-grid.appspot.com/blob?key=<log-blob-key>. Example `"1qulq3d387"`.
 - `:log-byte-length` Length of the testsuite log file, integer.
+    Present only if the `:status` present.
     Note, the maximum length of the only copy of the file is 100 000 bytes,
     even if `:log-byte-length` value is greater. When longer files are submitted
     online, a section in the middle of the file is cut out.
 - `:load-results` List of load result objects for all the ASDF systems of that library.
 
 **Extended test status**
-Returned when the testsuite adapter knows how to distinguis
+Returned when the testsuite adapter knows how to distinguish
 separate testcases in the test framework used.
 - `:failed-tests`  list of failed testcase names (strings)
 - `:known-to-fail` list of testcases known to fail in this test framework.
