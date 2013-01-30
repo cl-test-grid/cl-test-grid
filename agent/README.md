@@ -1,3 +1,6 @@
+Running Tests
+=============
+
 `test-grid-agent:agent` is a lisp object able
 to manage test exectuion by subordinate lisp
 implementations (executables) and submit test
@@ -139,3 +142,32 @@ Getting assistance
 
 Feel free to contact us if you have any questions or
 difficulties (see the mailing list address below).
+
+Source Code Guide
+=================
+
+The key components, from bottom up:
+- `lisp-exe` Represents lisp implementation executable and allows to start
+  child lisp process to execute some lisp code. Supports timeouts: if the child
+  lisp process exceeds the specified timeout, it is killed and corresponding
+  condition is signalled.
+- On top of it the function `complete-test-run` is build.
+  It runs tests on the specified `lisp-exe` and quicklisp installation,
+  and stores test results in a directory. If the testging process is
+  interrupted and started again with the same output directory, it continues
+  from the point of interruption.
+- `submit-test-run-results` submits log files and test results from test run
+  output directory to online storage.
+- Finally, on top of these components `agent` object is build. It maintains
+  private quicklisp installation in working directory and updates it to the
+  latest version every time when started. It also remembers what lisp implenetations
+  were tested on what quicklisp version. This information kept in a `persistence`
+  - simple plist saved in file. Also agent checks the configuratio parameters
+  provided by user and ensures only one agent instance is run at time,
+  using a TCP port, as described above.
+
+The source files naming convention _proc-*.lisp_ is used for files executed
+by child lisp processes started via `lisp-exe`.
+
+
+  
