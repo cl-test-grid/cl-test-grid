@@ -151,7 +151,7 @@ The key components, from bottom up:
   child lisp process to execute some lisp code. Supports timeouts: if the child
   lisp process exceeds the specified timeout, it is killed and corresponding
   condition is signalled.
-- On top of it the function `complete-test-run` is build.
+- On top of it the function `complete-test-run` is built.
   It runs tests on the specified `lisp-exe` and quicklisp installation,
   and stores test results in a directory. If the testging process is
   interrupted and started again with the same output directory, it continues
@@ -161,8 +161,8 @@ The key components, from bottom up:
 - Finally, on top of these components `agent` object is build. It maintains
   private quicklisp installation in working directory and updates it to the
   latest version every time when started. It also remembers what lisp implenetations
-  were tested on what quicklisp version. This information kept in a `persistence`
-  - simple plist saved in file. Also agent checks the configuratio parameters
+  were tested on what quicklisp version. This information kept in 
+ `persistence` - a simple plist saved in file. Also agent checks the configuratio parameters
   provided by user and ensures only one agent instance is run at time,
   using a TCP port, as described above.
 
