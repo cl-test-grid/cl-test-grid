@@ -29,7 +29,7 @@ The follwing objects and properties extist:
     Possible values: 
     - `:ok' None of the testcases has failed.
 
-    - `:fail' Either some test cases failed but the test
+    - `:fail` Either some test cases failed but the test
               framework does not allow to distinguish
               particular test case, or some problem
               prevented the test suite from running at all.
@@ -39,27 +39,27 @@ The follwing objects and properties extist:
               in lisp code; or absense of necessary
               foreign library on the test system.
 
-    - `:no-resource' This status is designed to represent
+    - `:no-resource` This status is designed to represent
         situations when testsuite can not be run due
         to absense of necessary enviromnent.
 
         For example, CFFI test suite needs a small
         C library to be build. On Windows user must
         do it manually. If this library is not found,
-        testgrid adapter of the CFFI test suite returns :no-resource.
+        testgrid adapter of the CFFI test suite returns `:no-resource`.
          
         Or, external-program test suite can only be
         run on *nix platforms. On Windows testgrid
         adapter returns :no-resource.
 
-        The :no-resource handling in testsuite adapters
+        The `:no-resource` handling in testsuite adapters
         is optional, as every testsuite may have different
         requirements.
 
         Today, most testsuite adapters in testgrid
         do not implemente such a handling, and
         in case of any problems when running
-        the tests :fail is recorded.
+        the tests `:fail` is recorded.
 
     - `:crash` means the child lisp process running the test suite
         terminated without returning a result;

@@ -118,11 +118,11 @@ are accessed using the following functions:
          For example, CFFI test suite needs a small
          C library to be build. On Windows user must
          do it manually. If this library is not found,
-         testgrid adapter of the CFFI test suite returns :no-resource.
+         testgrid adapter of the CFFI test suite returns `:no-resource`.
          
          Or, external-program test suite can only be
          run on *nix platforms. On Windows testgrid
-         adapter returns :no-resource.
+         adapter returns `:no-resource`.
 
          The :no-resource handling in testsuite adapters
          is optional, as every testsuite may have different
@@ -131,7 +131,7 @@ are accessed using the following functions:
          Today, most testsuite adapters in testgrid
          do not implemente such a handling, and
          in case of any problems when running
-         the tests :fail is recorded.
+         the tests `:fail` is recorded.
 
        `:crash` means the child lisp process running the test suite
          terminated without returning a result;
