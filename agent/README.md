@@ -165,7 +165,7 @@ The key components, from bottom up:
   [`persistence`](persistence.lisp) - a simple plist saved in file.
   Also agent checks the configuration parameters provided by user and ensures only
   one agent instance is run at time, using a TCP port, as described above.
-  The agent public API is specified in the [_package.lisp_].
+  The agent public API is specified in the [_package.lisp_](package.lisp).
 
 The source files naming convention _proc-*.lisp_ is used for files executed
 by child lisp processes started via `lisp-exe`.
