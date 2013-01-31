@@ -147,7 +147,7 @@ Source Code Guide
 =================
 
 The key components, from bottom up:
-- `[lisp-exe](lisp-exe.lisp)` Represents lisp implementation executable and allows to start
+- [`lisp-exe`](lisp-exe.lisp) Represents lisp implementation executable and allows to start
   child lisp process to execute some lisp code. Supports timeouts: if the child
   lisp process exceeds the specified timeout, it is killed and corresponding
   condition is signalled.
