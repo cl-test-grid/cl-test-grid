@@ -139,16 +139,16 @@
 
   cl-test-grid consists of the following components:
   - =[[/agent][test-grid-agent]]= - the program able to run tests an upload the results online
-  - =test-grid-testsuites= - testgrid adapters for testsuites of all the included
+  - =[[/testsuites][test-grid-testsuites]]= - testgrid adapters for testsuites of all the included
     libraries; used by agent
-  - =test-grid-storage= - online storage for test results; based on =sptm=
-  - =sptm= - simple in-memory persistence for lisp data based on transaction log
+  - =[[/storage][test-grid-storage]]= - online storage for test results; based on =sptm=
+  - =[[/sptm][sptm]]sptm= - simple in-memory persistence for lisp data based on transaction log
     stored online at Amazon Web Services
-  - =test-grid-reporting= - tools to generate reports from test results
-  - =test-grid-data= - support code for test results datastructures shared between other
+  - =[[/reporting][test-grid-reporting]]= - tools to generate reports from test results
+  - =[[/data][test-grid-data]]= - support code for test results datastructures shared between other
     components; =data= is produced by =agent=, stored in =storage= and used by =reporting=
-  - =test-grid-gae-blobstore= - online storage for test logs; runs on Google App Engine
-  - =test-grid-utils= - utilities.
+  - =[[/gae-blobstore][test-grid-gae-blobstore]]= - online storage for test logs; runs on Google App Engine
+  - =[[/utils][test-grid-utils]]= - utilities.
 
   The packages also have have nicknames prefixed with =tg-= : =tg-agent=, =tg-testsuites=, and so on.
 
