@@ -138,8 +138,7 @@
   We record bugs there to avoid duplicated bug reports.
 
   cl-test-grid consists of the following components:
-  [[/agent][test-grid-agent]]
-  - =test-grid-agent= - the program able to run tests an upload the results online
+  - =[[/agent][test-grid-agent]]= - the program able to run tests an upload the results online
   - =test-grid-testsuites= - testgrid adapters for testsuites of all the included
     libraries; used by agent
   - =test-grid-storage= - online storage for test results; based on =sptm=
