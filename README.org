@@ -142,7 +142,7 @@
   - =[[/testsuites][test-grid-testsuites]]= - testgrid adapters for testsuites of all the included
     libraries; used by agent
   - =[[/storage][test-grid-storage]]= - online storage for test results; based on =sptm=
-  - =[[/sptm][sptm]]sptm= - simple in-memory persistence for lisp data based on transaction log
+  - =[[/sptm][sptm]]= - simple in-memory persistence for lisp data based on transaction log
     stored online at Amazon Web Services
   - =[[/reporting][test-grid-reporting]]= - tools to generate reports from test results
   - =[[/data][test-grid-data]]= - support code for test results datastructures shared between other
