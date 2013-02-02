@@ -187,7 +187,7 @@
 
    In any case, contact the mailing list, we will help.
 
-* Mailing lisp
+* Mailing List
   [[http://groups.google.com/group/cl-test-grid]]
 * TODO fix in this README:
   Terminology - I say "quicklisp distro", but if be precise,
