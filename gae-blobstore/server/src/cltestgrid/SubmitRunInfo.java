@@ -66,7 +66,7 @@ public class SubmitRunInfo extends HttpServlet {
       Message msg = new MimeMessage(session);
       msg.setFrom(new InternetAddress("cl.test.grid@gmail.com", "cl-test-grid GAE server"));
       msg.addRecipient(Message.RecipientType.TO,
-                       new InternetAddress("avodonosov@yandex.ru", "Anton Vodonosov"));
+                       new InternetAddress("cl-test-grid-notifications@googlegroups.com", "cl-test-grid-notifications group"));
       msg.addRecipient(Message.RecipientType.TO,
                        new InternetAddress("cl-test-grid@yandex.ru", "cl-test-grid results inbox"));
       msg.setSubject("[cl-test-grid] [test run submitted]");

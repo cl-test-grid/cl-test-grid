@@ -187,8 +187,9 @@
 
    In any case, contact the mailing list, we will help.
 
-* Mailing List
-  [[http://groups.google.com/group/cl-test-grid]]
+* Resources
+  - mailing list: [[http://groups.google.com/group/cl-test-grid]]
+  - notifications about new test results: [[http://groups.google.com/group/cl-test-grid-notifications]]
 * TODO fix in this README:
   Terminology - I say "quicklisp distro", but if be precise,
   quicklisp calls it "quicklisp distro version". But

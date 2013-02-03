@@ -71,7 +71,7 @@ public class TellAdmin extends HttpServlet {
       Message msg = new MimeMessage(session);
       msg.setFrom(new InternetAddress("cl.test.grid@gmail.com", "cl-test-grid GAE server"));
       msg.addRecipient(Message.RecipientType.TO,
-                       new InternetAddress("avodonosov@yandex.ru", "Anton Vodonosov"));
+                       new InternetAddress("cl-test-grid-notifications@googlegroups.com", "cl-test-grid-notifications group"));
       msg.setSubject("[cl-test-grid] " + subject);
 
       Multipart multipart = new MimeMultipart();
