@@ -153,7 +153,7 @@ The key components, from bottom up:
   condition is signalled.
 - On top of it the function [`complete-test-run`](complete-test-run.lisp) is built.
   It runs tests on the specified `lisp-exe` and quicklisp installation,
-  and stores test results in a directory. If the testging process is
+  and stores test results in a directory. If the testing process is
   interrupted and started again with the same output directory, it continues
   from the point of interruption.
 - [`submit-test-run-results`](submit-test-run-results.lisp) submits log files and test
