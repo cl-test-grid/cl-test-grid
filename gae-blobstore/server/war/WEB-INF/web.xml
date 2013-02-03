@@ -42,12 +42,12 @@
   </servlet-mapping>
 
   <servlet>
-    <servlet-name>tell-admin</servlet-name>
-    <servlet-class>cltestgrid.TellAdmin</servlet-class>
+    <servlet-name>send-notification</servlet-name>
+    <servlet-class>cltestgrid.SendNotification</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>tell-admin</servlet-name>
-    <url-pattern>/tell-admin</url-pattern>
+    <servlet-name>send-notification</servlet-name>
+    <url-pattern>/send-notification</url-pattern>
   </servlet-mapping>
 
 <!--

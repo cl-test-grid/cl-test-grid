@@ -28,7 +28,7 @@ import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
-public class TellAdmin extends HttpServlet {
+public class SendNotification extends HttpServlet {
 
   private static final Logger logger = Logger.getLogger(Upload.class.getName());
 
@@ -46,7 +46,7 @@ public class TellAdmin extends HttpServlet {
     resp.setContentType("text/plain; charset=utf-8");
 
     logger.log(Level.INFO, 
-        "Handling the tell-admin submit from " + req.getRemoteAddr() 
+        "Handling the SendNotification submit from " + req.getRemoteAddr() 
         + "; X-AppEngine-Country: " + req.getHeader("X-AppEngine-Country"));
     
     Properties props = new Properties();

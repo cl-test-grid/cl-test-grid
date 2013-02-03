@@ -292,13 +292,13 @@ the PREDICATE."
           (log:info "Agent is asigned newly generated agent-id: ~A"
                     (get-agent-id p))))))
 
-(defun say-hello-to-admin (agent)
-  (log:info "sending hello message to admin")
-  (tg-gae-blobstore:tell-admin (blobstore agent)
-                               (format nil "[agent hello] from ~A (~A)"
-                                       (get-agent-id (persistence agent))
-                                       (user-email agent))
-                               "hello"))
+(defun send-hello-notification (agent)
+  (log:info "sending hello notification")
+  (tg-gae-blobstore:send-notification (blobstore agent)
+                                      (format nil "[agent hello] from ~A (~A)"
+                                              (get-agent-id (persistence agent))
+                                              (user-email agent))
+                                      "hello"))
 
 (defmethod main (agent)
   ;; setup logging for unhandled errors and warnings
@@ -319,7 +319,7 @@ the PREDICATE."
         (setf (persistence agent) (init-persistence (persistence-file agent)))
         (check-config agent)
         (ensure-has-id agent)
-        (say-hello-to-admin agent)
+        (send-hello-notification agent)
         (let ((lib-world (or (getf (custom-lib-world agent) :id)
                              (update-testing-quicklisp agent))))
           (setf (project-lister agent)

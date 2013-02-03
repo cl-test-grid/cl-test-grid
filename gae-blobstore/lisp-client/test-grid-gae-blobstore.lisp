@@ -7,7 +7,7 @@
            #:submit-files
            #:submit-files2
            #:submit-run-info
-           #:tell-admin
+           #:send-notification
            #:delete-blobs))
 
 (in-package #:test-grid-gae-blobstore)
@@ -38,9 +38,9 @@ Signals an ERROR in case of problems."))
    "Submits test run result RUN-INFO (a lisp object)
 to central database."))
 
-(defgeneric tell-admin (blobstore subject body)
+(defgeneric send-notification (blobstore subject body)
   (:documentation
-   "Sends message to admin."))
+   "Sends notification http://groups.google.com/group/cl-test-grid-notifications."))
 
 ;;; Implementation
 
@@ -223,10 +223,10 @@ and writting the file to that stream."
                          (test-grid-utils::safe-read s))))
       (error "Error submitting run info to the server. Unexpected response: ~A." response))))
 
-(defmethod tell-admin ((blobstore blobstore) subject body)
+(defmethod send-notification ((blobstore blobstore) subject body)
   (assert (not (null subject)))
   (setf body (or body ""))
-  (let ((response (drakma:http-request (format nil "~A/tell-admin" (base-url blobstore))
+  (let ((response (drakma:http-request (format nil "~A/send-notification" (base-url blobstore))
                                        :method :post
                                        :parameters `(("subject" . ,subject)
                                                      ("body" . ,body)))))
