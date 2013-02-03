@@ -3,6 +3,7 @@
 ;;;; See LICENSE for details.
 
 (defpackage #:test-grid-agent
+  (:nicknames :tg-agent)
   (:use #:common-lisp)
   (:export
            ;; agent public API version
