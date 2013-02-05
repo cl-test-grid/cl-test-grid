@@ -251,7 +251,7 @@ same prototype as `cl:set-exclusive-or`,
 but takes advantage of hash tables if the `:test` parameter
 is one of `cl:eq`, `cl:eql`, `cl:equal` or `cl:equalp`.
 
-Lets use 1compiler-diff` to compare two versions of ABCL: old release 1.0.1
+Lets use `compiler-diff` to compare two versions of ABCL: old release 1.0.1
 and some intermediate development version:
 ``` common-lisp
 TEST-GRID-REPORTING> (print-compiler-diff "demo/abcl-diff.html"
