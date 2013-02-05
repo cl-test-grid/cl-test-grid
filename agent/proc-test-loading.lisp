@@ -13,7 +13,7 @@
 
 (defun test-loading (system-name)
   (catching-problems (lambda ()
-                       (ql:quickload system-name))
+                       (ql:quickload system-name :verbose t))
                      (lambda ()
                        (return-from test-loading :fail)))
   :ok)
