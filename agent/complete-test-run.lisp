@@ -299,18 +299,6 @@ results in this directory are tested."
                             project-names
                             (alexandria:curry #'project-systems (project-lister agent)))))
 
-(defun merge-plists (plist &rest default-plists)
-  (if (null default-plists)
-      plist
-      (let* ((default-plist (car default-plists))
-             (result (copy-list default-plist)))
-        (test-grid-utils::do-plist (key val plist)
-          (setf (getf result key) val))
-        (apply #'merge-plists result (cdr default-plists)))))
-
-;; (merge-plists '(:a a1 :b b1) '(:a a2 :c c2) '(:b b3 :c c3 :d d3))
-;;  => (:a a1 :b b1 :c c2 :d d3) modulo sorting
-
 (defun complete-test-run2 (description run-dir quicklisp-dir lisp-exe &key project-names helper-lisp-exe)
   (unless (getf description :lib-world) (error "please specify :lib-world in the description"))
   (unless (getf description :contact-email) (error "lease specify :contact-email in the description"))
@@ -318,9 +306,9 @@ results in this directory are tested."
          (run-info-file (run-info-file run-dir))
          (saved-test-run (when (probe-file run-info-file)
                            (test-grid-utils::safe-read-file run-info-file)))
-         (test-run (make-run (merge-plists description
-                                           (list :lisp (implementation-identifier lisp-exe))
-                                           (test-grid-data::run-descr saved-test-run))
+         (test-run (make-run (tg-utils::merge-plists description
+                                                     (list :lisp (implementation-identifier lisp-exe))
+                                                     (test-grid-data::run-descr saved-test-run))
                              (test-grid-data::run-results saved-test-run)))
          (helper-lisp (or helper-lisp-exe lisp-exe))
          (project-lister (init-project-lister helper-lisp quicklisp-dir))

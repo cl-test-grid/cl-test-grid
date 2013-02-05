@@ -213,3 +213,15 @@ Examples:
 (assert (equal '((1 2 3) (4 5))
                (split-list '(1 2 3 4 5) 3)))
 
+(defun merge-plists (plist &rest default-plists)
+  (if (null default-plists)
+      plist
+      (let* ((default-plist (car default-plists))
+             (result (copy-list default-plist)))
+        (test-grid-utils::do-plist (key val plist)
+          (setf (getf result key) val))
+        (apply #'merge-plists result (cdr default-plists)))))
+
+;; (merge-plists '(:a a1 :b b1) '(:a a2 :c c2) '(:b b3 :c c3 :d d3))
+;;  => (:a a1 :b b1 :c c2 :d d3) modulo sorting
+

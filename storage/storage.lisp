@@ -44,7 +44,8 @@
 (defun transaction-allowed-p (func-symbol)
   (member func-symbol '(test-grid-data:add-test-run
                         test-grid-data:remove-test-runs
-                        test-grid-data::schema-change-006)))
+                        test-grid-data::schema-change-006
+                        test-grid-data:update-run-descr)))
 
 (defmethod make-replica (name local-snapshot-file)
   (make-instance 'replica

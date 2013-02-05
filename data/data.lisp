@@ -11,7 +11,8 @@
    #:read-db
    #:add-test-run
    #:add-test-runs
-   #:remove-test-runs))
+   #:remove-test-runs
+   #:update-run-descr))
 
 (in-package #:test-grid-data)
 
@@ -78,6 +79,21 @@
 (defun remove-test-runs (db &rest descr-key-val-plist)
   (updated-plist db :runs (remove-if (test-run-matcher descr-key-val-plist)
                                      (getf db :runs))))
+
+(defun update-run-descr (db descr-key-val-plist new-key-vals)
+  "DESCR-KEY-VAL-PLIST specifies what test run(s) to update.
+NEW-KEY-VALS are new key-values for descriptions of that test runs."
+  (let ((matcher (test-run-matcher descr-key-val-plist)))
+    (updated-plist db
+                   :runs
+                   (mapcar (lambda (test-run)
+                             (if (funcall matcher test-run)
+                                 (updated-plist test-run
+                                                :descr
+                                                (tg-utils::merge-plists new-key-vals
+                                                                        (run-descr test-run)))
+                                 test-run))
+                           (getf db :runs)))))
 
 (defun remove-lib-result (db
                           test-run-descr-key-val-plist
