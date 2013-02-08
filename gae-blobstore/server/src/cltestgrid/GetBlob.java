@@ -48,7 +48,7 @@ public class GetBlob extends HttpServlet {
         if (null == new BlobInfoFactory().loadBlobInfo(blobKey)) {
           throw new NotFoundException("Unknown key is specified: " + key);
         }
-      } else if (isCloudStorageKey(key)) {
+      } else if (BlobKeyUtil.isCloudStorageKey(key)) {
           throw new NotFoundException("Unknown key is specified: " + key);
       } else {
         // Indirectly, via intermediate short key,
@@ -67,10 +67,6 @@ public class GetBlob extends HttpServlet {
     } catch (NotFoundException e) {
       resp.sendRedirect("http://cl-test-grid-logs.storage.googleapis.com/" + key);
     }
-  }
-
-  private boolean isCloudStorageKey(String str)  {
-    return str.length() == 10;
   }
 }
 
