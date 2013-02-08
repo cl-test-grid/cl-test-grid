@@ -56,7 +56,15 @@ public class Upload2 extends HttpServlet {
       IOException, ServletException 
   {
     try {
-      Map<String, String> map = saveBlobs(req);
+
+      /* During migration we wanted to upload logs under their old names.
+      // Use req.getQueryString instead of req.getParameters, as it mutst be a POST
+      // request, and we want to parse the request body ourselves.
+      final boolean keepNames = (req.getQueryString() + "").contains("keepNames=true");
+      */
+
+      final boolean keepNames = false;
+      Map<String, String> map = saveBlobs(req, keepNames);
 
       String result = asAssocList(map);
       log.info("returning blobName-blobKey map: " + result);
@@ -131,8 +139,17 @@ public class Upload2 extends HttpServlet {
       Returns a map from fieldNames of the submitted files to
       blobNames of these files stored on CloudStorage.
    */
-  private Map<String, String> saveBlobs(HttpServletRequest req) throws IOException, ServletException {
+  private Map<String, String> saveBlobs(HttpServletRequest req, boolean keepNames) throws IOException, ServletException {
     List<MyFileItem> items = parseRequest(req);
+
+    for (MyFileItem item : items) {
+      if (keepNames) {
+        item.blobName = item.fieldName;
+      } else {
+        item.blobName = generateId();
+      }
+    }
+
     saveBlobsInParallel(items);
 
     Map<String, String> map = new HashMap<String, String>();
@@ -173,22 +190,20 @@ public class Upload2 extends HttpServlet {
         MyFileItem item = null;
         try {
           while ((item = tasks.poll()) != null) {
-            String blobName = generateId();
             try {
-              saveBlob(blobName, item.contentType, item.dataCollector.toByteArray());        
+              saveBlob(item.blobName, item.contentType, item.dataCollector.toByteArray());
               // Saving blob may throw a LockException due to CloudStorage issue
               // http://code.google.com/p/googleappengine/issues/detail?id=8592
               // Therefore retry two times in case of LockException:
             } catch (com.google.appengine.api.files.LockException e) {                
               try {
-                log.log(Level.WARNING, "retry saving blob " + blobName + " because of LockException when saving it first time", e);
-                saveBlob(blobName, item.contentType, item.dataCollector.toByteArray());        
+                log.log(Level.WARNING, "retry saving blob " + item.blobName + " because of LockException when saving it first time", e);
+                saveBlob(item.blobName, item.contentType, item.dataCollector.toByteArray());
               } catch (com.google.appengine.api.files.LockException e2) {
-                log.log(Level.WARNING, "second retry saving blob " + blobName + " because of LockException when saving it at first retry", e2);
-                saveBlob(blobName, item.contentType, item.dataCollector.toByteArray());        
+                log.log(Level.WARNING, "second retry saving blob " + item.blobName + " because of LockException when saving it at first retry", e2);
+                saveBlob(item.blobName, item.contentType, item.dataCollector.toByteArray());
               }
             }
-            item.blobName = blobName;
           }
         } catch (Throwable t) {
           if (item != null) {item.saveError = t;}

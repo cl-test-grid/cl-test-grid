@@ -183,8 +183,10 @@ and writting the file to that stream."
                           (get-blobkey (car id-pathname-pair))))
                   id-pathname-alist))))))
 
-(defun submit-files2 (blobstore id-pathname-alist &key (batch-size 300))
-  (submit-files-impl (constantly (format nil "~a/upload2" (base-url blobstore)))
+(defun submit-files2 (blobstore id-pathname-alist &key (batch-size 300) keep-names-p)
+  (submit-files-impl (constantly (format nil "~a/upload2~:[~;?keepNames=true~]"
+                                         (base-url blobstore)
+                                         keep-names-p))
                      id-pathname-alist
                      (alexandria:compose #'wrap-with-gzip #'make-file-sender)
                      :batch-size batch-size))
