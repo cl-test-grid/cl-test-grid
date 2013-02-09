@@ -144,7 +144,7 @@ public class Upload2 extends HttpServlet {
 
     for (MyFileItem item : items) {
       if (keepNames) {
-        item.blobName = item.fieldName;
+        item.blobName = item.fileName;
       } else {
         item.blobName = generateId();
       }
@@ -250,15 +250,16 @@ public class Upload2 extends HttpServlet {
     // ----------------------
 
     // the file data received from request
-    final String fieldName, contentType;
+    final String fieldName, fileName, contentType;
     final LimitingDataCollector dataCollector = new LimitingDataCollector();
 
     // results of storing the blob
     volatile String blobName = null;
     volatile Throwable saveError = null;
 
-    public MyFileItem(String fieldName, String contentType) {
+    public MyFileItem(String fieldName, String fileName, String contentType) {
       this.fieldName = fieldName;
+      this.fileName = fileName;
       this.contentType = contentType;
     }
 
@@ -294,6 +295,7 @@ public class Upload2 extends HttpServlet {
                                boolean isFormField,
                                String fileName)
     { 
+      log.info("blob to save: fileName: " + fileName + "; fieldName: " + fieldName + "; contentType: " + contentType);
       if (isFormField) throw new BadRequestException("This servlet only accepts files, support for usual form fields is not implemented.");
 
       this.filesSeen++;
@@ -301,7 +303,7 @@ public class Upload2 extends HttpServlet {
         throw new BadRequestException("Maximum nuber of files in one request is " + MAX_FILES);
       }
       
-      return new MyFileItem(fieldName, contentType);
+      return new MyFileItem(fieldName, fileName, contentType);
     }
   }
   

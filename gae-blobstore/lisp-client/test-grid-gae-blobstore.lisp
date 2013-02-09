@@ -184,6 +184,8 @@ and writting the file to that stream."
                   id-pathname-alist))))))
 
 (defun submit-files2 (blobstore id-pathname-alist &key (batch-size 300) keep-names-p)
+  "KEEP-NAMES-P when true make the log stored under original FILE-NAMESTRING
+of the pathnames passed in ID-PATHNAME-ALIST."
   (submit-files-impl (constantly (format nil "~a/upload2~:[~;?keepNames=true~]"
                                          (base-url blobstore)
                                          keep-names-p))
