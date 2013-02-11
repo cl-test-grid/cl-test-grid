@@ -37,6 +37,12 @@ public class GetBlob extends HttpServlet {
   public void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws IOException, ServletException
  {
+    String userAgent = request.getHeader("User-Agent");
+    if (userAgent != null && userAgent.indexOf("Baiduspider") >= 0) {
+      resp.sendRedirect("http://www.baidu.com/search/spider.html?please_honor_robots.txt_and_down_waste_our_resources.http://cl-test-grid.appspot.com/robots.txt");
+      return;
+    }
+
     final String key = req.getParameter("key");
     try {
       BlobKey blobKey;
