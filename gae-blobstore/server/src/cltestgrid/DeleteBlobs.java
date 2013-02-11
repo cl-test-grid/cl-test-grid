@@ -61,7 +61,7 @@ public class DeleteBlobs extends HttpServlet {
       if (key.length() > 19) {
         // Very long string (162 characters) are real blobstore BlobKeys;
         // the URLs with such long keys are very nasty.
-        files.add(new AppEngineFile("/blobstore/" + key));
+        files.add(fileService.getBlobFile(new BlobKey(key)));
       } else if (!BlobKeyUtil.isCloudStorageKey(key)) {
         // Indirectly, via intermediate short key,
         // which is ID of a datastore Entity, storing 
@@ -72,7 +72,7 @@ public class DeleteBlobs extends HttpServlet {
             Entity shortKeyEntity = datastore.get(datastoreKey);
             BlobKey blobKey = (BlobKey)shortKeyEntity.getProperty("blobKey");
 
-            files.add(new AppEngineFile("/blobstore/" + blobKey.getKeyString()));
+            files.add(fileService.getBlobFile(blobKey));
             shortKeys.add(datastoreKey);
         } catch (EntityNotFoundException e) {
             logger.warning("Unknown short key is specified: " + key);
