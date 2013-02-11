@@ -39,7 +39,7 @@ public class GetBlob extends HttpServlet {
  {
     String userAgent = request.getHeader("User-Agent");
     if (userAgent != null && userAgent.indexOf("Baiduspider") >= 0) {
-      resp.sendRedirect("http://www.baidu.com/search/spider.html?please_honor_robots.txt_and_down_waste_our_resources.http://cl-test-grid.appspot.com/robots.txt");
+      resp.sendRedirect("http://www.baidu.com/search/spider.html?please_honor_robots.txt_and_dont_waste_our_resources.http://cl-test-grid.appspot.com/robots.txt");
       return;
     }
 
