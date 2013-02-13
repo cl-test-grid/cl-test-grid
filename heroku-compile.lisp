@@ -10,4 +10,4 @@
 (ql:quickload :test-grid-server)
 (print ">>> Done building system")
 
-;; change the file just to invoke recompilation at heroku: 0
+;; change the file just to invoke recompilation at heroku: 1 
