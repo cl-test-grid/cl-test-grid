@@ -148,10 +148,11 @@ Transaction commit consists of:
 
 (defun gzip-string (str)
   "Returns byte vector"
-  (gzip-stream:gzip-sequence (babel:string-to-octets str)))
+  (gzip-stream:gzip-sequence (babel:string-to-octets str :encoding :utf-8)))
 
 (defun gunzip-string (byte-vector)
-  (babel:octets-to-string (gzip-stream:gunzip-sequence byte-vector)))
+  (babel:octets-to-string (gzip-stream:gunzip-sequence byte-vector)
+                          :encoding :utf-8))
 
 (assert (string= "abc" (gunzip-string (gzip-string "abc"))))
 
