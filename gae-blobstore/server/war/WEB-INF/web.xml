@@ -6,24 +6,6 @@
   <display-name>CL Test Grid</display-name>
 
   <servlet>
-    <servlet-name>upload</servlet-name>
-    <servlet-class>cltestgrid.Upload</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>upload</servlet-name>
-    <url-pattern>/upload</url-pattern>
-  </servlet-mapping>
-
-  <servlet>
-    <servlet-name>upload-url</servlet-name>
-    <servlet-class>cltestgrid.GetUploadUrl</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>upload-url</servlet-name>
-    <url-pattern>/upload-url</url-pattern>
-  </servlet-mapping>
-
-  <servlet>
     <servlet-name>blob</servlet-name>
     <servlet-class>cltestgrid.GetBlob</servlet-class>
   </servlet>

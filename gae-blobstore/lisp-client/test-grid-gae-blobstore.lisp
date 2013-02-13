@@ -219,7 +219,7 @@ of the pathnames passed in ID-PATHNAME-ALIST."
 ;;                :batch-size 500)
 
 (defmethod submit-run-info ((blobstore blobstore) run-info)
-  (assert (not (null run-info)))
+b  (assert (not (null run-info)))
   (let ((response (drakma:http-request (format nil "~A/submit-run-info" (base-url blobstore))
                                        :method :post
                                        :parameters `(("run-info" . ,(prin1-to-string run-info))))))
@@ -238,8 +238,21 @@ of the pathnames passed in ID-PATHNAME-ALIST."
                          (test-grid-utils::safe-read s))))
       (error "Error sending message to admin. Unexpected response: ~A." response))))
 
+;; Blob keys reffered via http://cl-test-grid.appspot.com/blob?key=<blob key>
+;; in internet.
+;; Collected manually via google search at 2013.02.13
 (defparameter *logs-to-keep*
-  (list))
+  '("100025" "1037868" "1044920" "167051" "167058" "170032" "171015" "176038"
+    "177044" "178062" "180050" "187096" "190086" "197101" "198057" "198076"
+    "216013" "226017" "260299" "269153" "274297" "297008" "340364" "357430"
+    "370563" "374954" "386272" "388372" "389242" "430179" "498392" "502394"
+    "534856" "564037" "564037" "599867" "600015" "607011" "608020" "6100" "647037"
+    "647056" "648045" "7018" "789714" "792731" "854116" "860701" "882267" "941904"
+    "AMIfv95LxbkgWChpsuKddRA8bTozHhRzkT8zH7wqG_e6E84kTL58N5duGsXDkKDTthXmv7QjDAJtGxnRFshqkUKk9L59UvGg7luWEjxfEpPqcq9mNLAdus1SMdmQewx0_TUrkyOEX-TAV76U2LZX_i9qfa-q0RerOQ"
+    "AMIfv96z3zpAJ7NBVUox0ZXqXE0MofFZLcuaXtttHS6VFsXVRDyJqCFVZRfdNYiJqAOZbRbnUvIfyUzsK9t-qRBQmGtwyaVd7WcGMTa0XaKEAEY1AL1NRz6SkwlB6mV-2utmWKkmHQC94iVpGHbaZ2ZifpGBjtp_Hg"
+    "AMIfv97DXhtnmey3lh8C3P-s6SbAFyFqEFodohqccgB7UtGbKn7Qg8jlH5RanWIiC-2recfsNeWoPTbsZC1SLsjLszHLja2b3yv25TNJ_6p45mDYOWVuPIWgDkuVOdBCNGuSgSsMGjRMeLorD0fxOWwK2qPOBmZajA"
+    "AMIfv97suboJpeei-uBWzlkqcR7CTlyh0Izhvi7u_29HNBgu80ScYf0Mj6zWPjgbsosA-F0Q12HP8o9S5zhsEelTfss8_3C7sjgcuG_q_grR-jMfXPLLRzu6CNytLoNk23rwqlQ6AsajxTRYFubFbz3iBWl5uo8iZQ"
+    "AMIfv97wo4FQxGLBZOagyZyLZCqwMWavAfwsByKxjq8QiJQ5rIzEggGwGJ_kH2qRZLMb8N_el8aKIpLDbnr67Pxcy9r8RFKmBnjTQ1B44yaCcyZWtO2CSbBliyAINvoI41_R8uA8hoPia-yXPdlmADiJcavCCgpHGA"))
 
 (defun delete-blobs (blobstore blob-keys)
   (flet ((delete-batch (blob-keys)

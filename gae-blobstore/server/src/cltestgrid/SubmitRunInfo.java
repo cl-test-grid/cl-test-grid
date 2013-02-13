@@ -30,7 +30,7 @@ import javax.mail.internet.MimeMultipart;
 
 public class SubmitRunInfo extends HttpServlet {
 
-  private static final Logger logger = Logger.getLogger(Upload.class.getName());
+  private static final Logger logger = Logger.getLogger(SubmitRunInfo.class.getName());
 
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse resp) throws
