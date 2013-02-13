@@ -238,8 +238,8 @@ b  (assert (not (null run-info)))
                          (test-grid-utils::safe-read s))))
       (error "Error sending message to admin. Unexpected response: ~A." response))))
 
-;; Blob keys reffered via http://cl-test-grid.appspot.com/blob?key=<blob key>
-;; in internet.
+;; Blob keys referred via http://cl-test-grid.appspot.com/blob?key=<blob key>
+;; in Internet.
 ;; Collected manually via google search at 2013.02.13
 (defparameter *logs-to-keep*
   '("100025" "1037868" "1044920" "167051" "167058" "170032" "171015" "176038"
