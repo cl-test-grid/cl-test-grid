@@ -12,3 +12,7 @@ The serer side is implemented on Java (few small
 servlets; maybe sometime we will be able
 to use ABCL instead, or just move the functionality
 to Heroku + Amazon S3 and use any Lisp).
+
+The server uses Commons FileUpload library, licensed
+under the Apache Software License, Version 1.1.
+See Apache-LICENSE.txt.

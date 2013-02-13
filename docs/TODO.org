@@ -151,7 +151,161 @@
    CLOSED: [2012-10-23 Вт 05:40]
 ** DONE file system results storage for Juan Jose
    CLOSED: [2012-10-23 Вт 05:40]
-** TODO [6 h] Prevent HTML injection via test-run-info
+** DONE [6 h] Prevent HTML injection via test-run-info
+   CLOSED: [2012-12-19 Ср 22:05]
+* 0.6.1 Some fixes and improvements
+** DONE memoization of the implementation-identifier generic function is not portable
+   CLOSED: [2012-10-23 Вт 05:58]
+   in particular, it's known that fare-memoization can't memoize it on ACL,
+   see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
+** DONE ensure the tesg-grid-testsuites code is recompiled when necessary
+   CLOSED: [2012-08-15 Ср 19:11]
+   The libraries being tested are recompiled at every test run.
+   It would be good to ensure test-grid-testsuites code is also correctly
+   recompiled.
+   Related thread on asdf-devel:
+   http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
+** DONE move test-grid::print-log-footer to the test-grid-agent package,
+   CLOSED: [2012-10-23 Вт 05:59]
+   and call it only form the agent process, not from the child, test suite
+   running, process.
+** DONE backtrace on errors in agent.log
+   CLOSED: [2012-08-15 Ср 19:09]
+** DONE Do not allow empty contributor contact in test results. Instead
+   CLOSED: [2012-08-20 Пн 01:56]
+   always ask the contributor to provide something, nickname,
+   whatever.
+** DONE Prevent child lisp process entering debugger.
+   CLOSED: [2012-08-15 Ср 19:09]
+   Note, different lisps treat unhangled signals during -eval
+   differently: ECL exits with status 1, CCL enters debugger
+   and hangs.
+
+* 0.7.0 Wrap-up the active development phase
+** DONE [0.5 h] Increase load timeout 2 times - to 10 minutes. Increas test timeout to 15 minutes.
+   CLOSED: [2012-11-29 Чт 05:31]
+** DONE doc update
+   CLOSED: [2013-01-23 Ср 10:42]
+** DONE [4 h] shorten the .fasl file paths to avoid long path problems on windos
+   CLOSED: [2013-01-27 Вс 16:01]
+** DONE check why git pull doesn't work with cron
+   CLOSED: [2012-12-15 Сб 23:11]
+** DONE [40+ h] Immediate test results avaiability, without waiting for admin
+   CLOSED: [2012-12-22 Сб 09:34]
+   Solution: implemented test-grid-storage, based on sptm
+** DONE [2 h] Shortly document the test-grid-storage features in the main README.org.
+   CLOSED: [2013-01-24 Чт 16:32]
+** DONE [1 h] Document the result db access via test-grid-storage in the reporting/README.md
+   CLOSED: [2013-01-24 Чт 16:32]
+** TODO [40 h] Move online log storage to Google Cloud Storage from Google App Engine.
+   GAE Blobstore used now to store logs costs for our application at least $108 a year.
+   Also we have seen GAE stability/user support issues.
+   We moved to Google Cloud Storage.
+   See more info here:
+   http://avodonosov.blogspot.com/2013/02/quest-for-immutable-static-files-hosting.html
+
+   Logs registered in all cl-test-grid databases (cl-test-grid-results
+   git repository and all test-grid-storage storages) are moved
+   to Cloud Storage under the same names.
+
+   Old GetBlob servlet redirects to Cloud Storage if the log is not
+   found in blobstore.
+*** TODO decrease GAE daily budget
+*** DONE Blob ID generator (random)
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE lisp client for the Upload2 servlet, including gzipping and limiting file size
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE test lisp client on real data
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE Upload2: limit the file size
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE Upload2: limit number of files
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE Upload2: proppagate saveBlob erros to the main thread
+    CLOSED: [2012-12-23 Вс 04:59]
+*** Apache license for commons file upload
+*** document the design-decision
+*** Google Storage: restrict cl.test.grid@gmail.com rights to the bucket only, not have it as a member of the project
+*** policy condition for cl-test-grid-blobs: cl.test.grid.user@gmail.com must give full access to the bucket owner
+*** delete cl.test.grid.user account from google and Amazon if not necessary (including from policies)
+*** DONE allow result storage names to be specified for each lisp-exe. If specifed,
+    CLOSED: [2013-01-24 Чт 17:38]
+    the (result-storage-space agent) is not used for this lisp-exe.
+** DONE configure robots.txt so that web crawlers do not read GAE blobs
+   CLOSED: [2012-12-22 Сб 09:34]
+   it takes to much "frontend hours" and google bills me for that.
+   This issue is related to the old blobs accessible via
+   http://cl-test-grid.appspot.com/blob?key=XXXXX.
+
+   The new blobs, stored on the Google Cloud Storage will
+   not take fronted hours. Probably we may want to limit
+   the network transfer, but we will see later.
+
+** TODO [24 h] document the code base
+** DONE [4 h] docs: move test running instructions into agent/README.md
+   CLOSED: [2013-01-19 Сб 09:42]
+** DONE [4 h] docs: move reporting tutorial from reports-overview.html to reporting/README.md
+   CLOSED: [2013-01-19 Сб 09:42]
+** TODO [8 h] security: agent runs lot of code provided by unknown people
+   Discuss with Zach, what we know about these people
+   and what level of confidence we have in their code.
+   This includes:
+   - confidence in their good intentions
+   - confidence their code don't open unintentional doors to the machine
+     (e.g. opens a socker, receives s-expression from it and executes)
+
+   Anyway, the final solution will most likely be to advice
+   contributors to run agent under a separate user on their OSes.
+** DONE [1 h] remove the ecl-12.7.1-ce653d88 results
+   CLOSED: [2013-01-19 Сб 09:43]
+** DONE [1 h] remove the Dave Cooper's results broken by absense of some .lisp files in his quicklisp
+   CLOSED: [2013-01-24 Чт 16:34]
+** DONE [2 h] results older that 3 recent quicklisps should be archived to cl-test-grid-results
+   CLOSED: [2013-01-24 Чт 16:34]
+** DONE [3 h] db format. change :contact (:email "someone@host.com) to just :contact-email "someone@host.com"
+** DONE contributor monthly summary.
+   CLOSED: [2013-01-24 Чт 23:04]
+   Now that test grid agent can be run by cron, sending confirmation
+   email to contributor for every test result doesn't make sense,
+   because the contributor is anaware when testing happens. But providing
+   feedback is necessary. We may send a monthly digest to contributor
+   summarizing the test results received from his agent(s). May be implemented
+   as a cron task running say at the 8th of every month (so that admin has
+   time to commit all the resutls to db.lisp and the digest
+   producer task sees them). Admin should be BCC'ed in these emails.
+   Should it be a single email for all contributors and the mailing list,
+   or each contributor should be emailed individually?
+
+   Solution: the email is sent manually with help of
+   tg-reporting::contributors function, which prepares the email test.
+
+** TODO better formatting of test-run-info.lisp when results are submitted via notification
+* User Requests
+** TODO Vladimir Sedach: test multithreaded CLISP
+   (less important now as Vladimir already installed such lisp on his
+   machine and contributes tests)
+** TODO Luis Oliveira: buld library heads from source control
+* Backlog
+** TODO [8 h] when submitting shortened version of a log to online storage,
+   the :log-byte-length attribute stores the length of the original file.
+   Should we store the shortened length instead?
+** TODO [8 h] when killing a test subprocess due to timeout
+   we send it a signal, then write a message to log and continue.
+   But the signal is handled asynchronously, so sometimes
+   the process continues some time after we've written log footer,
+   and even writes to the log below the footer.
+   Example logs:
+   "361349" "359363" "355443" "375901" "374959" "385018" "AMIfv94t7Sr7BRnCnuDJlNAbLWTWESlU8T2-EMrFprYvGLIF78KIpxCScAvQVy6-N9A7II4PMMCh-u_8mTQdzH3EPGp1U4t3xHnxBhEwqDZDxfrCFO5U-jvSLN3syJty4V9oXu-DLbFr-zrB0NpyMTtEo86omldetQ"
+** TODO [8 h] authentication for DeleteBlobs servlet
+** TODO [5 h] send notifications not to the admin directly, but to a mailing list
+** TODO [8 h] gc blobs
+** TODO [1 h] Add CCL command line parameter to limit heap size when running agent to run-agent.sh.sample, run-agent.bat.sample
+** TODO [2 h] Make JNA available to ABCL running under cl-test-grid.
+   Problem: jna.jar should be in classpath, or maven should be installed on the machine.
+   As cl-test-grid doesn't use the ABCL's shell script, the .jar should
+   be added to classpath explisitly. Add another parameter to lisp-exe:abcl class?
+   Or just modify the CLASSPATH variable on my machine?
+   Install maven?
 ** TODO [4 h] document, for each CL community role, how he can benefit from testgrid
    - library mainaner:
      - Status of your library ASDF systems loaded by various lisps
@@ -174,23 +328,13 @@
        ensure there is no regressions, and see the improvements.
    - application developer
      (Actually, the application developer as the end user
-      of CL infrastructuure, rarely will use testgrid directly.
-      He, hopefully, will benefit indirectly, from improved
-      stability and quality of the CL world).
-      Still, the end user may:
+     of CL infrastructuure, rarely will use testgrid directly.
+     He, hopefully, will benefit indirectly, from improved
+     stability and quality of the CL world).
+     Still, the end user may:
      - see what libraries work on his platform
      - giving his ASDF system see what dependencies
        are broken on what platform
-
-** TODO [1 h] link to the library reports from the Results Overview page
-** TODO terminology improvement
-  - db format: rename?
-                  :libname -> :project
-                  :status -> :test-status
-                  :log-blob-key -> :test-log-blob-key
-                  :log-byte-length -> :test-log-byte-length
-  - project name: a keyword, or string? Currently a keyword; but ASDF system names are strings.
-  - rename test-grid-testsuites:*all-libs* to *all-testsuites*?
 ** TODO Apply for a subdomain at common-lisp.net, e.g. test-grid.common-lisp.net,
    It is another way to solve the security issue with HTML injections,
    because in this case web browser keeps test grid reports in different
@@ -203,58 +347,21 @@
         block this library.
         Look for help from http://chart.ravenbrook.com/ ?
 ** TODO has-regressions-p - cover all the possible cases by unit tests?
-* 0.7.0 Wrap-up the active development phase
-** DONE [0.5 h] Increase load timeout 2 times - to 10 minutes. Increas test timeout to 15 minutes.
-   CLOSED: [2012-11-29 Чт 05:31]
-** TODO [1 h] Add CCL command line parameter to limit heap size when running agent to run-agent.sh.sample, run-agent.bat.sample
-** TODO [40+ h] Immediate test results avaiability, without waiting for admin
-   - Store test results locally?
-   - Provide a script example, whcih after completing the tests
-     generates necessary reports from local test results
-     (optionally merged with the global db)
-   - Or maybe instead create a server with accepts results
-     and makes them available without participation of admin?
-** TODO [40 h] Move online log storage to Amazon S3 from Google App Engine?
-  We are already close to limit of free GAE resources
-  (mostly on datastore write operations, several of which
-  are performed for every uploaded log, and when testing
-  quicklisp we upload thousands of logs).
+** TODO Add ANSI test suite?
+  Does not depend on quicklisp distro version; but BTW may be distirbuted via quicklisp.
+** TODO Test source control HEADs of libraries, not only quicklisp releases
+   Rrequires a way to specify lib-wold as a quicklisp version with some
+   library versions overriden (checkout this particular
+   libraries from the scm), so that library author can quickly
+   get test result for his changes (fixes)  in scm.
+   An implementation idea to consider: almost every scm allows
+   to download asnapshot via http, so the quicklisp http machinery may
+   be reused here, whithout running a shell command for
+   checkout.
+   40h
 
-  Payed GAE plan costs minimum $15 per month.
-
-  Amazon S3 costs $0.12 per GB per month - much cheaper
-  (whole quicklisp by singl lisp implementation produces
-  2-5 MB of logs).
-
-  Also we have seen GAE stability/user support issues.
-
-  Problem: uploading logs is easy usin zs3 library,
-  but how to assing unique identifiers to them?
-  S3 doesn't provide such a functionality. We would
-  like to avoid another service only for identifier
-  generation. Randome identifiers seems good, but
-  we must resovle possible collisions. Maybe calculate
-  MD5 for every log before submit and compare with
-  ETag returned by S3 in HTTP header? Can it help?
-
-** TODO [24 h] document the code base
-** TODO [8 h] security: agent runs lot of code provided by unknown peple
-   Discuss with Zach, what we know about these people
-   and what level of confidence we have in their code.
-   This includes:
-   - confidence in their good intentions
-   - confidence their code don't open unintentional doors to the machine
-     (e.g. opens a socker, receives s-expression from it and executes)
-
-   Anyway, the final solution will most likely be to advice
-   contributors to run agent under a separate user on their OSes.
-* 1.1.0 Install more lisps on my VPS
-  I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
-** DONE ABCL
-   CLOSED: [2012-08-20 Пн 01:48]
-** TODO CLISP (build a multithreaded version)
-* 1.2.0 Add more test suites
-** TODO add testsuites of more libraries from quicklisp
+** TODO Add more test suites
+*** TODO add testsuites of more libraries from quicklisp
 
     See the following files in the "docs" directory:
 
@@ -272,25 +379,27 @@
          (no test suite, needs manual configuration, hangs, etc.)
           The libraries are ordered in alphabetical order.
 
-** TODO create drakma test suite - will ensure drakma works on all the lisps.
+*** TODO create drakma test suite - will ensure drakma works on all the lisps.
     Drakma test suite is a must. HTTP client today is as vital thing
     as file system access. It should work on all the lisps.
     Create a test suite, the simples one - download one file
     form common-lisp.net. And make sure it works on all the lisps.
-* 1.3.1 Add ANSI test suite?
-  Does not depend on quicklisp distro version; but BTW may be distirbuted via quicklisp.
-* 1.4.0 Test source control HEADs of libraries, not only quicklisp releases
-** TODO a way to specify lib-wold as a quicklisp version with some
-   library versions overriden (checkout this particular
-   libraries from the scm), so that library author can quickly
-   get test result for his changes (fixes)  in scm.
-   An implementation idea to consider: almost every scm allows
-   to download asnapshot via http, so the quicklisp http machinery may
-   be reused here, whithout running a shell command for
-   checkout.
-   40h
-
-* 1.5.0 For all the libraries which need specific environment
+** TODO terminology improvement
+  - db format: rename?
+                  :libname -> :project
+                  :status -> :test-status
+                  :log-blob-key -> :test-log-blob-key
+                  :log-byte-length -> :test-log-byte-length
+  - project name: a keyword, or string? Currently a keyword; but ASDF system names are strings.
+  - rename test-grid-testsuites:*all-libs* to *all-testsuites*?
+  - I often call library test logs "blobs", while it would be more correct to say "logs",
+    because they are have conctrete context type text/hmlt and will have content encoding "gzip"
+** TODO Install more lisps on my VPS
+  I already have acl 8.2a express, ccl 1.8, sbcl 1.57, ecl from git, cmucl 20c
+*** DONE ABCL
+   CLOSED: [2012-08-20 Пн 01:48]
+*** TODO CLISP (build a multithreaded version)
+** TODO For all the libraries which need specific environment
    (like cffi, cl-sql) correctly detect the absense of required
    envorinment and return :NO-RESOURCE status and provide guiding message to the
    user how to configure them (log to the output test output?).
@@ -321,7 +430,19 @@
 
    Although, for the most important libraries which don't have
    enough maintainers we could provide implementation.
-* agent postponed issues
+** TODO foreign library load errors should be recognized and represented
+   in test results (maybe as :no-resource status, but it's better
+   to have a special status, including the library name. that way
+   we will have up to date list of foreign libraries necessary
+   to have quicklisp fully working).
+
+   Catch CFFI conditions, and in case of ABCL, failure to load JNA classes.
+   This should be done for load test and for testsuite run.
+
+   After this is implemented, it is desirable to re-run the tests on
+   the current and the previous Quicklisps, so that we don't redundant
+   items in the diff report (what previous was a load failure
+   now becomes :no-resource - not a failure).
 ** TODO Introduce an option to limit agent run time
   Use case: someone wants to run agents at night, but have
   the machine free from agent during dayly work.
@@ -344,46 +465,11 @@
    How the command should be sent to agent? Via web interface?
    Lisp command from REPL?
 
-** TODO foreign library load errors should be recognized and represented
-   in test results (maybe as :no-resource status, but it's better
-   to have a special status, including the library name. that way
-   we will have up to date list of foreign libraries necessary
-   to have quicklisp fully working).
-
-   Catch CFFI conditions, and in case of ABCL, failure to load JNA classes.
-   This should be done for load test and for testsuite run.
-
-   After this is implemented, it is desirable to re-run the tests on
-   the current and the previous Quicklisps, so that we don't redundant
-   items in the diff report (what previous was a load failure
-   now becomes :no-resource - not a failure).
 ** TODO test run duration should be decreased by the time of hibernation
-** DONE memoization of the implementation-identifier generic function is not portable
-   CLOSED: [2012-10-23 Вт 05:58]
-   in particular, it's known that fare-memoization can't memoize it on ACL,
-   see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
 ** TODO when logging the name of a library currently being tested, log also it's number in the
    total number of libraries, e.g. [41 of 56].
 ** TODO remove the old test-runs, quicklisp directordires and ~/cl-test-grid-settings.lisp
    Do it autmatically, or send email to all the contributors, or just ignore this issue
-** TODO contributor monthly summary.
-   Now that test grid agent can be run by cron, sending confirmation
-   email to contributor for every test result doesn't make sense,
-   because the contributor is anaware when testing happens. But providing
-   feedback is necessary. We may send a monthly digest to contributor
-   summarizing the test results received from his agent(s). May be implemented
-   as a cron task running say at the 8th of every month (so that admin has
-   time to commit all the resutls to db.lisp and the digest
-   producer task sees them). Admin should be BCC'ed in these emails.
-   Should it be a single email for all contributors and the mailing list,
-   or each contributor should be emailed individually?
-** DONE ensure the tesg-grid-testsuites code is recompiled when necessary
-   CLOSED: [2012-08-15 Ср 19:11]
-   The libraries being tested are recompiled at every test run.
-   It would be good to ensure test-grid-testsuites code is also correctly
-   recompiled.
-   Related thread on asdf-devel:
-   http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
 ** TODO Admin stores a hashmap for lisps to be tested (or skipped)
     by particular agent in the aget sources (note, the agent
     updates the source every time from git) This allows to distribute work
@@ -418,20 +504,8 @@
    implement a shell script killtree.sh <pid> which uses
    ps to find all descendents and kill them. Portable format
    of ps arguments should be used.
-** DONE move test-grid::print-log-footer to the test-grid-agent package,
-   CLOSED: [2012-10-23 Вт 05:59]
-   and call it only form the agent process, not from the child, test suite
-   running, process.
 ** TODO consider what test suite timeout value is the best (30 mins currently)
-** DONE backtrace in logs
-   CLOSED: [2012-08-15 Ср 19:09]
 ** TODO should the lisp-process-timeout condition inherit from serous-condition, error, or just condition?
-
-** DONE Prevent child lisp process entering debugger.
-   CLOSED: [2012-08-15 Ср 19:09]
-   Note, different lisps treat unhangled signals during -eval
-   differently: ECL exits with status 1, CCL enters debugger
-   and hangs.
 ** TODO program parameters escaping is not perfect. When we
    run CLISP as an external process, it can not stand
    string literals with " inside.
@@ -442,13 +516,11 @@
    are named by timestamp with resolution to seconds)
 ** TODO temp file naming: ensure unique [probably specify random-state]
 ** TODO persistence.lisp format - sort and newline for every record
-
-* User Requests
-** TODO Vladimir Sedach: test multithreaded CLISP
-   (less important now as Vladimir already installed such lisp on his
-   machine and contributes tests)
-** TODO Luis Oliveira: buld library heads from source control
-* Backlog
+** TODO refactor agent, to make the low-level building blocks suitable
+   for the following use cases:
+   - pre-release tesf of lisp compiler: do not delete test run info (as vsedach asked)
+   - test of new ASDF version (ensure the new ASDF is loaded before quicklisp/setup.lisp is loaded)
+   - test of patched quicklisp
 ** TODO Project dependencies info is hardcoded from quicklisp 2012-09-09. Make it more flexible
    and use the dependency info for the quicklisp we generate report for.
 ** TODO Child processes collision if agent is restarted very soon after it was killed.
@@ -502,10 +574,6 @@
    on Windows; it's not very good. Maybe try to provide them
    with a temporary directory inside of the cl-test-grid working
    dir?
-** DONE Do not allow empty contributor contact in test results. Instead
-   CLOSED: [2012-08-20 Пн 01:56]
-   always ask the contributor to provide something, nickname,
-   whatever.
 ** TODO quicklisp distro version in report headers may be a link to
    list of library versions in this ql version
    (like this: http://www.quicklisp.org/beta/releases.html, but

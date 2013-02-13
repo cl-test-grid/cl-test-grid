@@ -61,7 +61,6 @@
        from the "lisp" field, while they are
        the closest by the meaning]
       
-
 * How to don't loose test run results if test run was interrupted (by error or agent termination)
   One test run takes hours (more than 700 projects in quicklisp
   tested on a single implementation).
@@ -86,3 +85,20 @@
   If unfinished test run is found, it is continued instead
   of starting a new one.
 
+
+* How to store test logs online:
+  http://avodonosov.blogspot.com/2013/02/quest-for-immutable-static-files-hosting.html
+
+  Also a hint about allowing public to submit immutable files to S3 by employing versioning
+  http://news.ycombinator.com/item?id=5195100
+  Confirmation from Amazon staff at Amazon developer forums:
+  https://forums.aws.amazon.com/message.jspa?messageID=423560
+
+  Disadvantage of this approach:
+  - can't assign the identifiers myself, thus migration
+    from previous storage will assign new identifiers to
+    logs and to support old log URLs already published in some mailing
+    lists we will need to maintain a mapping between old and new identifiers;
+    or just dont migrate old logs and keep them on the old storage.
+
+    S3 has some Redirection Rules, probably the rules may help here somehow.
