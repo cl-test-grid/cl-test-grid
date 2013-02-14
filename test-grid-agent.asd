@@ -24,7 +24,9 @@
                #:fare-memoization
                #:usocket
                #:trivial-backtrace
-               #:trivial-features)
+               #:trivial-features
+               #:drakma
+               #:flexi-streams)
   :components 
     ((:module "agent"
       :serial t
@@ -40,5 +42,6 @@
        (:file "as-singleton-agent")
        (:file "generate-id")
        (:file "project-lister")
+       (:file "send-notification")
        (:file "agent")
        (:file "api-compatible-p")))))

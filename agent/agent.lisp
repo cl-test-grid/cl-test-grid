@@ -18,13 +18,10 @@
 ;;; Agent implementation class
 (defclass agent-impl (agent)
   ((persistence :type persistence :accessor persistence)
-   (results-receiver :type (function (list lisp-exe)) ; function of two arguments - test run and the lisp-exe produced it
-                     :accessor results-receiver)
    (result-storage-name :type string
                         :accessor result-storage-name
                         :initarg :result-storage-name
                         :initform "main")
-   (blobstore :accessor blobstore :initform (make-gae-blobstore))
    (project-lister :type project-lister :accessor project-lister)
    ;; custom-lib-world may be a plist in the form
    ;; (:directory <pathname designator> :id <string>)
@@ -60,22 +57,10 @@
 ;;; --- end of lisp specifications handling ---
 
 (defmethod initialize-instance :after ((agent agent-impl) &key)
-  (setf (work-dir agent) (default-work-dir)
-        (results-receiver agent) (lambda (test-run lisp-exe)
-                                   (dolist (storage (result-storages-for-lisp agent lisp-exe))
-                                     (test-grid-storage:add-test-run storage test-run))
-                                   ;; temporary keep submitting via the old chanell too, just for sure
-                                   (tg-gae-blobstore:submit-run-info (blobstore agent)
-                                                                     test-run))))
+  (setf (work-dir agent) (default-work-dir)))
 
 (defmethod make-agent ()
   (make-instance 'agent-impl))
-
-(defun make-gae-blobstore ()
-  (test-grid-gae-blobstore:make-blob-store :base-url
-                                           ;; during development of GAE blob storage
-                                           ;; :base-url may be "http://localhost:8080"
-                                           "http://cl-test-grid.appspot.com"))
 
 ;;; Working directory structure
 (defun test-output-base-dir (agent)
@@ -277,7 +262,7 @@ the PREDICATE."
                                                   agent
                                                   lisp
                                                   (project-names (project-lister agent)))))
-              (submit-test-run-results agent results-dir lisp)
+              (submit-test-run-results results-dir (result-storages-for-lisp agent lisp))
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
           continue)))))
@@ -294,11 +279,10 @@ the PREDICATE."
 
 (defun send-hello-notification (agent)
   (log:info "sending hello notification")
-  (tg-gae-blobstore:send-notification (blobstore agent)
-                                      (format nil "[agent hello] from ~A (~A)"
-                                              (get-agent-id (persistence agent))
-                                              (user-email agent))
-                                      "hello"))
+  (send-notification (format nil "[agent hello] from ~A (~A)"
+                             (get-agent-id (persistence agent))
+                             (user-email agent))
+                     "hello"))
 
 (defmethod main (agent)
   ;; setup logging for unhandled errors and warnings

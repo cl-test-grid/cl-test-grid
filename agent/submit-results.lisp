@@ -49,14 +49,6 @@
     (save-run-info run-info test-run-dir)
     run-info))
 
-(defun submit-test-run-results (agent test-run-dir lisp-exe)
-  (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
-  (let* ((run-info (submit-logs (blobstore agent) test-run-dir)))
-    (log:info "The log files are submitted. Submitting the test run info...")
-    (funcall (results-receiver agent) run-info lisp-exe)
-    (log:info "Done. The test results are submitted.")
-    run-info))
-
 (defun submitted-p (test-run)
   "Tests whether the specified TEST-RUN is already
 submitetd by checking if it contains a blobstore key
@@ -65,6 +57,25 @@ for some log."
     (or (getf lib-result :log-blob-key)
         (let ((load-result (first (getf lib-result :load-results))))
           (getf load-result :log-blob-key)))))
+
+(defun make-gae-blobstore ()
+  (test-grid-gae-blobstore:make-blob-store :base-url
+                                           ;; during development of GAE blob storage
+                                           ;; :base-url may be "http://localhost:8080"
+                                           "http://cl-test-grid.appspot.com"))
+
+(defun submit-test-run-results (test-run-dir storage-names)
+  (log:info "Submitting the test results to the server from the directory ~S ..." (truename test-run-dir))
+  (let* ((blobstore (make-gae-blobstore))
+         (run-info (submit-logs blobstore test-run-dir)))
+    (log:info "The log files are submitted. Submitting the test run info...")
+    (dolist (storage storage-names)
+      (test-grid-storage:add-test-run storage run-info))
+    (send-notification (format nil "[test run submitted] [storages: ~{~A~^, ~}]"
+                               storage-names)
+                       (format nil "~S" (tg-data::run-descr run-info)))
+    (log:info "Done. The test results are submitted.")
+    run-info))
 
 (defun list-test-runs (test-runs-root-dir)
   (let ((test-runs '()))
