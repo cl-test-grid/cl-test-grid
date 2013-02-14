@@ -29,6 +29,12 @@ performed in the current lisp system."
 (defun implementation-type (impl-identifier)
   (subseq impl-identifier 0 (position #\- impl-identifier)))
 
+(defun hash-char (str)
+  (let ((hash-str (format nil "~36,r"
+                          (reduce #'+ (flexi-streams:string-to-octets str
+                                                                      :external-format :utf-8)))))
+    (char-downcase (aref hash-str (1- (length hash-str))))))
+
 (defun name-run-directory (run-descr)
   "Generate name for the directory where test run
 data (libraries test suites output and the run results) will be saved."
@@ -40,7 +46,7 @@ data (libraries test suites output and the run results) will be saved."
       (format nil
               "~A.~(~A~)-~A"
               (fmt-time (getf run-descr :time))
-              (elt (generate-id) 3) ;; some random char to make it more unique
+              (hash-char (getf run-descr :lisp)) ;; add hash-char to make it more unique
               (implementation-type (getf run-descr :lisp)))
       (format nil
               "~A-~A"
