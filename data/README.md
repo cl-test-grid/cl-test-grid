@@ -82,7 +82,7 @@ Represents test results of some libraries on a single lisp implementation.
         requirements.
 
         Today, most testsuite adapters in testgrid
-        do not implemente such a handling, and
+        do not implement such a handling, and
         in case of any problems when running
         the tests `:fail` is recorded.
 
