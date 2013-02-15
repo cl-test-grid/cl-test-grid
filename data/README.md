@@ -1,4 +1,28 @@
 Test grid resul objects are represented by property lists.
+Example of test results database:
+
+``` common-lisp
+(:schema 6
+ :runs ((:descr (:lisp "sbcl-1.1.3-linux-x86" :lib-world "quicklisp 2012-12-23" :time 3567905766 :run-duration 4856 :contact-email "avodonosov@yandex.ru")
+         :results ((:libname :3B-SWF
+                    :load-results ((:system "3b-swf" :status :OK :log-blob-key "1iew8cc0h0" :log-byte-length 2096 :load-duration 1003/250)
+                                   (:system "3b-swf-swc" :status :OK :log-blob-key "67ta62onfu" :log-byte-length 4644 :load-duration 5807/100)))
+                   (:libname :ALEXANDRIA :status (:failed-tests () :known-to-fail ()) :log-blob-key "1cuq4v7hcr" :log-byte-length 22128 :test-duration 3013/1000
+                    :load-results ((:system "alexandria" :status :OK :log-blob-key "11of4il7dv" :log-byte-length 1707 :load-duration 126/125)
+                                   (:system "alexandria-tests" :status :OK :log-blob-key "1ejuor0bx2" :log-byte-length 1764 :load-duration 1013/1000)))
+                   (:libname :BABEL :status :FAIL :log-blob-key "kn5t6pp3sk" :log-byte-length 4172 :test-duration 1011/1000
+                    :load-results ((:system "babel" :status :OK :log-blob-key "fg0ccuo4z3" :log-byte-length 1682 :load-duration 101/100)
+                                   (:system "babel-streams" :status :OK :log-blob-key "gqc20yclat" :log-byte-length 1748 :load-duration 2009/1000)
+                                   (:system "babel-tests" :status :FAIL :log-blob-key "19jvlebgry" :log-byte-length 4181 :load-duration 101/100)))))
+        (:descr (:lisp "sbcl-1.1.3-macosx-x64" :lib-world "quicklisp 2012-12-23" :time 3567091719 :run-duration 10461 :contact-email "pnathan@vandals.uidaho.edu")
+         :results ((:libname :BABEL :status (:failed-tests ("babel-tests.encoder-and-decoder-return-values.encoder/decoder-retvals" "babel-tests.utf-8b.2") :known-to-fail ()) :log-blob-key "1094499" :log-byte-length 5466 :test-duration 1003/250
+                    :load-results ((:system "babel" :status :OK :log-blob-key "1086496" :log-byte-length 1748 :load-duration 2021/1000)
+                                   (:system "babel-streams" :status :OK :log-blob-key "1098464" :log-byte-length 1814 :load-duration 121/40)
+                                   (:system "babel-tests" :status :OK :log-blob-key "1093464" :log-byte-length 1811 :load-duration 2011/500)))))))
+
+```
+
+
 The follwing objects and properties extist:
 
 **Database**
@@ -112,28 +136,4 @@ Represents result of `ql:quickload` for an ASDF system.
 - `:log-blob-key` The same as described for library result objects
 - `:log-byte-length` The same as described for library result objects
 
-
-Example
--------
-
-``` common-lisp
-(:schema 6
- :runs ((:descr (:lisp "sbcl-1.1.3-linux-x86" :lib-world "quicklisp 2012-12-23" :time 3567905766 :run-duration 4856 :contact-email "avodonosov@yandex.ru")
-         :results ((:libname :3B-SWF
-                    :load-results ((:system "3b-swf" :status :OK :log-blob-key "1iew8cc0h0" :log-byte-length 2096 :load-duration 1003/250)
-                                   (:system "3b-swf-swc" :status :OK :log-blob-key "67ta62onfu" :log-byte-length 4644 :load-duration 5807/100)))
-                   (:libname :ALEXANDRIA :status (:failed-tests () :known-to-fail ()) :log-blob-key "1cuq4v7hcr" :log-byte-length 22128 :test-duration 3013/1000
-                    :load-results ((:system "alexandria" :status :OK :log-blob-key "11of4il7dv" :log-byte-length 1707 :load-duration 126/125)
-                                   (:system "alexandria-tests" :status :OK :log-blob-key "1ejuor0bx2" :log-byte-length 1764 :load-duration 1013/1000)))
-                   (:libname :BABEL :status :FAIL :log-blob-key "kn5t6pp3sk" :log-byte-length 4172 :test-duration 1011/1000
-                    :load-results ((:system "babel" :status :OK :log-blob-key "fg0ccuo4z3" :log-byte-length 1682 :load-duration 101/100)
-                                   (:system "babel-streams" :status :OK :log-blob-key "gqc20yclat" :log-byte-length 1748 :load-duration 2009/1000)
-                                   (:system "babel-tests" :status :FAIL :log-blob-key "19jvlebgry" :log-byte-length 4181 :load-duration 101/100)))))
-        (:descr (:lisp "sbcl-1.1.3-macosx-x64" :lib-world "quicklisp 2012-12-23" :time 3567091719 :run-duration 10461 :contact-email "pnathan@vandals.uidaho.edu")
-         :results ((:libname :BABEL :status (:failed-tests ("babel-tests.encoder-and-decoder-return-values.encoder/decoder-retvals" "babel-tests.utf-8b.2") :known-to-fail ()) :log-blob-key "1094499" :log-byte-length 5466 :test-duration 1003/250
-                    :load-results ((:system "babel" :status :OK :log-blob-key "1086496" :log-byte-length 1748 :load-duration 2021/1000)
-                                   (:system "babel-streams" :status :OK :log-blob-key "1098464" :log-byte-length 1814 :load-duration 121/40)
-                                   (:system "babel-tests" :status :OK :log-blob-key "1093464" :log-byte-length 1811 :load-duration 2011/500)))))))
-
-```
 
