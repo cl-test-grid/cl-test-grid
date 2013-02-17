@@ -1,4 +1,4 @@
-Test grid resul objects are represented by property lists.
+Test grid result objects are represented by property lists.
 Example of test results database:
 
 ``` common-lisp
