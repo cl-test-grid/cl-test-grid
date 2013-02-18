@@ -12,6 +12,7 @@
    #:add-test-run
    #:add-test-runs
    #:remove-test-runs
+   #:remove-lib-results
    #:update-run-descr))
 
 (in-package #:test-grid-data)
@@ -95,19 +96,20 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
                                  test-run))
                            (getf db :runs)))))
 
-(defun remove-lib-result (db
-                          test-run-descr-key-val-plist
-                          libname)
+(defun remove-lib-results (db
+                           test-run-descr-key-val-plist
+                           libnames)
   (let* ((matcher (test-run-matcher test-run-descr-key-val-plist))
          (new-test-runs (mapcar (lambda (test-run)
                                   (if (funcall matcher test-run)
                                       (updated-plist test-run :results
                                                      (remove-if (lambda (lib-result)
-                                                                  (eq libname (getf lib-result :libname)))
+                                                                  (member (getf lib-result :libname) libnames :test #'eq))
                                                                 (getf test-run :results)))
                                       test-run))
                                 (getf db :runs))))
     (updated-plist db :runs new-test-runs)))
+
 
 ;;; DB printing
 
