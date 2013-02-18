@@ -85,3 +85,20 @@
             (libname result)
             (result-spec result)
             (log-uri result))))
+
+(defun result-spec-outcome (result)
+  "Consider result-spec as a pair of test and outcome.
+For example (:load \"some-system\" :ok),
+here (:load \"some-system\") is the test and :ok is the outcome.
+Or (:whole-test-suite :ok) - :whole-test-suite is a test
+and :ok is an outcome.
+
+Returns the outcome part of the result-spec."
+  (let ((result-spec (result-spec result)))
+    (case (car result-spec)
+      (:whole-test-suite (second result-spec))
+      (otherwise (third result-spec)))))
+
+(defun failure-p (result)
+  (case (result-spec-outcome result)
+    ((:fail :crash :timeout :known-fail :unexpected-ok :no-resource) t)))
