@@ -98,7 +98,7 @@ to complete. After this time we consider the test suite
 as hung, kill the lisp process and record :TIMEOUT
 as the library test result.")
 
-(defparameter +loadtest-timeout-seconds+ #.(* 10 60)
+(defparameter +loadtest-timeout-seconds+ #.(* 5 60)
   "Maximum number of seconds we give each ASDF system to load
 in a fresh lisp process.  After this time we consider system
 as hung, kill the lisp process and record :TIMEOUT
@@ -308,7 +308,7 @@ results in this directory are tested."
 (defun complete-test-run2 (description run-dir quicklisp-dir lisp-exe &key project-names helper-lisp-exe)
   (unless (getf description :lib-world) (error "please specify :lib-world in the description"))
   (unless (getf description :contact-email) (error "lease specify :contact-email in the description"))
-  (let* ((*response-file-temp-dir* (or *response-file-temp-dir* run-dir))
+  (let* ((*response-file-temp-dir* (or *response-file-temp-dir* (ensure-directories-exist run-dir)))
          (run-info-file (run-info-file run-dir))
          (saved-test-run (when (probe-file run-info-file)
                            (test-grid-utils::safe-read-file run-info-file)))
