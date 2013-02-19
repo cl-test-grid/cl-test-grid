@@ -65,7 +65,9 @@
     (dbg:bug-backtrace nil))
   #+sbcl
   (sb-debug:backtrace
-   #.(if (find-symbol* "*VERBOSITY*" "SB-DEBUG" nil) :stream '(or count most-positive-fixnum))
+;; The only change I did to the original ASDF code, to avoid copy/pasing large asdf:find-symbol* function:
+;;  #.(if (find-symbol* "*VERBOSITY*" "SB-DEBUG" nil) :stream '(or count most-positive-fixnum))
+   #.(if (ignore-errors (find-symbol "*VERBOSITY*" "SB-DEBUG")) :stream '(or count most-positive-fixnum))
    stream))
 
 (defun print-backtrace (&rest keys &key stream count)
