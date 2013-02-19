@@ -27,7 +27,7 @@
           (*read-default-float-format* 'double-float)
           (*print-readably* nil)
           (*read-eval* nil))
-      (funcall thunk)))))
+      (funcall thunk))))
 
 (defun raw-print-backtrace (&key (stream *debug-io*) count)
   "Print a backtrace, directly accessing the implementation"
