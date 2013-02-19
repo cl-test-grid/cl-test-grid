@@ -33,6 +33,7 @@
       </fileset>
       <fileset dir="${java.libs}">
         <include name="commons-fileupload-1.0.jar" />
+        <include name="commons-io-2.4-bin/commons-io-2.4/commons-io-2.4.jar"/>
       </fileset>
     </copy>
   </target>
