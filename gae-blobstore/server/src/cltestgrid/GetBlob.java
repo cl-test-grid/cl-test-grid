@@ -43,8 +43,8 @@ public class GetBlob extends HttpServlet {
       readChannel = FileServiceFactory.getFileService().openReadChannel(file, lock);
       inputStream = Channels.newInputStream(readChannel);
       resp.setContentType("text/plain");
-      // The log files are gzipped, but we can't serve gzipped content ourselves,
-      // because GAE gzips servlet output itlself and so logs would end-up gzipped txice.
+      // The log files are gzipped, but we can't serve gzipped content,
+      // because GAE gzips servlet output itlself and so logs would end-up gzipped twice.
       // Therefore we need to ungzip the log.
       InputStream ungzipper = new GZIPInputStream(new BufferedInputStream(inputStream, 100*1024));
       IOUtils.copy(ungzipper, resp.getOutputStream());
