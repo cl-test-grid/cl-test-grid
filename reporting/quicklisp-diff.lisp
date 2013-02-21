@@ -75,10 +75,16 @@ Returns test part of the result-spec."
                                     :key (lambda (result)
                                            (list (libname result)
                                                  (lisp result)
-                                                 (result-spec result)))))))
+                                                 (result-spec result))))))
+         ;; comparator function whch guarantees that
+         ;; the old-quicklisp is always in the left column.
+         (two-lib-worlds (list old-quicklisp new-quicklisp))
+         (lib-world-comparator (lambda (lib-world-a lib-world-b)
+                                 (< (position lib-world-a two-lib-worlds :test #'string=)
+                                    (position lib-world-b two-lib-worlds :test #'string=)))))
     (my-time ("print-pivot...")
       (print-pivot report-file
                    diff
                    :rows '((lisp string<) (libname string<))
-                   :cols '((lib-world string<))
+                   :cols `((lib-world ,lib-world-comparator))
                    :cell-printer #'results-cell-printer))))
