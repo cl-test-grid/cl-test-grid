@@ -97,7 +97,7 @@
 ** Security
    So, we retrieve function names from transaction log and call these functions.
 
-   If the log is writable by untrasted parties, we can protect ourselves with
+   If the log is writable by untrusted parties, we can protect ourselves with
    a =transaction-checker= - a predicate on the function name. SPTM API
    accepts such a predicate as a parameter and uses it to verify that
    transactions refer only allowed functions before executing the transactions.
