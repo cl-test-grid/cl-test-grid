@@ -156,7 +156,7 @@ The key components, from bottom up:
   and stores test results in a directory. If the testing process is
   interrupted and started again with the same output directory, it continues
   from the point of interruption.
-- [`submit-test-run-results`](submit-test-run-results.lisp) submits log files and test
+- [`submit-test-run-results`](submit-results.lisp) submits log files and test
   results from test run output directory to online storage.
 - Finally, on top of these components [`agent`](agent.lisp) object is build. It maintains
   private quicklisp installation in working directory and updates it to the
