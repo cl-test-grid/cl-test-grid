@@ -144,10 +144,12 @@
   - =[[/storage][test-grid-storage]]= - online storage for test results; based on =sptm=
   - =[[/sptm][sptm]]= - simple in-memory persistence for lisp data based on transaction log
     stored online at Amazon Web Services
+  - =[[/gae-blobstore][test-grid-gae-blobstore]]= - online storage for test logs; runs on Google App Engine
   - =[[/reporting][test-grid-reporting]]= - tools to generate reports from test results
   - =[[/data][test-grid-data]]= - support code for test results datastructures shared between other
     components; =data= is produced by =agent=, stored in =storage= and used by =reporting=
-  - =[[/gae-blobstore][test-grid-gae-blobstore]]= - online storage for test logs; runs on Google App Engine
+  - =[[/server][test-grid-server]]= - tiny web application running at Heroku which forwards 
+    notification from =agents= to the google group cl-test-grid-notifications.
   - =[[/utils][test-grid-utils]]= - utilities.
 
   The packages also have have nicknames prefixed with =tg-= : =tg-agent=, =tg-testsuites=, and so on.
