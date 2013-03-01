@@ -2,6 +2,56 @@
 ;;;; Copyright (C) 2011 Anton Vodonosov (avodonosov@yandex.ru)
 ;;;; See LICENSE for details.
 
+#|
+
+The complete-test-run function defined in this file has several variants
+for different parameters. Example for complete-test-run2:
+
+(defparameter *sbcl*
+  (make-instance 'lisp-exe:sbcl
+                 :exe-path "C:\\Program Files\\Steel Bank Common Lisp\\1.1.0.36.mswinmt.1201-284e340\\run.bat"))
+
+(tg-agent::complete-test-run2 '(:lib-world "quicklisp 2013-01-28"
+                                :contact-email "avodonosov@yandex.ru")
+                              (merge-pathnames "test-runs/my-test-run/" (user-homedir-pathname))
+                              (merge-pathnames "quicklisp/" (user-homedir-pathname))
+                              *sbcl*)
+
+The first parameter is the plist of test run description attributes.
+You must specify at least :lib-world and :contact-email. All other
+test run description attributes will be computed automatically.
+
+The second parameter is the directory where test results will be placed.
+
+The third parameter is the directory where Quicklisp to be tested is located.
+
+The fourth parameter is the lisp-exe instance to be tested.
+
+The function also has keyword parameter :project-names allowing
+to specify explicitly list of projects, instead of testing all the
+projects in quicklisp.
+
+Keyword aprameter :helper-lisp-exe allows to specify a lisp-exe used
+to perform auxilary-tasks (like retrieving mapping from projects to their
+asdf systems).
+
+Example:
+
+(defparameter *ccl*
+  (make-instance 'lisp-exe:ccl
+                 :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl.exe"))
+
+
+(tg-agent::complete-test-run2 '(:lib-world "quicklisp 2013-01-28"
+                                :contact-email "avodonosov@yandex.ru")
+                              (merge-pathnames "test-runs/my-test-run/" (user-homedir-pathname))
+                              (merge-pathnames "quicklisp/" (user-homedir-pathname))
+                              *ccl*
+                              :project-names '(:alexandria :babel :flexi-streams)
+                              :helper-lisp-exe *sbcl*)
+
+|#
+
 (in-package #:test-grid-agent)
 
 (defun make-run-descr (lib-world lisp-implementation-identifier user-email)
