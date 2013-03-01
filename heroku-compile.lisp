@@ -10,6 +10,7 @@
 (ql:quickload :test-grid-server)
 
 (print ">>> saving image tg-server...")
+(asdf:clear-configuration)
 (sb-ext:save-lisp-and-die (merge-pathnames "tg-server" *build-dir*)
                           :toplevel (lambda ()
                                       (asdf:disable-output-translations) ;; just in case, although everything is loaded already
