@@ -149,7 +149,7 @@
   - =[[/data][test-grid-data]]= - support code for test results datastructures shared between other
     components; =data= is produced by =agent=, stored in =storage= and used by =reporting=
   - =[[/server][test-grid-server]]= - tiny web application running at Heroku which forwards 
-    notification from =agents= to the google group cl-test-grid-notifications.
+    notification from =agentss= to the cl-test-grid-notifications google group.
   - =[[/utils][test-grid-utils]]= - utilities.
 
   The packages also have have nicknames prefixed with =tg-= : =tg-agent=, =tg-testsuites=, and so on.
