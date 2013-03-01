@@ -90,7 +90,7 @@ performed in the current lisp system."
 data (libraries test suites output and the run results) will be saved."
   (if (os-windows-p)
       ;; On windows shorten the directory name by using only implementation type
-      ;; insteaf of full implementation identifier. Shorter name helps
+      ;; insted of full implementation identifier. Shorter name helps
       ;; to prevent problems with too long .fasl file names,
       ;; because windows has max path length of 256 chars.
       (format nil
