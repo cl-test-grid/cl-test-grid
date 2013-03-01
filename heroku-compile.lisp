@@ -14,6 +14,7 @@
 (sb-ext:save-lisp-and-die (merge-pathnames "tg-server" *build-dir*)
                           :toplevel (lambda ()
                                       (asdf:disable-output-translations) ;; just in case, although everything is loaded already
+                                      (setf ql:*quicklisp-home* (truename (merge-pathnames "quicklisp/" *default-pathname-defaults*)))
                                       (tg-server:start :port (parse-integer (asdf::getenv "PORT"))
                                                        :smtp-password (asdf::getenv "SMTP_PASSWORD"))
                                       (loop (sleep 1000)))
@@ -21,5 +22,3 @@
                           :purify t)
 
 (print ">>> Done building system")
-
-;; 3
