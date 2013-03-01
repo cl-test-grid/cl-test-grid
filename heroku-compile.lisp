@@ -12,6 +12,7 @@
 (print ">>> saving image tg-server...")
 (sb-ext:save-lisp-and-die (merge-pathnames "tg-server" *build-dir*)
                           :toplevel (lambda ()
+                                      (asdf:disable-output-translations) ;; just in case, although everything is loaded already
                                       (tg-server:start :port (parse-integer (asdf::getenv "PORT"))
                                                        :smtp-password (asdf::getenv "SMTP_PASSWORD"))
                                       (loop (sleep 1000)))
