@@ -336,9 +336,11 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: cl:assert.
 
   (quicklisp:quickload :cl-fad)
-  (load
-   (asdf:system-relative-pathname (asdf:find-system :cl-fad)
-                                  "test.lisp"))
+  (let ((test-file (or (asdf:system-relative-pathname :cl-fad "test.lisp")
+                       ;; some time ago the file was renamed
+                       (asdf:system-relative-pathname :cl-fad "fad.test.lisp")
+                       (error "Can not find fad.test.lisp nor test.lisp in the cl-fad sources"))))
+    (load test-file))
 
   ;; cl-fad test suite uses cl:assert.
   ;; I.e. any test faifures are signaled as errors.
