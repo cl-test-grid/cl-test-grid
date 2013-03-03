@@ -25,7 +25,7 @@
 
 ;;; DB operations
 
-(defun add-run (run-info &optional (db *db*))
+(defun add-run (run-info db)
   "Deprecated. Modifies DB destructively."
   (push run-info (getf db :runs)))
 
@@ -205,7 +205,7 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
                            (print-test-run out test-run (+ indent 8))))
   (format out "))"))
 
-(defun save-db (&optional (db *db*) (stream-or-path *standard-db-file*))
+(defun save-db (db &optional (stream-or-path *standard-db-file*))
   (with-open-file (out stream-or-path
                        :direction :output
                        :element-type 'character ;'(unsigned-byte 8) + flexi-stream
