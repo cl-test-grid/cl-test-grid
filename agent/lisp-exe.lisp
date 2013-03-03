@@ -320,7 +320,7 @@ remains running)."
          (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id lisp-process))
          ;; we haven't tested on other lisps, but hope it will be the process id
          #-(and ccl windows)
-         (external-program:process-id p)))
+         (external-program:process-id lisp-process)))
     (multiple-value-bind (status exit-code)
         (exec "taskkill" (list "/F" "/T" "/PID" (prin1-to-string process-id)))
       (when (not (and (eq :exited status)
