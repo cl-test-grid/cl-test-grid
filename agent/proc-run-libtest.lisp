@@ -17,8 +17,6 @@
            asdf:*central-registry*
            :test #'equal))
 
-(ql:quickload :test-grid-testsuites)
-
 (defun setup-asdf-output-translations (private-quicklisp-dir asdf-output-root-dir)
   (let (;; Configure ASDF so that .fasl files from our private quicklisp
         ;; are stored in the specified output directory
@@ -37,9 +35,13 @@
     (add-asdf-output-translation private-quicklisp-dir quicklisp-output-dir)
     (add-asdf-output-translation test-grid-dir test-grid-output-dir)))
 
+(defmacro fncall (funname &rest args)
+  `(funcall (read-from-string ,funname) ,@args))
+
 (defun run-libtest (libname)
   (catching-problems (lambda ()
-                       (test-grid-testsuites::normalize-status (test-grid-testsuites:libtest libname)))
+                       (ql:quickload :test-grid-testsuites)
+                       (fncall "test-grid-testsuites::normalize-status" (fncall "test-grid-testsuites:libtest" libname)))
                      (lambda ()
                        (return-from run-libtest :fail))))
 
