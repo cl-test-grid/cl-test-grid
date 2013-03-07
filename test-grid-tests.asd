@@ -7,7 +7,7 @@
 (asdf:defsystem #:test-grid-tests
   :version "0.1.0"
   :serial t
-  :depends-on (#:test-grid-testsuites #:test-grid-reporting)
+  :depends-on (#:alexandria #:test-grid-testsuites #:test-grid-reporting)
   :components ((:file "test-grid-tests")))
 
 ;; make sample test suites available to ASDF

@@ -62,7 +62,8 @@ just passed to the QUICKLISP:QUICKLOAD."
                         ("lift-api" . "lift-api-impl")
                         ("fiveam-api" . "fiveam-api-impl")
                         ("eos-api" . "eos-api-impl")
-                        ("stefil-api" . "stefil-api-impl")))
+                        ("stefil-api" . "stefil-api-impl")
+                        ("clunit-api" . "clunit-api-impl")))
          (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
                                api)))
         (quicklisp:quickload impl-asdf-system)))
@@ -130,6 +131,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   (require-impl "stefil-api")
   (let ((result (stefil-api:run-test-suite test-suite-spec)))
     (list :failed-tests (stefil-api:failed-tests result)
+          :known-to-fail '())))
+
+(defun run-clunit-test-suite (test-suite-name)
+  (require-impl "clunit-api")
+  (let ((result (clunit-api:run-test-suite test-suite-name)))
+    (list :failed-tests (clunit-api:failed-tests result)
           :known-to-fail '())))
 
 (defun running-cl-test-more-suite (project-name runner-function)
@@ -726,7 +733,11 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: lift.
   (ql:quickload :cl-num-utils)
   (ql:quickload :cl-num-utils-tests)
-  (run-lift-test-suite (read-from-string "cl-num-utils-tests::cl-num-utils-tests")))
+  (if (member "lift"
+              (asdf::component-load-dependencies (asdf:find-system :cl-num-utils-tests))
+              :test #'string-equal)
+      (run-lift-test-suite (read-from-string "cl-num-utils-tests::cl-num-utils-tests"))
+      (run-clunit-test-suite (read-from-string "cl-num-utils-tests::tests"))))
 
 (defmethod libtest ((library-name (eql :ieee-floats)))
   ;; test framework used: FiveAM
