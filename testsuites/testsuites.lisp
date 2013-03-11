@@ -3,6 +3,7 @@
 ;;;; See LICENSE for details.
 
 (defpackage #:test-grid-testsuites
+  (:nicknames :tg-testsuites :tg-suites)
   (:use :cl)
   (:export  ;; list of the libraries added to test-grid
             #:*all-libs*
