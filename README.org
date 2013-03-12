@@ -183,7 +183,7 @@
    #+END_SRC
    
    If you are not the library author and don't know how
-   it's test suite is run, look how the library tests are
+   its test suite is run, look how the library tests are
    started in the =asdf:perform= method for =asdf:test-op=
    defined in the library .asd file.
 
