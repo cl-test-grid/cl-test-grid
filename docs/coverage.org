@@ -233,7 +233,7 @@
 + trivial-backtrace 2010-11-10
 + trivial-features 2010-11-10
 + trivial-garbage 2010-11-10
-- trivial-gray-streams 2010-11-10
++ trivial-gray-streams 2013-02-17+ (implemented testsuite myself, will be captured by the next quicklisp version)
 + trivial-http 2012-03-07
 + trivial-shell 2012-03-07
 + trivial-timeout 2010-11-10
