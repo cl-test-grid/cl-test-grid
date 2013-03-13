@@ -74,21 +74,21 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter *all-libs*
-  '(:alexandria            :babel               :trivial-features    :cffi
-    :cl-ppcre              :usocket             :flexi-streams       :bordeaux-threads
-    :cl-base64             :cl-fad              :trivial-backtrace   :puri
-    :anaphora              :parenscript         :trivial-garbage     :iterate
-    :metabang-bind         :cl-json             :cl-containers       :metatilities-base
-    :cl-cont               :moptilities         :trivial-timeout     :metatilities
-    :named-readtables      :arnesi              :local-time          :s-xml
-    :cl-oauth              :cl-routes           :cl-unicode          :fiveam
-    :trivial-utf-8         :yason               :cl-annot            :cl-openid
-    :split-sequence        :cl-closure-template :cl-interpol         :trivial-shell
-    :let-plus              :data-sift           :cl-num-utils        :ieee-floats
-    :cl-project            :trivial-http        :cl-store            :hu.dwim.stefil
-    :kmrcl                 :cxml-stp            :hu.dwim.walker      :hu.dwim.defclass-star
-    :bknr-datastore        :yaclml              :com.google.base     :external-program
-    :cl-mustache)
+  '(:alexandria            :babel                :trivial-features    :cffi
+    :cl-ppcre              :usocket              :flexi-streams       :bordeaux-threads
+    :cl-base64             :cl-fad               :trivial-backtrace   :puri
+    :anaphora              :parenscript          :trivial-garbage     :iterate
+    :metabang-bind         :cl-json              :cl-containers       :metatilities-base
+    :cl-cont               :moptilities          :trivial-timeout     :metatilities
+    :named-readtables      :arnesi               :local-time          :s-xml
+    :cl-oauth              :cl-routes            :cl-unicode          :fiveam
+    :trivial-utf-8         :yason                :cl-annot            :cl-openid
+    :split-sequence        :cl-closure-template  :cl-interpol         :trivial-shell
+    :let-plus              :data-sift            :cl-num-utils        :ieee-floats
+    :cl-project            :trivial-http         :cl-store            :hu.dwim.stefil
+    :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
+    :bknr-datastore        :yaclml               :com.google.base     :external-program
+    :cl-mustache           :trivial-gray-streams)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -876,3 +876,18 @@ just passed to the QUICKLISP:QUICKLOAD."
                               #'(lambda ()
                                   (quicklisp:quickload :cl-mustache-test)
                                   (funcall (read-from-string "mustache-test:run")))))
+
+(defmacro fncall (funname &rest args)
+  `(funcall (read-from-string ,funname) ,@args))
+
+(defmethod libtest ((library-name (eql :trivial-gray-streams)))
+  ;; test framework used: custom
+  (handler-case (ql:quickload :trivial-gray-streams-test)
+    (serious-condition (c)
+      (format t "~A~%" c)
+      (format t "Can't load trivial-gray-streams-test. Most likely we deal with an old version of trivial-gray-streams where test suite is not implemented yet.~%")
+      (RETURN-FROM libtest :no-resource)))
+
+  (list :failed-tests (fncall "trivial-gray-streams-test:failed-test-names"
+                              (fncall "trivial-gray-streams-test:run-tests"))
+        :known-to-fail nil))
