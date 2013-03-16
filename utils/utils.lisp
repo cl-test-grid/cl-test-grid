@@ -3,7 +3,7 @@
 ;;;; See LICENSE for details.
 
 (defpackage #:test-grid-utils
-  (:nicknames :tg-utils)
+  (:nicknames #:tg-utils)
   (:use :cl)
   (:export #:set=))
 
@@ -64,7 +64,7 @@
                                          accessors-and-predicates)))
 
 (defun plist-comparator (&rest props-and-predicates)
-  (funcall #'obj-comparator (map-plist #'property-comparator props-and-predicates)))
+  (lexicographical-comparator (map-plist #'property-comparator props-and-predicates)))
 
 ;; examples:
 #|
