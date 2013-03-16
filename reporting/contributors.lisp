@@ -21,5 +21,5 @@ test results summary for particular lib-world."
 
     (format t "Test results summary for ~A:~%~%" lib-world)
     (format t "~{~{~A ~A~}~%~}"
-            (sort result (obj-comparator #'first #'string<
-                                         #'second #'string<)))))
+            (sort result (tg-utils::obj-comparator #'first #'string<
+                                                   #'second #'string<)))))
