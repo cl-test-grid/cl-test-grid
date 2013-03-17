@@ -5,9 +5,10 @@
 ;;;; This file contains common utilities usefull for most
 ;;;; of the child lisp processes started by agent.
 
-(in-package #:cl-user)
+(defpackage #:test-grid-proc-common (:use :cl))
+(in-package #:test-grid-proc-common)
 
-(defun set-response (response-file value)
+(defun cl-user::set-response (response-file value)
   "Save the resposne for the parent process."
   (with-open-file (out response-file
                        :direction :output
@@ -83,7 +84,7 @@
 
 ;;; end of backtrace printing
 
-(defun catching-problems (body-func on-problem-func)
+(defun cl-user::catching-problems (body-func on-problem-func)
   "Runs BODY-FUNC and returns it's result. But if BODY-FUNC causes any
 problems (signals SERIOS-CONDITION or enters debugger),
 logs the problem description to *STANDARD-OUTPUT* and
@@ -107,7 +108,7 @@ if it wants to prevent the lisp to hang in the debugger."
                               (funcall on-problem-func))))
       (funcall body-func))))
 
-(defun saving-output (file body)
+(defun cl-user::saving-output (file body)
   (with-open-file (stream file
                           :direction :output
                           :if-exists :append
