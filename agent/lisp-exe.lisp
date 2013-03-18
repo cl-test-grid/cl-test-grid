@@ -213,6 +213,7 @@ command, the rest strings are the command arguments."))
           "--noinit"
           "--nosystem"
           "--batch"
+          "--eval" "(require :abcl-contrib)"
           ,@(prepend-each "--eval" form-strings))))
 
 (defmethod make-command-line ((lisp-exe sbcl) form-strings)
