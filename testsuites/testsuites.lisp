@@ -88,7 +88,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-project            :trivial-http         :cl-store            :hu.dwim.stefil
     :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
     :bknr-datastore        :yaclml               :com.google.base     :external-program
-    :cl-mustache           :trivial-gray-streams)
+    :cl-mustache           :trivial-gray-streams :drakma)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -891,3 +891,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   (list :failed-tests (fncall "trivial-gray-streams-test:failed-test-names"
                               (fncall "trivial-gray-streams-test:run-tests"))
         :known-to-fail nil))
+
+(defmethod libtest ((library-name (eql :drakma)))
+  ;; The test framework used: fiveam.
+  (handler-case (ql:quickload :drakma-test)
+    (serious-condition (c)
+      (format t "~A~%" c)
+      (format t "Can't load drakma-test. Most likely we deal with an old version of drakma where test suite is not implemented yet.~%")
+      (RETURN-FROM libtest :no-resource)))
+  (run-fiveam-test-suite :drakma))

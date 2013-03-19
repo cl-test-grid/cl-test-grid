@@ -99,7 +99,7 @@
                     and downloading it using quicklisp' http utility).
 
 + data-sift 2012-03-07
-- drakma 2010-11-10
++ drakma 2013-03-12+ (implemented trivial testsuite myself, will be captured by the next quicklisp version)
 +2 elephant 2012-03-07 (Not trivial to test, involves C compiler, running database
                         instances, user-provided configuration. Postponed.)
 + external-program 2012-03-07
@@ -233,7 +233,7 @@
 + trivial-backtrace 2010-11-10
 + trivial-features 2010-11-10
 + trivial-garbage 2010-11-10
-+ trivial-gray-streams 2013-02-17+ (implemented testsuite myself, will be captured by the next quicklisp version)
++ trivial-gray-streams 2013-03-12+ (implemented testsuite myself, will be captured by the next quicklisp version)
 + trivial-http 2012-03-07
 + trivial-shell 2012-03-07
 + trivial-timeout 2010-11-10
