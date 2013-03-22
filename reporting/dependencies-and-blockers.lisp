@@ -13,7 +13,7 @@
 (in-package #:test-grid-reporting)
 
 (defun reverse-dependencies (dependency-hash)
-  "Accpet a hash table from system name to a list of its depencendies,
+  "Accept a hash table from system name to a list of its depencendies,
 and returns a hash table from system name to a list of its dependents."
   (let ((result (make-hash-table :test #'equal)))
     (maphash (lambda (system dependencies)
@@ -78,7 +78,7 @@ from system name to a boolean denotin whether the system load has failed."
 (defun blocked-exclusively (system-name failed-hash)
   "ASDF system names for which the SYSTEM-NAME is the only blocker.
 SYSTEM-NAME is a string. FAILED-HASH is a hash table
-from system name to a boolean denotin whether the system load has failed."
+from system name to a boolean denoting whether the system load has failed."
   (when (gethash system-name failed-hash)
     (let ((list-sys-name (list system-name)))
       (remove-if-not (lambda (dep) (equal (root-blockers dep failed-hash)
