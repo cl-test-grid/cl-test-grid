@@ -239,7 +239,7 @@ Lets say we want to compare new version of a compiler with an old version,
 to ensure there are no regressions in the new version.
 
 This is easy to do using the tools introduced above. The apporach:
-- select two subsets of results: of the old compiler and of the new one<
+- select two subsets of results: of the old compiler and of the new one
 - compute `exclusive-or` of these two subsets
 - print the resut as a pivot where results of two compilers
         are represented side by side
