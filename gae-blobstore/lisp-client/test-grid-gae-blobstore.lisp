@@ -4,15 +4,12 @@
   (:nicknames #:tg-gae-blobstore)
   (:use :cl)
   (:export #:make-blob-store
-           #:submit-files
            #:submit-files2
-           #:submit-run-info
-           #:send-notification
            #:delete-blobs))
 
 (in-package #:test-grid-gae-blobstore)
 
-(defgeneric submit-files (blobstore id-pathname-alist)
+(defgeneric submit-files2 (blobstore id-pathname-alist &key batch-size keep-names-p)
   (:documentation
    "Submits the files to the blobstore. Returns blob keys
 for every submitted file (the blobkey is used for later
@@ -33,14 +30,10 @@ has a blobkey for every file.
 
 Signals an ERROR in case of problems."))
 
-(defgeneric submit-run-info (blobstore run-info)
+(defgeneric delete-blobs (blobstore blob-keys)
   (:documentation
-   "Submits test run result RUN-INFO (a lisp object)
-to central database."))
-
-(defgeneric send-notification (blobstore subject body)
-  (:documentation
-   "Sends notification http://groups.google.com/group/cl-test-grid-notifications."))
+   "Deletes files from BLOBSTORE. The fiels
+are specified by BLOB-KEYS - a list of strings."))
 
 ;;; Implementation
 
@@ -183,7 +176,7 @@ and writting the file to that stream."
                           (get-blobkey (car id-pathname-pair))))
                   id-pathname-alist))))))
 
-(defun submit-files2 (blobstore id-pathname-alist &key (batch-size 300) keep-names-p)
+(defmethod submit-files2 (blobstore id-pathname-alist &key (batch-size 300) keep-names-p)
   "KEEP-NAMES-P when true make the log stored under original FILE-NAMESTRING
 of the pathnames passed in ID-PATHNAME-ALIST."
   (submit-files-impl (constantly (format nil "~a/upload2~:[~;?keepNames=true~]"
@@ -192,17 +185,6 @@ of the pathnames passed in ID-PATHNAME-ALIST."
                      id-pathname-alist
                      (alexandria:compose #'wrap-with-gzip #'make-file-sender)
                      :batch-size batch-size))
-
-;; old version of log submittion
-(defmethod submit-files ((blobstore blobstore) id-pathname-alist)
-  ;; Google App Engine Blobstore does not allow to submit blobs to a constant URL,
-  ;; we need to perform a separate request to our servlet, which will
-  ;; generate an URL where we can upload files.
-  ;; https://developers.google.com/appengine/docs/java/blobstore/overview
-  (flet ((new-upload-url ()
-           (drakma:http-request (format nil "~A/upload-url" (base-url blobstore))
-                                :content-type "text/plain")))
-    (submit-files-impl #'new-upload-url id-pathname-alist #'make-file-sender)))
 
 ;;; tests:
 
@@ -217,26 +199,6 @@ of the pathnames passed in ID-PATHNAME-ALIST."
 ;;                          (cons (file-namestring file) file))
 ;;                        (cl-fad:list-directory #P"C:\\Users\\anton\\projects\\cl-test-grid2\\work\\test\\1"))
 ;;                :batch-size 500)
-
-(defmethod submit-run-info ((blobstore blobstore) run-info)
-  (assert (not (null run-info)))
-  (let ((response (drakma:http-request (format nil "~A/submit-run-info" (base-url blobstore))
-                                       :method :post
-                                       :parameters `(("run-info" . ,(prin1-to-string run-info))))))
-    (when (not (eq :ok (with-input-from-string (s response)
-                         (test-grid-utils::safe-read s))))
-      (error "Error submitting run info to the server. Unexpected response: ~A." response))))
-
-(defmethod send-notification ((blobstore blobstore) subject body)
-  (assert (not (null subject)))
-  (setf body (or body ""))
-  (let ((response (drakma:http-request (format nil "~A/send-notification" (base-url blobstore))
-                                       :method :post
-                                       :parameters `(("subject" . ,subject)
-                                                     ("body" . ,body)))))
-    (when (not (eq :ok (with-input-from-string (s response)
-                         (test-grid-utils::safe-read s))))
-      (error "Error sending message to admin. Unexpected response: ~A." response))))
 
 ;; Blob keys referred via http://cl-test-grid.appspot.com/blob?key=<blob key>
 ;; in Internet.
@@ -254,7 +216,7 @@ of the pathnames passed in ID-PATHNAME-ALIST."
     "AMIfv97suboJpeei-uBWzlkqcR7CTlyh0Izhvi7u_29HNBgu80ScYf0Mj6zWPjgbsosA-F0Q12HP8o9S5zhsEelTfss8_3C7sjgcuG_q_grR-jMfXPLLRzu6CNytLoNk23rwqlQ6AsajxTRYFubFbz3iBWl5uo8iZQ"
     "AMIfv97wo4FQxGLBZOagyZyLZCqwMWavAfwsByKxjq8QiJQ5rIzEggGwGJ_kH2qRZLMb8N_el8aKIpLDbnr67Pxcy9r8RFKmBnjTQ1B44yaCcyZWtO2CSbBliyAINvoI41_R8uA8hoPia-yXPdlmADiJcavCCgpHGA"))
 
-(defun delete-blobs (blobstore blob-keys)
+(defmethod delete-blobs (blobstore blob-keys)
   (flet ((delete-batch (blob-keys)
            (multiple-value-bind (body status-code headers uri stream2 must-close reason-phrase)
                (drakma:http-request (format nil "~A/delete-blobs" (base-url blobstore))
