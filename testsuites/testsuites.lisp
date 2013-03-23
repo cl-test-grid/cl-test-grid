@@ -88,7 +88,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-project            :trivial-http         :cl-store            :hu.dwim.stefil
     :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
     :bknr-datastore        :yaclml               :com.google.base     :external-program
-    :cl-mustache           :trivial-gray-streams :drakma)
+    :cl-mustache           :trivial-gray-streams :drakma              :optima)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -900,3 +900,8 @@ just passed to the QUICKLISP:QUICKLOAD."
       (format t "Can't load drakma-test. Most likely we deal with an old version of drakma where test suite is not implemented yet.~%")
       (RETURN-FROM libtest :no-resource)))
   (run-fiveam-test-suite :drakma))
+
+(defmethod libtest ((library-name (eql :optima)))
+  ;; The test framework used: eos.
+  (ql:quickload :optima.test)
+  (run-eos-test-suites (read-from-string "optima.test::optima-test")))
