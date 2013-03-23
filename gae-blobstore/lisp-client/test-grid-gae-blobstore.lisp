@@ -5,7 +5,7 @@
   (:use :cl)
   (:export #:make-blob-store
            #:submit-files2
-           #:delete-blobs))
+           #:delete-files))
 
 (in-package #:test-grid-gae-blobstore)
 
@@ -18,8 +18,8 @@ references to the file in the blobstore).
 Example:
  (submit-files my-blobstore '((:flexi-streams . #P\"flexi-streams.log\")
                               (:cl-ppcre . #P\"cl-ppcre.log\")))
-  => ((:flexi-streams . \"nFeUku39YtilF6s8zkXTlg\")
-      (:cl-ppcre . \"nG9B8tHEquLEPhsL3t8wcA\"))
+  => ((:flexi-streams . \"iv1b5xbp1z\")
+      (:cl-ppcre . \"1lnnja5y4d\"))
 
 The ID in the ID-PATHNAME-ALIST may be either a string or a symbol,
 and must be unique when compared case insensitively.
@@ -28,9 +28,17 @@ If the function returns without errors, it is guaranteed
 that all the files are submitted and the return value
 has a blobkey for every file.
 
-Signals an ERROR in case of problems."))
+Signals an ERROR in case of problems.
 
-(defgeneric delete-blobs (blobstore blob-keys)
+BATCH-SIZE is the number of files submitted in one request,
+leave the default value here in most cases.
+
+KEEP-NAMES-P allows to use (FILE-NAMESTRING pathname) as a blobkey
+instead of randomily generated new key. But this possibility
+was used only during migration between different Google storage
+APIs. Now it is disabled on the server-side."))
+
+(defgeneric delete-files (blobstore blob-keys)
   (:documentation
    "Deletes files from BLOBSTORE. The fiels
 are specified by BLOB-KEYS - a list of strings."))
@@ -216,7 +224,7 @@ of the pathnames passed in ID-PATHNAME-ALIST."
     "AMIfv97suboJpeei-uBWzlkqcR7CTlyh0Izhvi7u_29HNBgu80ScYf0Mj6zWPjgbsosA-F0Q12HP8o9S5zhsEelTfss8_3C7sjgcuG_q_grR-jMfXPLLRzu6CNytLoNk23rwqlQ6AsajxTRYFubFbz3iBWl5uo8iZQ"
     "AMIfv97wo4FQxGLBZOagyZyLZCqwMWavAfwsByKxjq8QiJQ5rIzEggGwGJ_kH2qRZLMb8N_el8aKIpLDbnr67Pxcy9r8RFKmBnjTQ1B44yaCcyZWtO2CSbBliyAINvoI41_R8uA8hoPia-yXPdlmADiJcavCCgpHGA"))
 
-(defmethod delete-blobs (blobstore blob-keys)
+(defmethod delete-files (blobstore blob-keys)
   (flet ((delete-batch (blob-keys)
            (multiple-value-bind (body status-code headers uri stream2 must-close reason-phrase)
                (drakma:http-request (format nil "~A/delete-blobs" (base-url blobstore))
@@ -224,7 +232,7 @@ of the pathnames passed in ID-PATHNAME-ALIST."
                                     :parameters `(("keys" . ,(format nil "~{~A~^,~}" blob-keys))))
              (declare (ignore headers uri stream2 must-close))
              (if (/= 200 status-code)
-                 (error "Error deleting blobs, the HTTP response code ~A: ~A" status-code reason-phrase)
+                 (error "Error deleting files, the HTTP response code ~A: ~A" status-code reason-phrase)
                  body))))
     (let* ((filtered-keys (set-difference blob-keys *logs-to-keep* :test #'string=))
            (total (length filtered-keys))
@@ -232,4 +240,4 @@ of the pathnames passed in ID-PATHNAME-ALIST."
       (dolist (batch (test-grid-utils::split-list filtered-keys 50))
         (delete-batch batch)
         (incf done (length batch))
-        (log:info "~A/~A blobs deleted" done total)))))
+        (log:info "~A/~A files deleted" done total)))))
