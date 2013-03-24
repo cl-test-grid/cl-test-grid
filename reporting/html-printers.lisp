@@ -49,7 +49,7 @@
   (format nil "~A/blob?key=~A"
           "http://cl-test-grid.appspot.com" blob-key))
 
-(defparameter *local-test-runs-dir* #P"C:\\Users\\anton\\projects\\cl-test-grid2-work-dir2\\agent\\test-runs\\")
+(defparameter *local-test-runs-dir* #P"/Users/anton/projects/cl-test-grid2-work-dir2/agent/test-runs/")
 
 ;; todo: won't work on FAILURE objects
 (defun lib-log-local-uri (joined-lib-result)
