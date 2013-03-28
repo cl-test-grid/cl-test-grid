@@ -23,6 +23,7 @@
      (:file "csv")
      (:file "pivot")
      (:file "quicklisp-diff")
+     (:file "quicklisp-diff2")
      (:file "library-report")
      (:file "regressions")
      (:file "meta-info-from-quicklisp")
