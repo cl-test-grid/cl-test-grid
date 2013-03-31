@@ -7,7 +7,8 @@ test-systems - list of all the ASDF systems in Quicklisp
 detect-test-systems.lisp - the lisp code which
             generated the test-systems file
 
-quicklisp-download-statistics-2012.txt - quiclisp download statistics
+quicklisp-download-statistics-2012.txt
+quicklisp-download-statistics-2013-02.txt - quicklisp download statistics at certain times
 
 coverage.org - information about the libraries already reviewed:
             whether it is added to test grid, and if not added - why
