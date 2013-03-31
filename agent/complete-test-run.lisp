@@ -148,7 +148,7 @@ to complete. After this time we consider the test suite
 as hung, kill the lisp process and record :TIMEOUT
 as the library test result.")
 
-(defparameter +loadtest-timeout-seconds+ #.(* 10 60)
+(defparameter +loadtest-timeout-seconds+ #.(* 15 60)
   "Maximum number of seconds we give each ASDF system to load
 in a fresh lisp process.  After this time we consider system
 as hung, kill the lisp process and record :TIMEOUT
