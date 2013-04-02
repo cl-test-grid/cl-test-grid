@@ -38,7 +38,7 @@ instead of randomily generated new key. But this possibility
 was used only during migration between different Google storage
 APIs. Now it is disabled on the server-side."))
 
-(defgeneric delete-files (blobstore blob-keys)
+(defgeneric delete-files (blobstore blob-keys &key batch-size)
   (:documentation
    "Deletes files from BLOBSTORE. The fiels
 are specified by BLOB-KEYS - a list of strings."))
@@ -224,7 +224,7 @@ of the pathnames passed in ID-PATHNAME-ALIST."
     "AMIfv97suboJpeei-uBWzlkqcR7CTlyh0Izhvi7u_29HNBgu80ScYf0Mj6zWPjgbsosA-F0Q12HP8o9S5zhsEelTfss8_3C7sjgcuG_q_grR-jMfXPLLRzu6CNytLoNk23rwqlQ6AsajxTRYFubFbz3iBWl5uo8iZQ"
     "AMIfv97wo4FQxGLBZOagyZyLZCqwMWavAfwsByKxjq8QiJQ5rIzEggGwGJ_kH2qRZLMb8N_el8aKIpLDbnr67Pxcy9r8RFKmBnjTQ1B44yaCcyZWtO2CSbBliyAINvoI41_R8uA8hoPia-yXPdlmADiJcavCCgpHGA"))
 
-(defmethod delete-files (blobstore blob-keys)
+(defmethod delete-files (blobstore blob-keys &key (batch-size 50))
   (flet ((delete-batch (blob-keys)
            (multiple-value-bind (body status-code headers uri stream2 must-close reason-phrase)
                (drakma:http-request (format nil "~A/delete-blobs" (base-url blobstore))
@@ -237,7 +237,7 @@ of the pathnames passed in ID-PATHNAME-ALIST."
     (let* ((filtered-keys (set-difference blob-keys *logs-to-keep* :test #'string=))
            (total (length filtered-keys))
            (done 0))
-      (dolist (batch (test-grid-utils::split-list filtered-keys 50))
+      (dolist (batch (test-grid-utils::split-list filtered-keys batch-size))
         (delete-batch batch)
         (incf done (length batch))
         (log:info "~A/~A files deleted" done total)))))
