@@ -51,4 +51,12 @@
       (asdf::defun* asdf:apply-output-translations (path)
         (if (child-path-p source-dir path)
             (merge-pathnames (rel-path source-dir path) output-dir)
-            (funcall orig-asdf-apply-output-translations path))))))
+            (if (child-path-p output-dir path)
+                ;; ASDF output translations design requires that sources
+                ;; contained in the output directory of some translation
+                ;; should have their .fasl files in the same directory,
+                ;; no other translations should be applied to them.
+                ;; See this asdf-devel thread:
+                ;; http://lists.common-lisp.net/pipermail/asdf-devel/2013-April/003129.html
+                path
+                (funcall orig-asdf-apply-output-translations path)))))))
