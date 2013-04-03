@@ -10,12 +10,12 @@
    This idea is also known as Prevalence and there is a Common Lisp
    library [[http://common-lisp.net/project/cl-prevalence/][cl-prevalence]].
    
-   All perstent data modifications are expressed as named functions
+   All persistent data modifications are expressed as named functions
    with parameters. For example
    
 #+BEGIN_SRC common-lisp
    (add-user database :id 1 :name "anton")
-   (add-order database id: 117 :user 1 :book "AIMA" :count 1)
+   (add-order database :id 117 :user 1 :book "AIMA" :count 1)
    (delete-user database :id 1)
 #+END_SRC
    Here =database= is some datastructure where you store the information,
@@ -25,8 +25,8 @@
    To make the modifications persistent they are executed in transactions
 #+BEGIN_SRC common-lisp
    (execute-transaction database 'add-user (list :id 1 :name "anton"))
-   (execute-transaction database 'add-order (list id: 117 :user 1 :book "AIMA" :count 1))
-   (execute-transaction database 'delete-user (list database :id 1))
+   (execute-transaction database 'add-order (list :id 117 :user 1 :book "AIMA" :count 1))
+   (execute-transaction database 'delete-user (list :id 1))
 #+END_SRC
    
    The =execute-transaction= first applies the specified function to arguments,
@@ -36,8 +36,8 @@
    
    When application process is restarted after a crash or normal termination,
    it reads the transaction log and executes the functions specified here.
-   In result all the the database modifications are repeated, so the
-   application sees it's in-memory database persistent across restarts.
+   In result all the database modifications are repeated, so the
+   application sees its in-memory database persistent across restarts.
    
    Besides the transaction log, a complete snapshot of database can be stored.
    Therefore the full procedure of restoring the in-memory database state
@@ -50,7 +50,7 @@
    The functions must be ready to receive arguments deserialized from log/snapshot,
    therefore we typically want to pass some string/numeric IDs as arguments,
    not whole object references. For example =add-order= accepts user ID as
-   the parameter, but not a =user= object. Otherwize we might end up
+   the parameter, but not a =user= object. Otherwise we might end up
    dealing with many copies of the same =user= object, duplicated by
    deserialization.
    
@@ -68,7 +68,7 @@
    may be serialized using global lock.
    
    But in SPTM the transactions are executed in different processes
-   runing on different machines over Internet. How to synchronize them?
+   running on different machines over Internet. How to synchronize them?
    
    Here we use ideas from optimistic concurrency approach in Clojure's
    software transactional memory.
@@ -131,7 +131,7 @@
    - Create an S3 bucket. This may be done via Amazon WS console.
    - Create a SimpleDB domain. Note, Amazon doesn't like dashes in S3
      domain names, so use "yourdomain", but  not "your-domain". The following
-     call may be used to create a domain on desired SimpleDB endpoing host:
+     call may be used to create a domain on desired SimpleDB endpoint host:
 #+BEGIN_SRC common-lisp
        (sptm::create-simpledb-domain "yourdomain"
            '(:credentials ("YOUR-ACCESS-KEY-ID" "YOUR-SECRET-ACCESS-KEY") :host "sdb.eu-west-1.amazonaws.com"))
@@ -181,7 +181,7 @@
      
 ** Further Notes and Restrictions
 *** System Time on Your Machine
-    Amazon Web Services requie each request to be annotated with
+    Amazon Web Services require each request to be annotated with
     a timestamp. If the timestamp is different by more than 15 minutes
     form system time of Amazon server, the request is rejected - 
     http://docs.amazonwebservices.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationTimeStamp.
@@ -195,7 +195,7 @@
     how to create the empty database (empty map or collection).
     
     Possible approach is to have the very first transaction
-    to be a function retrning this fresh database.
+    to be a function returning this fresh database.
 
     Another option is to write your application so, that
     =versioned-data= with version 0, which is created before
@@ -206,10 +206,10 @@
     
 *** The Default Serialization is via =cl:write= / =cl:read=.
 
-    The default serilization of the transactions and snapshots stored
-    online, and of the relica local shapshots is via =cl:write= / =cl:read=
+    The default serialization of the transactions and snapshots stored
+    online, and of the replica local snapshots is via =cl:write= / =cl:read=
     (with =cl:*read-eval*= bound to =nil= of course). To use different
-    serialization it is necessary to customize the code, by overrriding
+    serialization it is necessary to customize the code, by overriding
     methods of certain generic functions.
 
 *** Clojure Has Many Refs, SPTM Operates on a Single Big Database.

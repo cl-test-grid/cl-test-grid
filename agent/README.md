@@ -34,7 +34,7 @@ It is necessary to perform `git pull` on agent sources
 often.
 
 There are template scripts demonstrating how to
-load, cofigure and run agent by a single commant.
+load, configure and run agent by a single command.
 
 Please use [CCL](http://ccl.clozure.com/) - it is the development platform and the only
 lisp known to run agent successfully. The template scripts
@@ -65,7 +65,7 @@ Example crontab record to run agent at 10 o'clock every day:
 Details of what agent actually does
 -----------------------------------
 
-Simplified, the agent mode of operation may be represened
+Simplified, the agent mode of operation may be represented
 by the following pseudo code:
 
 ``` common-lisp
@@ -82,7 +82,7 @@ by the following pseudo code:
 As you can see, the agent submits test results after
 completing full test set on a single lisp implementation. 
 
-The code, including the internal implementaton
+The code, including the internal implementation
 of `complete-test-run` is organized so that agent can
 be interrupted (computer rebooted or hibernated,
 agent process killed). When started again, it continues
@@ -96,7 +96,7 @@ in a fresh lisp process).
 
 **Caveat of killing the agent:** if you killed the agent process
 (without rebooting the machine), the subordinate process
-running current testsute or compiling current ASDF system
+running current testsuite or compiling current ASDF system
 remains alive. Typically it takes less than a minute for
 it to finish, but sometimes it may take longer (the
 testsuite or library compilation may require longer
@@ -112,14 +112,14 @@ Parallel execution of multiple agents
 
 Agent operates sequentially.
 
-During its work, agent keeps it's working data in
-a directory specified by the cofiguration property
+During its work, agent keeps its working data in
+a directory specified by the configuration property
 - `work-dir` - Defaults to the _&lt;cl-test-grid source code root&gt;/work-dir/agent/_
 
 The agent takes measures to ensure there is only
 one agent instance using this working directory.
 
-This is acheaved by using a TCP port as an inter-process
+This is achieved by using a TCP port as an inter-process
 lock. When started, agent tries to open a socket on
 the port. If it is successful, the agent continues.
 If the port is busy, the agent deduces there is
@@ -131,9 +131,9 @@ property
 - `singleton-lock-port` defaults to 7685.
 
 If you want to run several agent processes
-and distirbute testing work between them,
+and distribute testing work between them,
 you can assign each agent different set 
-of lisp implemenations and give each
+of lisp implementations and give each
 agent different working directory and lock
 port.
 
@@ -160,7 +160,7 @@ The key components, from bottom up:
   results from test run output directory to online storage.
 - Finally, on top of these components [`agent`](agent.lisp) object is build. It maintains
   private quicklisp installation in working directory and updates it to the
-  latest version every time when started. It also remembers what lisp implenetations
+  latest version every time when started. It also remembers what lisp implementations
   were tested on what quicklisp version. This information kept in 
   [`persistence`](persistence.lisp) - a simple plist saved in file.
   Also agent checks the configuration parameters provided by user and ensures only

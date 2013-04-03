@@ -66,7 +66,7 @@ are accessed using the following functions:
     - `(:load "some-asdf-system-name" [:ok | :fail | :crash | :timeout])`
 
        Returned if the result object represents result of loading an ASDF system.
-       Here the notation `[:ok | :fail | :crash | :timeout]` shoud be read as "one of `:ok`, `:fail`, `:crash` or `:timeout`".
+       Here the notation `[:ok | :fail | :crash | :timeout]` should be read as "one of `:ok`, `:fail`, `:crash` or `:timeout`".
     
        `:ok` means the load operation succeeded;
 
@@ -91,7 +91,7 @@ are accessed using the following functions:
                       by the developers, for example, to mark
                       test cases which are impossible to fix right now,
                       maybe due to lack of support or bugs
-                      in CL implemntatons, 3rd party libraries, or similar);
+                      in CL implementations, 3rd party libraries, or similar);
 
         `:unexpected-ok` means the testcase marked as known failure has not failed.
 
@@ -113,7 +113,7 @@ are accessed using the following functions:
 
        `:no-resource` This status is designed to represent
          situations when testsuite can not be run due
-         to absense of necessary enviromnent.
+         to absense of necessary environment.
 
          For example, CFFI test suite needs a small
          C library to be build. On Windows user must
@@ -129,7 +129,7 @@ are accessed using the following functions:
          requirements.
 
          Today, most testsuite adapters in testgrid
-         do not implemente such a handling, and
+         do not implement such a handling, and
          in case of any problems when running
          the tests `:fail` is recorded.
 
@@ -147,9 +147,9 @@ are accessed using the following functions:
 - `(lib-world result)` A string naming the set of libraries and their versions used during testing,
   for example `"quicklisp 2012-07-03"`, `"quicklisp 2012-08-11"`.
 
-- `(system-name result)` If the result descibes ASDF system load result, then the
+- `(system-name result)` If the result describes ASDF system load result, then the
   name of that ASDF system - a string, like `"arnesi"`, `"anaphora"`.
-  Otherwize =NIL=.
+  Otherwise =NIL=.
 
 - `(log-uri result)` URI of the stored online output produced by the child lisp process
   performed the test suite or tested the ASDF system load.
@@ -187,7 +187,7 @@ Displaying Data - Pivot Tables
 ==============================
 
 To understand a large result set it is necessary to group
-resuls into groups and further soubroups.
+results into groups and further subgroups.
 
 Pivot tables provide a more or less universal solution for
 grouping and sorting data according to values of selected
@@ -212,7 +212,7 @@ TEST-GRID-REPORTING> (print-pivot "demo/some-results.html"
 Please review the resulting file: [cl-test-grid/reports-generated/demo/some-results.html](http://common-lisp.net/project/cl-test-grid/demo/some-results.html).
 You may see that the table is build according to the parameters we specified: row headers contain
 `lib-world` and `lisp` values, column headers contain `libname`.
-The soring corresponds to what is specified for every field.
+The sorting corresponds to what is specified for every field.
 
 The `:cell-printer` parameter is a function responsible for printing set of
 results falling into a single pivot cell. The function we pass prints results
@@ -232,16 +232,16 @@ Please review the resulting file: [cl-test-grid/reports-generated/demo/some-resu
 As you see, it is the same table, but `results-cell-printer` 
 takes care to colorize the results.
 
-Comparing Resutlts to Find Regressions
-======================================
+Comparing Results to Find Regressions
+=====================================
 
 Lets say we want to compare new version of a compiler with an old version,
 to ensure there are no regressions in the new version.
 
-This is easy to do using the tools introduced above. The apporach:
+This is easy to do using the tools introduced above. The approach:
 - select two subsets of results: of the old compiler and of the new one
 - compute `exclusive-or` of these two subsets
-- print the resut as a pivot where results of two compilers
+- print the result as a pivot where results of two compilers
         are represented side by side
 
 The function `compiler-diff` implements this approach.
@@ -302,7 +302,7 @@ When some ASDF system fails to load, it blocks all other
 systems depending on it.
 
 We can build a report showing which ASDF systems are
-the most importatnt to fix.
+the most important to fix.
 
 The most fruitful systems to fix are those which:
   - fail by themselves, i.e. don't have failing dependencies

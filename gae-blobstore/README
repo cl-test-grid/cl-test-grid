@@ -1,7 +1,7 @@
 Online storage for library test logs produced by CL Test Grid.
 Runs on Google App Engine,
 
-The serer side is implemented on Java (few small
+The server side is implemented on Java (few small
 servlets; maybe sometime we will be able
 to use ABCL instead, or just move the functionality
 to Heroku + Amazon S3 and use any Lisp).

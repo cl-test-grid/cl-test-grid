@@ -64,7 +64,7 @@
 
   Limitations.
 
-  Of course, we should understand that test sute success
+  Of course, we should understand that test suite success
   does not always mean the library is workable -
   there might be bugs which are not covered by the tests.
   And the other way around - failed tests not always
@@ -81,7 +81,7 @@
   all the possible hardware/OS/Lisp implementation combinations,
   we provide a way for Common Lisp users to contribute
   test results from their systems, and collectively
-  monitor the CL world. (Of course, if anyone whould want
+  monitor the CL world. (Of course, if anyone would want
   to setup a test farm, cl-test-grid simplifies this task too,
   by providing required building blocks).
 
@@ -90,7 +90,7 @@
   - run tests
   - publish results online and access them programmatically
   - perform massive comparison of results and print HTML
-    resports. For example, compare results of two Quicklisp
+    reports. For example, compare results of two Quicklisp
     versions, or compare two versions a lisp implementation
     on the same Quicklisp.
 
@@ -118,9 +118,9 @@
   The use cases for this are pre-release testing of CL implementations,
   ASDF, or patches to particular libraries.
 
-  The =test-grid-storage= named "main" is intended to contain resutls
+  The =test-grid-storage= named "main" is intended to contain results
   for the last 3 Quicklisp distros and is cleared periodically.
-  Old results are archvied in a plain lisp file in a separate git repository:
+  Old results are archived in a plain lisp file in a separate git repository:
   https://github.com/cl-test-grid/cl-test-grid-results.
 
   Besides this, we store online the output produced by
@@ -152,7 +152,7 @@
     notification from =agents= to the cl-test-grid-notifications google group.
   - =[[/utils][test-grid-utils]]= - utilities.
 
-  The packages also have have nicknames prefixed with =tg-= : =tg-agent=, =tg-testsuites=, and so on.
+  The packages also have nicknames prefixed with =tg-= : =tg-agent=, =tg-testsuites=, and so on.
 
   More detailed documentation for most of the modules may be found in the module subdirectory.
 
@@ -198,4 +198,4 @@
   if I say "lib-world is a set of libraries with specified
   versions. An example of lib-world is a quicklisp 
   distro version" the word "version" is repeated twice
-  with diffirent sense - confusing.
+  with different sense - confusing.
