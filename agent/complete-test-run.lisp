@@ -171,7 +171,7 @@ as the system load status.")
      ,@body))
 
 (defun print-testsuite-log-header (libname run-descr log-file)
-  (with-open-file (stream log-file
+  (with-open-file (stream (ensure-directories-exist log-file)
                           :direction :output
                           :if-does-not-exist :create
                           :if-exists :supersede)
@@ -263,7 +263,7 @@ upon the BODY completion runs the BODY again."
                               internal-time-units-per-second)))))
 
 (defun print-loadtest-log-header (system-name run-descr log-file)
-  (with-open-file (stream log-file
+  (with-open-file (stream (ensure-directories-exist log-file)
                           :direction :output
                           :if-does-not-exist :create
                           :if-exists :supersede)
