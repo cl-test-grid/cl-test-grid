@@ -10,7 +10,7 @@
 
 (defun cl-user::set-response (response-file value)
   "Save the resposne for the parent process."
-  (with-open-file (out response-file
+  (with-open-file (out (ensure-directories-exist response-file)
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
