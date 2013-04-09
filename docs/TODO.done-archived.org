@@ -194,7 +194,6 @@
 ** DONE shorten the blob keys of online library logs
    CLOSED: [2012-04-06 Пт 04:46]
 
-
 * 0.3.2 Reports Improve 1
 ** DONE floating report table headers, so that when we scroll, :report:pivot:
    CLOSED: [2012-04-22 Вс 04:14]
@@ -396,3 +395,185 @@
    CLOSED: [2012-09-15 Сб 10:02]
 ** DONE increase the load-test timeout from 2 to 5 minutes
    CLOSED: [2012-09-21 Пт 07:37]
+* 0.6.0 Reports Improve 2
+** DONE combine information about load failures with information about system dependencies
+   CLOSED: [2012-10-01 Пн 07:12]
+   It will allow us to find "root" compilation blockers -
+   the libraries which do not compile and block other libraries
+   compilation.
+
+   After the milestone 0.5.1 we will have compilation status
+   for all the ASDF systems in quicklisp on all the lisp implemetations.
+
+   If we combine the compilation statuses with the dependency
+   information, it will become visible, what libraries should
+   be fixed first to make certain lisp implementation wider adopted.
+
+   Of course, quicklisp download statistics we have already
+   provides some information about "importance" of libraries,
+   but the dependency information will make the situation more clear.
+
+   This feature is suggested by Juan Jose - the ECL maintainer.
+
+
+   We now have information which ASDF systems fail to load on particular Lisps
+   (this is implemented for the 56 libraries already included into the test-grid,
+   and After the milestone 0.5.1 we will have compilation status
+   for all the ASDF systems in quicklisp on all the lisp implemetations).
+
+   But ASDF systems depend on each other, so if system A fails to load,
+   all other systems which depend on A directly or indirectly fail to load as well.
+   So if we just list all the load failures, we are going to have large list, but will
+   be unable to see where the real problem is, what is necessary to fix.
+
+   The idea is to combine the information about load failures with information
+   about dependencies to find out the root "blockers" - the libraries failing by
+   themselves and blocking others.
+
+   To do so we may just sort the ASDF systems by dependencies
+   (https://en.wikipedia.org/wiki/Topological_sorting), and the root blockers
+   will be at the top of the list.
+
+   I envision simple report in the form
+
+   system-a: blocked-by: <list of failed systems on which system-a depends>; blocks <list of failed systems depending on system-a>
+   system-b: blocked-by: <list of failed systems on which system-b depends>; blocks <list of failed systems depending on system-b>
+   ...
+
+   While the real data is not available, you can just hardcode
+   two stub functions:
+   (load-failed-p <system name>) => true or false,
+   and
+   (dependencies <system name>) => list of systems on which the given system depends.
+
+   With hardcoded stub information we may already experiment and develop with the report.
+
+   Also, we can extract the dependency information for the real implementation
+   of the DEPENDENCIES function. It may be done either by loading
+   every system and querying ASDF, or from quicklisp - see file quicklisp\dists\quicklisp\systems.txt
+   in your quicklisp installation. Note, there is no way to detect 100% exact
+   dependency information, because .asd files are just lisp code,
+   and some of them just do (asdf:operate 'asdf:load-op 'something)
+   instead of putting something to :depend-on clause of defsystem macro.
+   But the information which IS possible to extract will give us good results
+   I believe.
+
+** DONE the diff report (aka regressions report) - diff along various dimentions
+   CLOSED: [2012-10-01 Пн 08:26]
+   Currently we can only find differences between test statuses
+   of a library on different quicklisps, when the lisp implementation
+   version is a constant.
+   We should generalize this to compare test results on two
+   different versions of a compiler (windows/linux or old compiler
+   version and new one). Also when comparing test results,
+   we must be more flexible than matching results only of
+   exactly the same lisp-implementation-identifier,
+   because we don't always has exactly this lisp.
+   For example when we compare the lates qicklisp version
+   with the previous one, we may want to consider ecl-12.7.1-dee2506a-linux-x86-lisp-to-c
+   and ecl-12.7.1-xxxxffff-linux-x86-lisp-to-c as the same compiler,
+   because otherwise we might just have no results to compare.
+
+   In other case, we want to compare test results of these two
+   compilers. Then we consider them different and
+   different sides of comparision: one on the left hand,
+   and another on the right side.
+
+   At first sight the task may be solved
+   by parametrizing the report by two functions:
+   - the one which decides what results to put to left side and to right side
+   - a predicate which decides if a result cell from the left side is comparable
+     to a result from the right side.
+
+  ==============
+  The solution:
+  - select two sets of results
+  - compute exclusive-or of them
+  - print pivot with necessary columns and rows
+
+  Example is the compiler-diff report and quicklisp-diff
+
+** DONE limit amount of data included into to HTML reports to the last 3 quicklisp releases 
+   CLOSED: [2012-08-15 Ср 20:42]
+   to improve the page performance and load time.
+** DONE remove the :load-failed status from DB and reporting
+   CLOSED: [2012-10-01 Пн 08:48]
+** DONE document the lisp functions for test results access and report generation,
+   CLOSED: [2012-10-08 Пн 09:03]
+   provide source code examples
+** DONE describe the load-failures, the compiler-diff and quicklisp-diff
+   CLOSED: [2012-10-08 Пн 09:14]
+   reports on the reporting page
+
+   Sketch of the reporing page structure:
+
+   - data collected by test-grid
+   - how to load the data: repository and ASDF systems
+     git clone
+     git clone
+     asdf:*central-regitsty*
+     (*db* (load-db))
+     (in-package :test-grid-reporting)
+
+   - simpliest list-failures example:
+
+   - diffs:
+     compiler diff
+     quicklisp diff
+
+   - representation tools: pivots
+
+   - load failures + dependencies
+
+** DONE different result-spec for known failures? and different color
+   CLOSED: [2012-10-09 Вт 08:22]
+** DONE library mainainer page
+   CLOSED: [2012-10-13 Сб 22:54]
+   with reports about the test statuses
+   for this single library on various platforms with
+   various quicklisp versions.
+
+** DONE remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
+   CLOSED: [2012-10-14 Вс 02:36]
+** DONE Document the RESULT objects instead of FAILURE. Link to the library reports.
+   CLOSED: [2012-10-15 Пн 14:17]
+** DONE generate reports for quicklisp 2012-10-13
+   CLOSED: [2012-10-17 Ср 03:27]
+** DONE fix the quicklisp diff report so that table cell which don't have a counterpart are not displayed
+   CLOSED: [2012-10-17 Ср 03:27]
+   I.e. if a library was testsed on that compiler in new quicklisp,
+   but was not in the previous quicklisp, exclude this row from the report.
+** DONE widely announce library reports, so that the developers know where to find test results
+   CLOSED: [2012-10-23 Вт 05:40]
+** DONE file system results storage for Juan Jose
+   CLOSED: [2012-10-23 Вт 05:40]
+** DONE [6 h] Prevent HTML injection via test-run-info
+   CLOSED: [2012-12-19 Ср 22:05]
+* 0.6.1 Some fixes and improvements
+** DONE memoization of the implementation-identifier generic function is not portable
+   CLOSED: [2012-10-23 Вт 05:58]
+   in particular, it's known that fare-memoization can't memoize it on ACL,
+   see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
+** DONE ensure the tesg-grid-testsuites code is recompiled when necessary
+   CLOSED: [2012-08-15 Ср 19:11]
+   The libraries being tested are recompiled at every test run.
+   It would be good to ensure test-grid-testsuites code is also correctly
+   recompiled.
+   Related thread on asdf-devel:
+   http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
+** DONE move test-grid::print-log-footer to the test-grid-agent package,
+   CLOSED: [2012-10-23 Вт 05:59]
+   and call it only form the agent process, not from the child, test suite
+   running, process.
+** DONE backtrace on errors in agent.log
+   CLOSED: [2012-08-15 Ср 19:09]
+** DONE Do not allow empty contributor contact in test results. Instead
+   CLOSED: [2012-08-20 Пн 01:56]
+   always ask the contributor to provide something, nickname,
+   whatever.
+** DONE Prevent child lisp process entering debugger.
+   CLOSED: [2012-08-15 Ср 19:09]
+   Note, different lisps treat unhangled signals during -eval
+   differently: ECL exits with status 1, CCL enters debugger
+   and hangs.
+

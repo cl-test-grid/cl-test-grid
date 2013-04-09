@@ -1,186 +1,4 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
-* 0.6.0 Reports Improve 2
-** DONE combine information about load failures with information about system dependencies
-   CLOSED: [2012-10-01 Пн 07:12]
-   It will allow us to find "root" compilation blockers -
-   the libraries which do not compile and block other libraries
-   compilation.
-
-   After the milestone 0.5.1 we will have compilation status
-   for all the ASDF systems in quicklisp on all the lisp implemetations.
-
-   If we combine the compilation statuses with the dependency
-   information, it will become visible, what libraries should
-   be fixed first to make certain lisp implementation wider adopted.
-
-   Of course, quicklisp download statistics we have already
-   provides some information about "importance" of libraries,
-   but the dependency information will make the situation more clear.
-
-   This feature is suggested by Juan Jose - the ECL maintainer.
-
-
-   We now have information which ASDF systems fail to load on particular Lisps
-   (this is implemented for the 56 libraries already included into the test-grid,
-   and After the milestone 0.5.1 we will have compilation status
-   for all the ASDF systems in quicklisp on all the lisp implemetations).
-
-   But ASDF systems depend on each other, so if system A fails to load,
-   all other systems which depend on A directly or indirectly fail to load as well.
-   So if we just list all the load failures, we are going to have large list, but will
-   be unable to see where the real problem is, what is necessary to fix.
-
-   The idea is to combine the information about load failures with information
-   about dependencies to find out the root "blockers" - the libraries failing by
-   themselves and blocking others.
-
-   To do so we may just sort the ASDF systems by dependencies
-   (https://en.wikipedia.org/wiki/Topological_sorting), and the root blockers
-   will be at the top of the list.
-
-   I envision simple report in the form
-
-   system-a: blocked-by: <list of failed systems on which system-a depends>; blocks <list of failed systems depending on system-a>
-   system-b: blocked-by: <list of failed systems on which system-b depends>; blocks <list of failed systems depending on system-b>
-   ...
-
-   While the real data is not available, you can just hardcode
-   two stub functions:
-   (load-failed-p <system name>) => true or false,
-   and
-   (dependencies <system name>) => list of systems on which the given system depends.
-
-   With hardcoded stub information we may already experiment and develop with the report.
-
-   Also, we can extract the dependency information for the real implementation
-   of the DEPENDENCIES function. It may be done either by loading
-   every system and querying ASDF, or from quicklisp - see file quicklisp\dists\quicklisp\systems.txt
-   in your quicklisp installation. Note, there is no way to detect 100% exact
-   dependency information, because .asd files are just lisp code,
-   and some of them just do (asdf:operate 'asdf:load-op 'something)
-   instead of putting something to :depend-on clause of defsystem macro.
-   But the information which IS possible to extract will give us good results
-   I believe.
-
-** DONE the diff report (aka regressions report) - diff along various dimentions
-   CLOSED: [2012-10-01 Пн 08:26]
-   Currently we can only find differences between test statuses
-   of a library on different quicklisps, when the lisp implementation
-   version is a constant.
-   We should generalize this to compare test results on two
-   different versions of a compiler (windows/linux or old compiler
-   version and new one). Also when comparing test results,
-   we must be more flexible than matching results only of
-   exactly the same lisp-implementation-identifier,
-   because we don't always has exactly this lisp.
-   For example when we compare the lates qicklisp version
-   with the previous one, we may want to consider ecl-12.7.1-dee2506a-linux-x86-lisp-to-c
-   and ecl-12.7.1-xxxxffff-linux-x86-lisp-to-c as the same compiler,
-   because otherwise we might just have no results to compare.
-
-   In other case, we want to compare test results of these two
-   compilers. Then we consider them different and
-   different sides of comparision: one on the left hand,
-   and another on the right side.
-
-   At first sight the task may be solved
-   by parametrizing the report by two functions:
-   - the one which decides what results to put to left side and to right side
-   - a predicate which decides if a result cell from the left side is comparable
-     to a result from the right side.
-
-  ==============
-  The solution:
-  - select two sets of results
-  - compute exclusive-or of them
-  - print pivot with necessary columns and rows
-
-  Example is the compiler-diff report and quicklisp-diff
-
-** DONE limit amount of data included into to HTML reports to the last 3 quicklisp releases 
-   CLOSED: [2012-08-15 Ср 20:42]
-   to improve the page performance and load time.
-** DONE remove the :load-failed status from DB and reporting
-   CLOSED: [2012-10-01 Пн 08:48]
-** DONE document the lisp functions for test results access and report generation,
-   CLOSED: [2012-10-08 Пн 09:03]
-   provide source code examples
-** DONE describe the load-failures, the compiler-diff and quicklisp-diff
-   CLOSED: [2012-10-08 Пн 09:14]
-   reports on the reporting page
-
-   Sketch of the reporing page structure:
-
-   - data collected by test-grid
-   - how to load the data: repository and ASDF systems
-     git clone
-     git clone
-     asdf:*central-regitsty*
-     (*db* (load-db))
-     (in-package :test-grid-reporting)
-
-   - simpliest list-failures example:
-
-   - diffs:
-     compiler diff
-     quicklisp diff
-
-   - representation tools: pivots
-
-   - load failures + dependencies
-
-** DONE different result-spec for known failures? and different color
-   CLOSED: [2012-10-09 Вт 08:22]
-** DONE library mainainer page
-   CLOSED: [2012-10-13 Сб 22:54]
-   with reports about the test statuses
-   for this single library on various platforms with
-   various quicklisp versions.
-
-** DONE remove or wrap nicely the global variable *failures* from the dependencies-and-blockers.lisp
-   CLOSED: [2012-10-14 Вс 02:36]
-** DONE Document the RESULT objects instead of FAILURE. Link to the library reports.
-   CLOSED: [2012-10-15 Пн 14:17]
-** DONE generate reports for quicklisp 2012-10-13
-   CLOSED: [2012-10-17 Ср 03:27]
-** DONE fix the quicklisp diff report so that table cell which don't have a counterpart are not displayed
-   CLOSED: [2012-10-17 Ср 03:27]
-   I.e. if a library was testsed on that compiler in new quicklisp,
-   but was not in the previous quicklisp, exclude this row from the report.
-** DONE widely announce library reports, so that the developers know where to find test results
-   CLOSED: [2012-10-23 Вт 05:40]
-** DONE file system results storage for Juan Jose
-   CLOSED: [2012-10-23 Вт 05:40]
-** DONE [6 h] Prevent HTML injection via test-run-info
-   CLOSED: [2012-12-19 Ср 22:05]
-* 0.6.1 Some fixes and improvements
-** DONE memoization of the implementation-identifier generic function is not portable
-   CLOSED: [2012-10-23 Вт 05:58]
-   in particular, it's known that fare-memoization can't memoize it on ACL,
-   see https://groups.google.com/d/topic/cl-test-grid/Vnl3kHJbQ0M/discussion
-** DONE ensure the tesg-grid-testsuites code is recompiled when necessary
-   CLOSED: [2012-08-15 Ср 19:11]
-   The libraries being tested are recompiled at every test run.
-   It would be good to ensure test-grid-testsuites code is also correctly
-   recompiled.
-   Related thread on asdf-devel:
-   http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
-** DONE move test-grid::print-log-footer to the test-grid-agent package,
-   CLOSED: [2012-10-23 Вт 05:59]
-   and call it only form the agent process, not from the child, test suite
-   running, process.
-** DONE backtrace on errors in agent.log
-   CLOSED: [2012-08-15 Ср 19:09]
-** DONE Do not allow empty contributor contact in test results. Instead
-   CLOSED: [2012-08-20 Пн 01:56]
-   always ask the contributor to provide something, nickname,
-   whatever.
-** DONE Prevent child lisp process entering debugger.
-   CLOSED: [2012-08-15 Ср 19:09]
-   Note, different lisps treat unhangled signals during -eval
-   differently: ECL exits with status 1, CCL enters debugger
-   and hangs.
-
 * 0.7.0 Wrap-up the active development phase
 ** DONE [0.5 h] Increase load timeout 2 times - to 10 minutes. Increas test timeout to 15 minutes.
    CLOSED: [2012-11-29 Чт 05:31]
@@ -190,14 +8,15 @@
    CLOSED: [2013-01-27 Вс 16:01]
 ** DONE check why git pull doesn't work with cron
    CLOSED: [2012-12-15 Сб 23:11]
-** DONE [40+ h] Immediate test results avaiability, without waiting for admin
+** DONE [60 h] Immediate test results avaiability, without waiting for admin
    CLOSED: [2012-12-22 Сб 09:34]
    Solution: implemented test-grid-storage, based on sptm
 ** DONE [2 h] Shortly document the test-grid-storage features in the main README.org.
    CLOSED: [2013-01-24 Чт 16:32]
 ** DONE [1 h] Document the result db access via test-grid-storage in the reporting/README.md
    CLOSED: [2013-01-24 Чт 16:32]
-** TODO [40 h] Move online log storage to Google Cloud Storage from Google App Engine.
+** DONE [40 h] Move online log storage to Google Cloud Storage from Google App Engine.
+   CLOSED: [2013-03-03 Вс 20:06]
    GAE Blobstore used now to store logs costs for our application at least $108 a year.
    Also we have seen GAE stability/user support issues.
    We moved to Google Cloud Storage.
@@ -210,7 +29,8 @@
 
    Old GetBlob servlet redirects to Cloud Storage if the log is not
    found in blobstore.
-*** TODO decrease GAE daily budget
+*** DONE move to free GAE plan
+    CLOSED: [2013-03-03 Вс 20:05]
 *** DONE Blob ID generator (random)
     CLOSED: [2013-01-24 Чт 16:33]
 *** DONE lisp client for the Upload2 servlet, including gzipping and limiting file size
@@ -241,12 +61,13 @@
    not take fronted hours. Probably we may want to limit
    the network transfer, but we will see later.
 
-** TODO [24 h] document the code base
+** DONE [24 h] document the code base
+   CLOSED: [2013-03-23 Сб 11:11]
 ** DONE [4 h] docs: move test running instructions into agent/README.md
    CLOSED: [2013-01-19 Сб 09:42]
 ** DONE [4 h] docs: move reporting tutorial from reports-overview.html to reporting/README.md
    CLOSED: [2013-01-19 Сб 09:42]
-** TODO [8 h] security: agent runs lot of code provided by unknown people
+** TODO [2 h] document the security issue: agent runs lot of code provided by unknown people
    Discuss with Zach, what we know about these people
    and what level of confidence we have in their code.
    This includes:
@@ -279,13 +100,75 @@
    Solution: the email is sent manually with help of
    tg-reporting::contributors function, which prepares the email test.
 
-** TODO better formatting of test-run-info.lisp when results are submitted via notification
+* March-April 2013:
+** DONE ABCL 14300 (ensure utf-8)
+   CLOSED: [2013-03-07 Чт 04:27]
+** DONE ABCL HEAD (14420) (ensure utf-8)
+   CLOSED: [2013-03-07 Чт 06:48]
+** DONE ql 2013-02-17 on windows
+   CLOSED: [2013-03-16 Сб 15:16]
+** DONE send the test contribution digest and ask Pat to remove ecl-12.2.1-ceaff1a7-macosx-x86-bytecode
+   CLOSED: [2013-03-16 Сб 16:02]
+   and propose everybody to use only releases for the "main" test results storage
+** DONE adjust cl-fad testsute adapter (test.lisp was renamed)
+   CLOSED: [2013-03-03 Вс 22:21]
+** DONE adjust cl-num-utils testsuite adapter (it switched to new test framework - clunit)
+   CLOSED: [2013-03-07 Чт 04:26]
+** DONE add clunit support to test-grid-testsuites
+   CLOSED: [2013-03-07 Чт 04:26]
+** DONE ASDF 2.32 on linux (switch back to ASCII?)
+   CLOSED: [2013-03-16 Сб 15:17]
+** DONE check if CCL rc2 still has the failures I reported for rc1
+   CLOSED: [2013-03-16 Сб 15:16]
+   Done: http://clozure.com/pipermail/openmcl-devel/2013-March/014184.html
+** DONE review quicklisp 2013-02-17 results
+   CLOSED: [2013-04-06 Сб 00:46]
+** DONE review ECL results collected by Juan Jose
+   CLOSED: [2013-04-06 Сб 00:46]
+** DONE discuss with Paul Nathan the lisp implementations to run on his OS X PowerPC machine
+   CLOSED: [2013-04-06 Сб 00:50]
+   https://groups.google.com/d/msg/cl-test-grid/rY2mJcMFWv4/YPPNgkyPGHEJ
+** DONE create test suite for drakma and add it to test grid
+   CLOSED: [2013-03-23 Сб 11:08]
+   https://github.com/edicl/drakma/pull/27
+** DONE add optima test suite
+   CLOSED: [2013-03-23 Сб 16:12]
+** DONE [1 h] run quicklisp 2013-03-12 tests on my linux server
+   CLOSED: [2013-04-06 Сб 03:20]
+** DONE [8 h] fix the ASDF output-translation hangling by test-grid-agent which causes
+   CLOSED: [2013-04-06 Сб 14:21]
+   problems testing cffi-grovel dependent libraries on quicklisp 2013-03-12:
+   https://groups.google.com/forum/?fromgroups=#!topic/cl-test-grid/mvrLUcIyy5g
+
+   And rerun tests.
+** DONE [8 h] preform pre-release testing of bordeaux-threads
+   CLOSED: [2013-04-06 Сб 14:21]
+   http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2013-March/000225.html
+** TODO [4 h] run quicklisp 2013-03-12 tests on my windows machine
+** TODO [4 h] review quicklisp 2013-03-12 results and report any possible regressions
+** TODO notify drakma mainteners when there are test results form drakma suite
+** TODO notify optima mainteners when there are test results from optima suite
+** TODO retest the latest ASDF
 * User Requests
 ** TODO Vladimir Sedach: test multithreaded CLISP
    (less important now as Vladimir already installed such lisp on his
    machine and contributes tests)
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
+** TODO [16 h] Integrate tg-suites:libtest with asdf:test-system
+** TODO [1 h] move tg-suites::normalize-status call into an around method of tg-sutes:libtest.
+** TODO [40 h] publish pivot reports to online spreadsheet,
+   so that notes about particular failures may be entered
+   right into the table.
+   Difficulties: the current pivot reports contains several
+   links in one table cell. None of the online spreadsheet
+   I saw so far allow this.
+** TODO [4 h] sptm: if the replica is fresh, load snapshot (if present),
+   don't execute the transactions from the beginning, ever if the full
+   transaction log is stored online.
+   May be implmented either by checking (version vdata) == 0 => load snapshot,
+   or by (+ 100 (version vdata)) < (max-transaction-version log) => load snapshot.
+   In the latter case: should we hardoced 100 or pass it as a parameter?
 ** TODO [8 h] when submitting shortened version of a log to online storage,
    the :log-byte-length attribute stores the length of the original file.
    Should we store the shortened length instead?
