@@ -193,7 +193,7 @@
   - mailing list: [[http://groups.google.com/group/cl-test-grid]]
   - notifications about new test results: [[http://groups.google.com/group/cl-test-grid-notifications]]
 * Donate
-  [[https://www.paypal.com/xclick/business%3Dtreasurer%40cl-foundation.org&currency_code%3DEUR&item_name%3DDonation%20cl-test-grid&lc%3DGB][PalPal/Credit Card]]
+  [[https://www.paypal.com/xclick/business=treasurer%40cl-foundation.org&currency_code=EUR&item_name=Donation%20cl-test-grid&lc=GB][PalPal/Credit Card]]
 
   When donating please understand that your support
   helps to compensate the expenses/energy already
