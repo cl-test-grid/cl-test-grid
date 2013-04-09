@@ -193,12 +193,9 @@
   - mailing list: [[http://groups.google.com/group/cl-test-grid]]
   - notifications about new test results: [[http://groups.google.com/group/cl-test-grid-notifications]]
 
- *Project Planning*
-
- Use emacs org-mode to browse TODO documents, because the github
+ *Project Planning*. Use emacs org-mode to browse the TODO documents, because the github
  org to html translation is not adequate.
-
- - /docs/TODO.org/ - Current TODO list
+ - /docs/TODO.org/ - The current TODO list
  - /docs/TODO.done-archived.org/ - Archive of done TODO items
 
 * Donate
