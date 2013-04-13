@@ -106,7 +106,7 @@ accepts such a predicate as a parameter and uses it to verify that
 transactions refer only allowed functions before executing the transactions.
 
 ## Example
-   Please see (example.lisp).
+   Please see [example.lisp](example.lisp).
    
 ## API and the Source Code
    - /versioned-data.lisp/ - start here. Defines a two-slot class
