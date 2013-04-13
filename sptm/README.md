@@ -106,20 +106,23 @@ accepts such a predicate as a parameter and uses it to verify that
 transactions refer only allowed functions before executing the transactions.
 
 ## Example
-   Please see [example.lisp](example.lisp).
+
+Please see [example.lisp](example.lisp).
    
 ## API and the Source Code
-   - /versioned-data.lisp/ - start here. Defines a two-slot class
-     =versioned-data= which can annotate arbitrary data with a =fixnum= version.
-     Also defines a protocol (set of generic functions) for transaction log.
-     Then, based on the transaction log protocol defines the main functions to
-     operate on =versioned-data= via transaction log: =roll-forward=, 
-     =execute-transaction=, =record-transaction=.
-   - /aws-transaction-log.lisp/ - implements the transaction log protocol using
-     Amazon Web Services: S3 and SimpleDB.
-   - /replica.lisp/ - convenience class =replica=, combines transaction log,
-     versioned-data and a local snapshot of the versioned-data, stored in a file.
-   - /amazon-simple-db.lisp/ - private tools to work with Amazon SimpleDB.
+
+- [versioned-data.lisp](versioned-data.lisp) - start here. Defines a two-slot class
+  `versioned-data` which can annotate arbitrary data with a `fixnum` version.
+  Also defines a protocol (set of generic functions) for transaction log.
+  Then, based on the transaction log protocol defines the main functions to
+  operate on `versioned-data` via transaction log: `roll-forward`, 
+  `execute-transaction`, `record-transaction`.
+- [aws-transaction-log.lisp](aws-transaction-log.lisp) - implements the transaction
+  log protocol using Amazon Web Services: S3 and SimpleDB.
+- [replica.lisp](replica.lisp) - convenience class `replica`, combines transaction log,
+  versioned-data and a local snapshot of the versioned-data, stored in a file.
+- [amazon-simple-db.lisp](amazon-simple-db.lisp) - private tools to work
+  with Amazon SimpleDB.
 
 ## Storage Space at Amazon
    You may use the demonstrational S3 bucket and SimpleDB domain as shown
