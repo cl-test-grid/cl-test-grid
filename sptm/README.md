@@ -125,35 +125,36 @@ Please see [example.lisp](example.lisp).
   with Amazon SimpleDB.
 
 ## Storage Space at Amazon
-   You may use the demonstrational S3 bucket and SimpleDB domain as shown
-   in the /example.lisp/. Many independent transaction logs may be stored
-   on the same storage - just give every transaction log different name.
-   The function =sptm-example::make-demo-transaction-log= demonstrates how to do this.
 
-   Please don't store too many data on this storage. Also the storage
-   owner reserves right to delete the data at any time.
+You may use the demonstrational S3 bucket and SimpleDB domain as shown
+in the [example.lisp](example.lisp). Many independent transaction logs may be stored
+on the same storage - just give every transaction log different name.
+The function `sptm-example::make-demo-transaction-log` demonstrates how to do this.
 
-   If you want to use your own storage, here are the steps:
-   - Create an S3 bucket. This may be done via Amazon WS console.
-   - Create a SimpleDB domain. Note, Amazon doesn't like dashes in S3
-     domain names, so use "yourdomain", but  not "your-domain". The following
-     call may be used to create a domain on desired SimpleDB endpoint host:
-#+BEGIN_SRC common-lisp
+Please don't store too many data on this storage. Also the storage
+owner reserves right to delete the data at any time.
+
+If you want to use your own storage, here are the steps:
+- Create an S3 bucket. This may be done via Amazon WS console.
+- Create a SimpleDB domain. Note, Amazon doesn't like dashes in S3
+  domain names, so use "yourdomain", but  not "your-domain". The following
+  call may be used to create a domain on desired SimpleDB endpoint host:
+``` common-lisp
        (sptm::create-simpledb-domain "yourdomain"
            '(:credentials ("YOUR-ACCESS-KEY-ID" "YOUR-SECRET-ACCESS-KEY") :host "sdb.eu-west-1.amazonaws.com"))
-#+END_SRC     
-   - [Optional] If you provide access to the log to 3rd parties, you
-     may want to provide this access via separate user account created in
-     Amazon Identity Manager (so called IAM users). That way you may quickly
-     revoke access, and limit the access by these bucket and domain only.
-     
-     This separate user account must be granted the following permissions:
-     - S3 bucket: PutObject, GetObject, DeleteObject;
-     - SimpleDB domain: PutAttributes, GetAttributes, DeleteAttributes, Select.
-     
-     The resulting security policy for this user will look similar to this:
+```
+- [Optional] If you provide access to the log to 3rd parties, you
+  may want to provide this access via separate user account created in
+  Amazon Identity Manager (so called IAM users). That way you may quickly
+  revoke access, and limit the access by these bucket and domain only.
+  
+  This separate user account must be granted the following permissions:
+  - S3 bucket: PutObject, GetObject, DeleteObject;
+  - SimpleDB domain: PutAttributes, GetAttributes, DeleteAttributes, Select.
+  
+  The resulting security policy for this user will look similar to this:
 
-#+BEGIN_SRC json
+``` json
      {
        "Statement": [
          {
@@ -183,46 +184,47 @@ Please see [example.lisp](example.lisp).
          }
        ]
      }
-#+END_SRC
+```
      
-** Further Notes and Restrictions
-*** System Time on Your Machine
-    Amazon Web Services require each request to be annotated with
-    a timestamp. If the timestamp is different by more than 15 minutes
-    form system time of Amazon server, the request is rejected - 
-    http://docs.amazonwebservices.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationTimeStamp.
-    Therefore your machine must have correct system time to use
-    SPTM.
+## Further Notes and Restrictions
+### System Time on Your Machine
 
-*** Initial DB Content
+Amazon Web Services require each request to be annotated with
+a timestamp. If the timestamp is different by more than 15 minutes
+form system time of Amazon server, the request is rejected - 
+http://docs.amazonwebservices.com/AmazonS3/latest/dev/RESTAuthentication.html#RESTAuthenticationTimeStamp.
+Therefore your machine must have correct system time to use
+SPTM.
+
+### Initial DB Content
     
-    If database is some kind of collection or map where
-    the data is stored by transactions, the first question is
-    how to create the empty database (empty map or collection).
+If database is some kind of collection or map where
+the data is stored by transactions, the first question is
+how to create the empty database (empty map or collection).
+
+Possible approach is to have the very first transaction
+to be a function returning this fresh database.
+
+Another option is to write your application so, that
+`versioned-data` with version 0, which is created before
+executing any transactions, is always created with
+`data` slot initialized to a fresh database. All the
+further transactions can expect the database to be
+initialized. This little trick is used in [example.lisp](example.lisp).
     
-    Possible approach is to have the very first transaction
-    to be a function returning this fresh database.
+### The Default Serialization is via `cl:write` / `cl:read`.
 
-    Another option is to write your application so, that
-    =versioned-data= with version 0, which is created before
-    executing any transactions, is always created with
-    =data= slot initialized to a fresh database. All the
-    further transactions can expect the database to be
-    initialized. This little trick is used in /example.lisp/.
-    
-*** The Default Serialization is via =cl:write= / =cl:read=.
+The default serialization of the transactions and snapshots stored
+online, and of the replica local snapshots is via `cl:write` / `cl:read`
+(with `cl:*read-eval*` bound to `nil` of course). To use different
+serialization it is necessary to customize the code, by overriding
+methods of certain generic functions.
 
-    The default serialization of the transactions and snapshots stored
-    online, and of the replica local snapshots is via =cl:write= / =cl:read=
-    (with =cl:*read-eval*= bound to =nil= of course). To use different
-    serialization it is necessary to customize the code, by overriding
-    methods of certain generic functions.
+### Clojure Has Many Refs, SPTM Operates on a Single Big Database.
 
-*** Clojure Has Many Refs, SPTM Operates on a Single Big Database.
+Using many independent Ref objects allows Clojure to reduce
+interference between transactions - transactions operating
+on different Refs are not conflicting and no retries are necessary
+for them, they are just commited freely.
 
-    Using many independent Ref objects allows Clojure to reduce
-    interference between transactions - transactions operating
-    on different Refs are not conflicting and no retries are necessary
-    for them, they are just commited freely.
-
-    For cl-test-grid the SPTM approach of a single database is enough.
+For cl-test-grid the SPTM approach of a single database is enough.
