@@ -577,3 +577,94 @@
    differently: ECL exits with status 1, CCL enters debugger
    and hangs.
 
+* 0.7.0 Wrap-up the active development phase
+** DONE [0.5 h] Increase load timeout 2 times - to 10 minutes. Increas test timeout to 15 minutes.
+   CLOSED: [2012-11-29 Чт 05:31]
+** DONE doc update
+   CLOSED: [2013-01-23 Ср 10:42]
+** DONE [4 h] shorten the .fasl file paths to avoid long path problems on windos
+   CLOSED: [2013-01-27 Вс 16:01]
+** DONE check why git pull doesn't work with cron
+   CLOSED: [2012-12-15 Сб 23:11]
+** DONE [60 h] Immediate test results avaiability, without waiting for admin
+   CLOSED: [2012-12-22 Сб 09:34]
+   Solution: implemented test-grid-storage, based on sptm
+** DONE [2 h] Shortly document the test-grid-storage features in the main README.org.
+   CLOSED: [2013-01-24 Чт 16:32]
+** DONE [1 h] Document the result db access via test-grid-storage in the reporting/README.md
+   CLOSED: [2013-01-24 Чт 16:32]
+** DONE [40 h] Move online log storage to Google Cloud Storage from Google App Engine.
+   CLOSED: [2013-03-03 Вс 20:06]
+   GAE Blobstore used now to store logs costs for our application at least $108 a year.
+   Also we have seen GAE stability/user support issues.
+   We moved to Google Cloud Storage.
+   See more info here:
+   http://avodonosov.blogspot.com/2013/02/quest-for-immutable-static-files-hosting.html
+
+   Logs registered in all cl-test-grid databases (cl-test-grid-results
+   git repository and all test-grid-storage storages) are moved
+   to Cloud Storage under the same names.
+
+   Old GetBlob servlet redirects to Cloud Storage if the log is not
+   found in blobstore.
+*** DONE move to free GAE plan
+    CLOSED: [2013-03-03 Вс 20:05]
+*** DONE Blob ID generator (random)
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE lisp client for the Upload2 servlet, including gzipping and limiting file size
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE test lisp client on real data
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE Upload2: limit the file size
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE Upload2: limit number of files
+    CLOSED: [2013-01-24 Чт 16:33]
+*** DONE Upload2: proppagate saveBlob erros to the main thread
+    CLOSED: [2012-12-23 Вс 04:59]
+*** Apache license for commons file upload
+*** document the design-decision
+*** Google Storage: restrict cl.test.grid@gmail.com rights to the bucket only, not have it as a member of the project
+*** policy condition for cl-test-grid-blobs: cl.test.grid.user@gmail.com must give full access to the bucket owner
+*** delete cl.test.grid.user account from google and Amazon if not necessary (including from policies)
+*** DONE allow result storage names to be specified for each lisp-exe. If specifed,
+    CLOSED: [2013-01-24 Чт 17:38]
+    the (result-storage-space agent) is not used for this lisp-exe.
+** DONE configure robots.txt so that web crawlers do not read GAE blobs
+   CLOSED: [2012-12-22 Сб 09:34]
+   it takes to much "frontend hours" and google bills me for that.
+   This issue is related to the old blobs accessible via
+   http://cl-test-grid.appspot.com/blob?key=XXXXX.
+
+   The new blobs, stored on the Google Cloud Storage will
+   not take fronted hours. Probably we may want to limit
+   the network transfer, but we will see later.
+
+** DONE [24 h] document the code base
+   CLOSED: [2013-03-23 Сб 11:11]
+** DONE [4 h] docs: move test running instructions into agent/README.md
+   CLOSED: [2013-01-19 Сб 09:42]
+** DONE [4 h] docs: move reporting tutorial from reports-overview.html to reporting/README.md
+   CLOSED: [2013-01-19 Сб 09:42]
+** DONE [1 h] remove the ecl-12.7.1-ce653d88 results
+   CLOSED: [2013-01-19 Сб 09:43]
+** DONE [1 h] remove the Dave Cooper's results broken by absense of some .lisp files in his quicklisp
+   CLOSED: [2013-01-24 Чт 16:34]
+** DONE [2 h] results older that 3 recent quicklisps should be archived to cl-test-grid-results
+   CLOSED: [2013-01-24 Чт 16:34]
+** DONE [3 h] db format. change :contact (:email "someone@host.com) to just :contact-email "someone@host.com"
+** DONE contributor monthly summary.
+   CLOSED: [2013-01-24 Чт 23:04]
+   Now that test grid agent can be run by cron, sending confirmation
+   email to contributor for every test result doesn't make sense,
+   because the contributor is anaware when testing happens. But providing
+   feedback is necessary. We may send a monthly digest to contributor
+   summarizing the test results received from his agent(s). May be implemented
+   as a cron task running say at the 8th of every month (so that admin has
+   time to commit all the resutls to db.lisp and the digest
+   producer task sees them). Admin should be BCC'ed in these emails.
+   Should it be a single email for all contributors and the mailing list,
+   or each contributor should be emailed individually?
+
+   Solution: the email is sent manually with help of
+   tg-reporting::contributors function, which prepares the email test.
+
