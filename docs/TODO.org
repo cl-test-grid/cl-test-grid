@@ -45,7 +45,8 @@
    http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2013-March/000225.html
 ** DONE [4 h] run quicklisp 2013-03-12 tests on my windows machine
    CLOSED: [2013-04-14 Вс 00:57]
-** TODO [4 h] review quicklisp 2013-03-12 results and report any possible regressions
+** DONE [6 h] review quicklisp 2013-03-12 results and report any possible regressions
+   CLOSED: [2013-04-20 Сб 01:28]
 ** TODO notify drakma mainteners when there are test results form drakma suite
 ** TODO notify optima mainteners when there are test results from optima suite
 ** TODO retest the latest ASDF
@@ -55,6 +56,8 @@
    machine and contributes tests)
 ** TODO Luis Oliveira: buld library heads from source control
 * Backlog
+** TODO invoke QL-DIST:DELETE-AND-RETRY restart in case of QL-DIST:BADLY-SIZED-LOCAL-ARCHIVE
+   Restrict maximun number of retries to 3.
 ** TODO [16 h] Integrate tg-suites:libtest with asdf:test-system
 ** TODO [1 h] move tg-suites::normalize-status call into an around method of tg-sutes:libtest.
 ** TODO [40 h] publish pivot reports to online spreadsheet,
