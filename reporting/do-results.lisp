@@ -19,6 +19,8 @@
 (defgeneric lisp (item))              ;; lisp implementation identifier - a string
 (defgeneric lib-world (item))         ;; a string, like "quicklisp 2012-07-03"
 (defgeneric status (item))            ;; test status, like :ok, :fail, :timeout, :crash, :no-resource, (:failed-tests (<list of test case name string>) :known-to-fail (<list of test case names marked by the test suite autor as "known">))
+(defgeneric fail-condition-type (item))
+(defgeneric fail-condition-text (item))
 (defgeneric log-blob-key (item))      ;; the key under which the log produced by this test is stored online at https://cl-test-grid.appspot.com/blob?key=<key>
 (defgeneric log-byte-length (item))   ;; length of the log file
 (defgeneric load-results (item))      ;; List of load results for every ASDF system provided by that project (see below for the description of load-result object
@@ -30,8 +32,10 @@
 ;;; Every load-result object has these fields:
 (defgeneric system-name (load-result)) ;; ASDF system name - a string
 (defgeneric load-status (load-result))      ;; one of the following keywords: :ok, :fail, :timeout, :crash
-;; LOG-BLOB-KEY        ;; the generic functions defined above have methods on load-results too.
-;; LOG-BYTE-LENGTH     ;; they refer online stored output produced during the asdf system load
+;; FAIL-CONDITION-TYPE ;; the generic functions defined above have methods on load-results too.
+;; FAIL-CONDITION-TEXT
+;; LOG-BLOB-KEY
+;; LOG-BYTE-LENGTH
 (defgeneric load-duration (load-result)) ;; Time spend when loading the library. May include download time.
 
 ;; A functional wrapper around do-results.
@@ -93,6 +97,10 @@ WHERE is a predicate of one argument - test result record."
   (getf (lib-result item) :log-blob-key))
 (defmethod load-results ((item joined-lib-result))
   (getf (lib-result item) :load-results))
+(defmethod fail-condition-type ((item joined-lib-result))
+  (getf (lib-result item) :fail-condition-type))
+(defmethod fail-condition-text ((item joined-lib-result))
+  (getf (lib-result item) :fail-condition-text))
 
 ;;; The load-result objects are implemented by the same plist
 ;;; found in DB. So, the methods are specialized on list.
@@ -106,3 +114,7 @@ WHERE is a predicate of one argument - test result record."
   (getf item :log-blob-key))
 (defmethod load-duration ((item list))
   (getf item :load-duration))
+(defmethod fail-condition-type ((item list))
+  (getf item :fail-condition-type))
+(defmethod fail-condition-text ((item list))
+  (getf item :fail-condition-text))

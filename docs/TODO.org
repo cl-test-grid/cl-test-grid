@@ -47,6 +47,21 @@
    CLOSED: [2013-04-14 Вс 00:57]
 ** DONE [6 h] review quicklisp 2013-03-12 results and report any possible regressions
    CLOSED: [2013-04-20 Сб 01:28]
+** DONE [4 h] new test result attributes: :fail-condition-type and :fail-condition-text
+   CLOSED: [2013-04-20 Сб 15:50]
+   When unhandled SERIOUS-CONDITION is signalled during testing (asdf system load or testsuite),
+   in addition to recording the :fail status, record the condition type and text.
+
+   The main purpose of this task is to collect the list of foreign libraries
+   needed by all quicklisp libraries and to recognize foreign library -related
+   errors during reporting and exclude them from results diff.
+
+   This particular task only covers collection and recording of :fail-condition-type
+   and :fail-condition-text attributes, but not reporing.
+
+** TODO [2 h] announce :fail-condition-type and :fail-condition-text
+   After we collect test results, announce the possibility to retrieve
+   the list of missing foreign libraries.
 ** TODO notify drakma mainteners when there are test results form drakma suite
 ** TODO notify optima mainteners when there are test results from optima suite
 ** TODO retest the latest ASDF

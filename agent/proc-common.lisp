@@ -84,11 +84,11 @@
 
 ;;; end of backtrace printing
 
-(defun cl-user::catching-problems (body-func on-problem-func)
+(defun catching-problems (body-func on-problem-func)
   "Runs BODY-FUNC and returns it's result. But if BODY-FUNC causes any
-problems (signals SERIOS-CONDITION or enters debugger),
+problems (signals SERIOUS-CONDITION or enters debugger),
 logs the problem description to *STANDARD-OUTPUT* and
-invokes ON-PROBLEM-FUNC. The ON-PROBLEM-FUN can transfer control
+invokes ON-PROBLEM-FUNC. The ON-PROBLEM-FUNC can transfer control
 if it wants to prevent the lisp to hang in the debugger."
   (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
                              (declare (ignore me-or-my-encapsulation))
@@ -97,7 +97,7 @@ if it wants to prevent the lisp to hang in the debugger."
                                      (type-of condition)
                                      condition)
                              (print-backtrace :stream *standard-output*)
-                             (funcall on-problem-func))))
+                             (funcall on-problem-func condition))))
     (handler-bind
         ((serious-condition (lambda (condition)
                               (format t
@@ -105,8 +105,28 @@ if it wants to prevent the lisp to hang in the debugger."
                                       (type-of condition)
                                       condition)
                               (print-backtrace :stream *standard-output*)
-                              (funcall on-problem-func))))
+                              (funcall on-problem-func condition))))
       (funcall body-func))))
+
+(defun wrap-status-impl (body-fn)
+  (catching-problems (lambda () (list :status (funcall body-fn)))
+                     (lambda (condition)
+                       (return-from wrap-status-impl
+                         (list :status :fail
+                               :fail-condition-type (let ((*package* (find-package :keyword)))
+                                                      (prin1-to-string (type-of condition)))
+                               :fail-condition-text (princ-to-string  condition))))))
+
+(defmacro cl-user::wrap-status (&body body)
+  "Executes BODY. If BODY finishes successfully,
+returns list in the form (:STATUS <body return value>).
+If BODY signals any SERIOUS-CONDITION or enters debugger,
+the condition and its backtrace are logged to *STANDARD-OUTPUT*
+and a list in the form
+   (:STATUS :FAIL :FAIL-CONDITION-TYPE <condition type> :FAIL-CONDITION-TEXT <condition text>)
+where <condition type> and <condition text> are strings.
+The <condition type> includes package name, e.g. \"COMMON-LISP:SIMPLE-ERROR\"."
+  `(wrap-status-impl (lambda () ,@body)))
 
 (defun cl-user::saving-output (file body)
   (with-open-file (stream file

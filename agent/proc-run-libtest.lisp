@@ -39,11 +39,9 @@
   `(funcall (read-from-string ,funname) ,@args))
 
 (defun run-libtest (libname)
-  (catching-problems (lambda ()
-                       (ql:quickload :test-grid-testsuites)
-                       (fncall "test-grid-testsuites::normalize-status" (fncall "test-grid-testsuites:libtest" libname)))
-                     (lambda ()
-                       (return-from run-libtest :fail))))
+  (wrap-status
+    (ql:quickload :test-grid-testsuites)
+    (fncall "test-grid-testsuites::normalize-status" (fncall "test-grid-testsuites:libtest" libname))))
 
 (defun run-libtest-main (libname
                          log-file

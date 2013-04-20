@@ -246,21 +246,21 @@ upon the BODY completion runs the BODY again."
                         (format log "The error condition signalled in the parent process: ~A~%" condition))
                       (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
                                 condition)
-                      :crash)
+                      '(:status :crash))
                     (lisp-exe:lisp-process-timeout (c)
                       (appending log logfile
                         (format log "~%The ~A test suite hasn't finished in ~A seconds." libname (lisp-exe:seconds c))
                         (format log "~%We consider the test suite as hung; the test suite lisp process is killed.~%"))
                       (log:info "Child lisp process running ~A test suite has exceeded the timeout of ~A seconds and killed."
                                 libname (lisp-exe:seconds c))
-                      :timeout))))
-      (log:info "The ~A test suite status: ~S" libname status)
-      (print-log-footer libname status logfile)
-      (list :libname libname
-            :status status
-            :log-byte-length (test-grid-utils::file-byte-length logfile)
-            :test-duration (/ (- (get-internal-real-time) start-time)
-                              internal-time-units-per-second)))))
+                      '(:status :timeout)))))
+      (log:info "The ~A test suite result: ~S" libname status)
+      (print-log-footer libname (getf status :status) logfile)
+      (append (list :libname libname)
+              status
+              (list :log-byte-length (test-grid-utils::file-byte-length logfile)
+                    :test-duration (/ (- (get-internal-real-time) start-time)
+                                      internal-time-units-per-second))))))
 
 (defun print-loadtest-log-header (system-name run-descr log-file)
   (with-open-file (stream (ensure-directories-exist log-file)
@@ -305,21 +305,21 @@ upon the BODY completion runs the BODY again."
                       (format log "The error condition signalled in the parent process: ~A" condition))
                     (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
                               condition)
-                    :crash)
+                    '(:status :crash))
                   (lisp-exe:lisp-process-timeout (c)
                     (appending log logfile
                       (format log "~%The system ~A load hasn't finished in ~A seconds." system-name (lisp-exe:seconds c))
                       (format log "~%We consider the load operation as hung; the lisp process is killed.~%"))
                     (log:info "Child lisp testing loading the ~A system has exceeded the timeout of ~A seconds and killed."
                               system-name (lisp-exe:seconds c))
-                    :timeout))))
-    (print-log-footer system-name status logfile)
-    (log:info "The ~A system load status: ~S" system-name status)
-    (list :system system-name
-          :status status
-          :log-byte-length (test-grid-utils::file-byte-length logfile)
-          :load-duration (/ (- (get-internal-real-time) start-time)
-                            internal-time-units-per-second))))
+                    '(:status :timeout)))))
+    (print-log-footer system-name (getf status :status) logfile)
+    (log:info "The ~A system load result: ~S" system-name status)
+    (append (list :system system-name)
+            status
+            (list :log-byte-length (test-grid-utils::file-byte-length logfile)
+                  :load-duration (/ (- (get-internal-real-time) start-time)
+                                    internal-time-units-per-second)))))
 
 (defun loadtest-log-name (system-name)
   (format nil

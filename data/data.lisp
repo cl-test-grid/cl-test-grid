@@ -175,7 +175,12 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
                                      (print-test-status nil (getf lib-result :status))
                                      (getf lib-result :log-blob-key)
                                      (getf lib-result :log-byte-length)
-                                     (getf lib-result :test-duration)))
+                                     (getf lib-result :test-duration))
+                             (when (getf lib-result :fail-condition-type)
+                               (format out
+                                       " :fail-condition-type ~s :fail-condition-text ~s"
+                                       (getf lib-result :fail-condition-type)
+                                       (getf lib-result :fail-condition-text))))
                            (when (getf lib-result :load-results)
                              (format out "~%~v,0t:load-results (" (+ indent 12))
                              (print-list-elements out
@@ -185,12 +190,18 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
                                                                  (getf load-result :system)))
                                                   (format nil "~~%~~~Dt" (+ indent 27))
                                                   (lambda (load-result)
-                                                    (format out "(:system ~s :status ~s :log-blob-key ~s :log-byte-length ~s :load-duration ~s)"
+                                                    (format out "(:system ~s :status ~s :log-blob-key ~s :log-byte-length ~s :load-duration ~s"
                                                             (getf load-result :system)
                                                             (getf load-result :status)
                                                             (getf load-result :log-blob-key)
                                                             (getf load-result :log-byte-length)
-                                                            (getf load-result :load-duration))))
+                                                            (getf load-result :load-duration))
+                                                    (when (getf load-result :fail-condition-type)
+                                                      (format out
+                                                              " :fail-condition-type ~s :fail-condition-text ~s"
+                                                              (getf load-result :fail-condition-type)
+                                                              (getf load-result :fail-condition-text)))
+                                                    (format out ")")))
                              (format out ")"))
                            (format out ")")))
   (format out "))"))
