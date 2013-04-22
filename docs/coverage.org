@@ -43,6 +43,7 @@
 + cffi 2010-11-10
 - chunga 2010-11-10
 - cl+ssl 2010-11-10 (there is a test.lisp, but it's not automated, and no (asdf:operate (op asdf:test-op) ...)
++ cl-6502 2013-04-20
 + cl-annot 2012-03-07
 + cl-base64 2010-11-10
 - cl-cairo2 2012-03-07
