@@ -21,7 +21,7 @@
 (defgeneric status (item))              ;; test status, like :ok, :fail, :timeout, :crash, :no-resource,
                                         ;; (:failed-tests (<list of test case name string>)
                                         ;;  :known-to-fail (<list of test case names marked by the test suite autor as "known">))
-(defgeneric fail-condition-type (item)) ;; NIL or string specifying type of unhandled condition signalled during testing.
+(defgeneric fail-condition-type (item)) ;; NIL or string specifying type of unhandled condition signaled during testing.
                                         ;; Includes package name, for example:
                                         ;; "COMMON-LISP:SIMPLE-ERROR", "CFFI:LOAD-FOREIGN-LIBRARY-ERROR".
 (defgeneric fail-condition-text (item)) ;; NIL or a string, result of princ-to-string for the condition.
