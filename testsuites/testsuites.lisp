@@ -909,5 +909,6 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :cl-6502)))
   ;; The test framework used: fiveam.
+  (quicklisp:quickload :cl-6502)
   (quicklisp:quickload :cl-6502-tests)
   (run-fiveam-test-suite (read-from-string "6502-tests::6502-tests")))
