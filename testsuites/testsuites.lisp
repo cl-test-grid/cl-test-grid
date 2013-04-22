@@ -89,7 +89,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
     :bknr-datastore        :yaclml               :com.google.base     :external-program
     :cl-mustache           :trivial-gray-streams :drakma              :optima
-    :cl-6502-tests)
+    :cl-6502)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
