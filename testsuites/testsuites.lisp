@@ -905,3 +905,8 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: eos.
   (ql:quickload :optima.test)
   (run-eos-test-suites (read-from-string "optima.test::optima-test")))
+
+(defmethod libtest ((library-name (eql :cl-6502)))
+  ;; The test framework used: fiveam.
+  (quicklisp:quickload :cl-6502-tests)
+  (run-fiveam-test-suite (read-from-string "6502-tests::6502-tests")))
