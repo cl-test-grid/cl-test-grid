@@ -68,7 +68,7 @@ In the form (\"Access Key Id\" \"Secret Access Key\").")
 
 (defun make-demo-transaction-log (name)
   "Creates a transaction log persisted to the demo storage."
-  (make-instance 'sptm::aws-transaction-log
+  (make-instance 'sptm:aws-transaction-log
                  :name name
                  :s3-bucket "sptm-demo"
                  :simpledb-domain "sptmdemo"
@@ -88,56 +88,56 @@ In the form (\"Access Key Id\" \"Secret Access Key\").")
 
 ;; Retrieve whatever other people left in the DB:
 (defparameter *d*
-  (sptm::roll-forward *log*
-                      (make-instance 'sptm::versioned-data :version 0 :data (new-db))                    
-                      'transaction-allowed-p))
+  (sptm:roll-forward *log*
+                     (make-instance 'sptm:versioned-data :version 0 :data (new-db))
+                     'transaction-allowed-p))
 
 ;; Now *d* is a versioned-data instance holding the
 ;; latest data. Examine it:
-(sptm::version *d*)
-(sptm::data *d*)
+(sptm:version *d*)
+(sptm:data *d*)
 
 ;; Execute some transactions. You can do
 ;; it from different lisp processes and see how
 ;; data is synchronized.
-(setf *d* (sptm::exec-transaction *log* *d*
-                                  'deposit (list :a 7)
-                                  'transaction-allowed-p))
+(setf *d* (sptm:exec-transaction *log* *d*
+                                 'deposit (list :a 7)
+                                 'transaction-allowed-p))
 
-(setf *d* (sptm::exec-transaction *log* *d*
-                                  'transfer (list :a :b 3)
-                                  'transaction-allowed-p))
+(setf *d* (sptm:exec-transaction *log* *d*
+                                 'transfer (list :a :b 3)
+                                 'transaction-allowed-p))
 
 ;;; Replica is a "higher" level convenience class, which combines
 ;;; versioned-data, transaction log and a local snapshot file.
 (defparameter *r*
-  (make-instance 'sptm::replica
+  (make-instance 'sptm:replica
                  :transaction-log *log*
                  :transaction-checker 'transaction-allowed-p
                  :local-snapshot-file "sptm-demo-replica.lisp"
-                 :vdata (make-instance 'sptm::versioned-data :version 0 :data (new-db))))
+                 :vdata (make-instance 'sptm:versioned-data :version 0 :data (new-db))))
 
-(sptm::sync *r*)
+(sptm:sync *r*)
 ;; The above call reads local snapshot if exists.
 ;; Then, if online storage has any newer changes, retrieves
 ;; these changes and stores local snapshot of new data.
 
 ;; Examine the data in the replica
-(sptm::data *r*)
-(sptm::version *r*)
+(sptm:data *r*)
+(sptm:version *r*)
 
 ;; Execute some transaction using the replica,
 ;; saving the local snapshot if the transaction
 ;; executed successfully.
-(sptm::repli-exec-save *r* 'withdraw (list :a 3))
+(sptm:repli-exec-save *r* 'withdraw (list :a 3))
 
 ;; Save online snapshot of the current data version
 ;; and remove all the transactions and snapshots
 ;; of older versions from the online storage.
-(sptm::save-snapshot (sptm::transaction-log *r*)
-                     (sptm::vdata *r*))
-(sptm::delete-records (sptm::transaction-log *r*)
-                      :below-version (sptm::version *r*))
+(sptm:save-snapshot (sptm:transaction-log *r*)
+                    (sptm:vdata *r*))
+(sptm:delete-records (sptm:transaction-log *r*)
+                     :below-version (sptm:version *r*))
 
 ;; Delete all the snapshots and transactions:
-(sptm::delete-records (sptm::transaction-log *r*))
+(sptm:delete-records (sptm:transaction-log *r*))

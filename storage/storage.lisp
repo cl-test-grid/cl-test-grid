@@ -24,7 +24,7 @@
 (defgeneric make-replica (name local-snapshot-file))
 (defgeneric name (replica))
 
-(defclass replica (sptm::replica) ())
+(defclass replica (sptm:replica) ())
 
 ;; Amazon Web Service credentials for cl-test-grid-user account
 ;; in the form (<Access Key Id>  <Secret Access Key>).
@@ -35,7 +35,7 @@
   '("AKIAJS4QAUS7CU5BK5MA" "wf4CbpVQHwuD9LkS+7Dby3exfc7PTv1upvZewIa0"))
 
 (defun make-transaction-log (name)
-  (make-instance 'sptm::aws-transaction-log
+  (make-instance 'sptm:aws-transaction-log
                  :name name
                  :simpledb-domain "cltestgrid"
                  :s3-bucket "cl-test-grid"
@@ -55,21 +55,21 @@
                  :local-snapshot-file local-snapshot-file))
 
 (defmethod name ((replica replica))
-  (sptm::name (sptm::transaction-log replica)))
+  (sptm:name (sptm:transaction-log replica)))
 
 ;; override the local snapshow serialization
 ;; to pretty format the data
-(defmethod sptm::save-local-snapshot ((replica replica))
-  (let ((versioned-data (sptm::vdata replica)))
-    (with-open-file (out (sptm::local-snapshot-file replica)
+(defmethod sptm:save-local-snapshot ((replica replica))
+  (let ((versioned-data (sptm:vdata replica)))
+    (with-open-file (out (sptm:local-snapshot-file replica)
                          :direction :output
                          :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                          :if-exists :supersede
                          :if-does-not-exist :create)
-      (format out "(:version ~a~%" (sptm::version versioned-data))
+      (format out "(:version ~a~%" (sptm:version versioned-data))
       (format out " :data ")
       (test-grid-data::print-db out
-                                (sptm::data versioned-data)
+                                (sptm:data versioned-data)
                                 7)
       (format out ")")))
   replica)
@@ -77,4 +77,4 @@
 ;; convenience method to record the most often used transaction
 (defun add-test-run (storage-name test-run)
   (let ((log (make-transaction-log storage-name)))
-    (sptm::record-transaction log 'test-grid-data::add-test-run (list test-run))))
+    (sptm:record-transaction log 'test-grid-data::add-test-run (list test-run))))
