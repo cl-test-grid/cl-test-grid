@@ -916,4 +916,4 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :doplus)))
   ;; The test framework used: eos (similar to FiveAM).
   (quicklisp:quickload :doplus-tests)
-  (run-eos-test-suites (read-from-string "doplus-tests::doplus-suite"))
+  (run-eos-test-suites (read-from-string "doplus-tests::doplus-suite")))
