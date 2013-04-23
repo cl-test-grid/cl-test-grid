@@ -89,7 +89,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
     :bknr-datastore        :yaclml               :com.google.base     :external-program
     :cl-mustache           :trivial-gray-streams :drakma              :optima
-    :cl-6502)
+    :cl-6502               :doplus)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -912,3 +912,8 @@ just passed to the QUICKLISP:QUICKLOAD."
   (quicklisp:quickload :cl-6502)
   (quicklisp:quickload :cl-6502-tests)
   (run-fiveam-test-suite (read-from-string "6502-tests::6502-tests")))
+
+(defmethod libtest ((library-name (eql :doplus)))
+  ;; The test framework used: eos (similar to FiveAM).
+  (quicklisp:quickload :doplus-tests)
+  (run-eos-test-suites (read-from-string "doplus-tests::doplus-suite"))
