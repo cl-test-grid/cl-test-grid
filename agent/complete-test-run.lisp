@@ -428,5 +428,6 @@ results in this directory are tested."
           (check-asdf-output "ql/"))
         (when (intersection project-names test-grid-testsuites:*all-libs* :test #'string=)
           (check-asdf-output "test-grid/"))
-        (cl-fad:delete-directory-and-files asdf-output-dir :if-does-not-exist :ignore)
+        (ignore-errors ;; CCL on Windows has problem deleting directory if a file containing in it has total length of pathname longer than MAX_PATH - 1 = 259 chars.
+          (cl-fad:delete-directory-and-files asdf-output-dir :if-does-not-exist :ignore))
         run-dir))))
