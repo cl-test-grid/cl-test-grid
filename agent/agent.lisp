@@ -282,7 +282,12 @@ the PREDICATE."
   (send-notification (format nil "[agent hello] from ~A (~A)"
                              (get-agent-id (persistence agent))
                              (user-email agent))
-                     "hello"))
+                     (format nil "~(~S~)"
+                             (list :user-email (user-email agent)
+                                   :agent-id (get-agent-id (persistence agent))
+                                   :lisp-exes (mapcar #'implementation-identifier
+                                                      (lisp-exes agent))
+                                   :preferred-lisp (implementation-identifier (preferred-lisp agent))))))
 
 (defmethod main (agent)
   ;; setup logging for unhandled errors and warnings
