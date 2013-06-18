@@ -302,7 +302,7 @@ the PREDICATE."
                   (log:warn "A warning is signalled: ~A" w)
                   (muffle-warning))))
     (as-singleton (agent)
-      (log:config :daily (log-file agent) :immediate-flush)
+      (log:config :daily (namestring (log-file agent)) :immediate-flush)
       (let ((*response-file-temp-dir* (work-dir agent)))
         ;; finish the agent initialization
         (setf (persistence agent) (init-persistence (persistence-file agent)))
