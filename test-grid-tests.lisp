@@ -60,7 +60,7 @@
   (asdf:operate 'asdf:load-op :stefil-sample-test-suite)
   (let ((status (test-grid-testsuites::run-stefil-test-suite (read-from-string "stefil-sample-test-suite::sample-stefil-suite"))))
     (and (alexandria:set-equal (getf status :failed-tests)
-                               '("sample-stefil-suite.one-fail-test" 
+                               '("sample-stefil-suite.one-fail-test"
                                  "sample-stefil-suite.two-fails-test"
                                  "sample-stefil-suite.error-test"
                                  "sample-stefil-suite.all-fails-expected-test"
@@ -76,6 +76,17 @@
                                  "clunit-sample-test-suite::test-int1")
                                :test #'string=)
          (null (getf status :known-to-fail)))))
+
+(defun test-nst-api ()
+  (asdf:operate 'asdf:load-op :nst-sample-test-suite)
+  (let ((status (test-grid-testsuites::run-nst-test-suites
+                   :nst-sample-test-suite)))
+    (and (alexandria:set-equal
+            (getf status :failed-tests)
+            '("nst-sample-test-suite::mixed-bag::error-test"
+              "nst-sample-test-suite::mixed-bag::bad-addition")
+            :test #'string=)
+	 (null (getf status :known-to-fail)))))
 
 (defun test-aggregated-status ()
   (and (eq :ok (test-grid-reporting::aggregated-status :ok))
@@ -97,4 +108,5 @@
                        (test-eos-api)
                        (test-stefil-api)
                        (test-clunit-api)
+                       (test-nst-api)
                        (test-aggregated-status)))))
