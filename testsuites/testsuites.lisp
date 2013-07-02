@@ -90,7 +90,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
     :bknr-datastore        :yaclml               :com.google.base     :external-program
     :cl-mustache           :trivial-gray-streams :drakma              :optima
-    :cl-6502               :doplus               :nst)
+    :cl-6502               :doplus               :nst                 :track-best)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -947,3 +947,8 @@ just passed to the QUICKLISP:QUICKLOAD."
                        #+not :nst-meta-sources
                        #+not :nst-meta-sources-1
                        #+not :nst-methods-meta-sources))
+
+(defmethod libtest ((library-name (eql :track-best)))
+  ;; The test framework used: nst.
+  (quicklisp:quickload :track-best-tests)
+  (run-nst-test-suites :track-best-tests))
