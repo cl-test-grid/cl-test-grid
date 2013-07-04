@@ -120,7 +120,7 @@
 
   The =test-grid-storage= named "main" is intended to contain results
   for the last 3 Quicklisp distros and is cleared periodically.
-  Old results are archived in a plain lisp file in a separate git repository:
+  Old results are archived in a plain lisp files in a separate git repository:
   https://github.com/cl-test-grid/cl-test-grid-results.
 
   Besides this, we store online the output produced by
