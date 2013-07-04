@@ -43,7 +43,7 @@ $ git clone git@github.com:cl-test-grid/cl-test-grid-results.git
 ```
 
 ``` common-lisp
-TEST-GRID-REPORTING> (defparameter *db* (test-grid-data:read-db))
+TEST-GRID-REPORTING> (defparameter *db* (test-grid-data:read-archive))
 ```
 
 `RESULT` Objects
