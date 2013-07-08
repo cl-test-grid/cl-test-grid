@@ -1,76 +1,122 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
-* March-April 2013:
-** DONE ABCL 14300 (ensure utf-8)
-   CLOSED: [2013-03-07 Чт 04:27]
-** DONE ABCL HEAD (14420) (ensure utf-8)
-   CLOSED: [2013-03-07 Чт 06:48]
-** DONE ql 2013-02-17 on windows
-   CLOSED: [2013-03-16 Сб 15:16]
-** DONE send the test contribution digest and ask Pat to remove ecl-12.2.1-ceaff1a7-macosx-x86-bytecode
-   CLOSED: [2013-03-16 Сб 16:02]
-   and propose everybody to use only releases for the "main" test results storage
-** DONE adjust cl-fad testsute adapter (test.lisp was renamed)
-   CLOSED: [2013-03-03 Вс 22:21]
-** DONE adjust cl-num-utils testsuite adapter (it switched to new test framework - clunit)
-   CLOSED: [2013-03-07 Чт 04:26]
-** DONE add clunit support to test-grid-testsuites
-   CLOSED: [2013-03-07 Чт 04:26]
-** DONE ASDF 2.32 on linux (switch back to ASCII?)
-   CLOSED: [2013-03-16 Сб 15:17]
-** DONE check if CCL rc2 still has the failures I reported for rc1
-   CLOSED: [2013-03-16 Сб 15:16]
-   Done: http://clozure.com/pipermail/openmcl-devel/2013-March/014184.html
-** DONE review quicklisp 2013-02-17 results
-   CLOSED: [2013-04-06 Сб 00:46]
-** DONE review ECL results collected by Juan Jose
-   CLOSED: [2013-04-06 Сб 00:46]
-** DONE discuss with Paul Nathan the lisp implementations to run on his OS X PowerPC machine
-   CLOSED: [2013-04-06 Сб 00:50]
-   https://groups.google.com/d/msg/cl-test-grid/rY2mJcMFWv4/YPPNgkyPGHEJ
-** DONE create test suite for drakma and add it to test grid
-   CLOSED: [2013-03-23 Сб 11:08]
-   https://github.com/edicl/drakma/pull/27
-** DONE add optima test suite
-   CLOSED: [2013-03-23 Сб 16:12]
-** DONE [1 h] run quicklisp 2013-03-12 tests on my linux server
-   CLOSED: [2013-04-06 Сб 03:20]
-** DONE [8 h] fix the ASDF output-translation hangling by test-grid-agent which causes
-   CLOSED: [2013-04-06 Сб 14:21]
-   problems testing cffi-grovel dependent libraries on quicklisp 2013-03-12:
-   https://groups.google.com/forum/?fromgroups=#!topic/cl-test-grid/mvrLUcIyy5g
-
-   And rerun tests.
-** DONE [8 h] preform pre-release testing of bordeaux-threads
-   CLOSED: [2013-04-06 Сб 14:21]
-   http://lists.common-lisp.net/pipermail/bordeaux-threads-devel/2013-March/000225.html
-** DONE [4 h] run quicklisp 2013-03-12 tests on my windows machine
-   CLOSED: [2013-04-14 Вс 00:57]
-** DONE [6 h] review quicklisp 2013-03-12 results and report any possible regressions
-   CLOSED: [2013-04-20 Сб 01:28]
-** DONE [4 h] new test result attributes: :fail-condition-type and :fail-condition-text
-   CLOSED: [2013-04-20 Сб 15:50]
-   When unhandled SERIOUS-CONDITION is signalled during testing (asdf system load or testsuite),
-   in addition to recording the :fail status, record the condition type and text.
-
-   The main purpose of this task is to collect the list of foreign libraries
-   needed by all quicklisp libraries and to recognize foreign library -related
-   errors during reporting and exclude them from results diff.
-
-   This particular task only covers collection and recording of :fail-condition-type
-   and :fail-condition-text attributes, but not reporing.
-
-** TODO [2 h] announce :fail-condition-type and :fail-condition-text
-   After we collect test results, announce the possibility to retrieve
-   the list of missing foreign libraries.
+* July 2013
+** TODO Commit the Nst testsute by Patrick Stein
+** TODO Review and improve README.org
+** TODO Help Jan Moringen to track down the problem of submiting test results from his network.
+** TODO Add the "Credits" section to README
 ** TODO notify drakma mainteners when there are test results form drakma suite
 ** TODO notify optima mainteners when there are test results from optima suite
-** TODO retest the latest ASDF
+** TODO notify cl-6502 author when there are test results and ask about being in sync with cl-test-grid
+   He is definitely interested, as he have sent a merge request with testsuite adapter).
+* Engage People (ideas)
+** TODO Invite test-runners by publishing clearly my needs:
+   - Coverage table for Quicklisp testing,
+     clearly showing what lisps/platforms are missed.
+
+   - May serve also as a part of the "Contributors" section of
+     README - shows who is currently covers what lisps.
+     This will also allow particular
+     lisp developers (e.g. SBCL devs) to contact directly
+     with their lisp testers.
+
+   - Table with current release testing status for
+     various lisps. For example SBCL releases every month,
+     it will almost always present there. Coverage table for
+     pre-release testing of particular lisps. SBCL is the
+     most demanding in this respect, as they have release
+     every month.
+
+     |-------+-------------|
+     | ABCL  | Java        |
+     | ACL   | win/lin     |
+     | CCL   | win/lin/mac |
+     | CLISP |             |
+     | CMU   |             |
+     | ECL   |             |
+     | SBCL  |             |
+
+** TODO For all the new projects in eveny Quicklisp dist update
+   send emails to the authors explaining that their library
+   is now being tested by cl-testg-grid and show where to
+   observe results.
+
+   Propose to add their test suite to cl-test-grid (and stay in sync
+   with cl-test-grid in the future).
+** TODO If noone contributes ACL results, ask Robert Goldman
+   (He doesnt want to install qucklisp manually, explain
+   that it is 2 minutes, or just add a function require-quicklisp
+   and use it in run-agent.lisp to handle it automatically)
+** TODO Send request to groups/communities to contribute
+   tests and help with pre-release testing (show the
+   coverate table to describe the needs).
+** TODO Suggest work contracts to perform this job.
+   If anyone suggests his time, explain donors that thay
+   can fund the work.
+** TODO Invite Andrey Moskvitin. He just published
+   job search request. Ask for his rates.
+** TODO Add reccurring payments
+** TODO Donors when donating for a particular goal can also chose a particular
+   contributor who will perform the task (if the donor and contributor have this agreed).
+** TODO Publish the project balance:
+   Requrements (perform pre-release tests, hardware needed, coding).
+   Expences are in 3 forms: time, hardware. They may be donated,
+   or bouth by money (wich is also donated).
+   Task types:
+   - administration: time
+   - coding: time
+   - testing: time, hardware
+   - reporults analysys: time
+
+   Time, hardware and money may be donated.
+   Show what parts of our expences are covered by what donations:
+   whose time, hardware and money are used on what task.
+
+** TODO Possible donors
+   - Franz expressed interest in using cl-test-grid and
+     asked for instructions, but seems like thay have no
+     time (have more important priorities)?
+     Would they be willing to pay someone for performing
+     regular testing?
+   - Fare told "they" can maintain in the form of money donations
+     (paying for servers).
+   - Christoph Rhodes and SBCL team?
+   - Dave Cooper said he knows possible sponsors (ALU and some others)
+     but they want clear list of goals. May coverate tables will be
+     clear in the real-time needs of the projects, donors can fund
+     it task by taks, with small payments.
+     Contact Dave when I produce enough visibility for project goals
+     and needs. It must be noted that sponsors participation
+     would be good for goal definitions. People who want to see
+     SBCL tested pay for SBCL, those who want to see ACL tested pay
+     for this, those interested in Quicklisp pre-release tesging
+     donate for this.
+   - GSOC for SBCL testing (althoug unlikelly it's a good variant)
+** TODO Summer of code idea: establish SBCL testing using cl-test-grid
 * User Requests
 ** TODO Vladimir Sedach: test multithreaded CLISP
    (less important now as Vladimir already installed such lisp on his
    machine and contributes tests)
 ** TODO Luis Oliveira: buld library heads from source control
+** TODO Juan Jose: add the function call performed by test grid to the log
 * Backlog
+** TODO Exclude cl-glfw from testing?
+   Due to 300 ASDF systems it taks large part of testing time.
+   Also lot of results storage.
+   The author ignored my question about the way to test all the ASDF system at once
+   (is there a single  ASDF system which includes all the other ASDF systems?)
+** TODO Add stmx testsuite
+   https://github.com/cosmos72/stmx
+** TODO Reccurig donations via PayPall
+** TODO Use :fail-condition-type/text during reporting to automatically
+   exclude FFI depending failures from comparision.
+** TODO Document :fail-condition-type/text on data/README.md
+** TODO When retrieving project/systems list from Quicklisp, sort them.
+   So that testing order is deterministic and is always the same.
+   Impl. plan: handl in the agent/project-lister.java
+** TODO Snapshot publisher daemon (heroku worker dyno app running every day (hour)).
+** TODO Reports re-generator daemon (heroku worker dyno app scheduled after every
+   test run submit notification and also at some intervals to cover other DB
+   changes, and also manually (from REPL or URL in browser).
 ** TODO invoke QL-DIST:DELETE-AND-RETRY restart in case of QL-DIST:BADLY-SIZED-LOCAL-ARCHIVE
    Restrict maximun number of retries to 3.
 ** TODO [16 h] Integrate tg-suites:libtest with asdf:test-system
