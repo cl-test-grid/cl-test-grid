@@ -9,6 +9,8 @@
    #:make-db
    #:join-dbs
    #:read-db
+   #:save-db
+   #:read-archive
    #:add-test-run
    #:add-test-runs
    #:remove-test-runs
@@ -20,8 +22,10 @@
 (defun src-dir()
   (asdf:system-relative-pathname :test-grid-data #P"data/"))
 
-(defvar *standard-db-file*
-  (merge-pathnames #P"../../cl-test-grid-results/db.lisp" (src-dir)))
+(defun standard-archive-dir ()
+  "The directory of cl-test-grid-results git repo, assuming it is cloned
+near the cl-test-grid repo."
+  (merge-pathnames #P"../../cl-test-grid-results/" (src-dir)))
 
 ;;; DB operations
 
@@ -216,7 +220,7 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
                            (print-test-run out test-run (+ indent 8))))
   (format out "))"))
 
-(defun save-db (db &optional (stream-or-path *standard-db-file*))
+(defun save-db (db stream-or-path)
   (with-open-file (out stream-or-path
                        :direction :output
                        :element-type 'character ;'(unsigned-byte 8) + flexi-stream
@@ -224,9 +228,15 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
                        :if-does-not-exist :create)
     (print-db out db)))
 
-(defun read-db (&optional (stream-or-path *standard-db-file*))
+(defun read-db (stream-or-path)
   (with-open-file (in stream-or-path
                       :direction :input
                       :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                       )
     (test-grid-utils::safe-read in)))
+
+(defun read-archive (&optional (archive-dir (standard-archive-dir)))
+  (flet ((archive-file (file-name)
+           (merge-pathnames file-name archive-dir)))
+    (join-dbs (read-db (archive-file "db.lisp"))
+              (read-db (archive-file "db2.lisp")))))
