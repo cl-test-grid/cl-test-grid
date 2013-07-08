@@ -89,6 +89,11 @@
                                    prev-quicklisp
                                    new-quicklisp))
 
+    (my-time ("Quicklisp diff2...~%")
+      (print-quicklisp-diff-report2 "quicklisp-diff2.html"
+                                    all-results
+                                    prev-quicklisp
+                                    new-quicklisp))
     (my-time ("library reports...")
       (print-library-reports all-results))
 
@@ -106,37 +111,34 @@
                          "ecl-12.12.1-unknown-linux-x86-lisp-to-c"
                          new-quicklisp))
 
-  (let ((new-abcl "abcl-1.2.0-dev-svn-14300-fasl39-linux-x86")
-        (old-abcl "abcl-1.0.1-svn-13750-13751-fasl38-linux-java"))
-    (my-time ("ABCL diff...~%")
-      (print-compiler-diff "abcl.html"
-                           all-results
-                           new-quicklisp
-                           old-abcl
-                           new-abcl))
-    (my-time ("ABCL load failures...~%")
-      (print-load-failures "abcl-load-failures.html"
-                           all-results
-                           new-abcl
-                           new-quicklisp)))
+  (my-time ("ABCL load failures...~%")
+    (print-load-failures "abcl-load-failures.html"
+                         all-results
+                         "abcl-1.1.1-fasl39-linux-x86"
+                         new-quicklisp))
+
   (my-time ("CCL load failures...~%")
     (print-load-failures "ccl-load-failures.html"
                          all-results
                          "ccl-1.8-f95-linux-x86"
                          new-quicklisp))
-  (my-time ("ACL load failures...~%")
-    (print-load-failures "acl-load-failures.html"
+  (my-time ("SBCL load failures...~%")
+    (print-load-failures "sbcl-load-failures.html"
                          all-results
-                         "acl-8.2a-linux-x86"
+                         "sbcl-1.1.1-linux-x86"
                          new-quicklisp))
+
+  ;; ACL 8.2 license has expired and 9.0 doesn't run on my linux
+  ;;(my-time ("ACL load failures...~%")
+  ;;  (print-load-failures "acl-load-failures.html"
+  ;;                       all-results
+  ;;                       "acl-8.2a-linux-x86"
+  ;;                       new-quicklisp))
+
   ;; CMUCL results are not yet collected
   ;; (my-time ("CMUCL load failures...~%")
   ;;   (print-load-failures "cmucl-load-failures.html"
   ;;                        all-results
   ;;                        "cmu-20c_release-20c__20c_unicode_-linux-x86"
   ;;                        new-quicklisp))
-  (my-time ("SBCL load failures...~%")
-    (print-load-failures "sbcl-load-failures.html"
-                         all-results
-                         "sbcl-1.1.1-linux-x86"
-                         new-quicklisp)))
+  )
