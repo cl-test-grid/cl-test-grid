@@ -64,7 +64,8 @@ just passed to the QUICKLISP:QUICKLOAD."
                         ("fiveam-api" . "fiveam-api-impl")
                         ("eos-api" . "eos-api-impl")
                         ("stefil-api" . "stefil-api-impl")
-                        ("clunit-api" . "clunit-api-impl")))
+                        ("clunit-api" . "clunit-api-impl")
+                        ("nst-api" . "nst-api-impl")))
          (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
                                api)))
         (quicklisp:quickload impl-asdf-system)))
@@ -89,7 +90,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
     :bknr-datastore        :yaclml               :com.google.base     :external-program
     :cl-mustache           :trivial-gray-streams :drakma              :optima
-    :cl-6502               :doplus)
+    :cl-6502               :doplus               :nst                 :track-best)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -139,6 +140,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   (require-impl "clunit-api")
   (let ((result (clunit-api:run-test-suite test-suite-name)))
     (list :failed-tests (clunit-api:failed-tests result)
+          :known-to-fail '())))
+
+(defun run-nst-test-suites (&rest test-suite-names)
+  (require-impl "nst-api")
+  (let ((result (apply #'nst-api:run-test-suites test-suite-names)))
+    (list :failed-tests (nst-api:failed-tests result)
           :known-to-fail '())))
 
 (defun running-cl-test-more-suite (project-name runner-function)
@@ -917,3 +924,31 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: eos (similar to FiveAM).
   (quicklisp:quickload :doplus-tests)
   (run-eos-test-suites (read-from-string "doplus-tests::doplus-suite")))
+
+(defmethod libtest ((library-name (eql :nst)))
+  ;; The test framework used: nst.
+  (let ((nst-system (asdf:find-system :nst)))
+    (dolist (asd (list "test/asdf/masdfnst.asd"
+                       "test/direct/nst-simple-tests.asd"
+                       "test/lisp/comp-set/comp-set.asd"
+                       "test/manual/nst-manual-tests.asd"
+                       "test/meta/mnst-relay.asd"
+                       "test/meta/nst-meta-tests.asd"
+                       "test/nst-test-jenkins.asd"
+                       "test/nst-test.asd"
+                       "test/util/nst-selftest-utils.asd"))
+      (load (asdf:system-relative-pathname nst-system asd))))
+  (quicklisp:quickload :nst-test)
+  (run-nst-test-suites :nst-test
+                       :nst-test-utils
+                       :nst-simple-tests
+                       :nst-simple-tests-interpreted
+                       :nst-meta
+                       #+not :nst-meta-sources
+                       #+not :nst-meta-sources-1
+                       #+not :nst-methods-meta-sources))
+
+(defmethod libtest ((library-name (eql :track-best)))
+  ;; The test framework used: nst.
+  (quicklisp:quickload :track-best-tests)
+  (run-nst-test-suites :track-best-tests))
