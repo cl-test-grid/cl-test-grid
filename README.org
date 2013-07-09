@@ -208,3 +208,7 @@
   cl-test-grid fix or improvement.
 
   Thank you.
+* Credits
+** Patrick Stein (http://nklein.com/, https://github.com/nklein)
+   Integration with the =nst= test framework. Testsutes of =nst= and =track-best=.
+   Contributing test results.
