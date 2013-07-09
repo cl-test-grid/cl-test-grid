@@ -18,7 +18,8 @@
                #:fiveam-api
                #:eos-api
                #:stefil-api
-               #:clunit-api)
+               #:clunit-api
+               #:nst-api)
   :components
   ((:module "testsuites"
     :serial t
