@@ -927,18 +927,23 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :nst)))
   ;; The test framework used: nst.
-  (let ((nst-system (asdf:find-system :nst)))
-    (dolist (asd (list "test/asdf/masdfnst.asd"
-                       "test/direct/nst-simple-tests.asd"
-                       "test/lisp/comp-set/comp-set.asd"
-                       "test/manual/nst-manual-tests.asd"
-                       "test/meta/mnst-relay.asd"
-                       "test/meta/nst-meta-tests.asd"
-                       "test/nst-test-jenkins.asd"
-                       "test/nst-test.asd"
-                       "test/util/nst-selftest-utils.asd"))
-      (load (asdf:system-relative-pathname nst-system asd))))
-  (quicklisp:quickload :nst-test)
+  (quicklisp:quickload :nst)
+
+  ;; Quicklisp (as of 2013-06-15) can not find many ASDF
+  ;; systems located in subdirectories of nst project.
+  ;; Workaround this by putting necesary directories
+  ;; into ASDF:*CENTRAL-REGISTRY*
+  (let ((asdf:*central-registry* (append (mapcar (lambda (subdir)
+                                                   (asdf:system-relative-pathname :nst subdir))
+                                                 '("test/asdf/"
+                                                   "test/direct/"
+                                                   "test/lisp/comp-set/"
+                                                   "test/manual/"
+                                                   "test/meta/"
+                                                   "test/"
+                                                   "test/util/"))
+                                         asdf:*central-registry*)))
+    (quicklisp:quickload :nst-test))
   (run-nst-test-suites :nst-test
                        :nst-test-utils
                        :nst-simple-tests
