@@ -8,7 +8,7 @@
   (test-grid-testsuites::clean-rt)
 
   (asdf:clear-system :rt-sample-test-suite)
-  (asdf:operate 'asdf:load-op :rt-sample-test-suite)
+  (ql:quickload :rt-sample-test-suite)
 
   (let ((status (test-grid-testsuites::run-rt-test-suite)))
     (and (alexandria:set-equal (getf status :failed-tests)
@@ -19,7 +19,7 @@
                                :test #'string=))))
 
 (defun test-lift-api ()
-  (asdf:operate 'asdf:load-op :lift-sample-test-suite)
+  (ql:quickload :lift-sample-test-suite)
   (let ((status (test-grid-testsuites::run-lift-test-suite :sample-lift-suite)))
     (and (alexandria:set-equal (getf status :failed-tests)
                                '("sample-lift-suite.test-2"
@@ -39,7 +39,7 @@
                                :test #'string=))))
 
 (defun test-fiveam-api ()
-  (asdf:operate 'asdf:load-op :fiveam-sample-test-suite)
+  (ql:quickload :fiveam-sample-test-suite)
   (let ((status (test-grid-testsuites::run-fiveam-test-suite :sample-fiveam-suite)))
     (and (alexandria:set-equal (getf status :failed-tests)
                                '("fiveam-sample-test-suite.error-test"
@@ -48,7 +48,7 @@
 	 (null (getf status :known-to-fail)))))
 
 (defun test-eos-api ()
-  (asdf:operate 'asdf:load-op :eos-sample-test-suite)
+  (ql:quickload :eos-sample-test-suite)
   (let ((status (test-grid-testsuites::run-eos-test-suites :sample-eos-suite)))
     (and (alexandria:set-equal (getf status :failed-tests)
                                '("eos-sample-test-suite.error-test"
@@ -57,7 +57,7 @@
 	 (null (getf status :known-to-fail)))))
 
 (defun test-stefil-api ()
-  (asdf:operate 'asdf:load-op :stefil-sample-test-suite)
+  (ql:quickload :stefil-sample-test-suite)
   (let ((status (test-grid-testsuites::run-stefil-test-suite (read-from-string "stefil-sample-test-suite::sample-stefil-suite"))))
     (and (alexandria:set-equal (getf status :failed-tests)
                                '("sample-stefil-suite.one-fail-test"
@@ -69,7 +69,7 @@
          (null (getf status :known-to-fail)))))
 
 (defun test-clunit-api ()
-  (asdf:operate 'asdf:load-op :clunit-sample-test-suite)
+  (ql:quickload :clunit-sample-test-suite)
   (let ((status (test-grid-testsuites::run-clunit-test-suite (read-from-string "clunit-sample-test-suite::NumberSuite"))))
     (and (alexandria:set-equal (getf status :failed-tests)
                                '("clunit-sample-test-suite::test-float1"
@@ -78,7 +78,7 @@
          (null (getf status :known-to-fail)))))
 
 (defun test-nst-api ()
-  (asdf:operate 'asdf:load-op :nst-sample-test-suite)
+  (ql:quickload :nst-sample-test-suite)
   (let ((status (test-grid-testsuites::run-nst-test-suites
                    :nst-sample-test-suite)))
     (and (alexandria:set-equal
