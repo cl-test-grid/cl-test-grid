@@ -209,6 +209,6 @@
 
   Thank you.
 * Credits
-** Patrick Stein (http://nklein.com/, https://github.com/nklein)
+** [[https://github.com/nklein ][Patrick Stein]]
    Integration with the =nst= test framework. Testsutes of =nst= and =track-best=.
    Contributing test results.
