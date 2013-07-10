@@ -1,13 +1,24 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
 * July 2013
-** TODO Commit the Nst testsute by Patrick Stein
-** TODO Review and improve README.org
-** TODO Help Jan Moringen to track down the problem of submiting test results from his network.
-** TODO Add the "Credits" section to README
-** TODO notify drakma mainteners when there are test results form drakma suite
-** TODO notify optima mainteners when there are test results from optima suite
-** TODO notify cl-6502 author when there are test results and ask about being in sync with cl-test-grid
+** DONE Commit the Nst testsute by Patrick Stein
+   CLOSED: [2013-07-09 Вт 15:01]
+** DONE notify cl-6502 author when there are test results
+   CLOSED: [2013-07-09 Вт 15:07]
    He is definitely interested, as he have sent a merge request with testsuite adapter).
+
+   Done in a comment to his blog post:
+   http://blog.redlinernotes.com/posts/My-Lisp-Summer-Project.html
+
+** DONE notify drakma mainteners when there are test results form drakma suite
+   CLOSED: [2013-07-10 Ср 03:39]
+   Posted as a comment here: https://github.com/edicl/drakma/pull/27
+** DONE notify optima mainteners when there are test results from optima suite***
+   CLOSED: [2013-07-10 Ср 03:46]
+   Send email to tomo@cx4a.org.
+** TODO Review and improve README.org
+** TODO Add the "Credits" section to README
+** TODO Help Jan Moringen to track down the problem of submiting test results from his network.
+
 * Engage People (ideas)
 ** TODO Invite test-runners by publishing clearly my needs:
    - Coverage table for Quicklisp testing,
