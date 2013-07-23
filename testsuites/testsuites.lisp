@@ -90,7 +90,8 @@ just passed to the QUICKLISP:QUICKLOAD."
     :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
     :bknr-datastore        :yaclml               :com.google.base     :external-program
     :cl-mustache           :trivial-gray-streams :drakma              :optima
-    :cl-6502               :doplus               :nst                 :track-best)
+    :cl-6502               :doplus               :nst                 :track-best
+    :cleric                :cl-erlang-term)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -957,3 +958,24 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: nst.
   (quicklisp:quickload :track-best-tests)
   (run-nst-test-suites :track-best-tests))
+
+(defmethod libtest ((library-name (eql :cleric)))
+  ;; The test framework used: fiveam.
+  (quicklisp:quickload :cleric)
+  (quicklisp:quickload :cleric-test)
+  (run-fiveam-test-suite (read-from-string "cleric-test::cleric")))
+
+(defmethod libtest ((library-name (eql :cl-erlang-term)))
+  ;; The test framework used: fiveam.
+  (quicklisp:quickload :erlang-term)
+  (let ((asdf:*central-registry* (cons (asdf:system-source-directory :erlang-term)
+                                       asdf:*central-registry*)))
+    (quicklisp:quickload :erlang-term-test))
+  (reduce #'combine-extended-libresult
+          (mapcar #'run-fiveam-test-suite
+                  (mapcar #'read-from-string
+                          '("erlang-term-test::bops"
+                            "erlang-term-test::decode"
+                            "erlang-term-test::encode"
+                            "erlang-term-test::erlang-object"
+                            "erlang-term-test::erlang-translatable")))))

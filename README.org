@@ -64,12 +64,13 @@
 
   Limitations.
 
-  Of course, we should understand that test suite success
-  does not always mean the library is workable -
+  Test suite success does not always mean the library is workable -
   there might be bugs which are not covered by the tests.
+  
   And the other way around - failed tests not always
   means the library is broken - it may be just 
   a bug in the tests themselves. 
+
   Reducing this gap increases the utility of automated testing.
 
 * The Implementation Idea
@@ -103,9 +104,9 @@
   - fresh recompilation and loading of every ASDF system found in Quicklisp;
   - testsuites of some of the libraries.
 
-  For testsuites we have so far considered 119 libraries,
+  For testsuites we have so far considered 121 libraries,
   starting from more often downloaded ones.
-  64 of these libraries have appropriate test suites
+  66 of these libraries have appropriate test suites
   (fully automated, no user interaction is needed) which
   are added to the cl-test-grid.
   
