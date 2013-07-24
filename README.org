@@ -215,7 +215,7 @@
  - Anton Vodonosov - the project author, developer and maintainer and test runner.
  - Juan Jose Garcia-Ripoll - his ECL test farm was one of the inspirations for the project.
    Also Juan Jose provided some very valuable feedback and suggestions about the project.
- - Paul Nathan - maintains Linux and Mac OSX build machines and constantly
+ - Paul Nathan - maintains Linux and Mac OS X build machines and constantly
    contributes test results for various Lisps.
  - Robert P. Goldman - for moral support and running tests in the early stage of the project.
  - Erik Huelsmann and [[http://efficito.com][efficito.com]] - for hosting a Linux VM to run our tests.
