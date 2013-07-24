@@ -201,42 +201,32 @@
  - /docs/TODO.done-archived.org/ - Archive of done TODO items
 
 * Donate
-  [[https://www.paypal.com/xclick/business=treasurer%40cl-foundation.org&currency_code=EUR&item_name=Donation%20cl-test-grid&lc=GB][PalPal/Credit Card]]
+  [[https://www.paypal.com/xclick/business=treasurer%40cl-foundation.org&currency_code=EUR&item_name=Donation%20cl-test-grid&lc=GB][PalPal/Credit Card]] - handled by Common Lisp Fundation.
 
   Donations can help the project by compensating our energy and expenses.
 
   By default the donations provided are spent at the discretion of the
-  project maintainers.
+  project maintainers. If you want to fund a particular goal,
+  it should be negotiated first.
 
-  If you want to fund a particular goal, it should be negotiated first.
+  Thank you.
 
 * Credits
- - Anton Vodonosov
-   Project author, developer and maintainer and test runner.
- - Juan Jose Garcia-Ripoll
-   His ECL test farm was one of the inspirations for the project.
+ - Anton Vodonosov - the project author, developer and maintainer and test runner.
+ - Juan Jose Garcia-Ripoll - his ECL test farm was one of the inspirations for the project.
    Also Juan Jose provided some very valuable feedback and suggestions about the project.
- - Paul Nathan
-   Maintains Linux and Mac OSX build machines and constantly contributes test results for various Lisps.
- - Robert P. Goldman
-   For moral support and running tests in the early stage of the project.
- - Erik Huelsmann and [[efficito.com]]
-   For hosting a Linux VM to run our tests.
- - Mark Safronov
-   Contributes test results.
- - Dave Cooper and [[http://genworks.com/][Genworks International]]
-   For donation
- - [[http://www.cl-foundation.org/][Common Lisp Fundation]]
-   For handling donations
- - Daniel Zaru
-   Implemented some code for retrieving test results from email box
+ - Paul Nathan - maintains Linux and Mac OSX build machines and constantly
+   contributes test results for various Lisps.
+ - Robert P. Goldman - for moral support and running tests in the early stage of the project.
+ - Erik Huelsmann and [[efficito.com]] - for hosting a Linux VM to run our tests.
+ - Mark Safronov - contributes test results.
+ - Dave Cooper and [[http://genworks.com/][Genworks International]] - for donation.
+ - [[http://www.cl-foundation.org/][Common Lisp Fundation]] - for handling donations
+ - Daniel Zaru - implemented some code for retrieving test results from email box
    and the DB printing.
- - [[https://github.com/nklein ][Patrick Stein]]
-   Integration with the =nst= test framework. Testsutes of =nst= and =track-best=.
+ - [[https://github.com/nklein ][Patrick Stein]] - integration with the =nst= test framework. Testsutes of =nst= and =track-best=.
    Contributing test results.
- - Timo Myyrä
-   Contributes test results.
- - Jan Moringen
-   Contributes test restuls.
+ - Timo Myyrä - contributes test results.
+ - Jan Moringen - contributes test restuls.
    
  Sorry if I missed anyone in this list. Please send me a note in this case.
