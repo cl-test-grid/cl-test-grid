@@ -218,7 +218,7 @@
  - Paul Nathan - maintains Linux and Mac OSX build machines and constantly
    contributes test results for various Lisps.
  - Robert P. Goldman - for moral support and running tests in the early stage of the project.
- - Erik Huelsmann and [[efficito.com]] - for hosting a Linux VM to run our tests.
+ - Erik Huelsmann and [[http://efficito.com][efficito.com]] - for hosting a Linux VM to run our tests.
  - Mark Safronov - contributes test results.
  - Dave Cooper and [[http://genworks.com/][Genworks International]] - for donation.
  - [[http://www.cl-foundation.org/][Common Lisp Fundation]] - for handling donations
