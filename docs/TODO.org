@@ -46,7 +46,7 @@
      | ECL   |             |
      | SBCL  |             |
 
-** TODO For all the new projects in eveny Quicklisp dist update
+** TODO For all the new projects in every Quicklisp dist update
    send emails to the authors explaining that their library
    is now being tested by cl-testg-grid and show where to
    observe results.
@@ -70,7 +70,7 @@
    contributor who will perform the task (if the donor and contributor have this agreed).
 ** TODO Publish the project balance:
    Requrements (perform pre-release tests, hardware needed, coding).
-   Expences are in 3 forms: time, hardware. They may be donated,
+   Expences are in 2 forms: time, hardware. They may be donated,
    or bouth by money (wich is also donated).
    Task types:
    - administration: time
@@ -110,6 +110,14 @@
 ** TODO Luis Oliveira: buld library heads from source control
 ** TODO Juan Jose: add the function call performed by test grid to the log
 * Backlog
+** TODO Quicklisp quality metric:
+   single number characterizing quality,
+   possible to calculate for every month (or time period),
+   for every chosen subset of lisps.
+
+   How to compare todays results form one year ago?
+   Lisp implementations had different versions.
+
 ** TODO Exclude cl-glfw from testing?
    Due to 300 ASDF systems it taks large part of testing time.
    Also lot of results storage.
