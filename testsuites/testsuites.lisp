@@ -91,7 +91,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :bknr-datastore        :yaclml               :com.google.base     :external-program
     :cl-mustache           :trivial-gray-streams :drakma              :optima
     :cl-6502               :doplus               :nst                 :track-best
-    :cleric                :cl-erlang-term)
+    :cleric                :cl-erlang-term       :stmx)
   "All the libraries currently supported by the test-grid.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -979,3 +979,9 @@ just passed to the QUICKLISP:QUICKLOAD."
                             "erlang-term-test::encode"
                             "erlang-term-test::erlang-object"
                             "erlang-term-test::erlang-translatable")))))
+
+(defmethod libtest ((library-name (eql :stmx)))
+  ;; The test framework used: fiveam.
+  (quicklisp:quickload :stmx)
+  (quicklisp:quickload :stmx.test)
+  (run-fiveam-test-suite (read-from-string "stmx.test::suite")))
