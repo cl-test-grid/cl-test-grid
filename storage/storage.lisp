@@ -57,8 +57,9 @@
 (defmethod name ((replica replica))
   (sptm:name (sptm:transaction-log replica)))
 
-;; override the local snapshow serialization
-;; to pretty format the data
+;; Override the local snapshot serialization
+;; to format the data based on our knowledge
+;; of the data structure we keep in the storage.
 (defmethod sptm:save-local-snapshot ((replica replica))
   (let ((versioned-data (sptm:vdata replica)))
     (with-open-file (out (sptm:local-snapshot-file replica)
