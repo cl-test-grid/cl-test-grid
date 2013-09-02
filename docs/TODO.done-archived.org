@@ -738,3 +738,23 @@
    CLOSED: [2013-05-25 Сб 19:28]
 ** DONE [4 h] Run Windows tests for Quicklisp 2013-04-20
    CLOSED: [2013-05-25 Сб 19:29]
+* July 2013
+** DONE Commit the Nst testsute by Patrick Stein
+   CLOSED: [2013-07-09 Вт 15:01]
+** DONE notify cl-6502 author when there are test results
+   CLOSED: [2013-07-09 Вт 15:07]
+   He is definitely interested, as he have sent a merge request with testsuite adapter).
+
+   Done in a comment to his blog post:
+   http://blog.redlinernotes.com/posts/My-Lisp-Summer-Project.html
+
+** DONE notify drakma mainteners when there are test results form drakma suite
+   CLOSED: [2013-07-10 Ср 03:39]
+   Posted as a comment here: https://github.com/edicl/drakma/pull/27
+** DONE notify optima mainteners when there are test results from optima suite***
+   CLOSED: [2013-07-10 Ср 03:46]
+   Send email to tomo@cx4a.org.
+** DONE Review and improve README.org
+   CLOSED: [2013-07-24 Ср 10:39]
+** DONE Add the "Credits" section to README
+   CLOSED: [2013-07-24 Ср 10:39]

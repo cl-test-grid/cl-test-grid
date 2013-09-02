@@ -1,24 +1,12 @@
 ;;;; -*- Mode: org; indent-tabs-mode: nil; coding: utf-8; show-trailing-whitespace: t -*-
-* July 2013
-** DONE Commit the Nst testsute by Patrick Stein
-   CLOSED: [2013-07-09 Вт 15:01]
-** DONE notify cl-6502 author when there are test results
-   CLOSED: [2013-07-09 Вт 15:07]
-   He is definitely interested, as he have sent a merge request with testsuite adapter).
-
-   Done in a comment to his blog post:
-   http://blog.redlinernotes.com/posts/My-Lisp-Summer-Project.html
-
-** DONE notify drakma mainteners when there are test results form drakma suite
-   CLOSED: [2013-07-10 Ср 03:39]
-   Posted as a comment here: https://github.com/edicl/drakma/pull/27
-** DONE notify optima mainteners when there are test results from optima suite***
-   CLOSED: [2013-07-10 Ср 03:46]
-   Send email to tomo@cx4a.org.
-** TODO Review and improve README.org
-** TODO Add the "Credits" section to README
+* September 2013
+** DONE Add stmx testsuite
+   CLOSED: [2013-09-02 Пн 02:56]
+   https://github.com/cosmos72/stmx
+** TODO National characters in DB: ensure DB and transactions are saved/read using utf-8
+   We started to have national characters in DB after intorduction of :fail-condition-text
 ** TODO Help Jan Moringen to track down the problem of submiting test results from his network.
-
+** TODO Install more Lisps on cl-test-grid.cloud.efficito.com machine, as my Linux server is not available anymore.
 * Engage People (ideas)
 ** TODO Invite test-runners by publishing clearly my needs:
    - Coverage table for Quicklisp testing,
@@ -123,8 +111,6 @@
    Also lot of results storage.
    The author ignored my question about the way to test all the ASDF system at once
    (is there a single  ASDF system which includes all the other ASDF systems?)
-** TODO Add stmx testsuite
-   https://github.com/cosmos72/stmx
 ** TODO Reccurig donations via PayPall
 ** TODO Use :fail-condition-type/text during reporting to automatically
    exclude FFI depending failures from comparision.
