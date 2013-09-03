@@ -139,20 +139,20 @@
   We record bugs there to avoid duplicated bug reports.
 
   cl-test-grid consists of the following components:
-  - =[[/agent][test-grid-agent]]= - the program able to run tests and upload the results online.
-  - =[[/testsuites][test-grid-testsuites]]= - testgrid adapters for testsuites of all the included
+  - [[/agent][test-grid-agent]] - the program able to run tests and upload the results online.
+  - [[/testsuites][test-grid-testsuites]] - testgrid adapters for testsuites of all the included
     libraries; used by agent.
-  - =[[/storage][test-grid-storage]]= - online storage for test results (Lisp data). Based on =sptm=
-  - =[[/sptm][sptm]]= - simple in-memory persistence for lisp data based on transaction log
+  - [[/storage][test-grid-storage]] - online storage for test results (Lisp data). Based on =sptm=
+  - [[/sptm][sptm]] - simple in-memory persistence for lisp data based on transaction log
     stored online at Amazon Web Services.
-  - =[[/gae-blobstore][test-grid-gae-blobstore]]= - online storage for test logs (plain text files).
+  - [[/gae-blobstore][test-grid-gae-blobstore]] - online storage for test logs (plain text files).
     Runs on Google App Engine.
-  - =[[/reporting][test-grid-reporting]]= - tools to generate reports from test results.
-  - =[[/data][test-grid-data]]= - support code for test results datastructures shared between other
+  - [[/reporting][test-grid-reporting]] - tools to generate reports from test results.
+  - [[/data][test-grid-data]] - support code for test results datastructures shared between other
     components; =data= is produced by =agent=, stored in =storage= and used by =reporting=
-  - =[[/server][test-grid-server]]= - tiny web application running at Heroku which forwards 
+  - [[/server][test-grid-server]] - tiny web application running at Heroku which forwards 
     notification from =agents= to the cl-test-grid-notifications google group.
-  - =[[/utils][test-grid-utils]]= - utilities.
+  - [[/utils][test-grid-utils]] - utilities.
 
   The packages also have nicknames prefixed with =tg-= : =tg-agent=, =tg-testsuites=, and so on.
 
@@ -226,7 +226,7 @@
    and the DB printing.
  - [[https://github.com/nklein ][Patrick Stein]] - integration with the =nst= test framework. Testsutes of =nst= and =track-best=.
    Contributing test results.
- - Timo Myyr‰ - contributes test results.
+ - Timo Myyr√§ - contributes test results.
  - Jan Moringen - contributes test restuls.
    
  Sorry if I missed anyone in this list. Please send me a note in this case.
