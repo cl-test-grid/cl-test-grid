@@ -226,7 +226,7 @@
    and the DB printing.
  - [[https://github.com/nklein ][Patrick Stein]] - integration with the =nst= test framework. Testsutes of =nst= and =track-best=.
    Contributing test results.
- - Timo Myyr‰ - contributes test results.
+ - Timo Myyr√§ - contributes test results.
  - Jan Moringen - contributes test restuls.
    
  Sorry if I missed anyone in this list. Please send me a note in this case.
