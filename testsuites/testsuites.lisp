@@ -91,8 +91,8 @@ just passed to the QUICKLISP:QUICKLOAD."
     :bknr-datastore        :yaclml               :com.google.base     :external-program
     :cl-mustache           :trivial-gray-streams :drakma              :optima
     :cl-6502               :doplus               :nst                 :track-best
-    :cleric                :cl-erlang-term       :stmx)
-  "All the libraries currently supported by the test-grid.")
+    :cleric                :cl-erlang-term       :stmx                :cl-epmd)
+  "All the libraries testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
   (require-impl "rt-api")
@@ -985,3 +985,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   (quicklisp:quickload :stmx)
   (quicklisp:quickload :stmx.test)
   (run-fiveam-test-suite (read-from-string "stmx.test::suite")))
+
+(defmethod libtest ((library-name (eql :cl-epmd)))
+  ;; The test framework used: fiveam.
+  (quicklisp:quickload :epmd-test)
+  (reduce #'combine-extended-libresult
+          (mapcar #'run-fiveam-test-suite
+                  (mapcar #'read-from-string '("epmd-test::epmd-protocol"
+                                               "epmd-test::epmd-client"
+                                               "epmd-test::epmd-server")))))
