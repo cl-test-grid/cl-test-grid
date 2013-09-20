@@ -125,5 +125,8 @@ Returns the outcome part of the result-spec."
              (member fail-type
                      '("CFFI:LOAD-FOREIGN-LIBRARY-ERROR")
                      :test #'string-equal))
-        (and fail-text
-             (search "Undefined foreign symbol" fail-text)))))
+        (and (find-if (lambda (txt)
+                        (search txt fail-text))
+                      '("Undefined foreign symbol"
+                        "Don't know how to REQUIRE JNA"
+                        "CFFI requires CLISP compiled with dynamic FFI support"))))))
