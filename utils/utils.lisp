@@ -142,7 +142,9 @@ Examples:
 (defun safe-read-file (file)
   (with-open-file (in file
                       :direction :input
-                      :element-type 'character ;'(unsigned-byte 8) + flexi-stream
+                      :element-type 'character
+                       ;'(unsigned-byte 8) + flexi-stream
+                      :external-format asdf:*utf-8-external-format*
                       )
     (safe-read in)))
 
@@ -150,6 +152,8 @@ Examples:
   "Write to file the lisp object OBJ in a format acceptable to READ."
   (with-standard-io-syntax
     (with-open-file (out file
+                         :element-type 'character
+                         :external-format asdf:*utf-8-external-format*
                          :direction :output
                          :if-exists :supersede
                          :if-does-not-exist :create)

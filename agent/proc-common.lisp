@@ -8,9 +8,30 @@
 (defpackage #:test-grid-proc-common (:use :cl))
 (in-package #:test-grid-proc-common)
 
+;;; utf-8 external format, if supported by the lisp implementation.
+;;; copy/pasted from ASDF
+#+(or abcl (and allegro ics) (and (or clisp cmu ecl mkcl) unicode)
+      clozure lispworks (and sbcl sb-unicode) scl)
+(eval-when (:load-toplevel :compile-toplevel :execute)
+  (pushnew :asdf-unicode *features*))
+
+(defparameter *utf-8-external-format*
+  #+(and asdf-unicode (not clisp)) :utf-8
+  #+(and asdf-unicode clisp) charset:utf-8
+  #-asdf-unicode :default
+  "Default :external-format argument to pass to CL:OPEN and also
+CL:LOAD or CL:COMPILE-FILE to best process a UTF-8 encoded file.
+On modern implementations, this will decode UTF-8 code points as CL characters.
+On legacy implementations, it may fall back on some 8-bit encoding,
+with non-ASCII code points being read as several CL characters;
+hopefully, if done consistently, that won't affect program behavior too much.")
+;;; --- end of the ASDF copy/paste ---
+
 (defun cl-user::set-response (response-file value)
   "Save the resposne for the parent process."
   (with-open-file (out (ensure-directories-exist response-file)
+                       :element-type 'character
+                       :external-format *utf-8-external-format*
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
