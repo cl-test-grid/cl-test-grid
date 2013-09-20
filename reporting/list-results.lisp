@@ -117,3 +117,13 @@ Returns the outcome part of the result-spec."
 (defun failure-p (result)
   (case (result-spec-outcome result)
     ((:fail :crash :timeout :known-fail :unexpected-ok :no-resource) t)))
+
+(defun ffi-failure-p (result)
+  (let ((fail-type (fail-condition-type result))
+        (fail-text (fail-condition-text result)))
+    (or (and fail-type
+             (member fail-type
+                     '("CFFI:LOAD-FOREIGN-LIBRARY-ERROR")
+                     :test #'string-equal))
+        (and fail-text
+             (search "Undefined foreign symbol" fail-text)))))
