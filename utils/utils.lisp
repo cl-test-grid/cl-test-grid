@@ -5,9 +5,13 @@
 (defpackage #:test-grid-utils
   (:nicknames #:tg-utils)
   (:use :cl)
-  (:export #:set=))
+  (:export #:set=
+           #:*utf-8-external-format*))
 
 (in-package #:test-grid-utils)
+
+(defparameter *utf-8-external-format* asdf:*utf-8-external-format*
+  "See docstring for ASDF:*UTF-8-EXTERNAL-FORMAT*.")
 
 (defun set= (set-a set-b &key (test #'eql) key)
   (null (set-exclusive-or set-a set-b :test test :key key)))
@@ -144,7 +148,7 @@ Examples:
                       :direction :input
                       :element-type 'character
                        ;'(unsigned-byte 8) + flexi-stream
-                      :external-format asdf:*utf-8-external-format*
+                      :external-format *utf-8-external-format*
                       )
     (safe-read in)))
 
@@ -152,9 +156,9 @@ Examples:
   "Write to file the lisp object OBJ in a format acceptable to READ."
   (with-standard-io-syntax
     (with-open-file (out file
-                         :element-type 'character
-                         :external-format asdf:*utf-8-external-format*
                          :direction :output
+                         :element-type 'character
+                         :external-format *utf-8-external-format*
                          :if-exists :supersede
                          :if-does-not-exist :create)
       (pprint obj out)))

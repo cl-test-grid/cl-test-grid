@@ -121,7 +121,8 @@ data (libraries test suites output and the run results) will be saved."
   (let ((run-file (run-info-file directory)))
     (with-open-file (out run-file
                          :direction :output
-                         :element-type 'character ;'(unsigned-byte 8) + flexi-stream
+                         :element-type 'character
+                         :external-format tg-utils:*utf-8-external-format*
                          :if-exists :supersede
                          :if-does-not-exist :create)
       (test-grid-data::print-test-run out test-run))))
@@ -167,14 +168,18 @@ as the system load status.")
   `(with-open-file (,stream-var ,file
                                 :direction :output
                                 :if-does-not-exist :create
-                                :if-exists :append)
+                                :if-exists :append
+                                :element-type 'character
+                                :external-format tg-utils:*utf-8-external-format*)
      ,@body))
 
 (defun print-testsuite-log-header (libname run-descr log-file)
   (with-open-file (stream (ensure-directories-exist log-file)
                           :direction :output
                           :if-does-not-exist :create
-                          :if-exists :supersede)
+                          :if-exists :supersede
+                          :element-type 'character
+                          :external-format tg-utils:*utf-8-external-format*)
     (let ((*print-case* :downcase) (*print-pretty* nil))
       (format stream "============================================================~%")
       (format stream "  cl-test-grid testsuite execution~%")
@@ -266,7 +271,9 @@ upon the BODY completion runs the BODY again."
   (with-open-file (stream (ensure-directories-exist log-file)
                           :direction :output
                           :if-does-not-exist :create
-                          :if-exists :supersede)
+                          :if-exists :supersede
+                          :element-type 'character
+                          :external-format tg-utils:*utf-8-external-format*)
     (let ((*print-case* :downcase) (*print-pretty* nil))
       (format stream "============================================================~%")
       (format stream "  cl-test-grid system load test~%")

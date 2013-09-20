@@ -30,11 +30,11 @@ hopefully, if done consistently, that won't affect program behavior too much.")
 (defun cl-user::set-response (response-file value)
   "Save the resposne for the parent process."
   (with-open-file (out (ensure-directories-exist response-file)
-                       :element-type 'character
-                       :external-format *utf-8-external-format*
                        :direction :output
                        :if-exists :supersede
-                       :if-does-not-exist :create)
+                       :if-does-not-exist :create
+                       :element-type 'character
+                       :external-format *utf-8-external-format*)
     (pprint value out)))
 
 ;;; backtrace printing, copy-pasted form ASDF git at 2013-02-19
@@ -153,7 +153,9 @@ The <condition type> includes package name, e.g. \"COMMON-LISP:SIMPLE-ERROR\"."
   (with-open-file (stream file
                           :direction :output
                           :if-exists :append
-                          :if-does-not-exist :create)
+                          :if-does-not-exist :create
+                          :element-type 'character
+                          :external-format *utf-8-external-format*)
     (let* ((*standard-output* stream)
            (*error-output* stream))
       (funcall body))))

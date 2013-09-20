@@ -223,16 +223,17 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
 (defun save-db (db stream-or-path)
   (with-open-file (out stream-or-path
                        :direction :output
-                       :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                        :if-exists :supersede
-                       :if-does-not-exist :create)
+                       :if-does-not-exist :create
+                       :element-type 'character
+                       :external-format tg-utils:*utf-8-external-format*)
     (print-db out db)))
 
 (defun read-db (stream-or-path)
   (with-open-file (in stream-or-path
                       :direction :input
-                      :element-type 'character ;'(unsigned-byte 8) + flexi-stream
-                      )
+                      :element-type 'character
+                      :external-format tg-utils:*utf-8-external-format*)
     (test-grid-utils::safe-read in)))
 
 (defun read-archive (&optional (archive-dir (standard-archive-dir)))

@@ -64,9 +64,10 @@
   (let ((versioned-data (sptm:vdata replica)))
     (with-open-file (out (sptm:local-snapshot-file replica)
                          :direction :output
-                         :element-type 'character ;'(unsigned-byte 8) + flexi-stream
                          :if-exists :supersede
-                         :if-does-not-exist :create)
+                         :if-does-not-exist :create
+                         :element-type 'character
+                         :external-format tg-utils:*utf-8-external-format*)
       (format out "(:version ~a~%" (sptm:version versioned-data))
       (format out " :data ")
       (test-grid-data::print-db out
