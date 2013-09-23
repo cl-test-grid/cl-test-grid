@@ -15,6 +15,7 @@
      (:file "cl-ex")
      (:file "do-results")
      (:file "distinct")
+     (:file "notes")
      (:file "html-printers")
      (:file "list-results")
      (:file "templating")
