@@ -116,10 +116,13 @@ to include in to the text of the link, defaults to RESULT-SPEC"
   (let ((html (format nil "<a class=\"~a\" href=\"~a\">~a</a>"
                       (result-css-class result)
                       (html-template:escape-string-all (log-uri result))
-                      (html-template:escape-string-all (fields-to-string result fields)))))
-    (if (ffi-failure-p result)
-        (format nil "<span style=\"white-space: nowrap\">~A ffi</span>" html)
-        html)))
+                      (html-template:escape-string-all (fields-to-string result fields))))
+        (notes (notes *note-db* result)))
+    (when (ffi-failure-p result)
+      (setf notes (cons "ffi" notes)))
+    (when notes
+      (setf html (format nil "<span style=\"white-space: nowrap\">~A ~{~A~^, ~}</span>" html notes)))
+    html))
 
 (defun results-cell-printer (out cell-data &rest fields)
   "Convenient for the most cases printer of
