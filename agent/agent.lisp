@@ -25,7 +25,8 @@
    (project-lister :type project-lister :accessor project-lister)
    ;; custom-lib-world may be a plist in the form
    ;; (:directory <pathname designator> :id <string>)
-   (custom-lib-world :type list :accessor custom-lib-world :initform nil)))
+   (custom-lib-world :type list :accessor custom-lib-world :initform nil)
+   (custom-project-names :type list :accessor custom-project-names :initform nil)))
 
 ;;; Now the LISPS property of agent may contain
 ;;; not only LISP-EXE as elements, but also
@@ -88,6 +89,10 @@
 ;; File relative to the src-dir
 (defun src-file (file-name)
   (merge-pathnames file-name (src-dir)))
+
+(defun projects-to-test (agent)
+  (or (custom-project-names agent)
+      (project-names (project-lister agent))))
 
 (defun update-testing-quicklisp (agent)
   "Ensures the private quicklisp of the agent
@@ -261,7 +266,7 @@ the PREDICATE."
                                                       (make-run lib-world (implementation-identifier lisp)))
                                                   agent
                                                   lisp
-                                                  (project-names (project-lister agent)))))
+                                                  (projects-to-test agent))))
               (submit-test-run-results results-dir (result-storages-for-lisp agent lisp))
               (mark-tested (persistence agent) lib-world (implementation-identifier lisp))
               (cl-fad:delete-directory-and-files results-dir :if-does-not-exist :ignore)))
@@ -331,7 +336,8 @@ the PREDICATE."
               ,@body)
          (setf ,place ,old)))))
 
-(defun test-patched-quicklisp (agent quicklisp-dir lib-world-id)
+(defun test-patched-quicklisp (agent quicklisp-dir lib-world-id &key project-names)
   (with-value ((custom-lib-world agent)
                (list :directory quicklisp-dir :id lib-world-id))
-    (main agent)))
+    (with-value ((custom-project-names agent) project-names)
+      (main agent))))
