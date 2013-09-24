@@ -32,12 +32,18 @@
     font-style: italic;
 }
 
+.note {
+    white-space: nowrap;}
+
+.result {
+    padding-left: 2ex;
+    text-indent: -2ex;}
+
 /* Table */
 
 .test-table {
     border-spacing: 0px;
     margin: 5;
-    white-space: nowrap;
     font-weight: bold;
     border-collapse: collapse;
 }

@@ -113,16 +113,10 @@ to include in to the text of the link, defaults to FAIL-SPEC"
 for the RESULT. The FIELDS specifies set of fields
 to include in to the text of the link, defaults to RESULT-SPEC"
   (setf fields (or fields '(result-spec)))
-  (let ((html (format nil "<a class=\"~a\" href=\"~a\">~a</a>"
-                      (result-css-class result)
-                      (html-template:escape-string-all (log-uri result))
-                      (html-template:escape-string-all (fields-to-string result fields))))
-        (notes (notes *note-db* result)))
-    (when (ffi-failure-p result)
-      (setf notes (cons "ffi" notes)))
-    (when notes
-      (setf html (format nil "<span style=\"white-space: nowrap\">~A ~{~A~^, ~}</span>" html notes)))
-    html))
+  (format nil "<a class=\"~a\" href=\"~a\">~a</a>"
+          (result-css-class result)
+          (html-template:escape-string-all (log-uri result))
+          (html-template:escape-string-all (fields-to-string result fields))))
 
 (defun results-cell-printer (out cell-data &rest fields)
   "Convenient for the most cases printer of
@@ -131,7 +125,12 @@ CELL-DATA is the list of RESULT objects to print."
   (dolist (result (sort (copy-list cell-data)
                         #'string<
                         :key (lambda (elem) (fields-to-string elem fields))))
-    (format out "~A</br>" (apply #'result-log-link result fields))))
+    (let ((notes (notes *note-db* result)))
+      (when (ffi-failure-p result)
+        (setf notes (cons "ffi" notes)))
+      (format out "<div class=\"result\">~A ~{<span class=\"note\">~A</span>~^, ~}</div>"
+              (apply #'result-log-link result fields)
+              notes))))
 
 (defun format-lib-results (out joined-lib-results)
   (dolist (joined-lib-result joined-lib-results)
