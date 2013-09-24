@@ -33,7 +33,12 @@
 }
 
 .note {
-    white-space: nowrap;}
+    white-space: nowrap;
+    color: black;}
+.note:hover {
+    color: black;}
+.note:visited {
+    color: black;}
 
 .result {
     padding-left: 2ex;

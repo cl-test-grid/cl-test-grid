@@ -4,14 +4,41 @@
 
 (in-package #:test-grid-reporting)
 
+;;; Note is either text or a ticket reference
+(defclass ticket () ())
+(defclass launchpad-ticket (ticket)
+  ((id :type string
+       :accessor id
+       :initarg :id
+       :initform (error ":id is required"))))
+
+(defun note-body-p (obj)
+  (or (stringp obj)
+      (typep obj 'ticket)))
+
+(defmethod print-object ((ticket launchpad-ticket) stream)
+  (print-unreadable-object (ticket stream :type t :identity t)
+    (format stream "~S" (id ticket))))
+
+(defgeneric ticket-url (ticket))
+(defmethod ticket-url ((ticket launchpad-ticket))
+  (concatenate 'string
+               "http://bugs.launchpad.net/bugs/"
+               (id ticket)))
+
+(defun lp-ticket (id)
+  (make-instance 'launchpad-ticket :id id))
+
+;;; Note database
+
 (defun make-note-db ()
   (make-hash-table :test 'equal))
 
-(defun set-note (db fields field-values text)
+(defun set-note (db fields field-values body)
   (let ((index (or (gethash fields db)
                     (setf (gethash fields db)
                           (make-hash-table :test 'equal)))))
-    (setf (gethash field-values index) text)))
+    (setf (gethash field-values index) body)))
 
 (defun note (db fields field-values)
   (let ((index (gethash fields db)))
@@ -42,7 +69,7 @@
                (list val))))
     (let ((db (make-note-db)))
       (labels ((fill-rec (fields field-vals spec)
-                 (if (stringp spec)
+                 (if (note-body-p spec)
                      (set-note db fields field-vals spec)
                      (let* ((cur-field (first spec))
                             (cur-field-vals (as-list (second spec)))
@@ -56,7 +83,7 @@
       db)))
 
 (defparameter *note-db*
-  (fill-notes '((lib-world "quicklisp 2013-08-13"
+  (fill-notes `((lib-world "quicklisp 2013-08-13"
                  (libname :com.informatimago
                   (failure-p t "author informed"))
                  (libname :asdf-dependency-grovel
@@ -71,10 +98,11 @@
                     "needs ASDF 3"))
                  (libname (:periods :cambl)
                   (failure-p t
-                    "see #1229050"))))))
+                    ,(lp-ticket "1229050")))))))
 #|
 (notes *note-db* (first (subset *all-results* (lambda (r) (and
-                                                           (eq (libname r) :com.informatimago)
+                                                           (eq (libname r) :cambl)
+                                                           (failure-p r)
                                                            (string= (lib-world r) "quicklisp 2013-08-13"))))))
 
 (time (dolist (r *all-results*)

@@ -118,6 +118,11 @@ to include in to the text of the link, defaults to RESULT-SPEC"
           (html-template:escape-string-all (log-uri result))
           (html-template:escape-string-all (fields-to-string result fields))))
 
+(defun note-html (note)
+  (etypecase note
+    (ticket (format nil "<a class=\"note\" href=\"~A\">#~A</a>" (ticket-url note) (id note)))
+    (string (format nil "<span class=\"note\">~A</span>" note))))
+
 (defun results-cell-printer (out cell-data &rest fields)
   "Convenient for the most cases printer of
 a RESULT object list for a pivot table cell.
@@ -128,9 +133,9 @@ CELL-DATA is the list of RESULT objects to print."
     (let ((notes (notes *note-db* result)))
       (when (ffi-failure-p result)
         (setf notes (cons "ffi" notes)))
-      (format out "<div class=\"result\">~A ~{<span class=\"note\">~A</span>~^, ~}</div>"
+      (format out "<div class=\"result\">~A ~{~A~^, ~}</div>"
               (apply #'result-log-link result fields)
-              notes))))
+              (mapcar #'note-html notes)))))
 
 (defun format-lib-results (out joined-lib-results)
   (dolist (joined-lib-result joined-lib-results)
