@@ -41,6 +41,10 @@
                          :data (getf plist :data))))
   replica)
 
+(defmethod read-local-snapshot :before ((replica replica))
+  (log:info "reading local snapshot from ~A..."
+            (truename (local-snapshot-file replica))))
+
 (defmethod read-local-snapshot :after ((replica replica))
   (log:info "read local snapshot of version ~A from ~A"
             (version replica)
@@ -54,7 +58,10 @@
   replica)
 
 (defmethod save-local-snapshot :before ((replica replica))
-  (log:info "saving local snapshot to ~A" (local-snapshot-file replica)))
+  (log:info "saving local snapshot to ~A..." (local-snapshot-file replica)))
+
+(defmethod save-local-snapshot :after ((replica replica))
+  (log:info "saved local snapshot to ~A" (local-snapshot-file replica)))
 
 (defun sync (replica)
   (when (and (zerop (version replica))
