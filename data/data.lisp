@@ -240,4 +240,5 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
   (flet ((archive-file (file-name)
            (merge-pathnames file-name archive-dir)))
     (join-dbs (read-db (archive-file "db.lisp"))
-              (read-db (archive-file "db2.lisp")))))
+              (read-db (archive-file "db2.lisp"))
+              (read-db (archive-file "db3.lisp")))))
