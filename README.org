@@ -162,9 +162,8 @@
 ** Running tests
    Described in the =agent= module documentation.
 
-   We are looking for contributors who would agree to run
-   =test-grid-agent= periodically (ideally once a day, but even
-   once a month is OK).
+   We are looking for contributors who would run tests
+   on [[http://www.lispworks.com/][LispWorks]] and [[http://franz.com/products/allegro-common-lisp/][Allegro]].
 
 ** Adding testsuite of your library
 
