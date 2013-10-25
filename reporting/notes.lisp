@@ -132,8 +132,7 @@
                     (failure-p t
                       ,(lp-ticket "1244452"))))
                  (system-name "lil"
-                   (failure-p t
-                     "https://github.com/fare/lisp-interface-library/issues/1"))))))
+                   (failure-p t "new LIL version requires ASDF 3"))))))
 #|
 (notes *note-db* (first (subset *all-results* (lambda (r) (and
                                                            (eq (libname r) :cambl)
