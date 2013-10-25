@@ -4,7 +4,7 @@
 
 (in-package #:test-grid-reporting)
 
-;;; Note is either text or a ticket reference
+;;; Note is either a text or a ticket reference
 (defclass ticket () ())
 (defclass launchpad-ticket (ticket)
   ((id :type string
@@ -98,7 +98,42 @@
                     "needs ASDF 3"))
                  (libname (:periods :cambl)
                   (failure-p t
-                    ,(lp-ticket "1229050")))))))
+                    ,(lp-ticket "1229050"))))
+                (lib-world "quicklisp 2013-10-03"
+                 (libname (:periods :cambl)
+                  (lisp-impl-type :acl
+                    "new dependency SERIES doesn't work on ACL"))
+                 (libname :cl-annot
+                   (lisp-impl-type :cmu
+                     ,(lp-ticket "1242490")))
+                 (libname :cl-autowrap
+                   (lisp-impl-type :ccl
+                     ,(lp-ticket "1242492")))
+                 (libname (:cl-gdata :cl-generic-arithmetic :sexml :string-case
+                           :memoize :macroexpand-dammit :conduit-packages
+                           :docbrowser)
+                  (failure-p t
+                    ,(lp-ticket "1242500")))
+                 (libname :cl-grace
+                  (lisp-impl-type (:acl :abcl)
+                    "Not a problem. ACL and ABCL are not supported anyway."))
+                 (libname :cl-parser-combinators
+                  (lisp-impl-type :ecl
+                   (failure-p t
+                    ,(lp-ticket "1243531"))))
+                 (libname (:cl-redis :cl-secure-read :rutils)
+                  (lisp ("ecl-13.4.1-0e93edfc-win-x86-bytecode"
+                         "ecl-13.4.1-0e93edfc-win-x86-lisp-to-c"
+                         "abcl-1.2.1-fasl42-macosx-x64")
+                   (failure-p t
+                    ,(lp-ticket "1243540"))))
+                 (libname :opticl
+                  (lisp ("cmu-snapshot-2013-04__20d_unicode_-linux-x86")
+                    (failure-p t
+                      ,(lp-ticket "1244452"))))
+                 (system-name "lil"
+                   (failure-p t
+                     "https://github.com/fare/lisp-interface-library/issues/1"))))))
 #|
 (notes *note-db* (first (subset *all-results* (lambda (r) (and
                                                            (eq (libname r) :cambl)

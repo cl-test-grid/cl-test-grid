@@ -55,8 +55,26 @@
    (load-result :type (or null list) :initarg :load-result :initform nil :reader load-result)
    (result-spec :type list :initarg :result-spec :reader result-spec)))
 
+(defgeneric lisp-impl-type (obj))
+(defparameter +lisp-impl-types+
+  (alexandria:alist-hash-table (mapcar (lambda (keyword)
+                                         (cons (string-downcase keyword)
+                                               keyword))
+                                       '(:abcl :acl :ccl :clisp :corman :cmu
+                                         :ecl :gcl :lw :mcl :mkcl :sbcl :scl :symbolics :xcl))
+                               :test #'equal))
+
+(defmethod lisp-impl-type ((implementation-identifier string))
+  (let* ((dash-pos (or (position #\- implementation-identifier)
+                      (error "invalid implementaiton-identifier: ~A" implementation-identifier)))
+         (impl-type (subseq implementation-identifier 0 dash-pos)))
+    (or (gethash impl-type +lisp-impl-types+)
+        (error "unknown lisp implementaion type: ~A" impl-type))))
+
 (defmethod lisp ((item result))
   (lisp (lib-result item)))
+(defmethod lisp-impl-type ((item result))
+  (lisp-impl-type (lisp item)))
 (defmethod lib-world ((item result))
   (lib-world (lib-result item)))
 (defmethod libname ((item result))
