@@ -89,12 +89,20 @@
                                    all-results
                                    prev-quicklisp
                                    new-quicklisp))
-
+    (print-quicklisp-diff-report (format nil "ql/~A-diff.html" (substitute #\- #\Space new-quicklisp))
+                                 all-results
+                                 prev-quicklisp
+                                 new-quicklisp)
     (my-time ("Quicklisp diff2...~%")
       (print-quicklisp-diff-report2 "quicklisp-diff2.html"
                                     all-results
                                     prev-quicklisp
                                     new-quicklisp))
+    (print-quicklisp-diff-report2 (format nil "ql/~A-diff2.html" (substitute #\- #\Space new-quicklisp))
+                                  all-results
+                                  prev-quicklisp
+                                  new-quicklisp)
+
     (my-time ("library reports...")
       (print-library-reports all-results))
 
