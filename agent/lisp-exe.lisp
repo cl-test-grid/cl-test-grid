@@ -311,13 +311,13 @@ remains running)."
   ;; on CCL external-program:process-id returns process handle
   ;; instead of process id. See http://trac.clozure.com/ccl/ticket/983.
   #+(and ccl windows)
-  (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id lisp-process))
+  (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id process))
   ;; we haven't tested on other lisps, but hope it will be the process id
   #-(and ccl windows)
-  (external-program:process-id lisp-process))
+  (external-program:process-id process))
 
 (defun windows-proc-tree-kill-command (process)
-  (list "taskkill" "/F" "/T" "/PID" (prin1-to-string (process-id lisp-process))))
+  (list "taskkill" "/F" "/T" "/PID" (prin1-to-string (process-id process))))
 
 (defun unix-proc-tree-kill-command (process)
   (list (asdf:system-relative-pathname :test-grid-agent "agent/killproctree.sh")
@@ -343,12 +343,12 @@ remains running)."
           (log:warn "~A \"~A\" is signalled when killing the process. external-program:process-status still returns :running for the process, but this value may be outdated, so we hope that the error is signalled because the process is already terminated."
                     (type-of c) c))))))
 
-(defun try-to-kill-process-tree (lisp-process)
-  (log:info "Trying to kill the process tree of ~A" lisp-process)
+(defun try-to-kill-process-tree (process)
+  (log:info "Trying to kill the process tree of ~A" process)
   (let ((command-line (if (member :windows *features*)
-                          (windows-proc-tree-kill-command lisp-process)
+                          (windows-proc-tree-kill-command process)
                           ;; does non-windows always mean unix-like? :)
-                          (unix-proc-tree-kill-command lisp-process))))
+                          (unix-proc-tree-kill-command process))))
     (multiple-value-bind (status exit-code)
         (exec (car command-line) (cdr command-line))
       (when (not (and (eq :exited status)
@@ -357,7 +357,7 @@ remains running)."
                   status exit-code)
         (unless (member :windows *features*)
           (log:info "As the process tree kill failed, fallback to just killing the process by signal 9...")
-          (unix-kill-process lisp-process))))))
+          (unix-kill-process process))))))
 
 (defmethod run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (let ((p (apply #'start-lisp-process lisp-exe forms)))
