@@ -162,7 +162,7 @@ and writting the file to that stream."
                    (submit-batch id-pathname-alist-part)
                  (incf done (length id-pathname-alist-part))
                  (log:info "~A/~A files uploaded" done total))))
-      (let* ( ;; Split the files submitted into batches by < 500 elements
+      (let* ( ;; Split the files submitted into batches by < batch-size elements
              ;; to workaround GAE blobstore issue: https://code.google.com/p/googleappengine/issues/detail?id=8032
              (batches (test-grid-utils::split-list id-pathname-alist batch-size))
              (response (mapcan #'submit-batch-logging batches)))
