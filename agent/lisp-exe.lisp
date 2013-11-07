@@ -170,13 +170,14 @@ Otherwise he may just ignore the condition."))
 (defgeneric start-lisp-process (lisp-exe &rest forms))
 
 ;;; default implementation of start-lisp-process
-(defgeneric make-command-line (lisp-exe from-strings)
+(defgeneric make-command-line (lisp-exe form-strings)
  (:documentation "Returns a list of strings. The first string is the
 command, the rest strings are the command arguments."))
 
 (defun code-str (lisp-code)
   "Formats lisp code so that it can be read back by lisp reader."
-  (prin1-to-string lisp-code))
+  (let ((*print-case* :downcase))
+    (prin1-to-string lisp-code)))
 
 (defmethod start-lisp-process ((lisp-exe lisp-exe) &rest forms)
   (let ((command-line (make-command-line lisp-exe (mapcar #'code-str forms))))
@@ -272,7 +273,7 @@ command, the rest strings are the command arguments."))
           "-batch"
           ,@(prepend-each "-ee" (mapcar #'escape-process-parameter-for-allegro
                                         form-strings))
-          "-ee" "(excl:exit 0)")))
+          "-ee" ,(escape-process-parameter-for-allegro "(excl:exit 0)"))))
 
 (defmethod make-command-line ((lisp-exe lispworks) form-strings)
   (log:warn "lisp-exe for lispworks hasn't been tested, may fail; creating command line for lispworks...")
