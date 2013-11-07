@@ -24,25 +24,42 @@
     (t
      (error "Malformed feature specification ~S" x))))
 
-;;; ---------------------------------------------------------------------------
-;;; implementation-identifier
-;;;
-;;; produce a string to identify current implementation.
-;;; Initially stolen from SLIME's SWANK, rewritten in ASDF.
-;;; Now adopted in cl-test-grid.
 
-(defun first-feature (features)
-  (dolist (x features)
-    (multiple-value-bind (val feature)
-        (if (consp x) (values (first x) (cons :or (rest x))) (values x x))
-      (when (featurep feature) (return val)))))
+;;; The code below is copy/pasted from ASDF.
+;;; ASDF version: 
+;;; commit ef15f1f1ab4a1c627a9a6eaa83c9587478a0adde
+;;; Author: Francois-Rene Rideau <tunes@google.com>
+;;; Date:   Thu Nov 7 10:48:55 2013 -0500
+
+;;;; implementation-identifier
+;;
+;; produce a string to identify current implementation.
+;; Initially stolen from SLIME's SWANK, completely rewritten since.
+;; We're back to runtime checking, for the sake of e.g. ABCL.
+
+(defun first-feature (feature-sets)
+  "A helper for various feature detection functions"
+  (dolist (x feature-sets)
+    (multiple-value-bind (short long feature-expr)
+        (if (consp x)
+            (values (first x) (second x) (cons :or (rest x)))
+            (values x x x))
+      (when (featurep feature-expr)
+        (return (values short long))))))
 
 (defun implementation-type ()
+  "The type of Lisp implementation used, as a short UIOP-standardized keyword"
   (first-feature
-   '(:abcl (:acl :allegro) (:ccl :clozure) :clisp (:corman :cormanlisp) :cmu
-     :ecl :gcl (:lw :lispworks) :mcl :mkcl :sbcl :scl :symbolics :xcl)))
+   '(:abcl (:acl :allegro) (:ccl :clozure) :clisp (:corman :cormanlisp)
+     (:cmu :cmucl :cmu) :ecl :gcl
+     (:lwpe :lispworks-personal-edition) (:lw :lispworks)
+     :mcl :mkcl :sbcl :scl (:smbx :symbolics) :xcl)))
+
+(defvar *implementation-type* (implementation-type)
+  "The type of Lisp implementation used, as a short UIOP-standardized keyword")
 
 (defun operating-system ()
+  "The operating system of the current host"
   (first-feature
    '(:cygwin (:win :windows :mswindows :win32 :mingw32) ;; try cygwin first!
      (:linux :linux :linux-target) ;; for GCL at least, must appear before :bsd
@@ -51,8 +68,9 @@
      :genera)))
 
 (defun architecture ()
+  "The CPU architecture of the current host"
   (first-feature
-   '((:x64 :amd64 :x86-64 :x86_64 :x8664-target (:and :word-size=64 :pc386))
+   '((:x64 :x86-64 :x86_64 :x8664-target :amd64 (:and :word-size=64 :pc386))
      (:x86 :x86 :i386 :i486 :i586 :i686 :pentium3 :pentium4 :pc386 :iapx386 :x8632-target)
      (:ppc64 :ppc64 :ppc64-target) (:ppc32 :ppc32 :ppc32-target :ppc :powerpc)
      :hppa64 :hppa :sparc64 (:sparc32 :sparc32 :sparc)
@@ -71,17 +89,19 @@
       (error "Can't determine fasl version.")))
 
 (defun lisp-version-string ()
+  "return a string that identifies the current Lisp implementation version"
   (let ((s (lisp-implementation-version)))
     (car ; as opposed to OR, this idiom prevents some unreachable code warning
      (list
       #+allegro
-      (format nil "~A~A~@[~A~]"
+      (format nil "~A~@[~A~]~@[~A~]~@[~A~]"
               excl::*common-lisp-version-number*
-              ;; ANSI vs MoDeRn - thanks to Robert Goldman and Charley Cox
-              (if (eq excl:*current-case-mode* :case-sensitive-lower) "M" "A")
+              ;; M means "modern", as opposed to ANSI-compatible mode (which I consider default)
+              (and (eq excl:*current-case-mode* :case-sensitive-lower) "M")
               ;; Note if not using International ACL
               ;; see http://www.franz.com/support/documentation/8.1/doc/operators/excl/ics-target-case.htm
-              (excl:ics-target-case (:-ics "8")))
+              (excl:ics-target-case (:-ics "8"))
+              (and (member :smp *features*) "S"))
       #+armedbear (format nil "~a-fasl~a" s system::*fasl-version*)
       #+clisp
       (subseq s 0 (position #\space s)) ; strip build information (date, etc.)
@@ -105,6 +125,8 @@
       s))))
 
 (defun implementation-identifier ()
+  "Return a string that identifies the ABI of the current implementation,
+suitable for use as a directory name to segregate Lisp FASLs, C dynamic libraries, etc."
   (substitute-if
    #\_ #'(lambda (x) (find x " /:;&^\\|?<>(){}[]$#`'\""))
    (format nil "~(~a~@{~@[-~a~]~}~)"
@@ -112,3 +134,5 @@
            (or (lisp-version-string) (lisp-implementation-version))
            (or (operating-system) (software-type))
            (or (architecture) (machine-type)))))
+
+
