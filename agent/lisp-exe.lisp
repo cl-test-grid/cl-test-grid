@@ -320,7 +320,8 @@ remains running)."
   (list "taskkill" "/F" "/T" "/PID" (prin1-to-string (process-id process))))
 
 (defun unix-proc-tree-kill-command (process)
-  (list (asdf:system-relative-pathname :test-grid-agent "agent/killproctree.sh")
+  (list "/bin/sh"
+        (asdf:system-relative-pathname :test-grid-agent "agent/killproctree.sh")
         (prin1-to-string (process-id process))
         "9"))
 
