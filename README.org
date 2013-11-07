@@ -200,7 +200,7 @@
  - /docs/TODO.done-archived.org/ - Archive of done TODO items
 
 * Donate
-  [[https://www.paypal.com/xclick/business=treasurer%40cl-foundation.org&currency_code=EUR&item_name=Donation%20cl-test-grid&lc=GB][PalPal/Credit Card]] - handled by Common Lisp Fundation.
+  [[https://www.paypal.com/xclick/business=treasurer%40cl-foundation.org&currency_code=EUR&item_name=Donation%20cl-test-grid&lc=GB][PalPal/Credit Card]] - handled by Common Lisp Foundation.
 
   Donations can help the project by compensating our energy and expenses.
 
@@ -220,7 +220,7 @@
  - Erik Huelsmann and [[http://efficito.com][efficito.com]] - for hosting a Linux VM to run our tests.
  - Mark Safronov - contributes test results.
  - Dave Cooper and [[http://genworks.com/][Genworks International]] - for donation.
- - [[http://www.cl-foundation.org/][Common Lisp Fundation]] - for handling donations
+ - [[http://www.cl-foundation.org/][Common Lisp Foundation]] - for handling donations
  - Daniel Zaru - implemented some code for retrieving test results from email box
    and the DB printing.
  - [[https://github.com/nklein ][Patrick Stein]] - integration with the =nst= test framework. Testsutes of =nst= and =track-best=.
