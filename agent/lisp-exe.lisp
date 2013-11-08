@@ -307,47 +307,27 @@ remains running)."
            (return)))
        (sleep 1))))
 
-(defun try-to-kill-process-tree (lisp-process)
-  (log:info "Trying to kill the process tree of ~A" lisp-process)
-  (if (member :windows *features*)
-      (windows-kill-process-tree lisp-process)
-      ;; does non-windows always mean unix-like? :)
-      (unix-kill-process-tree lisp-process)))
+(defun process-id (process)
+  ;; on CCL external-program:process-id returns process handle
+  ;; instead of process id. See http://trac.clozure.com/ccl/ticket/983.
+  #+(and ccl windows)
+  (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id process))
+  ;; we haven't tested on other lisps, but hope it will be the process id
+  #-(and ccl windows)
+  (external-program:process-id process))
 
-(defun windows-kill-process-tree (lisp-process)
-  (let ((process-id
-         ;; on CCL external-program:process-id returns process handle
-         ;; instead of process id. See http://trac.clozure.com/ccl/ticket/983.
-         #+(and ccl windows)
-         (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id lisp-process))
-         ;; we haven't tested on other lisps, but hope it will be the process id
-         #-(and ccl windows)
-         (external-program:process-id lisp-process)))
-    (multiple-value-bind (status exit-code)
-        (exec "taskkill" (list "/F" "/T" "/PID" (prin1-to-string process-id)))
-      (when (not (and (eq :exited status)
-                      (= 0 exit-code)))
-        (log:warn "The result of taskkill unitilty is ~A, ~A for process ID ~A. Probably the process tree is not killed"
-                  status exit-code process-id)))))
+(defun windows-proc-tree-kill-command (process)
+  (list "taskkill" "/F" "/T" "/PID" (prin1-to-string (process-id process))))
 
-(defun unix-kill-process-tree (lisp-process)
-  ;; On unix killing the whole tree is less important,
-  ;; because one of the main motivations for killing
-  ;; tree is that CLISP always starts two processes on
-  ;; windows: clisp.exe and it's child performing the
-  ;; real work - lisp.exe. On unix-like systems
-  ;; lisp.exe is started using execv which replaces
-  ;; the parent process by child process, so CLISP
-  ;; is running in a single process.
-  ;;
-  ;; Still, killing the process tree is desirable,
-  ;; in case the test suite starts some other programs
-  ;; (as external-program teste sute, which runs some
-  ;; shell commands). Implementing the process tree
-  ;; kill on unix is in our TODO.
-  (log:warn "Killing the process tree for non-windows platforms is not implemented yet. Just killing the process.")
+(defun unix-proc-tree-kill-command (process)
+  (list "/bin/sh"
+        (asdf:system-relative-pathname :test-grid-agent "agent/killproctree.sh")
+        (prin1-to-string (process-id process))
+        "9"))
+
+(defun unix-kill-process (process)
   (handler-case
-      (external-program:signal-process lisp-process 9)
+      (external-program:signal-process process 9)
     (serious-condition (c)
       ;; If the process is already terminated, when we ask CCL to kill it,
       ;; CCL signals a SIMPLE-ERROR "No such process".
@@ -359,10 +339,26 @@ remains running)."
       ;; because we know that CCL do not synchronize
       ;; the process status immediately, so the :running
       ;; value may be just outdated information.
-      (let ((status (external-program:process-status lisp-process)))
+      (let ((status (external-program:process-status process)))
         (when (eq :running status)
           (log:warn "~A \"~A\" is signalled when killing the process. external-program:process-status still returns :running for the process, but this value may be outdated, so we hope that the error is signalled because the process is already terminated."
                     (type-of c) c))))))
+
+(defun try-to-kill-process-tree (process)
+  (log:info "Trying to kill the process tree of ~A" process)
+  (let ((command-line (if (member :windows *features*)
+                          (windows-proc-tree-kill-command process)
+                          ;; does non-windows always mean unix-like? :)
+                          (unix-proc-tree-kill-command process))))
+    (multiple-value-bind (status exit-code)
+        (exec (car command-line) (cdr command-line))
+      (when (not (and (eq :exited status)
+                      (= 0 exit-code)))
+        (log:warn "The result of the process tree kill command is ~A, ~A. Probably the process tree is not killed"
+                  status exit-code)
+        (unless (member :windows *features*)
+          (log:info "As the process tree kill failed, fallback to just killing the process by signal 9...")
+          (unix-kill-process process))))))
 
 (defmethod run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (let ((p (apply #'start-lisp-process lisp-exe forms)))
