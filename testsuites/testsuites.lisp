@@ -350,24 +350,44 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :cl-fad)))
 
-  ;; The test framework used: cl:assert.
+  ;; The test framework used: cl:assert + unit-test.
 
   (quicklisp:quickload :cl-fad)
-  (let ((test-file (or (probe-file (asdf:system-relative-pathname :cl-fad "test.lisp"))
-                       ;; some time ago the file was renamed
-                       (probe-file (asdf:system-relative-pathname :cl-fad "fad.test.lisp"))
-                       (error "Can not find fad.test.lisp nor test.lisp in the cl-fad sources"))))
-    (load test-file))
 
-  ;; cl-fad test suite uses cl:assert.
-  ;; I.e. any test faifures are signaled as errors.
-  (handler-case
-      (progn
-        (funcall (intern (symbol-name '#:test) '#:cl-fad-test))
-        :ok)
-    (error (e)
-      (format t "cl-fad test suite failed with error: ~A" e)
-      :fail)))
+  ;; loading the tests code:
+  (or
+   ;; in the most recent version of cl-fad, the tests have their own ASDF system
+   (ignore-errors (quicklisp:quickload :cl-fad-test) t)
+   ;; in older versions the tests are just kept in a single file
+   (let ((test-file (or (probe-file (asdf:system-relative-pathname :cl-fad "fad.test.lisp"))
+                        ;; in the oldest version the file was named differently
+                        (probe-file (asdf:system-relative-pathname :cl-fad "test.lisp")))))
+     (when test-file
+       (load test-file)))
+   (error "Can not load cl-fad-test system, and can not find fad.test.lisp nor test.lisp in the cl-fad sources"))
+
+  ;; running the tests
+  (let (
+        ;; main cl-fad test suite uses cl:assert.
+        ;; I.e. any test faifures are signaled as errors.
+        (main-ok-p (handler-case
+                       (progn
+                         (format t "~&~%;;; Running main tests~%~%")
+                         (funcall (read-from-string "cl-fad-test:test"))
+                         t)
+                     (error (e)
+                       (format t "cl-fad test suite failed with error: ~A" e)
+                       nil)))
+        ;; newer version of cl-fad has tests for temporary file functionality,
+        ;; these new tests are implemented using unit-test framework
+        (temp-file-ok-p (if (find-symbol (string 'temporary-file) 'cl-fad-test)
+                            (progn
+                              (format t "~&~%;;; Running temporary file tests~%~%")
+                              (funcall (read-from-string "unit-test:run-all-tests")
+                                       :unit
+                                       (read-from-string "cl-fad-test::temporary-file")))
+                            t)))
+    (and main-ok-p temp-file-ok-p)))
 
 (defmethod libtest ((library-name (eql :trivial-backtrace)))
   ;; The test framework used: lift.
