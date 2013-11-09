@@ -3,10 +3,88 @@
 ** DONE Add stmx testsuite
    CLOSED: [2013-09-02 Пн 02:56]
    https://github.com/cosmos72/stmx
-** TODO National characters in DB: ensure DB and transactions are saved/read using utf-8
+** DONE National characters in DB: ensure DB and transactions are saved/read using utf-8
+   CLOSED: [2013-09-24 Вт 20:20]
    We started to have national characters in DB after intorduction of :fail-condition-text
+** DONE recognize FFI failures and reflect them in the reports
+   CLOSED: [2013-09-24 Вт 20:20]
+   in test results (maybe as :no-resource status, but it's better
+   to have a special status, including the library name. that way
+   we will have up to date list of foreign libraries necessary
+   to have quicklisp fully working).
+
+   Catch CFFI conditions, and in case of ABCL, failure to load JNA classes.
+   This should be done for load test and for testsuite run.
+
+   After this is implemented, it is desirable to re-run the tests on
+   the current and the previous Quicklisps, so that we don't redundant
+   items in the diff report (what previous was a load failure
+   now becomes :no-resource - not a failure).
+
+   The solution:
+   The FFI failures are recognised based on :fail-condition-type
+   and :fail-condition-text properties of result and
+   marked by "ffi" note in reports, using our new "notes" feature.
+
+** DONE Notes: manually annotate failures with explanations; have the explanations printed in reports
+   CLOSED: [2013-10-13 Вс 03:49]
+** DONE Notes referring launchpad issues should be printed as hyperlinks
+   CLOSED: [2013-10-13 Вс 03:45]
+** DONE Install more Lisps on cl-test-grid.cloud.efficito.com machine, as my Linux server is not available anymore.
+   CLOSED: [2013-10-13 Вс 03:45]
+* October 2013
+** DONE DB maintenance
+   CLOSED: [2013-10-21 Пн 03:18]
+   - archive new test runs in cl-test-grid-results repo
+   - clean the "main" storage from all the results except
+     for the last 3 Quicklisp releases
+** DONE Review the quiclisp 2013-10-03 results and report bugs
+   CLOSED: [2013-11-10 Вс 01:10]
+* November 2013
+** DONE kill process tree on unix in case the test suite exceeded timeout
+   CLOSED: [2013-11-09 Сб 20:26]
+   Currenlty we only kill the lisp process, but not it's children.
+   Some test suites may start other programs, and it makes sense
+   to kill the testsuite child process too. Implementation hint:
+   the most portable API on unix to find out child processes,
+   as it seems to be, is the ps program. We will need to
+   implement a shell script killproctree.sh <pid> which uses
+   ps to find all descendents and kill them. Portable format
+   of ps arguments should be used.
+
+   The thread wich has lead to implementing the solution:
+   https://groups.google.com/forum/#!topic/cl-test-grid/6uqyuj6Jy-0
+
+** DONE Adjust cl-fad testsuite adapter
+   CLOSED: [2013-11-10 Вс 00:47]
+   Done. Also informed cl-fad developers that changes
+   in testsuite breaks cl-test-grid adapter
+   and asked them to inform us in such cases:
+   https://github.com/edicl/cl-fad/issues/10
+** DONE review the FFI related TODO items, some should be already done
+   CLOSED: [2013-11-10 Вс 00:55]
+** DONE mention Patrick's donation, and David as a test results contributor
+   CLOSED: [2013-11-10 Вс 00:59]
+   in the Credists section of README.org
+** DONE fix code rendering of data/README.md by github
+   CLOSED: [2013-11-10 Вс 01:10]
+   https://github.com/cl-test-grid/cl-test-grid/tree/master/data
+
+   Github recently has broken the code colorer. The lines
+   which does not fit into the code block width are wrapped,
+   and so all the indentation is broken and unreadable.
+
+   Previously the lines were not wraped, but code block just
+   had a horizontal scrollbar.
+
+   The solution: do not specify the programming language.
+   In this case the code is not colored, but the indentation
+   is reflected as necessary.
+
+** TODO Document :fail-condition-type/text on data/README.md
+** TODO Assist Dave Cooper in configuring tg-agent
+** TODO Document the Notes feature: code comments and the reporting/README.md
 ** TODO Help Jan Moringen to track down the problem of submiting test results from his network.
-** TODO Install more Lisps on cl-test-grid.cloud.efficito.com machine, as my Linux server is not available anymore.
 * Engage People (ideas)
 ** TODO Invite test-runners by publishing clearly my needs:
    - Coverage table for Quicklisp testing,
@@ -98,6 +176,8 @@
 ** TODO Luis Oliveira: buld library heads from source control
 ** TODO Juan Jose: add the function call performed by test grid to the log
 * Backlog
+** TODO README.org: list Patrick Stein and nklein.com as a donor
+** TODO remove wrong tooltip OK?FAIL
 ** TODO Quicklisp quality metric:
    single number characterizing quality,
    possible to calculate for every month (or time period),
@@ -113,11 +193,14 @@
    (is there a single  ASDF system which includes all the other ASDF systems?)
 ** TODO Reccurig donations via PayPall
 ** TODO Use :fail-condition-type/text during reporting to automatically
-   exclude FFI depending failures from comparision.
-** TODO Document :fail-condition-type/text on data/README.md
+   exclude FFI depending failures from comparision (quicklisp diff).
+   Thtats just an idea, probably this should be optional.
+   Anyway, the FFI related failures are distinguished by the "ffi"
+   note in the reports, so when we overview the diff, we know
+   it's not a regresson.
 ** TODO When retrieving project/systems list from Quicklisp, sort them.
    So that testing order is deterministic and is always the same.
-   Impl. plan: handl in the agent/project-lister.java
+   Impl. plan: handle in the agent/project-lister.java
 ** TODO Snapshot publisher daemon (heroku worker dyno app running every day (hour)).
 ** TODO Reports re-generator daemon (heroku worker dyno app scheduled after every
    test run submit notification and also at some intervals to cover other DB
@@ -292,19 +375,6 @@
 
    Although, for the most important libraries which don't have
    enough maintainers we could provide implementation.
-** TODO foreign library load errors should be recognized and represented
-   in test results (maybe as :no-resource status, but it's better
-   to have a special status, including the library name. that way
-   we will have up to date list of foreign libraries necessary
-   to have quicklisp fully working).
-
-   Catch CFFI conditions, and in case of ABCL, failure to load JNA classes.
-   This should be done for load test and for testsuite run.
-
-   After this is implemented, it is desirable to re-run the tests on
-   the current and the previous Quicklisps, so that we don't redundant
-   items in the diff report (what previous was a load failure
-   now becomes :no-resource - not a failure).
 ** TODO Introduce an option to limit agent run time
   Use case: someone wants to run agents at night, but have
   the machine free from agent during dayly work.
@@ -357,15 +427,6 @@
    will be up)
    Related thread on asdf-devel:
    http://lists.common-lisp.net/pipermail/asdf-devel/2012-July/002548.html
-** TODO kill process tree on unix in case the test suite exceeded timeout
-   Currenlty we only kill the lisp process, but not it's children.
-   Some test suites may start other programs, and it makes sense
-   to kill the testsuite child process too. Implementation hint:
-   the most portable API on unix to find out child processes,
-   as it seems to be, is the ps program. We will need to
-   implement a shell script killtree.sh <pid> which uses
-   ps to find all descendents and kill them. Portable format
-   of ps arguments should be used.
 ** TODO consider what test suite timeout value is the best (30 mins currently)
 ** TODO should the lisp-process-timeout condition inherit from serous-condition, error, or just condition?
 ** TODO program parameters escaping is not perfect. When we
