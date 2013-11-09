@@ -219,11 +219,13 @@
  - Robert P. Goldman - for moral support and running tests in the early stage of the project.
  - Erik Huelsmann and [[http://efficito.com][efficito.com]] - for hosting a Linux VM to run our tests.
  - Mark Safronov - contributes test results.
- - Dave Cooper and [[http://genworks.com/][Genworks International]] - for donation.
+ - Dave Cooper and [[http://genworks.com/][Genworks International]] - for donation and running the tests.
  - [[http://www.cl-foundation.org/][Common Lisp Foundation]] - for handling donations
  - Daniel Zaru - implemented some code for retrieving test results from email box
    and the DB printing.
- - [[https://github.com/nklein ][Patrick Stein]] - integration with the =nst= test framework. Testsutes of =nst= and =track-best=.
+ - [[https://github.com/nklein ][Patrick Stein]] - for donation,
+   for integration with the =nst= test framework.
+   Testsutes of =nst= and =track-best=.
    Contributing test results.
  - Timo Myyrä - contributes test results.
  - Jan Moringen - contributes test restuls.
