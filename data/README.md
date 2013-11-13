@@ -1,7 +1,7 @@
 Test grid result objects are represented by property lists.
 Example of test results database:
 
-```
+``` common-lisp
 (:schema 6
  :runs ((:descr (:lisp "sbcl-1.1.3-linux-x86" :lib-world "quicklisp 2012-12-23" :time 3567905766 :run-duration 4856 :contact-email "avodonosov@yandex.ru")
          :results ((:libname :3B-SWF
