@@ -84,6 +84,9 @@
 
 (defparameter *note-db*
   (fill-notes `((lib-world "quicklisp 2013-08-13"
+                 (libname (:series)
+                  (lisp-impl-type :acl
+                    ,(lp-ticket "1249658")))
                  (libname :com.informatimago
                   (failure-p t "author informed"))
                  (libname :asdf-dependency-grovel
@@ -100,6 +103,9 @@
                   (failure-p t
                     ,(lp-ticket "1229050"))))
                 (lib-world "quicklisp 2013-10-03"
+                 (libname (:series)
+                  (lisp-impl-type :acl
+                    ,(lp-ticket "1249658")))
                  (libname (:periods :cambl)
                   (lisp-impl-type :acl
                     "new dependency SERIES doesn't work on ACL"))

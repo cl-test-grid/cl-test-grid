@@ -29,7 +29,7 @@
                (project-systems-alist project-lister)
                :test #'string=)))
 
-(defparameter +list-quicklisp-projects-timeout-seconds+ 60)
+(defparameter +list-quicklisp-projects-timeout-seconds+ 180)
 
 (defun proc-list-quicklisp-projects (lisp-exe private-quicklisp-dir)
   (with-response-file (response-file)

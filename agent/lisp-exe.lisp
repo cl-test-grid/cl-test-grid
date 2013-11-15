@@ -144,7 +144,11 @@ Otherwise he may just ignore the condition."))
 ;; bugs, like http://trac.clozure.com/ccl/ticket/858.
 (defun escape-process-parameter (param-str)
   (if (and (member :windows *features*)
-           (member :ccl *features*))
+           (member :ccl *features*)
+           ;; the bug is fixed in CCL 1.9
+           ;; :ccl-1.9 will be present in *features* even
+           ;; in later versions, like 1.10, 1.11
+           (not (member :ccl-1.9 *features*)))
       (with-output-to-string (s)
         (princ #\" s)
         (loop for ch across param-str
@@ -364,6 +368,6 @@ remains running)."
   (let ((p (apply #'start-lisp-process lisp-exe forms)))
     (handler-case (wait timeout-seconds p)
       (lisp-process-timeout (c)
-        (log:warn "Lisp process ~A ~S exceeded the timeout of ~A seconds. Trying to kill the process and it's possible child processes" lisp-exe forms timeout-seconds)
+        (log:warn "Lisp process ~A ~S exceeded the timeout of ~A seconds. Trying to kill the process and its possible child processes" lisp-exe forms timeout-seconds)
         (try-to-kill-process-tree p)
         (signal c)))))
