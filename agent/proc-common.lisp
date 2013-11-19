@@ -27,13 +27,18 @@ with non-ASCII code points being read as several CL characters;
 hopefully, if done consistently, that won't affect program behavior too much.")
 ;;; --- end of the ASDF copy/paste ---
 
+
+(defparameter *utf-8-compatible-character-type*
+  #+lispworks 'lw:simple-char
+  #-lispworks 'character)
+
 (defun cl-user::set-response (response-file value)
   "Save the resposne for the parent process."
   (with-open-file (out (ensure-directories-exist response-file)
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create
-                       :element-type 'character
+                       :element-type *utf-8-compatible-character-type*
                        :external-format *utf-8-external-format*)
     (pprint value out)))
 
@@ -154,7 +159,7 @@ The <condition type> includes package name, e.g. \"COMMON-LISP:SIMPLE-ERROR\"."
                           :direction :output
                           :if-exists :append
                           :if-does-not-exist :create
-                          :element-type 'character
+                          :element-type *utf-8-compatible-character-type*
                           :external-format *utf-8-external-format*)
     (let* ((*standard-output* stream)
            (*error-output* stream))
