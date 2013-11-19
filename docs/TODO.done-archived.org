@@ -758,3 +758,44 @@
    CLOSED: [2013-07-24 Ср 10:39]
 ** DONE Add the "Credits" section to README
    CLOSED: [2013-07-24 Ср 10:39]
+* September 2013
+** DONE Add stmx testsuite
+   CLOSED: [2013-09-02 Пн 02:56]
+   https://github.com/cosmos72/stmx
+** DONE National characters in DB: ensure DB and transactions are saved/read using utf-8
+   CLOSED: [2013-09-24 Вт 20:20]
+   We started to have national characters in DB after intorduction of :fail-condition-text
+** DONE recognize FFI failures and reflect them in the reports
+   CLOSED: [2013-09-24 Вт 20:20]
+   in test results (maybe as :no-resource status, but it's better
+   to have a special status, including the library name. that way
+   we will have up to date list of foreign libraries necessary
+   to have quicklisp fully working).
+
+   Catch CFFI conditions, and in case of ABCL, failure to load JNA classes.
+   This should be done for load test and for testsuite run.
+
+   After this is implemented, it is desirable to re-run the tests on
+   the current and the previous Quicklisps, so that we don't redundant
+   items in the diff report (what previous was a load failure
+   now becomes :no-resource - not a failure).
+
+   The solution:
+   The FFI failures are recognised based on :fail-condition-type
+   and :fail-condition-text properties of result and
+   marked by "ffi" note in reports, using our new "notes" feature.
+
+** DONE Notes: manually annotate failures with explanations; have the explanations printed in reports
+   CLOSED: [2013-10-13 Вс 03:49]
+** DONE Notes referring launchpad issues should be printed as hyperlinks
+   CLOSED: [2013-10-13 Вс 03:45]
+** DONE Install more Lisps on cl-test-grid.cloud.efficito.com machine, as my Linux server is not available anymore.
+   CLOSED: [2013-10-13 Вс 03:45]
+* October 2013
+** DONE DB maintenance
+   CLOSED: [2013-10-21 Пн 03:18]
+   - archive new test runs in cl-test-grid-results repo
+   - clean the "main" storage from all the results except
+     for the last 3 Quicklisp releases
+** DONE Review the quiclisp 2013-10-03 results and report bugs
+   CLOSED: [2013-11-10 Вс 01:10]

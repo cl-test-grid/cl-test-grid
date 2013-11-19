@@ -44,5 +44,14 @@
 
 
 (defun init-project-lister (lisp-exe private-quicklisp-dir)
-  (let ((alist (proc-list-quicklisp-projects lisp-exe private-quicklisp-dir)))
-    (make-instance 'project-lister :project-systems-alist alist)))
+  (let* ((alist (proc-list-quicklisp-projects lisp-exe private-quicklisp-dir))
+         (sorted (sort (mapcar (lambda (elem)
+                                 (let ((project-name (first elem))
+                                       (system-names (rest elem)))
+                                   (cons project-name
+                                         (sort (copy-list system-names)
+                                               #'string<))))
+                               alist)
+                       #'string<
+                       :key #'first)))
+    (make-instance 'project-lister :project-systems-alist sorted)))
