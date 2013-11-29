@@ -92,7 +92,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-mustache           :trivial-gray-streams :drakma              :optima
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd)
-  "All the libraries testsuites of which we know how to run.")
+  "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
   (require-impl "rt-api")
