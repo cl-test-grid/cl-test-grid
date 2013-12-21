@@ -981,13 +981,11 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :cleric)))
   ;; The test framework used: fiveam.
-  (quicklisp:quickload :cleric)
   (quicklisp:quickload :cleric-test)
   (run-fiveam-test-suite (read-from-string "cleric-test:all-tests")))
 
 (defmethod libtest ((library-name (eql :cl-erlang-term)))
   ;; The test framework used: fiveam.
-  (quicklisp:quickload :erlang-term)
   (quicklisp:quickload :erlang-term-test)
   (run-fiveam-test-suite (read-from-string "erlang-term-test:all-tests")))
 
