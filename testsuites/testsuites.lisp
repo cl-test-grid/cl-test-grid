@@ -983,7 +983,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: fiveam.
   (quicklisp:quickload :cleric)
   (quicklisp:quickload :cleric-test)
-  (run-fiveam-test-suite (read-from-string "cleric-test::cleric")))
+  (run-fiveam-test-suite (read-from-string "cleric-test:all-tests")))
 
 (defmethod libtest ((library-name (eql :cl-erlang-term)))
   ;; The test framework used: fiveam.
@@ -991,14 +991,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (let ((asdf:*central-registry* (cons (asdf:system-source-directory :erlang-term)
                                        asdf:*central-registry*)))
     (quicklisp:quickload :erlang-term-test))
-  (reduce #'combine-extended-libresult
-          (mapcar #'run-fiveam-test-suite
-                  (mapcar #'read-from-string
-                          '("erlang-term-test::bops"
-                            "erlang-term-test::decode"
-                            "erlang-term-test::encode"
-                            "erlang-term-test::erlang-object"
-                            "erlang-term-test::erlang-translatable")))))
+  (run-fiveam-test-suite (read-from-string "erlang-term-test:all-tests")))
 
 (defmethod libtest ((library-name (eql :stmx)))
   ;; The test framework used: fiveam.
@@ -1009,8 +1002,4 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :cl-epmd)))
   ;; The test framework used: fiveam.
   (quicklisp:quickload :epmd-test)
-  (reduce #'combine-extended-libresult
-          (mapcar #'run-fiveam-test-suite
-                  (mapcar #'read-from-string '("epmd-test::epmd-protocol"
-                                               "epmd-test::epmd-client"
-                                               "epmd-test::epmd-server")))))
+  (run-fiveam-test-suite (read-from-string "epmd-test:all-tests")))
