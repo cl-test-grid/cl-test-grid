@@ -988,9 +988,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :cl-erlang-term)))
   ;; The test framework used: fiveam.
   (quicklisp:quickload :erlang-term)
-  (let ((asdf:*central-registry* (cons (asdf:system-source-directory :erlang-term)
-                                       asdf:*central-registry*)))
-    (quicklisp:quickload :erlang-term-test))
+  (quicklisp:quickload :erlang-term-test)
   (run-fiveam-test-suite (read-from-string "erlang-term-test:all-tests")))
 
 (defmethod libtest ((library-name (eql :stmx)))
