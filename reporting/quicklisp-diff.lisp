@@ -14,7 +14,7 @@ and :ok is an outcome.
 Returns test part of the result-spec."
 
   (case (car (result-spec result))
-    (:whole-test-suite :whole-test-sute)
+    (:whole-test-suite :whole-test-suite)
     (otherwise (subseq (result-spec result) 0 2)))
 
   ;; TODO: the result-spec syntax is irregular

@@ -92,7 +92,7 @@
   - publish results online and access them programmatically
   - perform massive comparison of results and print HTML
     reports. For example, compare results of two Quicklisp
-    versions, or compare two versions a lisp implementation
+    versions, or compare two versions of a lisp implementation
     on the same Quicklisp.
 
   The tests are run by a lisp program called =test-grid-agent=.

@@ -68,6 +68,19 @@
                                :test #'string=)
          (null (getf status :known-to-fail)))))
 
+(defun test-hu.dwim.stefil-api ()
+  (ql:quickload :hu.dwim.stefil-sample-test-suite)
+  (let ((status (test-grid-testsuites::run-hu.dwim.stefil-test-suite
+                   (read-from-string "hu.dwim.stefil-sample-test-suite::sample-stefil-suite"))))
+    (and (alexandria:set-equal (getf status :failed-tests)
+                               '("sample-stefil-suite.one-fail-test"
+                                 "sample-stefil-suite.two-fails-test"
+                                 "sample-stefil-suite.error-test"
+                                 "sample-stefil-suite.all-fails-expected-test"
+                                 "sample-stefil-suite.not-all-fails-expected-test")
+                               :test #'string=)
+         (null (getf status :known-to-fail)))))
+
 (defun test-clunit-api ()
   (ql:quickload :clunit-sample-test-suite)
   (let ((status (test-grid-testsuites::run-clunit-test-suite (read-from-string "clunit-sample-test-suite::NumberSuite"))))
@@ -107,6 +120,7 @@
                        (test-fiveam-api)
                        (test-eos-api)
                        (test-stefil-api)
+                       (test-hu.dwim.stefil-api)
                        (test-clunit-api)
                        (test-nst-api)
                        (test-aggregated-status)))))

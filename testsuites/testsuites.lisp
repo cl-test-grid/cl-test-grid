@@ -64,6 +64,7 @@ just passed to the QUICKLISP:QUICKLOAD."
                         ("fiveam-api" . "fiveam-api-impl")
                         ("eos-api" . "eos-api-impl")
                         ("stefil-api" . "stefil-api-impl")
+                        ("hu.dwim.stefil-api" . "hu.dwim.stefil-api-impl")
                         ("clunit-api" . "clunit-api-impl")
                         ("nst-api" . "nst-api-impl")))
          (impl-asdf-system (or (cdr (assoc api known-impls :test #'string=))
@@ -92,7 +93,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-mustache           :trivial-gray-streams :drakma              :optima
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd)
-  "All the libraries testsuites of which we know how to run.")
+  "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
   (require-impl "rt-api")
@@ -135,6 +136,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   (require-impl "stefil-api")
   (let ((result (stefil-api:run-test-suite test-suite-spec)))
     (list :failed-tests (stefil-api:failed-tests result)
+          :known-to-fail '())))
+
+(defun run-hu.dwim.stefil-test-suite (test-suite-spec)
+  (require-impl "hu.dwim.stefil-api")
+  (let ((result (hu.dwim.stefil-api:run-test-suite test-suite-spec)))
+    (list :failed-tests (hu.dwim.stefil-api:failed-tests result)
           :known-to-fail '())))
 
 (defun run-clunit-test-suite (test-suite-name)
@@ -215,10 +222,10 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :babel)))
 
-  ;; The test framework used: stefil.
+  ;; The test framework used: hu.dwim.stefil.
 
   (quicklisp:quickload :babel-tests)
-  (run-stefil-test-suite (intern (string '#:babel-tests) '#:babel-tests)))
+  (run-hu.dwim.stefil-test-suite (read-from-string "babel-tests::babel-tests")))
 
 (defmethod libtest ((library-name (eql :trivial-features)))
 
@@ -563,9 +570,9 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-fiveam-test-suite :it.bese.arnesi))
 
 (defmethod libtest ((library-name (eql :local-time)))
-  ;; test framework used: Stefil
+  ;; test framework used: stefil
   (quicklisp:quickload :local-time.test)
-  (run-stefil-test-suite (intern (string '#:test) '#:local-time.test)))
+  (run-stefil-test-suite (read-from-string "local-time.test::test")))
 
 (defmethod libtest ((library-name (eql :s-xml)))
   ;; test framework used: cl:assert
@@ -801,10 +808,10 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :hu.dwim.stefil)))
-  ;; The test framework used: stefil.
+  ;; The test framework used: hu.dwim.stefil.
 
   (ql:quickload :hu.dwim.stefil.test)
-  (run-stefil-test-suite (read-from-string "hu.dwim.stefil.test::test")))
+  (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.stefil.test::test")))
 
 (defmethod libtest ((library-name (eql  :kmrcl)))
 
@@ -829,14 +836,14 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :hu.dwim.walker)))
-  ;; The test framework used: stefil.
+  ;; The test framework used: hu.dwim.stefil.
   (ql:quickload :hu.dwim.walker.test)
-  (run-stefil-test-suite (read-from-string "hu.dwim.walker.test::test")))
+  (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.walker.test::test")))
 
 (defmethod libtest ((library-name (eql :hu.dwim.defclass-star)))
-  ;; The test framework used: stefil.
+  ;; The test framework used: hu.dwim.stefil.
   (ql:quickload :hu.dwim.defclass-star.test)
-  (run-stefil-test-suite (read-from-string "hu.dwim.defclass-star.test::test")))
+  (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.defclass-star.test::test")))
 
 (defmethod libtest ((library-name (eql :bknr-datastore)))
   ;; test framework used: FiveAM
@@ -869,9 +876,9 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-fiveam-test-suite :it.bese.yaclml))
 
 (defmethod libtest ((library-name (eql :com.google.base)))
-  ;; The test framework used: stefil.
+  ;; The test framework used: hu.dwim.stefil.
   (ql:quickload :com.google.base-test)
-  (run-stefil-test-suite (read-from-string "com.google.base-test::test-base")))
+  (run-hu.dwim.stefil-test-suite (read-from-string "com.google.base-test::test-base")))
 
 (defmethod libtest ((library-name (eql :external-program)))
   ;; test framework used: FiveAM

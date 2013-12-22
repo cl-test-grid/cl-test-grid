@@ -46,8 +46,7 @@
 (defun init-project-lister (lisp-exe private-quicklisp-dir)
   (let* ((alist (proc-list-quicklisp-projects lisp-exe private-quicklisp-dir))
          (sorted (sort (mapcar (lambda (elem)
-                                 (let ((project-name (first elem))
-                                       (system-names (rest elem)))
+                                 (destructuring-bind (project-name &rest system-names) elem
                                    (cons project-name
                                          (sort (copy-list system-names)
                                                #'string<))))

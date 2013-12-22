@@ -18,6 +18,7 @@
                #:fiveam-api
                #:eos-api
                #:stefil-api
+               #:hu.dwim.stefil-api
                #:clunit-api
                #:nst-api)
   :components

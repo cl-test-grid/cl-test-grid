@@ -4,8 +4,8 @@
 ;;;
 ;;; See LICENSE for details.
 
-(asdf:defsystem #:stefil-sample-test-suite
+(asdf:defsystem #:hu.dwim.stefil-sample-test-suite
   :version "0.1.0"
   :serial t
-  :depends-on (#:stefil)
-  :components ((:file "stefil-sample-test-suite")))
+  :depends-on (#:hu.dwim.stefil)
+  :components ((:file "hu.dwim.stefil-sample-test-suite")))

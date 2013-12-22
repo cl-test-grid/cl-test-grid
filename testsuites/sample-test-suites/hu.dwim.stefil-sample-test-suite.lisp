@@ -1,7 +1,7 @@
-(defpackage #:stefil-sample-test-suite
-  (:use #:cl :stefil))
+(defpackage #:hu.dwim.stefil-sample-test-suite
+  (:use #:cl :hu.dwim.stefil))
 
-(in-package #:stefil-sample-test-suite)
+(in-package #:hu.dwim.stefil-sample-test-suite)
 
 (defsuite sample-stefil-suite)
 (in-suite sample-stefil-suite)

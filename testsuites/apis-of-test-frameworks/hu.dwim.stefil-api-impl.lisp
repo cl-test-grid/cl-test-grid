@@ -1,7 +1,7 @@
-(defpackage #:stefil-api-impl
-  (:use #:cl :stefil-api))
+(defpackage #:hu.dwim.stefil-api-impl
+  (:use #:cl :hu.dwim.stefil-api))
 
-(in-package #:stefil-api-impl)
+(in-package #:hu.dwim.stefil-api-impl)
 
 (defun print-details (test-suite-result)
     (format t "~&~%-------------------------------------------------------------------------------------------------~%")
@@ -11,24 +11,24 @@
     (format t "~&~%Individual failures:~%")
     (map 'nil
          (lambda (descr) (format t "~A~%" descr))
-         (stefil::failure-descriptions-of test-suite-result)))
+         (hu.dwim.stefil::failure-descriptions-of test-suite-result)))
 
 (defun run-test-suite (test-suite-name)
   (let* ((*debug-io* *standard-output*)
-         (result (stefil:funcall-test-with-feedback-message test-suite-name)))
+         (result (hu.dwim.stefil:funcall-test-with-feedback-message test-suite-name)))
     (print-details result)
     result))
 
 (defun test-name (failure-description)
   (let ((hierarchical-names  (mapcar 
                               #'(lambda (context) 
-                                  (stefil::name-of
-                                   (stefil::test-of context)))
-                              (stefil::test-context-backtrace-of failure-description))))
+                                  (hu.dwim.stefil::name-of
+                                   (hu.dwim.stefil::test-of context)))
+                              (hu.dwim.stefil::test-context-backtrace-of failure-description))))
     (format nil "~(~{~A~^.~}~)" (nreverse hierarchical-names))))
 
 (defun failed-tests (test-suite-result)
   (remove-duplicates (map 'list
                           #'test-name
-                          (stefil::failure-descriptions-of test-suite-result))
+                          (hu.dwim.stefil::failure-descriptions-of test-suite-result))
                      :test #'string=))
