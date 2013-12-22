@@ -7,5 +7,5 @@
 (asdf:defsystem #:stefil-api-impl
   :version "0.1.0"
   :serial t
-  :depends-on (#:stefil-api #:hu.dwim.stefil)
+  :depends-on (#:stefil-api #:stefil)
   :components ((:file "stefil-api-impl")))
