@@ -46,11 +46,23 @@
    CLOSED: [2013-11-19 Вт 06:13]
    So that testing order is deterministic and is always the same.
    Impl. plan: handle in the agent/project-lister.java
+** DONE Assist Dave Cooper in configuring tg-agent
+   CLOSED: [2013-11-30 Сб 16:28]
+* December 2013
+** DONE Sperate code to run stefil suites and hu.dwim.stefil
+   CLOSED: [2013-12-22 Вс 09:48]
+   The same code can't be used for both anymore, as they
+   have become incompatible.
 ** TODO Document :fail-condition-type/text on data/README.md
-** TODO Assist Dave Cooper in configuring tg-agent
+** TODO sptm/README.md - improve a little
+   Explain the purpose better.
+   Explain how consistency checks should be implemented.
+   ...
 ** TODO Document the Notes feature: code comments and the reporting/README.md
 ** TODO Help Jan Moringen to track down the problem of submiting test results from his network.
+** TODO Debug ECL hangup on MacOS X of Patrick Stein
 ** TODO Review Quicklisp 2013-11-11 results and report bugs
+** TODO My own Quicklisp dist
 * Engage People (ideas)
 ** TODO Invite test-runners by publishing clearly my needs:
    - Coverage table for Quicklisp testing,
@@ -147,14 +159,14 @@
    https://bugs.launchpad.net/bugs/1142779
 ** TODO recover from submit-results failure
    When log files are uploaded sucessfully, but the test-run-info.lisp
-   upload fails, agent retarted next time tries to repeate full test run.
-   It's because the test-run-info.lisp is not considered uninished - it already has log IDs.
+   upload fails, the agent restarted next time tries to repeat full test run.
+   It's because the test-run-info.lisp is considered finished - it already has log IDs.
    Therefore agent doesn not try to complete it.
    And agent doesn't have the lisp implementation recorded in the
    :DONE-TESTS property in the persistence.lisp
-** TODO Do not copy/paste implementation-identifier code from ASDF?
+** TODO Avoid copy/paste of implementation-identifier code from ASDF?
    And somehow just use the recent ASDF?
-** TODO Do not copy/paste the print-backtrace from ASDF?
+** TODO Avoid copy/paste of the print-backtrace from ASDF?
    And somehow just use the recent ASDF?
 ** TODO remove wrong tooltip OK?FAIL
 ** TODO Quicklisp quality metric:
