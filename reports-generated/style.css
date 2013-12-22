@@ -33,7 +33,6 @@
 }
 
 .note {
-    white-space: nowrap;
     color: black;}
 .note:hover {
     color: black;}
