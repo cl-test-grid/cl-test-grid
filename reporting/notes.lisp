@@ -138,13 +138,171 @@
                     (failure-p t
                       ,(lp-ticket "1244452"))))
                  (system-name "lil"
-                   (failure-p t "new LIL version requires ASDF 3"))))))
-#|
-(notes *note-db* (first (subset *all-results* (lambda (r) (and
-                                                           (eq (libname r) :cambl)
-                                                           (failure-p r)
-                                                           (string= (lib-world r) "quicklisp 2013-08-13"))))))
+                   (failure-p t "new LIL version requires ASDF 3")))
+                (lib-world "quicklisp 2013-11-11"
+                 (system-name "asdf-package-system"
+                   (failure-p t "needs ASDF 3"))
+                 (libname (:caveman :cl-emb :cl-project)
+                  (lisp ("acl-9.08-linux-x64"
+                         "acl-9.08-linux-x86"
+                         "acl-9.08s-linux-x64"
+                         "acl-9.08s-linux-x86"
+                         "acl-9.0m8-linux-x64"
+                         "acl-9.0m8-linux-x86"
+                         "acl-9.0m8s-linux-x64"
+                         "acl-9.0m8s-linux-x86"
+                         "ccl-1.8-f95-win-x64"
+                         "ccl-1.8-f95-win-x86"
+                         "clisp-2.49-win-x86"
+                         "sbcl-1.1.0.36.mswinmt.1201-284e340-win-x64"
+                         "sbcl-1.1.0.36.mswinmt.1201-284e340-win-x86")
+                   ,(lp-ticket "1258873")))
+                 (libname :cl-annot
+                   (result-spec ((:whole-test-suite :fail))
+                     ,(lp-ticket "1258876")))
+                 (lisp ("acl-9.0-linux-x64"
+                        "acl-9.0-linux-x86"
+                        "acl-9.08-linux-x64"
+                        "acl-9.08-linux-x86"
+                        "acl-9.08s-linux-x64"
+                        "acl-9.08s-linux-x86"
+                        "acl-9.0s-linux-x64"
+                        "acl-9.0s-linux-x86"
+                        "ccl-1.8-f95-win-x64"
+                        "ccl-1.8-f95-win-x86"
+                        "ccl-1.9-f96-linux-x64"
+                        "ccl-1.9-f96-linux-x86"
+                        "ccl-1.9-f96-macosx-x64"
+                        "ccl-1.9-f96-macosx-x86")
+                  (failure-p t
+                    (libname (:clsql-helper :cl-csv)
+                     ,(lp-ticket "1258883"))
+                    (system-name ("data-table-clsql" "function-cache-clsql")
+                     ,(lp-ticket "1258883"))))
+                 (libname (:hunchentoot :hunchentoot-auth :hunchentoot-cgi :hunchentoot-vhost
+                           :cl-dropbox :cl-oauth :cl-paypal :amazon-ecs :ayah-captcha
+                           :cl-cheshire-cat :cl-server-manager :cl-webdav :cxml-rpc :ext-blog
+                           :firephp :formlets :gtfl :hh-web :ht-simple-ajax :smackjack
+                           :restas :restas-directory-publisher :restas.file-publisher :rpc4cl)
+                  (failure-p t
+                   (lisp-impl-type :clisp
+                    ,(lp-ticket "1258948"))))
+                 (system-name ("cl-twit-repl" "cl-twitter"
+                               "clack-handler-hunchentoot" "clack-middleware-oauth")
+                  (failure-p t
+                   (lisp-impl-type :clisp
+                    ,(lp-ticket "1258948"))))
+                 (libname (:cl-html-parse :cl-openid :cl-web-crawler :nekthuth)
+                  (failure-p t
+                   (lisp-impl-type (:abcl :acl :cmu :ecl)
+                    ,(lp-ticket "1252283"))))
+                 (system-name "dbd-sqlite3"
+                  (failure-p t
+                    (lisp ("ecl-12.12.1-unknown-linux-i686-bytecode"
+                           "ecl-13.4.1-94e04b54-linux-x64-bytecode"
+                           "ecl-13.5.1-237af2e8-linux-i686-bytecode"
+                           "ecl-13.5.1-unknown-linux-i686-bytecod")
+                     ,(lp-ticket "1258995"))))
+                 (libname :cl-launch
+                  (lisp ("abcl-1.1.1-fasl39-linux-x86"
+                         "clisp-2.49-unix-i386"
+                         "clisp-2.49-unix-x64"
+                         "clisp-2.49-win-x86"
+                         "ecl-12.12.1-unknown-linux-i686-lisp-to-c"
+                         "sbcl-1.0.57.0.debian-linux-x64"
+                         "sbcl-1.1.0.36.mswinmt.1201-284e340-win-x64"
+                         "sbcl-1.1.0.36.mswinmt.1201-284e340-win-x86")
+                   (failure-p t
+                     "Needs newer ASDF")))
+                 (system-name ("cl-mongo" "twitter-mongodb-driver")
+                  (failure-p t
+                   (lisp-impl-type :ecl
+                     ,(lp-ticket "1259029"))))
+                 (libname (:cl-redis :cl-secure-read)
+                  (failure-p t
+                   ,(lp-ticket "1243540")))
+                 (libname :cl-tuples (failure-p t ,(lp-ticket "1259051")))
+                 (libname (:coleslaw :inferior-shell)
+                  (lisp ("abcl-1.2.0-fasl42-linux-x86"
+                         "abcl-1.2.1-fasl42-linux-x64"
+                         "abcl-1.2.1-fasl42-macosx-x64"
+                         "ccl-1.9-f96-linux-x64"
+                         "ccl-1.9-f96-linux-x86"
+                         "ccl-1.9-f96-macosx-x64"
+                         "ccl-1.9-f96-macosx-x86"
+                         "clisp-2.49-win-x86"
+                         "ecl-12.12.1-unknown-linux-i686-bytecode"
+                         "ecl-13.4.1-0e93edfc-win-x86-bytecode"
+                         "ecl-13.4.1-0e93edfc-win-x86-lisp-to-c"
+                         "ecl-13.4.1-94e04b54-linux-x64-bytecode"
+                         "ecl-13.4.1-94e04b54-linux-x64-lisp-to-c"
+                         "ecl-13.5.1-unknown-linux-i686-bytecode"
+                         "ecl-13.5.1-unknown-linux-i686-lisp-to-c"
+                         "sbcl-1.1.11-linux-x86")
+                   (failure-p t
+                          "inferior-shell needs newer ASDF")))
+                 (libname :gendl
+                  (system-name "surf"
+                   (lisp "ccl-1.9-f96-linux-x86"
+                     ,(lp-ticket "1261297"))))
+                 (libname (:eager-future2 :intercom :stmx :thread.comm.rendezvous :myweb)
+                  (lisp "ecl-13.4.1-94e04b54-linux-x64-lisp-to-c"
+                    (failure-p t "Not a regresssion; bug #261 in old ECL shows up due to differrent compilation order")))
+                 (system-name "funds"
+                   (lisp ("sbcl-1.0.57.0.debian-linux-x64"
+                          "clisp-2.49-unix-x64")
+                    (failure-p t
+                      "Not a regression, result of a different compilation order")))
+                 (system-name "kl-verify"
+                  (lisp ("cmu-snapshot-2013-04__20d_unicode_-linux-x86")
+                    (failure-p t "Not a regression, result of a different compilation order")))
+                 (libname (:hu.dwim.perec :jenkins :metacopy :metatilities :moptilities
+                           :tinaa :weblocks :weblocks-stores :weblocks-tree-widget
+                           :rpm)
+                  (fail-condition-type ("ASDF:MISSING-DEPENDENCY-OF-VERSION"
+                                        "ASDF/FIND-COMPONENT:MISSING-DEPENDENCY-OF-VERSION")
+                   ,(lp-ticket "1262020")))
+                 (libname :l-math
+                   (lisp-impl-type (:acl :clisp :ecl)
+                    (failure-p t
+                      ,(lp-ticket "1262026"))))
+                 (libname :lisp-interface-library
+                  (lisp ("ccl-1.8-f95-win-x64"
+                         "ccl-1.8-f95-win-x86"
+                         "ccl-1.9-f96-linux-x64"
+                         "ccl-1.9-f96-linux-x86"
+                         "ccl-1.9-f96-macosx-x64"
+                         "ccl-1.9-f96-macosx-x86"
+                         "ecl-12.12.1-unknown-linux-i686-bytecode"
+                         "ecl-13.4.1-0e93edfc-win-x86-bytecode"
+                         "ecl-13.4.1-0e93edfc-win-x86-lisp-to-c"
+                         "ecl-13.4.1-94e04b54-linux-x64-bytecode"
+                         "ecl-13.4.1-94e04b54-linux-x64-lisp-to-c"
+                         "ecl-13.5.1-237af2e8-linux-i686-bytecode"
+                         "ecl-13.5.1-237af2e8-linux-i686-lisp-to-c"
+                         "ecl-13.5.1-unknown-linux-i686-bytecode"
+                         "ecl-13.5.1-unknown-linux-i686-lisp-to-c"
+                         "sbcl-1.0.57.0.debian-linux-x64"
+                         "sbcl-1.1.0.36.mswinmt.1201-284e340-win-x64"
+                         "sbcl-1.1.0.36.mswinmt.1201-284e340-win-x86")
+                   (failure-p t
+                          "requires ASDF 3 or later")))
+                 (libname :rutils
+                  (failure-p t
+                   ,(lp-ticket "1243540")))
+                 (libname (:smtp4cl :plain-odbc :net4cl)
+                  (lisp-impl-type :sbcl
+                   (failure-p t
+                     "Not a regression; constant redifinition shows up due to different compilation order.")))))))
 
-(time (dolist (r *all-results*)
-        (notes *note-db* r)))
+#|
+ (notes *note-db* (first (subset *all-results*
+                                 (lambda (r) (and
+                                              (eq (libname r) :cambl)
+                                              (failure-p r)
+                                              (string= (lib-world r) "quicklisp 2013-08-13"))))))
+
+ (time (dolist (r *all-results*)
+         (notes *note-db* r)))
 |#
+
