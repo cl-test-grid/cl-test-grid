@@ -988,24 +988,50 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :cleric)))
   ;; The test framework used: fiveam.
+
+  ;; Note, since quicklisp 2013-12-12 it is enough to just
+  ;;
+  ;;   (quicklisp:quickload :cleric-test)
+  ;;   (run-fiveam-test-suite (read-from-string "cleric-test:all-tests"))
+  ;;
+  ;; but we keep workarounds for old problems to be able to run
+  ;; tests on older Quicklisp. With time we will remove the workarounds
+  ;; and keep only the simple code above.
+  ;; See issue #21.
+
   (quicklisp:quickload :cleric)
   (quicklisp:quickload :cleric-test)
-  (run-fiveam-test-suite (read-from-string "cleric-test::cleric")))
+  (run-fiveam-test-suite (if (find-symbol (string 'all-tests) 'cleric-test)
+                             (read-from-string "cleric-test:all-tests")
+                             (read-from-string "cleric-test::cleric"))))
 
 (defmethod libtest ((library-name (eql :cl-erlang-term)))
   ;; The test framework used: fiveam.
+
+  ;; Note, since quicklisp 2013-12-12 it is enough to just
+  ;;
+  ;;   (quicklisp:quickload :erlang-term-test)
+  ;;   (run-fiveam-test-suite (read-from-string "erlang-term-test:all-tests"))
+  ;;
+  ;; but we keep workarounds for old problems to be able to run
+  ;; tests on older Quicklisp. With time we will remove the workarounds
+  ;; and keep only the simple code above.
+  ;; See issue #21.
+
   (quicklisp:quickload :erlang-term)
   (let ((asdf:*central-registry* (cons (asdf:system-source-directory :erlang-term)
                                        asdf:*central-registry*)))
     (quicklisp:quickload :erlang-term-test))
-  (reduce #'combine-extended-libresult
-          (mapcar #'run-fiveam-test-suite
-                  (mapcar #'read-from-string
-                          '("erlang-term-test::bops"
-                            "erlang-term-test::decode"
-                            "erlang-term-test::encode"
-                            "erlang-term-test::erlang-object"
-                            "erlang-term-test::erlang-translatable")))))
+  (if (find-symbol (string 'all-tests) 'erlang-term-test)
+      (run-fiveam-test-suite (read-from-string "erlang-term-test:all-tests"))
+      (reduce #'combine-extended-libresult
+              (mapcar #'run-fiveam-test-suite
+                      (mapcar #'read-from-string
+                              '("erlang-term-test::bops"
+                                "erlang-term-test::decode"
+                                "erlang-term-test::encode"
+                                "erlang-term-test::erlang-object"
+                                "erlang-term-test::erlang-translatable"))))))
 
 (defmethod libtest ((library-name (eql :stmx)))
   ;; The test framework used: fiveam.
@@ -1015,9 +1041,22 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :cl-epmd)))
   ;; The test framework used: fiveam.
+
+  ;; Note, since quicklisp 2013-12-12 it is enough to just
+  ;;
+  ;;   (quicklisp:quickload :epmd-test)
+  ;;   (run-fiveam-test-suite (read-from-string "epmd-test:all-tests"))
+  ;;
+  ;; but we keep workarounds for old problems to be able to run
+  ;; tests on older Quicklisp. With time we will remove the workarounds
+  ;; and keep only the simple code above.
+  ;; See issue #21.
+
   (quicklisp:quickload :epmd-test)
-  (reduce #'combine-extended-libresult
-          (mapcar #'run-fiveam-test-suite
-                  (mapcar #'read-from-string '("epmd-test::epmd-protocol"
-                                               "epmd-test::epmd-client"
-                                               "epmd-test::epmd-server")))))
+  (if (find-symbol (string 'all-tests) 'epmd-test)
+      (run-fiveam-test-suite (read-from-string "epmd-test:all-tests"))
+      (reduce #'combine-extended-libresult
+              (mapcar #'run-fiveam-test-suite
+                      (mapcar #'read-from-string '("epmd-test::epmd-protocol"
+                                                   "epmd-test::epmd-client"
+                                                   "epmd-test::epmd-server"))))))
