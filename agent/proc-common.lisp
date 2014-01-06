@@ -118,18 +118,20 @@ invokes ON-PROBLEM-FUNC. The ON-PROBLEM-FUNC can transfer control
 if it wants to prevent the lisp to hang in the debugger."
   (let ((*debugger-hook* #'(lambda (condition me-or-my-encapsulation)
                              (declare (ignore me-or-my-encapsulation))
-                             (format t
-                                     "INVOKE-DEBUGGER is called with condition of type ~A: ~A.~%"
-                                     (type-of condition)
-                                     condition)
+                             (let ((*package* (find-package :keyword)))
+                               (format t
+                                       "INVOKE-DEBUGGER is called with condition of type ~S: ~A.~%"
+                                       (type-of condition)
+                                       condition))
                              (print-backtrace :stream *standard-output*)
                              (funcall on-problem-func condition))))
     (handler-bind
         ((serious-condition (lambda (condition)
-                              (format t
-                                      "~&Unhandled SERIOUS-CONDITION of type ~A is signaled: ~A~%"
-                                      (type-of condition)
-                                      condition)
+                             (let ((*package* (find-package :keyword)))
+                               (format t
+                                       "~&Unhandled SERIOUS-CONDITION of type ~S is signaled: ~A~%"
+                                       (type-of condition)
+                                       condition))
                               (print-backtrace :stream *standard-output*)
                               (funcall on-problem-func condition))))
       (funcall body-func))))
