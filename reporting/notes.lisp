@@ -293,7 +293,18 @@
                  (libname (:smtp4cl :plain-odbc :net4cl)
                   (lisp-impl-type :sbcl
                    (failure-p t
-                     "Not a regression; constant redifinition shows up due to different compilation order.")))))))
+                     "Not a regression; constant redifinition shows up due to different compilation order."))))
+                (lib-world "quicklisp 2013-12-13 + asdf.38337a5"
+                 (libname (:exscribe :lisp-interface-library)
+                   (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
+                     "Quicklisp dependencies calculation/handling bug"))
+                 (fail-condition-type "CCL:NO-APPLICABLE-METHOD-EXISTS"
+                     "CCL:SLOT-VALUE-USING-CLASS problem after ASDF upgrade"))
+                (system-name ("hu.dwim.computed-class+hu.dwim.logger"
+                              "hu.dwim.computed-class.test"
+                              "caveman-test")
+                 (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
+                   "Quicklisp :defsystem-depends-on problem")))))
 
 #|
  (notes *note-db* (first (subset *all-results*
