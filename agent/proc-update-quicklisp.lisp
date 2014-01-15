@@ -23,20 +23,26 @@
 (defun do-quicklisp-update (install-dir)
   (install-quicklisp install-dir)
   (fncall "quicklisp:update-client" :prompt nil)
-#|
-  (fncall "quicklisp:update-all-dists" :prompt nil)
-  ;; or, if we need to install particular quicklisp version:
-  ;;(fncall "ql-dist:install-dist" "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt" :replace t :prompt nil)
-  (format nil "quicklisp ~A"
-          (fncall "ql-dist:version" (fncall "ql-dist:dist" "quicklisp")))
-|#
-  (fncall "ql-dist:disable" (fncall "ql-dist:dist" "quicklisp"))
-  (let ((dist (fncall "ql-dist:install-dist" "http://alpha.quicklisp.org/dist/qlalpha.txt" :prompt nil :replace t)))
-    (format nil "~A ~A"
-            (fncall "ql-dist:name" dist)
-            (fncall  "ql-dist:version" dist))))
 
-#|
-  (ql-dist:disable (ql-dist:dist "qlalpha"))
-  (ql-dist:enable (ql-dist:dist "quicklisp"))
-|#
+  (flet ((version-string (dist)
+           (format nil "~A ~A"
+                   (fncall "ql-dist:name" dist)
+                   (fncall "ql-dist:version" dist))))
+
+    ;; Update and use the "quicklisp" dist:
+    (let ((qlalpha (fncall "ql-dist:find-dist" "qlalpha")))
+      (when qlalpha (fncall "ql-dist:disable" qlalpha)))
+    (let ((dist (fncall "ql-dist:dist" "quicklisp")))
+      (fncall "ql-dist:enable" dist)
+      (fncall "ql:update-dist" dist :prompt nil)
+      (version-string dist))
+    ;; or, if we need to install particular quicklisp version:
+    ;;(version-string (fncall "ql-dist:install-dist" "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt" :replace t :prompt nil))
+
+    ;; Update and use the "qlalpha" dist:
+    ;;(fncall "ql-dist:disable" (fncall "ql-dist:dist" "quicklisp"))
+    ;;(let ((dist (fncall "ql-dist:install-dist" "http://alpha.quicklisp.org/dist/qlalpha.txt" :prompt nil :replace t)))
+    ;;  (fncall "ql-dist:enable" dist)
+    ;;  (fncall "ql:update-dist" dist :prompt nil)
+    ;;  (version-string dist)
+    ))
