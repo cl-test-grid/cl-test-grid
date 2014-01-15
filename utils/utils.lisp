@@ -86,6 +86,18 @@
   '((:A 1 :B "x") (:A 2 :B "y") (:A 2 :B "y") (:A 3 :B "z")))
 |#
 
+(defun ordering-comparator (ordering-list test)
+  (lambda (val-a val-b)
+    (< (position val-a ordering-list :test test)
+       (position val-b ordering-list :test test))))
+
+(let ((cmp (ordering-comparator '("a" "b" "c") #'string=)))
+  (assert (funcall cmp "a" "b"))
+  (assert (funcall cmp "b" "c"))
+  (assert (funcall cmp "a" "c"))
+  (assert (not (funcall cmp "b" "a")))
+  (assert (not (funcall cmp "b" "b"))))
+
 (defun plist-getter (prop)
   #'(lambda (plist)
       (getf plist prop)))
