@@ -317,7 +317,7 @@
                  (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
                    "Quicklisp :defsystem-depends-on problem"))
                 (system-name "ningle-test"
-                  (failure-p t
+                  (fail-condition-type ("USOCKET:ADDRESS-IN-USE-ERROR" "USOCKET:OPERATION-NOT-PERMITTED-ERROR")
                     ,(lp-ticket "1269486"))))
                 (lib-world "quicklisp 2013-12-13 + asdf.28a5c93.no-upgrade"
                  (libname (:exscribe :lisp-interface-library)
@@ -329,7 +329,7 @@
                  (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
                    "Quicklisp :defsystem-depends-on problem"))
                 (system-name "ningle-test"
-                  (failure-p t
+                  (fail-condition-type ("USOCKET:ADDRESS-IN-USE-ERROR" "USOCKET:OPERATION-NOT-PERMITTED-ERROR")
                     ,(lp-ticket "1269486"))))                (lib-world "qlalpha 2014-01-05"
                  (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
                    "Quicklisp dependencies calculation/handling bug")
