@@ -28,7 +28,7 @@
            ;; find a fresh DIST object in case it is stale,
            ;; because QL:UPDATE-DIST only changes data on file system
            ;; and does not update the DIST object
-           (let ((dist (ql-dist:dist (ql-dist:name dist))))
+           (let ((dist (fncall "ql-dist:dist" (fncall "ql-dist:name" dist))))
              (format nil "~A ~A"
                      (fncall "ql-dist:name" dist)
                      (fncall "ql-dist:version" dist)))))
