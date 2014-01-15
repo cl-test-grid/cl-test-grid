@@ -107,7 +107,7 @@ lib-world identifier of that quicklisp."
                                       `(cl-user::set-response ,response-file
                                                               (cl-user::do-quicklisp-update ,(private-quicklisp-dir agent)))))))
     (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
-    (format nil "quicklisp ~A" quicklisp-version)))
+    quicklisp-version))
 
 ;;; Configuration check functions
 (defun lisp-process-echo (lisp-exe str-to-echo)
