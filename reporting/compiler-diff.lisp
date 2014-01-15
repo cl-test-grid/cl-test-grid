@@ -34,16 +34,9 @@ reports-generated/<REPORT-FILE>."
                                   :test #'equal
                                   :key (lambda (result)
                                          (list (libname result) (result-spec result))))))
-    ;; We can not be sure that (string< lisp1 lisp2) == t,
-    ;; so create another comparator function whch guarantees that
-    ;; the lisp1 is always in the left column. The same for lib-worlds.
-    (flet ((make-comparator (ordering-list)
-             (lambda (val-a val-b)
-               (< (position val-a ordering-list :test #'string=)
-                  (position val-b ordering-list :test #'string=)))))
-      (print-pivot report-file
-                   diff
-                   :rows '((libname string<))
-                   :cols `((lib-world ,(make-comparator (list quicklisp1 quicklisp2)))
-                           (lisp ,(make-comparator (list lisp1 lisp2))))
-                   :cell-printer #'results-cell-printer))))
+    (print-pivot report-file
+                 diff
+                 :rows '((libname string<))
+                 :cols `((lib-world ,(tg-utils::ordering-comparator (list quicklisp1 quicklisp2) #'string=))
+                         (lisp ,(tg-utils::ordering-comparator (list lisp1 lisp2) #'string=)))
+                 :cell-printer #'results-cell-printer)))

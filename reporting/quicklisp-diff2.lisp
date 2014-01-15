@@ -56,5 +56,5 @@
   (print-pivot report-file
                (quicklisp-diff-items all-results old-quicklisp new-quicklisp)
                :rows '((libname string<) (lisp string<))
-               :cols '((lib-world string<))
+               :cols `((lib-world ,(tg-utils::ordering-comparator (list old-quicklisp new-quicklisp) #'string=)))
                :cell-printer #'results-cell-printer))

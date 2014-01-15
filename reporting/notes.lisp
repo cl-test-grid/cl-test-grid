@@ -299,10 +299,45 @@
                    (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
                      "Quicklisp dependencies calculation/handling bug"))
                  (fail-condition-type "CCL:NO-APPLICABLE-METHOD-EXISTS"
-                     "CCL:SLOT-VALUE-USING-CLASS problem after ASDF upgrade"))
+                     "CCL:SLOT-VALUE-USING-CLASS problem after ASDF upgrade")
                 (system-name ("hu.dwim.computed-class+hu.dwim.logger"
                               "hu.dwim.computed-class.test"
                               "caveman-test")
+                 (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
+                   "Quicklisp :defsystem-depends-on problem")))
+                (lib-world "quicklisp 2013-12-13 + asdf.28a5c93"
+                 (libname (:exscribe :lisp-interface-library)
+                   (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
+                     "Quicklisp dependencies calculation/handling bug"))
+                 (fail-condition-type "CCL:NO-APPLICABLE-METHOD-EXISTS"
+                     "CCL:SLOT-VALUE-USING-CLASS problem after ASDF upgrade")
+                 (system-name ("hu.dwim.computed-class+hu.dwim.logger"
+                               "hu.dwim.computed-class.test"
+                               "caveman-test")
+                 (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
+                   "Quicklisp :defsystem-depends-on problem"))
+                (system-name "ningle-test"
+                  (failure-p t
+                    ,(lp-ticket "1269486"))))
+                (lib-world "quicklisp 2013-12-13 + asdf.28a5c93.no-upgrade"
+                 (libname (:exscribe :lisp-interface-library)
+                   (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
+                     "Quicklisp dependencies calculation/handling bug"))
+                 (system-name ("hu.dwim.computed-class+hu.dwim.logger"
+                               "hu.dwim.computed-class.test"
+                               "caveman-test")
+                 (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
+                   "Quicklisp :defsystem-depends-on problem"))
+                (system-name "ningle-test"
+                  (failure-p t
+                    ,(lp-ticket "1269486"))))                (lib-world "qlalpha 2014-01-05"
+                 (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
+                   "Quicklisp dependencies calculation/handling bug")
+                 (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
+                   "Quicklisp :defsystem-depends-on problem"))
+                (lib-world "qlalpha 2014-01-11"
+                 (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
+                   "Quicklisp dependencies calculation/handling bug")
                  (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
                    "Quicklisp :defsystem-depends-on problem")))))
 
