@@ -311,8 +311,7 @@ the PREDICATE."
                   (muffle-warning))))
     (as-singleton (agent)
       (log:config :daily (namestring (log-file agent)) :immediate-flush)
-      (let ((*response-file-temp-dir* (work-dir agent))
-            (lisp-exe:*temp-dir* (work-dir agent)))
+      (let ((lisp-exe:*temp-dir* (work-dir agent)))
         ;; finish the agent initialization
         (setf (persistence agent) (init-persistence (persistence-file agent)))
         (check-config agent)

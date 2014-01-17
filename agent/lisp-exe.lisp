@@ -37,6 +37,9 @@
            #:seconds              ; the condition slot accessor
            #:hibernation-detected ; another condition
 
+           ;; the directory where temporary files
+           ;; used to interact with child lisp processes
+           ;; are to be stored
            #:*temp-dir*
            ))
 
@@ -386,7 +389,7 @@ remains running)."
 (defparameter *temp-dir* nil)
 
 (defun temp-file (template)
-  "Template must be a format string with one ~A."
+  "TEMPLATE must be a format string with one ~A."
   (let* ((file-name (format nil template (random #.(1- (expt 2 64))))))
     (if *temp-dir*
         (merge-pathnames file-name *temp-dir*)
