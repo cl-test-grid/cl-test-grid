@@ -36,6 +36,8 @@
            #:lisp-process-timeout ; timeout condition
            #:seconds              ; the condition slot accessor
            #:hibernation-detected ; another condition
+
+           #:*temp-dir*
            ))
 
 

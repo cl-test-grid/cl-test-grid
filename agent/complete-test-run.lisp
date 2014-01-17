@@ -366,6 +366,7 @@ results in this directory are tested."
   (unless (getf description :lib-world) (error "please specify :lib-world in the description"))
   (unless (getf description :contact-email) (error "lease specify :contact-email in the description"))
   (let* ((*response-file-temp-dir* (or *response-file-temp-dir* (ensure-directories-exist run-dir)))
+         (lisp-exe:*temp-dir* (or lisp-exe:*temp-dir* (ensure-directories-exist run-dir)))
          (run-info-file (run-info-file run-dir))
          (saved-test-run (when (probe-file run-info-file)
                            (test-grid-utils::safe-read-file run-info-file)))
@@ -382,6 +383,7 @@ results in this directory are tested."
 
 (defun complete-test-run-impl (test-run run-dir quicklisp-dir lisp-exe project-names project-systems-fn)
   (let* ((*response-file-temp-dir* (or *response-file-temp-dir* run-dir))
+         (lisp-exe:*temp-dir* (or lisp-exe:*temp-dir* run-dir))
          (run-descr (test-grid-data::run-descr test-run))
          (asdf-output-dir (merge-pathnames "fasl/" run-dir))
          (lib-results (getf test-run :results))
