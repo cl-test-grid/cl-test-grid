@@ -414,7 +414,7 @@ remains running)."
           (format stream "~{~S~%~}" forms)
           (write-string "(lw:quit)" stream))
         (let ((native-process (start (exe-path lisp-exe)
-                                     `("-init" ,script "-siteinit" "-"))))
+                                     `("-init" ,(namestring (truename script)) "-siteinit" "-"))))
           (make-instance 'process
                          :native-process native-process
                          :script script)))))
