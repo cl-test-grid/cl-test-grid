@@ -137,6 +137,32 @@ Otherwise he may just ignore the condition."))
 ;;; Implementation
 ;;;
 
+;; dependencies: tg-utils, log4cl, trivial-features, external-program... anything else?
+
+(defclass process ()
+  ((native-process :reader native-process
+                   :initarg :native-process
+                   :initform (error ":native-process is required"))
+   (script :reader script
+           :initarg :script
+           :initform nil)))
+
+(defun process-id (process)
+  ;; on CCL external-program:process-id returns process handle
+  ;; instead of process id. See http://trac.clozure.com/ccl/ticket/983.
+  #+(and ccl windows)
+  (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id (native-process process)))
+  ;; we haven't tested on other lisps, but hope it will be the process id
+  #-(and ccl windows)
+  (external-program:process-id process))
+
+(defun cleanup (process)
+  (let ((script (script process)))
+    (when (and script (probe-file script))
+      (handler-case (delete-file script)
+        (file-error (e)
+          (log:warn "Error deleting temporary script ~A: ~A" script e))))))
+
 ;; escaping of parameters passed to
 ;; external-program:run is not required
 ;; by the external-program specification,
@@ -185,7 +211,9 @@ command, the rest strings are the command arguments."))
 
 (defmethod start-lisp-process ((lisp-exe lisp-exe) &rest forms)
   (let ((command-line (make-command-line lisp-exe (mapcar #'code-str forms))))
-    (start (first command-line) (rest command-line))))
+    (make-instance 'process
+                   :native-process (start (first command-line)
+                                          (rest command-line)))))
 
 (defmethod run-lisp-process ((lisp-exe lisp-exe) &rest forms)
   (let ((command-line (make-command-line lisp-exe (mapcar #'code-str forms))))
@@ -299,8 +327,8 @@ remains running)."
          (end-time (+ seconds last-active-time)))
     (loop
        (when (not (eq :running
-                      (external-program:process-status lisp-process)))
-         (return (external-program:process-status lisp-process)))
+                      (external-program:process-status (native-process lisp-process))))
+         (return (external-program:process-status (native-process lisp-process))))
        (let ((now (get-universal-time)))
          (when (> now (+ last-active-time 7))
            (signal 'hibernation-detected)
@@ -310,15 +338,6 @@ remains running)."
            (signal 'lisp-process-timeout :seconds seconds)
            (return)))
        (sleep 1))))
-
-(defun process-id (process)
-  ;; on CCL external-program:process-id returns process handle
-  ;; instead of process id. See http://trac.clozure.com/ccl/ticket/983.
-  #+(and ccl windows)
-  (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id process))
-  ;; we haven't tested on other lisps, but hope it will be the process id
-  #-(and ccl windows)
-  (external-program:process-id process))
 
 (defun windows-proc-tree-kill-command (process)
   (list "taskkill" "/F" "/T" "/PID" (prin1-to-string (process-id process))))
@@ -331,7 +350,7 @@ remains running)."
 
 (defun unix-kill-process (process)
   (handler-case
-      (external-program:signal-process process 9)
+      (external-program:signal-process (native-process process) 9)
     (serious-condition (c)
       ;; If the process is already terminated, when we ask CCL to kill it,
       ;; CCL signals a SIMPLE-ERROR "No such process".
@@ -343,7 +362,7 @@ remains running)."
       ;; because we know that CCL do not synchronize
       ;; the process status immediately, so the :running
       ;; value may be just outdated information.
-      (let ((status (external-program:process-status process)))
+      (let ((status (external-program:process-status (native-process process))))
         (when (eq :running status)
           (log:warn "~A \"~A\" is signalled when killing the process. external-program:process-status still returns :running for the process, but this value may be outdated, so we hope that the error is signalled because the process is already terminated."
                     (type-of c) c))))))
@@ -366,8 +385,46 @@ remains running)."
 
 (defmethod run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (let ((p (apply #'start-lisp-process lisp-exe forms)))
-    (handler-case (wait timeout-seconds p)
-      (lisp-process-timeout (c)
-        (log:warn "Lisp process ~A ~S exceeded the timeout of ~A seconds. Trying to kill the process and its possible child processes" lisp-exe forms timeout-seconds)
-        (try-to-kill-process-tree p)
-        (signal c)))))
+    (unwind-protect
+         (handler-case (wait timeout-seconds p)
+           (lisp-process-timeout (c)
+             (log:warn "Lisp process ~A ~S exceeded the timeout of ~A seconds. Trying to kill the process and its possible child processes" lisp-exe forms timeout-seconds)
+             (try-to-kill-process-tree p)
+             (signal c)))
+      (cleanup p))))
+
+(defparameter *temp-dir* nil)
+
+(defun temp-file (template)
+  "Template must be a format string with one ~A."
+  (let* ((file-name (format nil template (random #.(1- (expt 2 64))))))
+    (if *temp-dir*
+        (merge-pathnames file-name *temp-dir*)
+        (let ((*package* (find-package :keyword)))
+          (log:warn "~S is not set, temporary file ~A will be created in the default directory."
+                    '*temp-dir* file-name)
+          file-name))))
+
+(defmethod start-lisp-process ((lisp-exe lispworks) &rest forms)
+  ;; the :windows feature is put into *features* by trivial-features
+  (if (not (member :windows *features*))
+      (call-next-method)
+      ;; On Windows we pass Lisp code via temporary file,
+      ;; because LispWorks command line parser is buggy:
+      ;; https://groups.google.com/d/msg/cl-test-grid/VH4oHb47riU/blEPk2M5G2EJ
+      (let* ((script (temp-file "script~A.lisp")))
+        (log:info "Writing code ~{~S~} to temporary file ~A" forms script)
+        (with-open-file (stream (ensure-directories-exist script)
+                                :direction :output
+                                :if-exists :supersede
+                                :if-does-not-exist :create
+                                :element-type tg-utils::*utf-8-compatible-character-type*
+                                :external-format tg-utils::*utf-8-external-format*)
+          (write-string "(win32:dismiss-splash-screen t)" stream)
+          (format stream "~{~S~%~}" forms)
+          (write-string "(lw:quit)" stream))
+        (let ((native-process (start (exe-path lisp-exe)
+                                     `("-init" ,script "-siteinit" "-"))))
+          (make-instance 'process
+                         :native-process native-process
+                         :script script)))))
