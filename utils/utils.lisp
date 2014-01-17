@@ -13,6 +13,10 @@
 (defparameter *utf-8-external-format* asdf:*utf-8-external-format*
   "See docstring for ASDF:*UTF-8-EXTERNAL-FORMAT*.")
 
+(defparameter *utf-8-compatible-character-type*
+  #+lispworks 'lw:simple-char
+  #-lispworks 'character)
+
 (defun set= (set-a set-b &key (test #'eql) key)
   (null (set-exclusive-or set-a set-b :test test :key key)))
 
@@ -158,7 +162,7 @@ Examples:
 (defun safe-read-file (file)
   (with-open-file (in file
                       :direction :input
-                      :element-type 'character
+                      :element-type *utf-8-compatible-character-type*
                        ;'(unsigned-byte 8) + flexi-stream
                       :external-format *utf-8-external-format*
                       )
@@ -169,7 +173,7 @@ Examples:
   (with-standard-io-syntax
     (with-open-file (out file
                          :direction :output
-                         :element-type 'character
+                         :element-type *utf-8-compatible-character-type*
                          :external-format *utf-8-external-format*
                          :if-exists :supersede
                          :if-does-not-exist :create)

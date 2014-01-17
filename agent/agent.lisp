@@ -101,7 +101,8 @@ lib-world identifier of that quicklisp."
   (log:info "Ensuring the quicklisp used to download the libraries being tested is updated to the recent version...")
   (let ((quicklisp-version
          (with-response-file (response-file)
-           (lisp-exe:run-lisp-process (preferred-lisp agent)
+           (lisp-exe:run-with-timeout #.(* 60 60)
+                                      (preferred-lisp agent)
                                       `(load ,(truename (src-file "proc-common.lisp")))
                                       `(load ,(truename (src-file "proc-update-quicklisp.lisp")))
                                       `(cl-user::set-response ,response-file
@@ -112,7 +113,8 @@ lib-world identifier of that quicklisp."
 ;;; Configuration check functions
 (defun lisp-process-echo (lisp-exe str-to-echo)
   (with-response-file (response-file)
-    (lisp-exe:run-lisp-process lisp-exe
+    (lisp-exe:run-with-timeout 60
+                               lisp-exe
                                `(load ,(truename (src-file "proc-common.lisp")))
                                `(cl-user::set-response ,response-file ,str-to-echo))))
 
@@ -142,7 +144,8 @@ lib-world identifier of that quicklisp."
            ;; on the printed representation of the compiled
            ;; function.
            (with-response-file (response-file)
-             (lisp-exe:run-lisp-process
+             (lisp-exe:run-with-timeout
+              180
               lisp-exe
               `(load ,(truename (src-file "proc-common.lisp")))
               '(compile (defun cl-user::-unique-name--- ()))
@@ -308,7 +311,8 @@ the PREDICATE."
                   (muffle-warning))))
     (as-singleton (agent)
       (log:config :daily (namestring (log-file agent)) :immediate-flush)
-      (let ((*response-file-temp-dir* (work-dir agent)))
+      (let ((*response-file-temp-dir* (work-dir agent))
+            (lisp-exe:*temp-dir* (work-dir agent)))
         ;; finish the agent initialization
         (setf (persistence agent) (init-persistence (persistence-file agent)))
         (check-config agent)
