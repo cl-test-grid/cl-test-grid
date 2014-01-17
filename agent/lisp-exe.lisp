@@ -36,15 +36,12 @@
            #:lisp-process-timeout ; timeout condition
            #:seconds              ; the condition slot accessor
            #:hibernation-detected ; another condition
-
-            ;; deprecated function, consider run-with-timeout where possible
-           #:run-lisp-process
            ))
 
 
 (in-package #:lisp-exe)
 
-(defgeneric run-lisp-process (lisp-exe &rest forms)
+(defgeneric run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (:documentation "Starts lisp process, executes the specified forms
 and exits the process. What happens in case of errors in forms (syntax or runtime errors),
 entering debugger and other problems is not specified. For example some lisps
@@ -56,13 +53,8 @@ and deliver response to the parent process (e.g. by storing the result
 value in a temporary file - if the temporary file is absent the parent
 knows something is wrong).
 
-This function is deprecated because it does not allow to handle
-hanging lisp processes. Consider RUN-WITH-TIMEOUT where possible."))
-
-(defgeneric run-with-timeout (timeout-seconds lisp-exe &rest forms)
-  (:documentation "Like RUN-LISP-PROCESS, but if the lisp porcess
-does not finish in the specified TIMEOUT-SECONDS, the process
-is killed together with it's possible child processes, a
+If the lisp porcess does not finish in the specified TIMEOUT-SECONDS,
+the process is killed together with it's possible child processes, a
 LISP-PROCESS-TIMEOUT condition is signalled and the function returns NIL.
 
 If while waiting for the process to finish it is detected that
@@ -214,10 +206,6 @@ command, the rest strings are the command arguments."))
     (make-instance 'process
                    :native-process (start (first command-line)
                                           (rest command-line)))))
-
-(defmethod run-lisp-process ((lisp-exe lisp-exe) &rest forms)
-  (let ((command-line (make-command-line lisp-exe (mapcar #'code-str forms))))
-    (exec (first command-line) (rest command-line))))
 
 (defun prepend-each (prepend-what list)
   (mapcan (lambda (elem) (list prepend-what elem))
