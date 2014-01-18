@@ -151,7 +151,7 @@ Otherwise he may just ignore the condition."))
   (lisp-exe-ccl::win-process-handle-to-id (external-program:process-id (native-process process)))
   ;; we haven't tested on other lisps, but hope it will be the process id
   #-(and ccl windows)
-  (external-program:process-id process))
+  (external-program:process-id (native-process process)))
 
 (defun cleanup (process)
   (let ((script (script process)))
