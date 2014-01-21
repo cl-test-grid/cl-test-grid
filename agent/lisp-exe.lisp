@@ -306,6 +306,7 @@ command, the rest strings are the command arguments."))
   (cons (exe-path lisp-exe)
         `("-init" "-"     ;; don't read
           "-siteinit" "-" ;; any initialization files
+          "-eval" "(load-all-patches)"
           ,@(prepend-each "-eval" form-strings)
           "-eval" "(lispworks:quit)")))
 
