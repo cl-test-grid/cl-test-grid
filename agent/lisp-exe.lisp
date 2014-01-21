@@ -414,6 +414,9 @@ remains running)."
                                 :element-type tg-utils::*utf-8-compatible-character-type*
                                 :external-format tg-utils::*utf-8-external-format*)
           (write-string "(win32:dismiss-splash-screen t)" stream)
+          (terpri stream)
+          (write-string "(load-all-patches)" stream)
+          (terpri stream)
           (format stream "~{~S~%~}" forms)
           (write-string "(lw:quit)" stream))
         (let ((native-process (start (exe-path lisp-exe)
