@@ -101,7 +101,7 @@ lib-world identifier of that quicklisp."
   (log:info "Ensuring the quicklisp used to download the libraries being tested is updated to the recent version...")
   (let ((quicklisp-version
          (with-response-file (response-file)
-           (lisp-exe:run-with-timeout #.(* 60 60)
+           (lisp-exe:run-with-timeout #.(* 2 60 60)
                                       (preferred-lisp agent)
                                       `(load ,(truename (src-file "proc-common.lisp")))
                                       `(load ,(truename (src-file "proc-update-quicklisp.lisp")))
