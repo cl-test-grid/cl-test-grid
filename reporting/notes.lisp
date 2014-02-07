@@ -6,28 +6,58 @@
 
 ;;; Note is either a text or a ticket reference
 (defclass ticket () ())
+(defgeneric ticket-url (ticket))
+
+(defun note-body-p (obj)
+  (or (stringp obj)
+      (typep obj 'ticket)))
+
 (defclass launchpad-ticket (ticket)
   ((id :type string
        :accessor id
        :initarg :id
        :initform (error ":id is required"))))
 
-(defun note-body-p (obj)
-  (or (stringp obj)
-      (typep obj 'ticket)))
+(defun lp-ticket (id)
+  (make-instance 'launchpad-ticket :id id))
 
 (defmethod print-object ((ticket launchpad-ticket) stream)
   (print-unreadable-object (ticket stream :type t :identity t)
     (format stream "~S" (id ticket))))
 
-(defgeneric ticket-url (ticket))
 (defmethod ticket-url ((ticket launchpad-ticket))
   (concatenate 'string
                "http://bugs.launchpad.net/bugs/"
                (id ticket)))
 
-(defun lp-ticket (id)
-  (make-instance 'launchpad-ticket :id id))
+(defclass github-issue (ticket)
+  ((user :type string
+         :accessor user
+         :initarg :user
+         :initform (error ":user is required"))
+   (repo :type string
+         :accessor repo
+         :initarg :repo
+         :initform (error ":repo is required"))
+   (numbr :type number
+          :accessor numbr
+          :initarg :number
+          :initform (error ":number is required"))))
+
+(defun github-issue (user repo numbr)
+  (make-instance 'github-issue :user user :repo repo :number numbr))
+
+(defmethod print-object ((ticket github-issue) stream)
+  (print-unreadable-object (ticket stream :type t :identity t)
+    (format stream "~A/~A/~S" (user ticket) (repo ticket) (numbr ticket))))
+
+(defmethod ticket-url ((ticket github-issue))
+  (format nil "https://github.com/~A/~A/issues/~A"
+          (user ticket)
+          (repo ticket)
+          (numbr ticket)))
+
+(ticket-url (github-issue "avodonosov" "test" 1))
 
 ;;; Note database
 
@@ -36,8 +66,8 @@
 
 (defun set-note (db fields field-values body)
   (let ((index (or (gethash fields db)
-                    (setf (gethash fields db)
-                          (make-hash-table :test 'equal)))))
+                   (setf (gethash fields db)
+                         (make-hash-table :test 'equal)))))
     (setf (gethash field-values index) body)))
 
 (defun note (db fields field-values)
@@ -50,26 +80,30 @@
   (assert (string= (note db '(lisp) '("sbcl"))
                    "this is a note for SBCL")))
 
-(defun notes (db result)
+(defun db-notes (db result)
   (let ((notes nil))
     (maphash (lambda (fields index)
                (let* ((field-vals (mapcar (lambda (field)
                                            (funcall field result))
                                           fields))
                       (note (gethash field-vals index)))
+                 (when (functionp note)
+                   ;; it's a function which preforms futher
+                   ;; analisys of the RESULT and may return a note or NIL
+                   (setf note (funcall note result)))
                  (when note
                    (push note notes))))
              db)
     notes))
 
-(defun fill-notes (note-spec-list)
+(defun fill-note-db (note-spec-list)
   (flet ((as-list (val)
            (if (consp val)
                val
                (list val))))
     (let ((db (make-note-db)))
       (labels ((fill-rec (fields field-vals spec)
-                 (if (note-body-p spec)
+                 (if (or (note-body-p spec) (functionp spec))
                      (set-note db fields field-vals spec)
                      (let* ((cur-field (first spec))
                             (cur-field-vals (as-list (second spec)))
@@ -83,7 +117,7 @@
       db)))
 
 (defparameter *note-db*
-  (fill-notes `((lib-world "quicklisp 2013-08-13"
+  (fill-note-db `((lib-world "quicklisp 2013-08-13"
                  (libname (:series)
                   (lisp-impl-type :acl
                     ,(lp-ticket "1249658")))
@@ -339,16 +373,26 @@
                  (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
                    "Quicklisp dependencies calculation/handling bug")
                  (fail-condition-type "ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
-                   "Quicklisp :defsystem-depends-on problem")))))
+                   "Quicklisp :defsystem-depends-on problem"))
+                (lib-world "quicklisp 2014-01-13"
+                 (libname (:more-conditions :xml.location)
+                   (failure-p t
+                     ,(github-issue "scymtym" "more-conditions" 1)))
+                 (libname :com.informatimago
+                    (lisp "sbcl-1.1.0.36.mswinmt.1201-284e340-win-x86"
+                       "QL-DIST:BADLY-SIZED-LOCAL-ARCHIVE")))
+                (lib-world "qlalpha 2014-02-04"
+                  ,(lambda (result)
+                     (cond ((and (string= "COMMON-LISP:SIMPLE-ERROR" (fail-condition-type result))
+                                 (or (search "lfp.h" (fail-condition-text result))
+                                     (search "Couldn't execute \"g++\"" (fail-condition-text result))))
+                            "grovel error")
+                           ((and (string= "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND" (fail-condition-type result))
+                                 (search "System \"iolib/" (fail-condition-text result)))
+                            "ql:system-not-found")))))))
 
-#|
- (notes *note-db* (first (subset *all-results*
-                                 (lambda (r) (and
-                                              (eq (libname r) :cambl)
-                                              (failure-p r)
-                                              (string= (lib-world r) "quicklisp 2013-08-13"))))))
-
- (time (dolist (r *all-results*)
-         (notes *note-db* r)))
-|#
-
+(defun notes (result)
+  (let ((notes (db-notes *note-db* result)))
+    (when (ffi-failure-p result)
+      (push "ffi" notes))
+    notes))
