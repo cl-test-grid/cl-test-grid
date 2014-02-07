@@ -120,7 +120,8 @@ to include in to the text of the link, defaults to RESULT-SPEC"
 
 (defun note-html (note)
   (etypecase note
-    (ticket (format nil "<a class=\"note\" href=\"~A\">#~A</a>" (ticket-url note) (id note)))
+    (github-issue (format nil "<a class=\"note\" href=\"~A\">#~A/~A</a>" (ticket-url note) (repo note) (numbr note)))
+    (launchpad-ticket (format nil "<a class=\"note\" href=\"~A\">#lp~A</a>" (ticket-url note) (id note)))
     (string (format nil "<span class=\"note\">~A</span>" note))))
 
 (defun results-cell-printer (out cell-data &rest fields)
@@ -130,9 +131,7 @@ CELL-DATA is the list of RESULT objects to print."
   (dolist (result (sort (copy-list cell-data)
                         #'string<
                         :key (lambda (elem) (fields-to-string elem fields))))
-    (let ((notes (notes *note-db* result)))
-      (when (ffi-failure-p result)
-        (setf notes (cons "ffi" notes)))
+    (let ((notes (notes result)))
       (format out "<div class=\"result\">~A ~{~A~^, ~}</div>"
               (apply #'result-log-link result fields)
               (mapcar #'note-html notes)))))
