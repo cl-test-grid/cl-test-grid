@@ -50,6 +50,7 @@
   (setup-asdf-output-translations private-quicklisp-dir asdf-output-root-dir)
   (saving-output log-file
                  (lambda ()
-                   (format t "  *features*:        ~(~A~)~%~%" (sort (copy-list *features*) #'string<))
+                   (format t "  *features*:        ~(~S~)~%" (sort (copy-list *features*) #'string<))
+                   (format t "  ASDF version*:     ~A~%~%" (asdf:asdf-version))
                    (run-libtest libname))))
 
