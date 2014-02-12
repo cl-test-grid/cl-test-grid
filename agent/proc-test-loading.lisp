@@ -25,5 +25,5 @@
                  (lambda ()
                    (let ((*package* (find-package :keyword)))
                      (format t "  *features*:        ~(~S~)~%" (sort (copy-list *features*) #'string<)))
-                   (format t "  ASDF version*:     ~A~%~%" (asdf:asdf-version))
+                   (format t "  ASDF version:      ~A~%~%" (asdf:asdf-version))
                    (test-loading system-name))))
