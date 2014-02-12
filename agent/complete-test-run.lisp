@@ -67,10 +67,9 @@ performed in the current lisp system."
   "The preferred time format used in the cl-test-grid project."
   (multiple-value-bind (sec min hour date month year)
       (decode-universal-time universal-time 0)
-    (funcall #'format
-             destination
-             "~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D"
-             year month date hour min sec)))
+    (format destination
+            "~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D~2,'0D"
+            year month date hour min sec)))
 
 (defun os-windows-p ()
   ;; :windows feature is put into *features* by trivial-features
@@ -159,10 +158,9 @@ as the system load status.")
   "The human-readable time format, used in reports."
   (multiple-value-bind (sec min hour date month year)
       (decode-universal-time universal-time 0)
-    (funcall #'format
-             destination
-             "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
-             year month date hour min sec)))
+    (format destination
+            "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
+            year month date hour min sec)))
 
 (defmacro appending (stream-var file &body body)
   `(with-open-file (,stream-var ,file
