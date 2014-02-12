@@ -50,3 +50,21 @@
     ;;  (fncall "ql:update-dist" dist :prompt nil)
     ;;  (version-string dist)
     ))
+
+(defun update-quicklisp (install-dir log-file)
+  (labels ((fmt-time (universal-time &optional destination)
+             (multiple-value-bind (sec min hour date month year)
+                 (decode-universal-time universal-time 0)
+               (format destination
+                       "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
+                       year month date hour min sec)))
+           (log-msg (destination msg)
+             (format destination "~&;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;~%")
+             (format destination "; ~A ~A" (fmt-time (get-universal-time)) msg)
+             (format destination "~&;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;~%")))
+    (saving-output log-file
+                   (lambda ()
+                     (prog2
+                         (log-msg t "update-quicklisp start")
+                         (do-quicklisp-update install-dir)
+                       (log-msg t "update-quicklisp done"))))))
