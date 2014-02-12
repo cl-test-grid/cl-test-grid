@@ -147,4 +147,5 @@ Returns the outcome part of the result-spec."
                         (search txt fail-text))
                       '("Undefined foreign symbol"
                         "Don't know how to REQUIRE JNA"
+                        "Don't know how to COMMON-LISP:REQUIRE JNA"
                         "CFFI requires CLISP compiled with dynamic FFI support"))))))
