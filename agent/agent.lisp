@@ -67,24 +67,26 @@
 (defun test-output-base-dir (agent)
   (merge-pathnames "test-runs/" (work-dir agent)))
 
+;; File relative to the work-dir
+(defun work-dir-child (agent relative-path)
+  (merge-pathnames relative-path (work-dir agent)))
+
 (defun log-file (agent)
   ;; good thing about log4cl, it creates
   ;; intermediate directories automatically,
   ;; so we need not care about this
-  (merge-pathnames "logs/agent.log"
-                   (work-dir agent)))
+  (work-dir-child agent "logs/agent.log"))
 
-;; File relative to the work-dir
-(defun workdir-child (agent relative-path)
-  (merge-pathnames relative-path (work-dir agent)))
+(defun quicklisp-update-log (agent)
+  (work-dir-child agent "logs/quicklisp-update.log"))
 
 (defun private-quicklisp-dir (agent)
   (if (custom-lib-world agent)
       (getf (custom-lib-world agent) :directory)
-      (workdir-child agent #P"quicklisp/")))
+      (work-dir-child agent #P"quicklisp/")))
 
 (defun persistence-file (agent)
-  (workdir-child agent "persistence.lisp"))
+  (work-dir-child agent "persistence.lisp"))
 
 ;; File relative to the src-dir
 (defun src-file (file-name)
@@ -106,7 +108,8 @@ lib-world identifier of that quicklisp."
                                       `(load ,(truename (src-file "proc-common.lisp")))
                                       `(load ,(truename (src-file "proc-update-quicklisp.lisp")))
                                       `(cl-user::set-response ,response-file
-                                                              (cl-user::do-quicklisp-update ,(private-quicklisp-dir agent)))))))
+                                                              (cl-user::update-quicklisp ,(private-quicklisp-dir agent)
+                                                                                         ,(quicklisp-update-log agent)))))))
     (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
     quicklisp-version))
 

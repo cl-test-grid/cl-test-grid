@@ -157,6 +157,7 @@ The <condition type> includes package name, e.g. \"COMMON-LISP:SIMPLE-ERROR\"."
   `(wrap-status-impl (lambda () ,@body)))
 
 (defun cl-user::saving-output (file body)
+  (ensure-directories-exist file)
   (with-open-file (stream file
                           :direction :output
                           :if-exists :append
