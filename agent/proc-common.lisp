@@ -165,5 +165,6 @@ The <condition type> includes package name, e.g. \"COMMON-LISP:SIMPLE-ERROR\"."
                           :element-type *utf-8-compatible-character-type*
                           :external-format *utf-8-external-format*)
     (let* ((*standard-output* stream)
-           (*error-output* stream))
+           (*error-output* stream)
+           (*trace-output* stream))
       (funcall body))))
