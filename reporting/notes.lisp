@@ -378,6 +378,21 @@
                  (libname (:more-conditions :xml.location)
                    (failure-p t
                      ,(github-issue "scymtym" "more-conditions" 1)))
+                 (libname (:cl-csv)
+                   (lisp ("acl-9.0-linux-x64" "acl-9.0-linux-x86" "acl-9.08-linux-x64"
+                          "acl-9.08-linux-x86" "acl-9.08s-linux-x64" "acl-9.08s-linux-x86"
+                          "acl-9.0s-linux-x64" "acl-9.0s-linux-x86")
+                     ,(github-issue "AccelerationNet" "cl-csv" 16)))
+                 (libname (:collectors :clsql-helper :data-table)
+                   (lisp ("acl-9.0-linux-x64"
+                          "acl-9.0-linux-x86"
+                          "acl-9.08-linux-x64"
+                          "acl-9.08-linux-x86"
+                          "acl-9.08s-linux-x64"
+                          "acl-9.08s-linux-x86"
+                          "acl-9.0s-linux-x64"
+                          "acl-9.0s-linux-x86")
+                     ,(github-issue "AccelerationNet" "collectors" 3)))
                  (libname :com.informatimago
                     (lisp "sbcl-1.1.0.36.mswinmt.1201-284e340-win-x86"
                        "QL-DIST:BADLY-SIZED-LOCAL-ARCHIVE")))
@@ -389,10 +404,34 @@
                             "grovel error")
                            ((and (string= "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND" (fail-condition-type result))
                                  (search "System \"iolib/" (fail-condition-text result)))
-                            "ql:system-not-found")))))))
+                            "ql:system-not-found"))))
+                (lib-world "quicklisp 2014-01-13 + asdf.3.1.0.64.warn-check"
+                  (failure-p t
+                    (libname :rutils
+                      ,(lp-ticket "1243540"))
+                    ,(lambda (result)
+                       (when (search "ASDF/COMPONENT:COMPONENT-CHILDREN" (fail-condition-text result))
+                         "component-children"))))
+                (lib-world "quicklisp 2014-02-11"
+                   (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
+                     "ql:system-not-found")
+                   ,(lambda (r)
+                      (cond ((search "You need ASDF >= 2.31.1"
+                                     (fail-condition-text r))
+                             "needs ASDF >= 2.31.1")
+                            ((search "lfp.h: No such file"
+                                     (fail-condition-text r))
+                             "iolib grovel")
+                            ((search "\"iolib."
+                                     (fail-condition-text r))
+                             "iolib.*"))))
+                  )))
+
+
 
 (defun notes (result)
   (let ((notes (db-notes *note-db* result)))
     (when (ffi-failure-p result)
       (push "ffi" notes))
     notes))
+
