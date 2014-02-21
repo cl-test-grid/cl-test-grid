@@ -1,15 +1,18 @@
 # SPTM - Shared Persistent Transactional Memory
 
-Simple online storage for lisp data, using the ideas of in-memory 
-persistence and optimistic concurrency control.
+Simple storage for lisp data, allowing distributed
+participants (processes) to interact via shared
+in-memory data structure.
 
-Operates via transaction log stored on Amazon Web Services (S3 and SimpleDB).
+Based on ideas of in-memory persistence and optimistic concurrency
+control and operates via transaction log stored on Amazon Web Services
+(S3 and SimpleDB).
 
 ## Informal Description of the Ideas
 ### In-Memory Persistence
 
-This idea is also known as Prevalence and there is a Common Lisp
-library [cl-prevalence](http://common-lisp.net/project/cl-prevalence/).
+This idea is also known as Prevalence (there is also Common Lisp
+library [cl-prevalence](http://common-lisp.net/project/cl-prevalence/)).
 
 All persistent data modifications are expressed as named functions
 with parameters. For example
@@ -96,6 +99,13 @@ This protocol guarantees that everyone replaying the transaction log
 executes the functions on exactly the same data as the process
 which recorded this transaction to the log.
 
+Data consistency checks are implemented in transaction functions.
+For example, `withdraw-from-bank-account` function should check
+that the account has enough funds, and signal a condition otherwise.
+If a concurrent transaction modified the acccount, our transation
+signlas the condition, and user receives notification. Thus only
+consistent modifications of database are comitted to the transaction log.
+
 ## Security
 
 So, we retrieve function names from transaction log and call these functions.
@@ -123,6 +133,7 @@ Please see [example.lisp](example.lisp).
   versioned-data and a local snapshot of the versioned-data, stored in a file.
 - [amazon-simple-db.lisp](amazon-simple-db.lisp) - private tools to work
   with Amazon SimpleDB.
+- [package.lisp](package.lisp) - lists all the public API functions.
 
 ## Storage Space at Amazon
 
