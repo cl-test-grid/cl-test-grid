@@ -102,7 +102,7 @@ which recorded this transaction to the log.
 Data consistency checks are implemented in transaction functions.
 For example, `withdraw-from-bank-account` function should check
 that the account has enough funds, and signal a condition otherwise.
-If a concurrent transaction modified the acccount, our transation
+If a concurrent transaction has spent all the funds, our transation
 signlas the condition, and user receives notification. Thus only
 consistent modifications of database are comitted to the transaction log.
 
