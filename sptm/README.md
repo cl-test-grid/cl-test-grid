@@ -133,7 +133,7 @@ Please see [example.lisp](example.lisp).
   versioned-data and a local snapshot of the versioned-data, stored in a file.
 - [amazon-simple-db.lisp](amazon-simple-db.lisp) - private tools to work
   with Amazon SimpleDB.
-- All the public API functions are listed in [package.lisp](package.lisp).
+- [package.lisp](package.lisp) - lists all the public API functions.
 
 ## Storage Space at Amazon
 
