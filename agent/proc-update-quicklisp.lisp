@@ -14,8 +14,19 @@
                             (declare (ignore err))
                             (when (find-restart 'quicklisp-quickstart::load-setup)
                               (invoke-restart 'quicklisp-quickstart::load-setup)))))
-    (quicklisp-quickstart:install :path install-dir)))
+    (quicklisp-quickstart:install :path install-dir))
 
+  (let ((asdf-init-file (merge-pathnames "asdf-config/init.lisp"
+                                         install-dir)))
+    (ensure-directories-exist asdf-init-file)
+    (with-open-file (f asdf-init-file
+                     :direction :output
+                     :element-type 'character
+                     :if-does-not-exist :create
+                     :if-exists :supersede)
+      (write-string "(asdf:initialize-source-registry '(:source-registry :ignore-inherited-configuration))"
+                    f)
+      (terpri f))))
 
 (defmacro fncall (funname &rest args)
   `(funcall (read-from-string ,funname) ,@args))
