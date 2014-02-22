@@ -5,7 +5,7 @@ participants (processes) to interact via shared
 in-memory data structure.
 
 Based on ideas of in-memory persistence and optimistic concurrency
-control and operates via transaction log stored on Amazon Web Services
+control. Operates via transaction log stored on Amazon Web Services
 (S3 and SimpleDB).
 
 ## Informal Description of the Ideas
