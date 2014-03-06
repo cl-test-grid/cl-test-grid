@@ -6,10 +6,6 @@
   (:nicknames :tg-agent)
   (:use #:common-lisp)
   (:export
-           ;; agent public API version
-           #:+api-version+
-           #:api-compatible-p
-
            ;; the agent class (abstract)
            #:agent
 
@@ -26,15 +22,19 @@
            #:make-agent
 
            ;; agent main function
-           #:main))
+           #:main
+
+           ;; DEPRECATED
+           #:+api-version+
+           #:api-compatible-p))
 
 (in-package #:test-grid-agent)
 
 (defparameter +api-version+ '(1 . 2)
-  "Current version of the test-grid-agent API.")
+  "DEPRECATED. Current version of the test-grid-agent API.")
 
 (defgeneric api-compatible-p (version-required &optional version-provided)
-  (:documentation "Returns true if an interface VERSION-PROVIDED by some module
+  (:documentation "DEPRECATED. Returns true if an interface VERSION-PROVIDED by some module
 is compatible with the VERSION-REQIRED by the module client.
 
 The version are conses in the form (<major> . <minor>),

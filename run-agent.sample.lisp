@@ -3,30 +3,19 @@
 ;;;; See LICENSE for details.
 ;;;;
 ;;;; Example file for how to configure and run cl-test-grid agent.
-;;;; This file supposes that Quicklisp is available.
-;;;;
 ;;;; Load the file by:
 ;;;;        (load "run-agent.lisp")
 ;;;;
 
-;; Put the directory containing this file
-;; into ASDF:*CENTRAL-REGISTRY*
-;; so that ASDF can find the test-grid-agent.asd
-(let* ((this-file (load-time-value (or *load-truename* #.*compile-file-pathname*)))
-       (this-file-dir (make-pathname :directory (pathname-directory this-file))))
-  (pushnew this-file-dir asdf:*central-registry* :test #'equal))
+(defparameter *this-dir*
+  (make-pathname :directory (pathname-directory *load-truename*)))
 
+;; If quicklisp is absent, install and load it
+(load (merge-pathnames "agent/require-quicklisp.lisp" *this-dir*))
+(tg-require-quicklisp:require :agent-work-dir (merge-pathnames "work-dir/agent/" *this-dir*))
+
+(pushnew *this-dir* asdf:*central-registry* :test #'equal)
 (ql:quickload :test-grid-agent)
-
-;; ensure this script is not outdated in respect to
-;; the agent public API
-(let ((api-version-required '(1 . 1)))
-  (when (not (test-grid-agent:api-compatible-p api-version-required))
-    (error "The agent public API has changed in an incompatible way:
-current agent API version is ~A. We use version ~A.
-It's necessary to adjust the run-agent.lisp script (see
-run-agent.sample.lisp for a fresh example)."
-           test-grid-agent:+api-version+ api-version-required)))
 
 ;; create agent instance
 (defparameter *agent* (test-grid-agent:make-agent))

@@ -37,8 +37,7 @@ There are template scripts demonstrating how to
 load, configure and run agent by a single command.
 
 Please use [CCL](http://ccl.clozure.com/) - it is the development platform and the only
-lisp known to run agent successfully. The template scripts
-assume [Quicklisp](http://www.quicklisp.org/beta/) is installed and added to the CCL init file.
+lisp known to run agent successfully.
 
 So, the steps:
 
