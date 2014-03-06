@@ -95,12 +95,12 @@
     (< (position val-a ordering-list :test test)
        (position val-b ordering-list :test test))))
 
-(let ((cmp (ordering-comparator '("a" "b" "c") #'string=)))
-  (assert (funcall cmp "a" "b"))
-  (assert (funcall cmp "b" "c"))
-  (assert (funcall cmp "a" "c"))
-  (assert (not (funcall cmp "b" "a")))
-  (assert (not (funcall cmp "b" "b"))))
+(let ((cmp (ordering-comparator '("first" "second" "third") #'string=)))
+  (assert (funcall cmp "first" "second"))
+  (assert (funcall cmp "second" "third"))
+  (assert (funcall cmp "first" "third"))
+  (assert (not (funcall cmp "second" "first")))
+  (assert (not (funcall cmp "second" "second"))))
 
 (defun plist-getter (prop)
   #'(lambda (plist)
