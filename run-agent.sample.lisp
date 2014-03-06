@@ -80,5 +80,5 @@
       ;;(test-grid-agent:work-dir *agent*) #P"/my/cl-test-grid/work-dir/agent/"
       )
 
-;;; Ask agent to do it's work
+;;; Ask agent to do its work
 (test-grid-agent:main *agent*)
