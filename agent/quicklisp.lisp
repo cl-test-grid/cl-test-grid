@@ -19,6 +19,11 @@
   (:use #:cl))
 (cl:in-package #:qlqs-user)
 
+(defpackage #:qlqs-info
+  (:export #:*version*))
+
+(defvar qlqs-info:*version* "2014-02-01")
+
 (defpackage #:qlqs-impl
   (:use #:cl)
   (:export #:*implementation*)
@@ -34,6 +39,7 @@
            #:ecl
            #:gcl
            #:lispworks
+	   #:mkcl
            #:scl
            #:sbcl))
 
@@ -65,8 +71,7 @@
 
 (defpackage #:qlqs-minitar
   (:use #:cl)
-  (:export #:tarball-contents
-           #:unpack-tarball))
+  (:export #:unpack-tarball))
 
 (defpackage #:quicklisp-quickstart
   (:use #:cl #:qlqs-impl #:qlqs-impl-util #:qlqs-http #:qlqs-minitar)
@@ -304,6 +309,22 @@
                   #:socket-connect
                   #:socket-make-stream))
 
+;;; MKCL
+
+(define-implementation-package :mkcl #:qlqs-mkcl
+  (:class mkcl)
+  (:documentation
+   "ManKai Common Lisp - http://common-lisp.net/project/mkcl/")
+  (:prep
+   (require 'sockets))
+  (:intern #:host-network-address)
+  (:reexport-from #:sb-bsd-sockets
+                  #:get-host-by-name
+                  #:inet-socket
+                  #:host-ent-address
+                  #:socket-connect
+                  #:socket-make-stream))
+
 ;;;
 ;;; Utility function
 ;;;
@@ -341,6 +362,8 @@
 (definterface host-address (host)
   (:implementation t
     host)
+  (:implementation mkcl
+    (qlqs-mkcl:host-ent-address (qlqs-mkcl:get-host-by-name host)))
   (:implementation sbcl
     (qlqs-sbcl:host-ent-address (qlqs-sbcl:get-host-by-name host))))
 
@@ -388,9 +411,22 @@
   (:implementation lispworks
     (qlqs-lispworks:open-tcp-stream host port
                                    :direction :io
+                                   :errorp t
                                    :read-timeout nil
                                    :element-type '(unsigned-byte 8)
                                    :timeout 5))
+  (:implementation mkcl
+    (let* ((endpoint (qlqs-mkcl:host-ent-address
+                      (qlqs-mkcl:get-host-by-name host)))
+           (socket (make-instance 'qlqs-mkcl:inet-socket
+                                  :protocol :tcp
+                                  :type :stream)))
+      (qlqs-mkcl:socket-connect socket endpoint port)
+      (qlqs-mkcl:socket-make-stream socket
+                                   :element-type '(unsigned-byte 8)
+                                   :input t
+                                   :output t
+                                   :buffering :full)))
   (:implementation sbcl
     (let* ((endpoint (qlqs-sbcl:host-ent-address
                       (qlqs-sbcl:get-host-by-name host)))
@@ -937,7 +973,8 @@
                                   (format nil ":~D" port)))
       (add-line "Connection: close")
       ;; FIXME: get this version string from somewhere else.
-      (add-line "User-Agent: quicklisp-bootstrap/2011103100")
+      (add-line "User-Agent: quicklisp-bootstrap/"
+                qlqs-info:*version*)
       (add-newline sink)
       (sink-buffer sink))))
 
@@ -1513,19 +1550,96 @@ the indexes in the header accordingly."
     (fetch url tmpfile)
     (rename-file tmpfile file)))
 
-(defvar *asdf-url* "http://beta.quicklisp.org/quickstart/asdf.lisp")
-(defvar *quicklisp-tar-url* "http://beta.quicklisp.org/quickstart/quicklisp.tar")
-(defvar *setup-url* "http://beta.quicklisp.org/quickstart/setup.lisp")
+(defvar *quickstart-parameters* nil
+  "This plist is populated with parameters that may carry over to the
+  initial configuration of the client, e.g. :proxy-url
+  or :initial-dist-url")
+
+(defvar *quicklisp-hostname* "beta.quicklisp.org")
+
+(defvar *client-info-url*
+  (format nil "http://~A/client/quicklisp.sexp"
+          *quicklisp-hostname*))
+
+(defclass client-info ()
+  ((setup-url
+    :reader setup-url
+    :initarg :setup-url)
+   (asdf-url
+    :reader asdf-url
+    :initarg :asdf-url)
+   (client-tar-url
+    :reader client-tar-url
+    :initarg :client-tar-url)
+   (version
+    :reader version
+    :initarg :version)
+   (plist
+    :reader plist
+    :initarg :plist)
+   (source-file
+    :reader source-file
+    :initarg :source-file)))
+
+(defmethod print-object ((client-info client-info) stream)
+  (print-unreadable-object (client-info stream :type t)
+    (prin1 (version client-info) stream)))
+
+(defun safely-read (stream)
+  (let ((*read-eval* nil))
+    (read stream)))
+
+(defun fetch-client-info-plist (url)
+  "Fetch and return the client info data at URL."
+  (let ((local-client-info-file (qmerge "tmp/client-info.sexp")))
+    (ensure-directories-exist local-client-info-file)
+    (renaming-fetch url local-client-info-file)
+    (with-open-file (stream local-client-info-file)
+      (list* :source-file local-client-info-file
+             (safely-read stream)))))
+
+(defun fetch-client-info (url)
+  (let ((plist (fetch-client-info-plist url)))
+    (destructuring-bind (&key setup asdf client-tar version
+                              source-file
+                              &allow-other-keys)
+        plist
+      (unless (and setup asdf client-tar version)
+        (error "Invalid data from client info URL -- ~A" url))
+      (make-instance 'client-info
+                     :setup-url (getf setup :url)
+                     :asdf-url (getf asdf :url)
+                     :client-tar-url (getf client-tar :url)
+                     :version version
+                     :plist plist
+                     :source-file source-file))))
+
+(defun client-info-url-from-version (version)
+  (format nil "http://~A/client/~A/client-info.sexp"
+          *quicklisp-hostname*
+          version))
+
+(defun distinfo-url-from-version (version)
+  (format nil "http://~A/dist/~A/distinfo.txt"
+          *quicklisp-hostname*
+          version))
+
 (defvar *help-message*
   (format nil "~&~%  ==== quicklisp quickstart install help ====~%~%    ~
                quicklisp-quickstart:install can take the following ~
                optional arguments:~%~%      ~
                  :path \"/path/to/installation/\"~%~%      ~
-                 :proxy \"http://your.proxy:port/\"~%~%"))
+                 :proxy \"http://your.proxy:port/\"~%~%      ~
+                 :client-url <url>~%~%      ~
+                 :client-version <version>~%~%      ~
+                 :dist-url <url>~%~%      ~
+                 :dist-version <version>~%~%"))
+
 (defvar *after-load-message*
-  (format nil "~&~%  ==== quicklisp quickstart loaded ====~%~%    ~
+  (format nil "~&~%  ==== quicklisp quickstart ~A loaded ====~%~%    ~
                To continue with installation, evaluate: (quicklisp-quickstart:install)~%~%    ~
-               For installation options, evaluate: (quicklisp-quickstart:help)~%~%"))
+               For installation options, evaluate: (quicklisp-quickstart:help)~%~%"
+          qlqs-info:*version*))
 
 (defvar *after-initial-setup-message*
   (with-output-to-string (*standard-output*)
@@ -1535,25 +1649,51 @@ the indexes in the header accordingly."
     (format t "    To load Quicklisp every time you start Lisp, use: (ql:add-to-init-file)~%~%")
     (format t "    For more information, see http://www.quicklisp.org/beta/~%~%")))
 
-(defun initial-install ()
+(defun initial-install (&key (client-url *client-info-url*) dist-url)
+  (setf *quickstart-parameters*
+        (list :proxy-url *proxy-url*
+              :initial-dist-url dist-url))
   (ensure-directories-exist (qmerge "tmp/"))
-  (ensure-directories-exist (qmerge "quicklisp/"))
-  (renaming-fetch *asdf-url* (qmerge "asdf.lisp"))
-  (let ((tmptar (qmerge "tmp/quicklisp.tar")))
-    (renaming-fetch *quicklisp-tar-url* tmptar)
-    (unpack-tarball tmptar :directory (qmerge "./")))
-  (renaming-fetch *setup-url* (qmerge "setup.lisp"))
-  (load (qmerge "setup.lisp"))
-  (write-string *after-initial-setup-message*)
-  (finish-output))
+  (let ((client-info (fetch-client-info client-url))
+        (tmptar (qmerge "tmp/quicklisp.tar"))
+        (setup (qmerge "setup.lisp"))
+        (asdf (qmerge "asdf.lisp")))
+    (renaming-fetch (client-tar-url client-info) tmptar)
+    (unpack-tarball tmptar :directory (qmerge "./"))
+    (renaming-fetch (setup-url client-info) setup)
+    (renaming-fetch (asdf-url client-info) asdf)
+    (rename-file (source-file client-info) (qmerge "client-info.sexp"))
+    (load setup :verbose nil :print nil)
+    (write-string *after-initial-setup-message*)
+    (finish-output)))
 
 (defun help ()
   (write-string *help-message*)
   t)
 
+(defun non-empty-file-namestring (pathname)
+  (let ((string (file-namestring pathname)))
+    (unless (or (null string)
+                (equal string ""))
+      string)))
+
 (defun install (&key ((:path *home*) *home*)
-                ((:proxy *proxy-url*) *proxy-url*))
-  (setf *home* (merge-pathnames *home*))
+                  ((:proxy *proxy-url*) *proxy-url*)
+                  client-url
+                  client-version
+                  dist-url
+                  dist-version)
+  (setf *home* (merge-pathnames *home* (truename *default-pathname-defaults*)))
+  (let ((name (non-empty-file-namestring *home*)))
+    (when name
+      (warn "Making ~A part of the install pathname directory"
+            name)
+      ;; This corrects a pathname like "/foo/bar" to "/foo/bar/" and
+      ;; "foo" to "foo/"
+      (setf *home*
+            (make-pathname :defaults *home*
+                           :directory (append (pathname-directory *home*)
+                                              (list name))))))
   (let ((setup-file (qmerge "setup.lisp")))
     (when (probe-file setup-file)
       (multiple-value-bind (result proceed)
@@ -1568,12 +1708,19 @@ the indexes in the header accordingly."
         (write-line "!!! Quicklisp has already been set up. !!!")
         (write-string *after-initial-setup-message*)
         t)
-      (call-with-quiet-compilation #'initial-install)))
-
-;;; Try to canonicalize to an absolute pathname; helps on Lisps where
-;;; *default-pathname-defaults* isn't an absolute pathname at startup
-;;; (e.g. CCL, CMUCL)
-(setf *default-pathname-defaults* (truename *default-pathname-defaults*))
+      (call-with-quiet-compilation
+       (lambda ()
+         (let ((client-url (or client-url
+                               (and client-version
+                                    (client-info-url-from-version client-version))
+                               *client-info-url*))
+               ;; It's ok for dist-url to be nil; there's a default in
+               ;; the client
+               (dist-url (or dist-url
+                             (and dist-version
+                                  (distinfo-url-from-version dist-version)))))
+           (initial-install :client-url client-url
+                            :dist-url dist-url))))))
 
 (write-string *after-load-message*)
 
