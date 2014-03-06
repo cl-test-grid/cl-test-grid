@@ -30,18 +30,6 @@
 
 (in-package #:test-grid-agent)
 
-(defparameter +api-version+ '(1 . 2)
-  "DEPRECATED. Current version of the test-grid-agent API.")
-
-(defgeneric api-compatible-p (version-required &optional version-provided)
-  (:documentation "DEPRECATED. Returns true if an interface VERSION-PROVIDED by some module
-is compatible with the VERSION-REQIRED by the module client.
-
-The version are conses in the form (<major> . <minor>),
-where major and minor are non-negative integers, for example '(1 . 0).
-
-VERSION-PROVIDED defaults to TEST-GRID-AGENT:+API-VERSION+"))
-
 (defclass agent ()
    ;; The list of lisp-exe's to run tests on.
   ((lisps :type list :accessor lisps :initform nil)
@@ -63,3 +51,16 @@ VERSION-PROVIDED defaults to TEST-GRID-AGENT:+API-VERSION+"))
 (defgeneric make-agent ())
 
 (defgeneric main (agent))
+
+(defparameter +api-version+ '(1 . 2)
+  "DEPRECATED. Current version of the test-grid-agent API.")
+
+(defgeneric api-compatible-p (version-required &optional version-provided)
+  (:documentation "DEPRECATED. Returns true if an interface VERSION-PROVIDED by some module
+is compatible with the VERSION-REQIRED by the module client.
+
+The version are conses in the form (<major> . <minor>),
+where major and minor are non-negative integers, for example '(1 . 0).
+
+VERSION-PROVIDED defaults to TEST-GRID-AGENT:+API-VERSION+"))
+
