@@ -59,7 +59,7 @@
     ;;(let ((dist (fncall "ql-dist:install-dist" "http://alpha.quicklisp.org/dist/qlalpha.txt" :prompt nil :replace t)))
     ;;  (fncall "ql-dist:enable" dist)
     ;;  (fncall "ql:update-dist" dist :prompt nil)
-    ;;  (version-string dist)
+    ;;  (version-string dist))
     ))
 
 (defun update-quicklisp (install-dir log-file)
