@@ -93,7 +93,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-mustache           :trivial-gray-streams :drakma              :optima
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd
-    :bencode)
+    :bencode               :jsown)
   "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -1066,3 +1066,8 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; test framework used: hu.dwim.stefil.
   (quicklisp:quickload :bencode-test)
   (run-hu.dwim.stefil-test-suite (read-from-string "bencode-test::test-all")))
+
+(defmethod libtest ((library-name (eql :jsown)))
+  ;; test framework used: fiveam.
+  (quicklisp:quickload :jsown-tests)
+  (run-fiveam-test-suite (read-from-string "jsown-tests:test-all")))
