@@ -92,7 +92,8 @@ just passed to the QUICKLISP:QUICKLOAD."
     :bknr-datastore        :yaclml               :com.google.base     :external-program
     :cl-mustache           :trivial-gray-streams :drakma              :optima
     :cl-6502               :doplus               :nst                 :track-best
-    :cleric                :cl-erlang-term       :stmx                :cl-epmd)
+    :cleric                :cl-erlang-term       :stmx                :cl-epmd
+    :bencode)
   "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -1060,3 +1061,8 @@ just passed to the QUICKLISP:QUICKLOAD."
                       (mapcar #'read-from-string '("epmd-test::epmd-protocol"
                                                    "epmd-test::epmd-client"
                                                    "epmd-test::epmd-server"))))))
+
+(defmethod libtest ((library-name (eql :bencode)))
+  ;; test framework used: hu.dwim.stefil.
+  (quicklisp:quickload :bencode-test)
+  (run-hu.dwim.stefil-test-suite (read-from-string "bencode-test::test-all")))
