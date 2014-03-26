@@ -26,6 +26,7 @@
 + anaphora 2010-11-10
 - asdf-system-connections 2010-11-10
 + babel 2010-11-10
++ bencode 2014-03-17
 +2 bknr.datastore 2012-03-07 (although the main test suite of
                               bknr-datastore is alread added to
                               the test grid, there is another
@@ -116,6 +117,7 @@
                             with one test defined using stefil)
 - fare-utils 2010-11-10
 + flexi-streams 2010-11-10
++ jsown 2014-03-17
 +2 gbbopen 2012-03-07 (Needs investigation.
                        The points:
                        - I am not sure how to detect test failures,
