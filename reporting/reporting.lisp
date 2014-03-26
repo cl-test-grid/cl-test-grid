@@ -106,38 +106,42 @@
     (my-time ("library reports...")
       (print-library-reports all-results))
 
-    (print-compiler-reports all-results new-quicklisp)))
+  ;  (print-compiler-reports all-results new-quicklisp)
+    ))
 
 (defun print-compiler-reports (all-results new-quicklisp)
   (my-time ("ECL bytecode load failures...~%")
     (print-load-failures "ecl-load-failures-bytecode.html"
                           all-results
                          ;;"ecl-12.12.1-unknown-linux-x86-bytecode"
-                         "ecl-13.4.1-94e04b54-linux-x64-bytecode"
+                         ;;"ecl-13..1-94e04b54-linux-x64-bytecode"
+                         "ecl-13.5.1-unknown-linux-i686-bytecode"
                          new-quicklisp))
   (my-time ("ECL lisp-to-c load failures...~%")
     (print-load-failures "ecl-load-failures-lisp-to-c.html"
                          all-results
                          ;;"ecl-12.12.1-unknown-linux-x86-lisp-to-c"
-                         "ecl-13.4.1-94e04b54-linux-x64-lisp-to-c"
+                         ;;"ecl-13.4.1-94e04b54-linux-x64-lisp-to-c"
+                         "ecl-13.5.1-unknown-linux-i686-lisp-to-c"
                          new-quicklisp))
 
   (my-time ("ABCL load failures...~%")
     (print-load-failures "abcl-load-failures.html"
                          all-results
-                         "abcl-1.1.1-fasl39-linux-x86"
+                         "abcl-1.2.0-fasl42-linux-x86"
                          new-quicklisp))
 
   (my-time ("CCL load failures...~%")
     (print-load-failures "ccl-load-failures.html"
                          all-results
-                         "ccl-1.9-f96-linux-x64"
+                         "ccl-1.9-f96-linux-x86"
                          new-quicklisp))
   (my-time ("SBCL load failures...~%")
     (print-load-failures "sbcl-load-failures.html"
                          all-results
                          ;"sbcl-1.1.1-linux-x86"
-                         "sbcl-1.0.57.0.debian-linux-x64"
+                         ;"sbcl-1.0.57.0.debian-linux-x64"
+                         "sbcl-1.1.11-linux-x86"
                          new-quicklisp))
 
   ;; ACL 8.2 license has expired and 9.0 doesn't run on my linux
