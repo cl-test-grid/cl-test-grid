@@ -15,7 +15,7 @@
   (extract-and-save-meta-info-from-quicklisp "C:\\Users\\anton\\quicklisp\\dists\\quicklisp\\systems.txt")
   => NIL
 
-;;;; To use the meta info from the intermediate file:
+;;;; To use the meta info from the intermediate file
 
   (get-dependencies)
   => #<hash-table {system-name: (dependency-system-names...),
@@ -27,7 +27,7 @@
                    ...}> 
 |#
 
-(defparameter +persistence-file+ (test-grid-reporting::src-file "meta-info-quicklisp-2013-08-13.lisp")
+(defparameter +persistence-file+ (test-grid-reporting::src-file "meta-info-quicklisp-2014-02-11.lisp")
   "This is where dependencies are save to and loaded from.")
 
 (defun skip-header (stream file-pathname)
