@@ -425,7 +425,20 @@
                             ((search "\"iolib."
                                      (fail-condition-text r))
                              "iolib.*"))))
-                  )))
+                (lib-world "qlalpha 2014-03-14"
+                   (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
+                     "ql:system-not-found")
+                   ,(lambda (r)
+                      (when (search ":ASDF does not match version 3.0.1" (fail-condition-text r))
+                        "needs ASDF >= 3.0.1"))
+                  (system-name "cl-lastfm-test"
+                    (failure-p t
+                      "no package SB-POSIX"))
+                  (system-name "single-threaded-ccl"
+                    (lisp "clisp-2.49-unix-x86"
+                      "needs newer ASDF")))
+
+                )))
 
 
 
