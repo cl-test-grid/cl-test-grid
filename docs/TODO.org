@@ -53,16 +53,35 @@
    CLOSED: [2013-12-22 Вс 09:48]
    The same code can't be used for both anymore, as they
    have become incompatible.
+** DONE Review Quicklisp 2013-11-11 results and report bugs
+   CLOSED: [2014-01-10 Пт 19:26]
+* January 2014
+** DONE Fix LispWorks windows (together with Camille Troillard)
+   CLOSED: [2014-02-10 Пн 17:10]
+** DONE Suggest quicklisp to rely on ASDF:missing-dependency during ql:quickload
+   CLOSED: [2014-01-18 Сб 05:25]
+** DONE Submit Quicklisp issue to reuse the same archives between dists
+   CLOSED: [2014-02-10 Пн 17:17]
+   https://github.com/quicklisp/quicklisp-client/issues/91
+** DONE Suggest to ASDF that missing :defsystem-depends-on were signalled as
+   CLOSED: [2014-02-10 Пн 17:16]
+  an (defclass missing-defsystem-dependency (MISSING-DEPENDENCY LOAD-SYSTEM-DEFINITION-ERROR) ())
+  https://bugs.launchpad.net/asdf/+bug/1276846
+* February
+** DONE Submit a CCL issue about cl-l10n failing with NO-APPLICABLE-METHOD-EXISTS CCL:SLOT-VALUE-USING-CLASS
+   CLOSED: [2014-02-10 Пн 17:45]
+** TODO Finish ASDF tests
+** TODO Submit issues for quicklisp 2013-12-13
+** TODO Agent: retry when test results upload failed.
 ** TODO Document :fail-condition-type/text on data/README.md
 ** TODO sptm/README.md - improve a little
    Explain the purpose better.
    Explain how consistency checks should be implemented.
    ...
+** TODO automate issue notifications
 ** TODO Document the Notes feature: code comments and the reporting/README.md
-** TODO Help Jan Moringen to track down the problem of submiting test results from his network.
 ** TODO Debug ECL hangup on MacOS X of Patrick Stein
-** TODO Review Quicklisp 2013-11-11 results and report bugs
-** TODO My own Quicklisp dist
+** TODO Ask Paul about the CLISP failures happening only at his CLISP
 * Engage People (ideas)
 ** TODO Invite test-runners by publishing clearly my needs:
    - Coverage table for Quicklisp testing,
@@ -154,9 +173,12 @@
 ** TODO Luis Oliveira: buld library heads from source control
 ** TODO Juan Jose: add the function call performed by test grid to the log
 * Backlog
-** TODO copy new inplementation of print-backtrace from ASDF
-   Because ASDF just fixed it for ECL
-   https://bugs.launchpad.net/bugs/1142779
+** TODO GC Quicklisp libraries
+   After Quicklisp updates dist version, the tarballs and sources
+   of old library versions not used by new dist remain on the file system.
+   It is desirable to remove them to save disk space.
+** TODO work-dir/agent/quicklisp-update.log with output of the quicklisp update process
+** TODO Add Camille to the credits section
 ** TODO recover from submit-results failure
    When log files are uploaded sucessfully, but the test-run-info.lisp
    upload fails, the agent restarted next time tries to repeat full test run.
@@ -168,6 +190,7 @@
    And somehow just use the recent ASDF?
 ** TODO Avoid copy/paste of the print-backtrace from ASDF?
    And somehow just use the recent ASDF?
+** TODO Help Jan Moringen to track down the problem of submiting test results from his network.
 ** TODO remove wrong tooltip OK?FAIL
 ** TODO Quicklisp quality metric:
    single number characterizing quality,
@@ -183,8 +206,7 @@
    The author ignored my question about the way to test all the ASDF system at once
    (is there a single  ASDF system which includes all the other ASDF systems?)
 ** TODO Reccurig donations via PayPall
-** TODO Use :fail-condition-type/text during reporting to automatically
-   exclude FFI depending failures from comparision (quicklisp diff).
+** TODO Automatically exclude FFI depending failures from comparision (quicklisp diff).
    Thtats just an idea, probably this should be optional.
    Anyway, the FFI related failures are distinguished by the "ffi"
    note in the reports, so when we overview the diff, we know
@@ -407,7 +429,6 @@
     the identifier will be a structured object, not just
     a string; provably it will even contains *features*
     of the lisp implementaion.
-** TODO Agent: retry when test results upload failed.
 ** TODO recompile cl-test-grid-agent sources at every agetn run?
    As currently ASDF doesn't rebuild depending libraries
    when the libraries they depend on changed (add
