@@ -186,8 +186,7 @@ as the system load status.")
       (format stream "  lib-world:         ~A~%" (getf run-descr :lib-world))
       (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
       (format stream "  contributor email: ~A~%" (getf run-descr :contact-email))
-      (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
-      (format stream "============================================================~%"))))
+      (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time))))))
 
 (defun print-log-footer (lib-or-system status log-file)
   (appending stream log-file
