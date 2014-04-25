@@ -279,8 +279,7 @@ upon the BODY completion runs the BODY again."
       (format stream "  lib-world:         ~A~%" (getf run-descr :lib-world))
       (format stream "  lisp:              ~A~%" (getf run-descr :lisp))
       (format stream "  contributor email: ~A~%" (getf run-descr :contact-email))
-      (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time)))
-      (format stream "============================================================~%"))))
+      (format stream "  timestamp:         ~A~%" (pretty-fmt-time (get-universal-time))))))
 
 (defun proc-test-loading (lisp-exe system-name run-descr
                           logfile private-quicklisp-dir asdf-output-dir)
