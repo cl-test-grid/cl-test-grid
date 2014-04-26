@@ -437,8 +437,37 @@
                   (system-name "single-threaded-ccl"
                     (lisp "clisp-2.49-unix-x86"
                       "needs newer ASDF")))
+                (lib-world "quicklisp 2014-03-17"
+                  (lisp "abcl-1.3.0-svn-14683-fasl42-linux-x86"
+                    ,(lambda (r)
+                       (when (search "Java exception 'java.lang.NullPointerException'"
+                                     (fail-condition-text r))
+                         "NPE"))))
+                (lib-world "qlalpha 2014-04-21"
+                 (libname (:more-conditions :xml.location :architecture.service-provider)
+                   (failure-p t
+                     ,(github-issue "scymtym" "more-conditions" 2)))
+                 (system-name "cl-i18n"
+                   (failure-p t
+                     "Needs newer UIOP"))
+                 (libname :lisp-interface-library
+                   (lisp ("sbcl-1.1.11-linux-x86" "sbcl-1.1.16-linux-x86")
+                     (failure-p t
+                       "Needs newer UIOP")))
+                 (libname :stumpwm
+                   (lisp-impl-type :clisp
+                     (failure-p t
+                      ,(github-issue "stumpwm" "stumpwm" 88))))
+                 (libname :torta
+                   (lisp-impl-type :cmu
+                     (failure-p t
+                      ,(github-issue "sgarciac" "torta" 1))))
+                 (libname :hu.dwim.computed-class
+                   (lisp "sbcl-1.1.11-linux-x86"
+                     (failure-p t
+                       ":HU.DWIM.LOGGER not found"))))
 
-                )))
+                  )))
 
 
 
