@@ -57,7 +57,36 @@
           (repo ticket)
           (numbr ticket)))
 
-(ticket-url (github-issue "avodonosov" "test" 1))
+(assert (string= "https://github.com/avodonosov/test/issues/1"
+                 (ticket-url (github-issue "avodonosov" "test" 1))))
+
+
+(defclass prj-ticket (ticket)
+  ((project-key :type keyworkd
+                :accessor project-key
+                :initarg :project-key
+                :initform (error ":project-key is required"))
+   (ticket-id :type t
+              :accessor ticket-id
+              :initarg :ticket-id
+              :initform (error ":ticket-id is required"))))
+
+(defparameter *prj-ticket-base-url*
+  (alexandria:plist-hash-table '(:abcl "http://abcl.org/trac/ticket/")))
+
+(defun prj-ticket (project-key ticket-id)
+  (make-instance 'prj-ticket
+                 :project-key project-key
+                 :ticket-id ticket-id))
+
+(defmethod ticket-url ((ticket prj-ticket))
+  (format nil "~A~A"
+          (gethash (project-key ticket)
+                   *prj-ticket-base-url*)
+          (ticket-id ticket)))
+
+(assert (string= (ticket-url (prj-ticket :abcl 357))
+                 "http://abcl.org/trac/ticket/357"))
 
 ;;; Note database
 
@@ -443,7 +472,7 @@
                        (when (search "Java exception 'java.lang.NullPointerException'"
                                      (fail-condition-text r))
                          "NPE"))))
-                (lib-world "qlalpha 2014-04-21"
+                (lib-world ("qlalpha 2014-04-21" "quicklisp 2014-04-25")
                  (libname (:more-conditions :xml.location :architecture.service-provider)
                    (failure-p t
                      ,(github-issue "scymtym" "more-conditions" 2)))
@@ -466,7 +495,24 @@
                    (lisp "sbcl-1.1.11-linux-x86"
                      (failure-p t
                        ":HU.DWIM.LOGGER not found"))))
-
+                (lib-world "quicklisp 2014-04-25"
+                 (libname (:exscribe :scribble :fare-quasiquote)
+                   (failure-p t
+                     "Needs newer UIOP"))
+                 (lisp "abcl-1.3.1-fasl42-linux-x86"
+                  (libname :cl-containers
+                    ,(prj-ticket :abcl 357)))
+                 (libname :utils-kt
+                  (failure-p t
+                    (lisp ("abcl-1.3.1-fasl42-linux-x86" "abcl-1.3.0-fasl42-linux-x86" "abcl-1.2.1-fasl42-linux-x86")
+                      "stack overflow"))))
+                (lib-world "quicklisp 2014-04-25 + asdf.synt-control.e4229d8"
+                 (system-name "cl-indeterminism"
+                   (lisp "sbcl-1.1.11-linux-x86"
+                     "Quicklisp bug"))
+                 (system-name "teepeedee2"
+                   (lisp ("sbcl-1.1.11-linux-x86" "clisp-2.49-unix-x86")
+                     ,(github-issue "vii" "teepeedee2" 4))))
                   )))
 
 
