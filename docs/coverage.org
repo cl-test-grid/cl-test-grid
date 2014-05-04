@@ -206,6 +206,7 @@
 + named-readtables 2012-03-07 (strange thing: it contains a copy of RT
                                test framework, but in it's own package
                                named-readtables-test)
++ nibbles 2014-04-25
 + optima 2013-03-12
 +2 osicat 2012-03-07 (has test suite, but has difficult :no-resource
                       condition - cffi-groveler involved)
