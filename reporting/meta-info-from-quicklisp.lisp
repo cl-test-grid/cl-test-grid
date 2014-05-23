@@ -12,7 +12,7 @@
 ;;;; (needs to be done only only once, as we have the intermediate
 ;;;; file commited):
 
-  (extract-and-save-meta-info-from-quicklisp "C:\\Users\\anton\\quicklisp\\dists\\quicklisp\\systems.txt")
+  (extract-and-save-meta-info-from-quicklisp "/home/anton/quicklisp/dists/quicklisp/systems.txt")
   => NIL
 
 ;;;; To use the meta info from the intermediate file
@@ -27,7 +27,7 @@
                    ...}> 
 |#
 
-(defparameter +persistence-file+ (test-grid-reporting::src-file "meta-info-quicklisp-2014-02-11.lisp")
+(defparameter +persistence-file+ (test-grid-reporting::src-file "meta-info-quicklisp-2014-04-25.lisp")
   "This is where dependencies are save to and loaded from.")
 
 (defun skip-header (stream file-pathname)
