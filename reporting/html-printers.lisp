@@ -122,8 +122,12 @@ to include in to the text of the link, defaults to RESULT-SPEC"
   (etypecase note
     (github-issue (format nil "<a class=\"note\" href=\"~A\">#~A/~A</a>" (ticket-url note) (repo note) (numbr note)))
     (launchpad-ticket (format nil "<a class=\"note\" href=\"~A\">#lp~A</a>" (ticket-url note) (id note)))
-    (prj-ticket (format nil "<a class=\"note\" href=\"~A\">#~A~A</a>" (ticket-url note) (project-key note) (ticket-id note)))
+    (prj-ticket (format nil "<a class=\"note\" href=\"~A\">#~(~A~)/~A</a>" (ticket-url note) (project-key note) (ticket-id note)))
     (string (format nil "<span class=\"note\">~A</span>" note))))
+
+(defun notes-html (result)
+  (format nil "~{~A~^, ~}"
+          (mapcar #'note-html (notes result))))
 
 (defun results-cell-printer (out cell-data &rest fields)
   "Convenient for the most cases printer of
@@ -132,10 +136,9 @@ CELL-DATA is the list of RESULT objects to print."
   (dolist (result (sort (copy-list cell-data)
                         #'string<
                         :key (lambda (elem) (fields-to-string elem fields))))
-    (let ((notes (notes result)))
-      (format out "<div class=\"result\">~A ~{~A~^, ~}</div>"
-              (apply #'result-log-link result fields)
-              (mapcar #'note-html notes)))))
+    (format out "<div class=\"result\">~A ~A</div>"
+            (apply #'result-log-link result fields)
+            (notes-html result))))
 
 (defun format-lib-results (out joined-lib-results)
   (dolist (joined-lib-result joined-lib-results)

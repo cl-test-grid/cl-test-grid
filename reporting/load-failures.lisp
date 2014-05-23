@@ -24,8 +24,8 @@
     (with-output-to-string (s)
       (dolist (fail load-fail-results)
         (let ((system (system-name fail)))
-          (format s "<tr><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td></tr>~%"
-                  (failure-log-link fail 'system-name)
+          (format s "<tr><td>~A ~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td><td>~A</td></tr>~%"
+                  (failure-log-link fail 'system-name) (notes-html fail)
                   (length (root-blockers system failed-hash))
                   (length (blocked-exclusively system failed-hash))
                   (length (project-names (blocked-exclusively system failed-hash)))
