@@ -453,7 +453,10 @@
                              "iolib grovel")
                             ((search "\"iolib."
                                      (fail-condition-text r))
-                             "iolib.*"))))
+                             "iolib.*")))
+                   (libname :cleric
+                     (lisp-impl-type (:acl :clisp)
+                       ,(github-issue "flambard" "CLERIC" 9))))
                 (lib-world "qlalpha 2014-03-14"
                    (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
                      "ql:system-not-found")
@@ -505,7 +508,13 @@
                  (libname :utils-kt
                   (failure-p t
                     (lisp ("abcl-1.3.1-fasl42-linux-x86" "abcl-1.3.0-fasl42-linux-x86" "abcl-1.2.1-fasl42-linux-x86")
-                      "stack overflow"))))
+                      "stack overflow")))
+                 (lisp "sbcl-1.1.18.572-8feebec-linux-x86"
+                   ,(lambda (r)
+                            (when (search "SB-C::IR2-BLOCK" (fail-condition-text r))
+                              "NIL isn't SB-C::IR2-BLOCK"))
+                   (fail-condition-type "EDITOR-HINTS.NAMED-READTABLES:READER-MACRO-CONFLICT"
+                     "named-readtables")))
                 (lib-world "quicklisp 2014-04-25 + asdf.synt-control.e4229d8"
                  (system-name "cl-indeterminism"
                    (lisp "sbcl-1.1.11-linux-x86"
@@ -513,9 +522,15 @@
                  (system-name "teepeedee2"
                    (lisp ("sbcl-1.1.11-linux-x86" "clisp-2.49-unix-x86")
                      ,(github-issue "vii" "teepeedee2" 4))))
+                (lib-world "quicklisp 2014-04-25 + asfd.3.1.0.120"
+                 (libname :utils-kt
+                  (failure-p t
+                    (lisp ("abcl-1.3.1-fasl42-linux-x86")
+                      "stack overflow")))
+                 (system-name "teepeedee2"
+                   (lisp ("sbcl-1.1.11-linux-x86" "clisp-2.49-unix-x86")
+                     ,(github-issue "vii" "teepeedee2" 4))))
                   )))
-
-
 
 (defun notes (result)
   (let ((notes (db-notes *note-db* result)))
