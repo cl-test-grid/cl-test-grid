@@ -530,6 +530,35 @@
                  (system-name "teepeedee2"
                    (lisp ("sbcl-1.1.11-linux-x86" "clisp-2.49-unix-x86")
                      ,(github-issue "vii" "teepeedee2" 4))))
+                (lib-world ("qlalpha 2014-05-24" "quicklisp 2014-05-25")
+                   (failure-p t
+                     (libname :lquery
+                       (lisp-impl-type (:ccl :clisp :cmu)
+                         ,(github-issue "Shinmera" "lquery" 1)))
+                     (libname :colleen
+                       (lisp-impl-type :sbcl
+                         ,(github-issue "Shinmera" "colleen" 5)))
+                     (libname :cl-mustache
+                       ,(github-issue "kanru" "cl-mustache" 15))
+                     (fail-condition-type "QUICKLISP-CLIENT:SYSTEM-NOT-FOUND"
+                       "ql:system-not-found")
+                     ,(lambda (r)
+                              (cond ((search "FAST-UNSAFE-SOURCE-FILE" (fail-condition-text r))
+                                     "ASDF: don't recognize component type FAST-UNSAFE-SOURCE-FILE")
+                                    ((search "C::*DEBUG*" (fail-condition-text r))
+                                     "C::*DEBUG* is unbound")))))
+                  (lib-world ("qlalpha 2014-06-12")
+                   (failure-p t
+                     (system-name ("hu.dwim.computed-class+hu.dwim.logger" "hu.dwim.computed-class.test")
+                       (lisp "sbcl-1.1.11-linux-x86"
+                         ":HU.DWIM.LOGGER not found"))
+                     (system-name "crane-web"
+                       (lisp "cmu-snapshot-2014-01__20e_unicode_-linux-x86"
+                          "CMUCL wants to print a style-warning for cl-base64, but experiences an error during printing."))
+                     ,(lambda (r)
+                              (when (or (search "Component \"asdf\" does not match version 3.0" (fail-condition-text r))
+                                        (search "there is no package with name \"UIOP\"" (fail-condition-text r)))
+                                     "needs newer ASDF"))))
                   )))
 
 (defun notes (result)
