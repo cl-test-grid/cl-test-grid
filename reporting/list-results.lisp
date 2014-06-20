@@ -136,15 +136,17 @@ Returns the outcome part of the result-spec."
   (case (result-spec-outcome result)
     ((:fail :crash :timeout :known-fail :unexpected-ok :no-resource) t)))
 
+(defun ffi-grovel-failure-p (result)
+  (string= "CFFI-GROVEL:GROVEL-ERROR" (fail-condition-type result)))
+
 (defun ffi-failure-p (result)
   (let ((fail-type (fail-condition-type result))
         (fail-text (fail-condition-text result)))
     (or (and fail-type
              (member fail-type
-                     '("CFFI:LOAD-FOREIGN-LIBRARY-ERROR")
+                     '("CFFI:LOAD-FOREIGN-LIBRARY-ERROR" )
                      :test #'string-equal))
-        (and (find-if (lambda (txt)
-                        (search txt fail-text))
+        (and (find-if (lambda (txt) (search txt fail-text))
                       '("Undefined foreign symbol"
                         "Don't know how to REQUIRE JNA"
                         "Don't know how to COMMON-LISP:REQUIRE JNA"

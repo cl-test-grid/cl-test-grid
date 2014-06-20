@@ -72,7 +72,8 @@
               :initform (error ":ticket-id is required"))))
 
 (defparameter *prj-ticket-base-url*
-  (alexandria:plist-hash-table '(:abcl "http://abcl.org/trac/ticket/")))
+  (alexandria:plist-hash-table '(:abcl "http://abcl.org/trac/ticket/"
+                                 :cmucl "http://trac.common-lisp.net/cmucl/ticket/")))
 
 (defun prj-ticket (project-key ticket-id)
   (make-instance 'prj-ticket
@@ -87,6 +88,9 @@
 
 (assert (string= (ticket-url (prj-ticket :abcl 357))
                  "http://abcl.org/trac/ticket/357"))
+
+(assert (string= (ticket-url (prj-ticket :cmucl 99))
+                 "http://trac.common-lisp.net/cmucl/ticket/99"))
 
 ;;; Note database
 
@@ -554,16 +558,28 @@
                          ":HU.DWIM.LOGGER not found"))
                      (system-name "crane-web"
                        (lisp "cmu-snapshot-2014-01__20e_unicode_-linux-x86"
-                          "CMUCL wants to print a style-warning for cl-base64, but experiences an error during printing."))
+                          ,(prj-ticket :cmucl 99)))
                      ,(lambda (r)
                               (when (or (search "Component \"asdf\" does not match version 3.0" (fail-condition-text r))
                                         (search "there is no package with name \"UIOP\"" (fail-condition-text r)))
                                      "needs newer ASDF"))))
+                  (lib-world ("quicklisp 2014-06-16")
+                    (failure-p t
+                      ,(lambda (r)
+                         (when (or (search "Component \"asdf\" does not match version 3.0" (fail-condition-text r))
+                                   (search "there is no package with name \"UIOP\"" (fail-condition-text r)))
+                           "needs newer ASDF"))
+                      (system-name "crane-web"
+                        (lisp ("cmu-snapshot-2014-01__20e_unicode_-linux-x86"
+                               "cmu-snapshot-2014-05-dirty__20e_unicode_-linux-x86")
+                          ,(prj-ticket :cmucl 99)))))
                   )))
 
 (defun notes (result)
   (let ((notes (db-notes *note-db* result)))
     (when (ffi-failure-p result)
       (push "ffi" notes))
+    (when (ffi-grovel-failure-p result)
+      (push "ffi-grovel" notes))
     notes))
 
