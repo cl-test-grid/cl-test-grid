@@ -138,6 +138,8 @@
   is used to record the bugs we submitted to various CL projects.
   We record bugs there to avoid duplicated bug reports.
 
+* System Architecture
+
   cl-test-grid consists of the following components:
   - [[/agent][test-grid-agent]] - the program able to run tests and upload the results online.
   - [[/testsuites][test-grid-testsuites]] - testgrid adapters for testsuites of all the included
