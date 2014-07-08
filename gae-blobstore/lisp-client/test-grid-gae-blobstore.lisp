@@ -144,19 +144,31 @@ and writting the file to that stream."
                                                        (list (funcall file-sender-factory pathname)
                                                              :filename (file-namestring pathname)
                                                              :content-type "text/plain"))))
-                                           id-pathname-alist-part)))
-                 (multiple-value-bind (stream status-code headers uri stream2 must-close reason-phrase)
-                     (drakma:http-request (funcall upload-url-fn)
-                                          :method :post
-                                          :content-length t
-                                          :parameters post-params
-                                          :want-stream t)
-                   (declare (ignore headers uri stream2 must-close))
-                   (cond ((/= 200 status-code)
-                          (error "Error uploading files, the HTTP response code ~A: ~A" status-code reason-phrase))
-                         (t (with-open-stream (stream stream)
-                              ;; And read the response
-                              (test-grid-utils::safe-read stream)))))))
+                                           id-pathname-alist-part))
+                      (retry-count 0))
+                 (tagbody retry
+                    (multiple-value-bind (stream status-code headers uri stream2 must-close reason-phrase)
+                        (drakma:http-request (funcall upload-url-fn)
+                                             :method :post
+                                             :content-length t
+                                             :parameters post-params
+                                             :want-stream t)
+                      (declare (ignore headers uri stream2 must-close))
+                      (cond ((and (= 500 status-code)
+                                  (<= (incf retry-count) 3))
+                             ;; Due to a GAE bug, server sometimes fails with HTTP 500 Internal Server Error.
+                             ;; Retry helps.
+                             (let ((sleep-seconds (* 10 (expt 2 (1- retry-count)))))
+                               (log:warn "HTTP response code ~A: ~A. Retry ~A after ~A seconds..."
+                                         status-code reason-phrase
+                                         retry-count sleep-seconds)
+                               (sleep sleep-seconds))
+                             (go retry))
+                            ((/= 200 status-code)
+                             (error "Error uploading files, the HTTP response code ~A: ~A" status-code reason-phrase))
+                            (t (with-open-stream (stream stream)
+                                 ;; And read the response
+                                 (test-grid-utils::safe-read stream))))))))
              (submit-batch-logging (id-pathname-alist-part)
                (prog1
                    (submit-batch id-pathname-alist-part)
