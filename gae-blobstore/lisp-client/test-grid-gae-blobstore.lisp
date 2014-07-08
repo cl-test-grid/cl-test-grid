@@ -146,7 +146,9 @@ and writting the file to that stream."
                                                              :content-type "text/plain"))))
                                            id-pathname-alist-part))
                       (retry-count 0))
-                 (tagbody retry
+                 (prog ()
+                  retry
+                  (return
                     (multiple-value-bind (stream status-code headers uri stream2 must-close reason-phrase)
                         (drakma:http-request (funcall upload-url-fn)
                                              :method :post
@@ -168,7 +170,7 @@ and writting the file to that stream."
                              (error "Error uploading files, the HTTP response code ~A: ~A" status-code reason-phrase))
                             (t (with-open-stream (stream stream)
                                  ;; And read the response
-                                 (test-grid-utils::safe-read stream))))))))
+                                 (test-grid-utils::safe-read stream)))))))))
              (submit-batch-logging (id-pathname-alist-part)
                (prog1
                    (submit-batch id-pathname-alist-part)
