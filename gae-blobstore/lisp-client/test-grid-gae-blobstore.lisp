@@ -196,7 +196,7 @@ and writting the file to that stream."
                           (get-blobkey (car id-pathname-pair))))
                   id-pathname-alist))))))
 
-(defmethod submit-files2 (blobstore id-pathname-alist &key (batch-size 100) keep-names-p)
+(defmethod submit-files2 (blobstore id-pathname-alist &key (batch-size 50) keep-names-p)
   "KEEP-NAMES-P when true make the log stored under original FILE-NAMESTRING
 of the pathnames passed in ID-PATHNAME-ALIST."
   (submit-files-impl (constantly (format nil "~a/upload2~:[~;?keepNames=true~]"
