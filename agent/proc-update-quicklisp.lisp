@@ -6,7 +6,7 @@
 ;;;; to update quicklisp.
 
 (let* ((this-file (load-time-value (or *load-truename* #.*compile-file-pathname*)))
-       (this-file-dir (make-pathname :directory (pathname-directory this-file))))
+       (this-file-dir (make-pathname :name nil :type nil :defaults this-file)))
   (load (merge-pathnames "quicklisp.lisp" this-file-dir)))
 
 (defun install-quicklisp (install-dir)
@@ -48,11 +48,11 @@
 (defmacro restarting-downloads (&body body)
   `(restarting-downloads-impl (lambda () ,@body)))
 
-(defun do-quicklisp-update (install-dir)
+(defun do-quicklisp-update (install-dir dist-specifier)
   (restarting-downloads
 
     (install-quicklisp install-dir)
-    (fncall "quicklisp:update-client" :prompt nil)
+    (fncall "ql:update-client" :prompt nil)
 
     (flet ((version-string (dist)
              ;; find a fresh DIST object in case it is stale,
@@ -63,25 +63,35 @@
                        (fncall "ql-dist:name" dist)
                        (fncall "ql-dist:version" dist)))))
 
-      ;; Update and use the "quicklisp" dist:
-      (let ((qlalpha (fncall "ql-dist:find-dist" "qlalpha")))
-        (when qlalpha (fncall "ql-dist:disable" qlalpha)))
-      (let ((dist (fncall "ql-dist:dist" "quicklisp")))
-        (fncall "ql-dist:enable" dist)
-        (fncall "ql:update-dist" dist :prompt nil)
-        (version-string dist))
-      ;; or, if we need to install particular quicklisp version:
-      ;;(version-string (fncall "ql-dist:install-dist" "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt" :replace t :prompt nil))
+      (cond ((string= "quicklisp" dist-specifier)
+             (let ((qlalpha (fncall "ql-dist:find-dist" "qlalpha")))
+               (when qlalpha (fncall "ql-dist:disable" qlalpha)))
+             (let ((dist (fncall "ql-dist:dist" "quicklisp")))
+               (fncall "ql-dist:enable" dist)
+               (fncall "ql:update-dist" dist :prompt nil)
+               (version-string dist)))
+            ((string= "qlalpha" dist-specifier)
+             (fncall "ql-dist:disable" (fncall "ql-dist:dist" "quicklisp"))
+             (let ((dist (or (fncall "ql-dist:find-dist" "qlalpha")
+                             (fncall "ql-dist:install-dist" "http://alpha.quicklisp.org/dist/qlalpha.txt" :prompt nil :replace t))))
+               (fncall "ql-dist:enable" dist)
+               (fncall "ql:update-dist" dist :prompt nil)
+               (version-string dist)))
+            (t
+             ;; dist-specifier must be an URL string, like
+             ;; "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt"
+             ;; Useful, when we need to test a particular quicklisp version.
+             (version-string (fncall "ql-dist:install-dist" dist-specifier :replace t :prompt nil))
+             ;; Note, even if other dists are installed in quicklisp,
+             ;; the new dist gets higher precedence by ql:quickload, because
+             ;; ql-dist:install-dist; records (get-universal-time) as the "preference number" of the dist,
+             ;; thus giving the dist higher preference than of previously installed dists.
+             ;;
+             ;; It would be more reliable to explicitly disable other dists,
+             ;; but quicklisp does not provide a function to enumerate dists.
+             )))))
 
-      ;; Update and use the "qlalpha" dist:
-      ;;(fncall "ql-dist:disable" (fncall "ql-dist:dist" "quicklisp"))
-      ;;(let ((dist (fncall "ql-dist:install-dist" "http://alpha.quicklisp.org/dist/qlalpha.txt" :prompt nil :replace t)))
-      ;;  (fncall "ql-dist:enable" dist)
-      ;;  (fncall "ql:update-dist" dist :prompt nil)
-      ;;  (version-string dist))
-      )))
-
-(defun update-quicklisp (install-dir log-file)
+(defun update-quicklisp (install-dir dist-specifier log-file)
   (labels ((fmt-time (universal-time &optional destination)
              (multiple-value-bind (sec min hour date month year)
                  (decode-universal-time universal-time 0)
@@ -96,5 +106,5 @@
                    (lambda ()
                      (prog2
                          (log-msg t "update-quicklisp start")
-                         (do-quicklisp-update install-dir)
+                         (do-quicklisp-update install-dir dist-specifier)
                        (log-msg t "update-quicklisp done"))))))

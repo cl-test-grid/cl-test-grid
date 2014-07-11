@@ -57,11 +57,12 @@
         (list (result-storage-name agent)))))
 ;;; --- end of lisp specifications handling ---
 
-(defmethod initialize-instance :after ((agent agent-impl) &key)
-  (setf (work-dir agent) (default-work-dir)))
+(defmethod initialize-instance :after ((agent agent-impl) &rest initargs &key)
+  (unless (slot-boundp agent 'work-dir)
+    (setf (work-dir agent) (default-work-dir))))
 
-(defmethod make-agent ()
-  (make-instance 'agent-impl))
+(defmethod make-agent (&rest initargs)
+  (apply #'make-instance 'agent-impl initargs))
 
 ;;; Working directory structure
 (defun test-output-base-dir (agent)
@@ -96,7 +97,7 @@
   (or (custom-project-names agent)
       (project-names (project-lister agent))))
 
-(defun update-testing-quicklisp (agent)
+(defun update-testing-quicklisp (agent dist-specifier)
   "Ensures the private quicklisp of the agent
 is updated to the recent version. Returns
 lib-world identifier of that quicklisp."
@@ -109,6 +110,7 @@ lib-world identifier of that quicklisp."
                                       `(load ,(truename (src-file "proc-update-quicklisp.lisp")))
                                       `(cl-user::set-response ,response-file
                                                               (cl-user::update-quicklisp ,(private-quicklisp-dir agent)
+                                                                                         ,dist-specifier
                                                                                          ,(quicklisp-update-log agent)))))))
     (log:info "Quicklisp update process finished, current quicklisp version: ~A." quicklisp-version)
     quicklisp-version))
@@ -299,8 +301,12 @@ the PREDICATE."
                                    :lisp-exes (mapcar #'implementation-identifier
                                                       (lisp-exes agent))
                                    :preferred-lisp (implementation-identifier (preferred-lisp agent))))))
-
-(defmethod main (agent)
+(defmethod main (agent
+                 ;; QL-DOST is NOT a part of the public API (yet).
+                 ;; The value may be either "quicklisp", or "qlalpha",
+                 ;; or an URL, like
+                 ;; "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt"
+                 &key (ql-dist "quicklisp"))
   ;; setup logging for unhandled errors and warnings
   (handler-bind
       ((serious-condition (lambda (c)
@@ -321,7 +327,7 @@ the PREDICATE."
         (ensure-has-id agent)
         (send-hello-notification agent)
         (let ((lib-world (or (getf (custom-lib-world agent) :id)
-                             (update-testing-quicklisp agent))))
+                             (update-testing-quicklisp agent ql-dist))))
           (setf (project-lister agent)
                 (init-project-lister (preferred-lisp agent)
                                      (private-quicklisp-dir agent)))

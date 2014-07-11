@@ -32,25 +32,34 @@
 
 (defclass agent ()
    ;; The list of lisp-exe's to run tests on.
-  ((lisps :type list :accessor lisps :initform nil)
+  ((lisps :type list :initform nil :initarg :lisps :accessor lisps)
    ;; The lisp-exe considered as more reliable on this OS,
    ;; and supporting more libraries. Used run various small
    ;; lisp programs like quicklisp update.
-   (preferred-lisp :type (or null lisp-exe:lisp-exe) :accessor preferred-lisp :initform nil)
-   (user-email :type (or null string) :accessor user-email :initform nil)
+   (preferred-lisp :type (or null lisp-exe:lisp-exe)
+                   :initform nil
+                   :initarg :preferred-lisp
+                   :accessor preferred-lisp)
+   (user-email :type (or null string)
+               :initform nil
+               :initarg :user-email
+               :accessor user-email)
    ;; pathname-designator for the working directory,
    ;; defaults to <source code root>/work-dir/agent
-   (work-dir :accessor work-dir)
+   (work-dir :accessor work-dir :initarg :work-dir)
    ;; the tcp port used as a lock to prevent several agents
    ;; running simultaneously.
    ;; If you want to ran several agents, assign them all
    ;; different signlethon-ports and different work-dirs.
-   (singleton-lock-port :type fixnum :accessor singleton-lock-port :initform 7685)))
+   (singleton-lock-port :type fixnum
+                        :initform 7685
+                        :initarg :singleton-lock-port
+                        :accessor singleton-lock-port)))
 
 
-(defgeneric make-agent ())
+(defgeneric make-agent (&rest initargs))
 
-(defgeneric main (agent))
+(defgeneric main (agent &key))
 
 (defparameter +api-version+ '(1 . 2)
   "DEPRECATED. Current version of the test-grid-agent API.")

@@ -173,6 +173,12 @@
 ** TODO Luis Oliveira: buld library heads from source control
 ** TODO Juan Jose: add the function call performed by test grid to the log
 * Backlog
+** TODO proc-update-quicklisp: when dist-specifier is an URL, disable other dists
+** TODO proc-update-quicklisp: prevent full re-download of archives done by ql-dist:install-dist
+   Either propose a change to ql-dist:install-dist :
+      new parameter IF-EXISTS may be either :ERROR :UPDATE :REPLACE
+      old paramteter REPLACE gets deprecated
+   or workaround it somehow else.
 ** TODO GC Quicklisp libraries
    After Quicklisp updates dist version, the tarballs and sources
    of old library versions not used by new dist remain on the file system.
