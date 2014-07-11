@@ -8,20 +8,16 @@
 ;;;;
 
 (defparameter *this-dir*
-  (make-pathname :directory (pathname-directory *load-truename*)))
+  (make-pathname :name nil :type nil :defaults *load-truename*))
 
 ;; If quicklisp is absent, install and load it
 (load (merge-pathnames "agent/require-quicklisp.lisp" *this-dir*))
 (tg-require-quicklisp:require :agent-work-dir (merge-pathnames "work-dir/agent/" *this-dir*))
 
-(pushnew *this-dir* asdf:*central-registry* :test #'equal)
-(ql:quickload :test-grid-agent)
+(let ((asdf:*central-registry* (cons *this-dir* asdf:*central-registry*)))
+  (ql:quickload :test-grid-agent))
 
-;; create agent instance
-(defparameter *agent* (test-grid-agent:make-agent))
-
-;;; Now inform the *AGENT* about the lisp implementations
-;;; we have on this machine.
+;;; Lisp implementations we have on this machine.
 (defparameter *abcl* (make-instance 'lisp-exe:abcl
                                     :java-exe-path "java"
                                     :abcl-jar-path "/home/testgrid/lisps/abcl-1.0.1\\abcl.jar"))
@@ -47,38 +43,47 @@
                                              :compiler :lisp-to-c))
 (defparameter *acl* (make-instance 'lisp-exe:acl :exe-path "/home/testgrid/lisps/acl82express/alisp"))
 
-(setf (test-grid-agent:lisps *agent*) (list *abcl* *clisp* *ccl-1.8-x86*
-                                            *ccl-1.8-x86-64* *sbcl*
-                                            *ecl-bytecode*
-                                            *ecl-lisp-to-c*
-                                            *acl*
-                                            ;; pre-release version of SBCL goes to test-grid-storage
-                                            ;; named "sbcl" instead of the default storage "main"
-                                            (list *sbcl-git* "sbcl"))
+;; create agent instance
+(defparameter *agent*
+  (test-grid-agent:make-agent
+   :lisps (list *abcl* *clisp* *ccl-1.8-x86*
+                *ccl-1.8-x86-64* *sbcl*
+                *ecl-bytecode*
+                *ecl-lisp-to-c*
+                *acl*
+                ;; pre-release version of SBCL goes to test-grid-storage
+                ;; named "sbcl" instead of the default storage "main"
+                (list *sbcl-git* "sbcl"))
 
-      ;; Preferred lisp is the lisp implementation the agent
-      ;; uses when it needs to perform some auxiliary
-      ;; task in a separate lisp process (for example, updating
-      ;; the private quicklisp installation we run tests on).
-      ;; Untill quicklisp issue https://github.com/quicklisp/quicklisp-client/issues/71
-      ;; is resolved, we suggest to not use CCL here.
-      (test-grid-agent:preferred-lisp *agent*) *sbcl*
+   ;; Preferred lisp is the lisp implementation the agent
+   ;; uses when it needs to perform some auxiliary
+   ;; task in a separate lisp process (for example, updating
+   ;; the private quicklisp installation we run tests on).
+   ;; Untill quicklisp issue https://github.com/quicklisp/quicklisp-client/issues/71
+   ;; is resolved, we suggest to not use CCL here.
+   :preferred-lisp *sbcl*
 
-      ;; Please provide your email so that we know who is submitting the test results.
-      ;; Also the email will be published in the online reports, and the library
-      ;; authors can later contact you in case of questions about this test run,
-      ;; your environment, etc.
-      ;;
-      ;; If you are strongly opposed to publishing you email, please provide
-      ;; just some nickname.
-      (test-grid-agent:user-email *agent*) "avodonosov@yandex.ru"
+   ;; Please provide your email so that we know who is submitting the test results.
+   ;; Also the email will be published in the online reports, and the library
+   ;; authors can later contact you in case of questions about this test run,
+   ;; your environment, etc.
+   ;;
+   ;; If you are strongly opposed to publishing you email, please provide
+   ;; just some nickname.
+   :user-email "avodonosov@yandex.ru"
 
-      ;;; --- the settings below are not required ---
+   ;;; --- the settings below are not required ---
 
-      ;; You may specify custom working directory for
-      ;; the agent. By default it is <source-code-base>/work-dir/agent/
-      ;;(test-grid-agent:work-dir *agent*) #P"/my/cl-test-grid/work-dir/agent/"
-      )
+   ;; You may specify custom working directory for
+   ;; the agent. By default it is <source-code-base>/work-dir/agent/
+   ;;
+   ;; :work-dir #P"/my/cl-test-grid/work-dir/agent/"
+
+   ;; Only if you run several agents, give each of them
+   ;; different work-dir (above) and lock port:
+   ;;
+   ;; :singleton-lock-port 7686
+   ))
 
 ;;; Ask agent to do its work
 (test-grid-agent:main *agent*)
