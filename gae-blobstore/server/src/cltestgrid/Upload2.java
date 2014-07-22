@@ -132,7 +132,14 @@ public class Upload2 extends HttpServlet {
 
   */
 
-  public static final int MAX_FILE_LEN = 50000;
+  // The files uploaded are gzipped. Avearage compressed file size
+  // is 7-10 Kbytes, but I've seen in practice
+  // a file of 99390 bytes uncompressed, when gzipped was 55918 bytes.
+  // So it's difficult to choose maximum compressed file size for all cases,
+  // in theory if the file is already compressed, it may even grow a little after gzip.
+  // Given the maximum uncompressed file zize limit of 100 Kbytes,
+  // we use 101 Kbyte limit for compressed files.
+  public static final int MAX_FILE_LEN = 101000;
   public static final int MAX_FILES = 500;
 
   /** 
