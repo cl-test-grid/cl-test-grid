@@ -90,5 +90,7 @@ from system name to a boolean denoting whether the system load has failed."
 (dolist (fn '(dependencies dependents blockers
               root-blockers blocked blocked-exclusively))
   (fare-memoization:unmemoize fn)
-  (fare-memoization:memoize fn))
+  (fare-memoization:memoize fn)
+  ;(remprop fn 'fare-memoization::memoization-info)
+  )
 
