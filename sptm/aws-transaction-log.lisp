@@ -255,9 +255,12 @@ Transaction commit consists of:
 
 (defun border-transaction-item (log max-or-min)
   (first (select (format nil
-                         "select * from ~A where itemName() like '~A-%' and itemName() like '%-tx' order by itemName() ~A limit 1"
+                         "select * from ~A where itemName() like '%-tx' and itemName() > '~A-~A-tx' and itemName() < '~A-~A-tx' order by itemName() ~A limit 1"
                          (simpledb-domain log)
                          (name log)
+                         (version-str 0)
+                         (name log)
+                         (max-version-str)
                          (ecase max-or-min
                            (:max "desc")
                            (:min "asc")))
