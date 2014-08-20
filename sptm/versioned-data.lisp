@@ -83,9 +83,9 @@ in the transaction chain."))
 
 ;; Transaction log provides the following two functions
 ;; for commiting transactions. Two functions allow transaction
-;; log to store the function name and arguments a speparate
+;; log to store the function name and arguments in a speparate
 ;; storage, and for the caller of these two functions to
-;; avoid repeated transfer of function name and arguments
+;; avoid repeated transfer of the function name and arguments
 ;; in case of concurrency collision.
 ;;
 ;; First save the function name and arguments using
