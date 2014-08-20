@@ -158,8 +158,9 @@ and writting the file to that stream."
                                              :want-stream t)
                       (declare (ignore headers uri stream2 must-close))
                       (cond ((/= 200 status-code)
-                             (if (<= (incf retry-count) 3)
-                                 ;; Due to a GAE bugs, server sometimes fails with HTTP 500 Internal Server Error, or other errors.
+                             (if (<= (incf retry-count) max-retries)
+                                 ;; Due to a GAE bugs, server sometimes fails with HTTP 500 Internal Server Error
+                                 ;; (probably other errors are possible too).
                                  ;; Retry helps.
                                  (let ((sleep-seconds (* 10 (expt 2 (1- retry-count)))))
                                    (log:warn "HTTP response code ~A: ~A. Retry ~A/~A after ~A seconds..."
@@ -176,7 +177,7 @@ and writting the file to that stream."
                    (submit-batch id-pathname-alist-part)
                  (incf done (length id-pathname-alist-part))
                  (log:info "~A/~A files uploaded" done total))))
-      (let* ( ;; Split the files submitted into batches by < batch-size elements
+      (let* (;; Split the files submitted into batches by < batch-size elements
              ;; to workaround GAE blobstore issue: https://code.google.com/p/googleappengine/issues/detail?id=8032
              (batches (test-grid-utils::split-list id-pathname-alist batch-size))
              (response (mapcan #'submit-batch-logging batches)))
