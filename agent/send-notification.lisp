@@ -13,7 +13,11 @@
 (defun send-notification (subject body &key (server-url "http://cl-test-grid.herokuapp.com/"))
   (handler-case
       (multiple-value-bind (body status)
-          (drakma:http-request (format nil "~a/send-notification" server-url)
+          (drakma:http-request (concatenate 'string
+                                            server-url
+                                            (unless (eql #\/ (char server-url (1- (length server-url))))
+                                              "/")
+                                            "send-notification")
                                :method :get
                                :parameters (list (cons "subject" subject)
                                                  (cons "body" body)))
