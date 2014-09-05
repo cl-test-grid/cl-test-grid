@@ -26,7 +26,7 @@
 
 
 ;;; The code below is copy/pasted from ASDF.
-;;; ASDF version: 
+;;; ASDF version:
 ;;; commit ef15f1f1ab4a1c627a9a6eaa83c9587478a0adde
 ;;; Author: Francois-Rene Rideau <tunes@google.com>
 ;;; Date:   Thu Nov 7 10:48:55 2013 -0500
@@ -106,9 +106,19 @@
       #+clisp
       (subseq s 0 (position #\space s)) ; strip build information (date, etc.)
       #+clozure
-      (format nil "~d.~d-f~d" ; shorten for windows
+      (format nil "~d.~d~@[-~a~]~@[-r~a~]-f~d" ; shorten for windows
               ccl::*openmcl-major-version*
               ccl::*openmcl-minor-version*
+              ;; my: ----------------------
+              ;; Include more info;
+              ;; based on CCL's code of lisp-implementation-version.
+              ;; The format string above is adjusted accordingly.
+              (unless (null ccl::*openmcl-revision*)
+                ccl::*openmcl-revision*)
+              (if (and (typep ccl::*openmcl-svn-revision* 'string)
+                       (> (length ccl::*openmcl-svn-revision*) 0))
+                  ccl::*openmcl-svn-revision*)
+              ;; end my -------------------
               (logand (ccl-fasl-version) #xFF))
       #+cmu (substitute #\- #\/ s)
       #+scl (format nil "~A~A" s
