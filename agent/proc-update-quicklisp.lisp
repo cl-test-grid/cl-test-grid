@@ -102,9 +102,9 @@
              (format destination "~&;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;~%")
              (format destination "; ~A ~A" (fmt-time (get-universal-time)) msg)
              (format destination "~&;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;~%")))
-    (saving-output log-file
-                   (lambda ()
-                     (prog2
-                         (log-msg t "update-quicklisp start")
-                         (do-quicklisp-update install-dir dist-specifier)
-                       (log-msg t "update-quicklisp done"))))))
+    (capturing-io log-file
+                  (lambda ()
+                    (prog2
+                        (log-msg t "update-quicklisp start")
+                        (do-quicklisp-update install-dir dist-specifier)
+                      (log-msg t "update-quicklisp done"))))))

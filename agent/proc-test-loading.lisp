@@ -21,10 +21,10 @@
                                                asdf-output-root-dir)))
 
     (add-asdf-output-translation private-quicklisp-dir quicklisp-output-dir))
-  (saving-output log-file
-                 (lambda ()
-                   (let ((*package* (find-package :keyword)))
-                     (format t "  *features*:        ~(~S~)~%" (sort (copy-list *features*) #'string<)))
-                   (format t "  ASDF version:      ~A~%" (asdf:asdf-version))
-                   (format t "============================================================~%~%")
-                   (test-loading system-name))))
+  (capturing-io log-file
+                (lambda ()
+                  (let ((*package* (find-package :keyword)))
+                    (format t "  *features*:        ~(~S~)~%" (sort (copy-list *features*) #'string<)))
+                  (format t "  ASDF version:      ~A~%" (asdf:asdf-version))
+                  (format t "============================================================~%~%")
+                  (test-loading system-name))))

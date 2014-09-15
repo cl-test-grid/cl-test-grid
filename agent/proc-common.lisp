@@ -156,9 +156,9 @@ where <condition type> and <condition text> are strings.
 The <condition type> includes package name, e.g. \"COMMON-LISP:SIMPLE-ERROR\"."
   `(wrap-status-impl (lambda () ,@body)))
 
-(defun cl-user::saving-output (file body)
-  (ensure-directories-exist file)
-  (with-open-file (stream file
+(defun cl-user::capturing-io (log-file body)
+  (ensure-directories-exist log-file)
+  (with-open-file (stream log-file
                           :direction :output
                           :if-exists :append
                           :if-does-not-exist :create
@@ -166,5 +166,9 @@ The <condition type> includes package name, e.g. \"COMMON-LISP:SIMPLE-ERROR\"."
                           :external-format *utf-8-external-format*)
     (let* ((*standard-output* stream)
            (*error-output* stream)
-           (*trace-output* stream))
+           (*trace-output* stream)
+           (*debug-io* (make-two-way-stream (make-string-input-stream "")
+                                            stream))
+           (*query-io* (make-two-way-stream (make-string-input-stream "")
+                                            stream)))
       (funcall body))))
