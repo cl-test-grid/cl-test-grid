@@ -291,9 +291,12 @@ Transaction commit consists of:
 
 (defun last-snapshot-item (log)
   (select-first (format nil
-                        "select * from ~A where itemName() like '~A-%' and itemName() like '%-snapshot' order by itemName() desc limit 1"
+                        "select * from ~A where itemName() like '%-snapshot' and itemName() > '~A-~A-snapshot' and itemName() < '~A-~A-snapshot' order by itemName() desc limit 1"
                         (simpledb-domain log)
-                        (name log))
+                        (name log)
+                        (version-str 0)
+                        (name log)
+                        (max-version-str))
                 (simpledb-options log)))
 
 (defmethod snapshot-version ((log aws-transaction-log) &key (if-absent :error))
