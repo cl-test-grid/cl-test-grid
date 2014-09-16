@@ -118,6 +118,23 @@ I.e. limit serves as a maximum batch size."
             (when (null next-token)
               (return results))))))
 
+(defun select-first (query options)
+  "The QUERY is expected to be 'SELECT ... LIMIT 1'.
+
+The problem this function solves, is that Amazon Simple DB
+seems sometimes return empty result, even if matching records
+exist (maybe due to query timeout, or other problems).
+
+The solution is to repeat request if result was empty, but NextToken is present." 
+  (let ((next-token nil))
+    (loop (let* ((bindings (submit-select query options :next-token next-token))
+                 (results (zaws-xml:bvalue :items bindings)))
+            (setf next-token (zaws-xml:bvalue :next-token bindings))
+            (if results
+                (return (first results))
+                (unless next-token
+                  (return nil)))))))
+
 (defun delete-item (domain item-name options)
   (let ((response (submit-sdb-request options "DeleteAttributes" (list "DomainName" domain
                                                                        "ItemName" item-name))))

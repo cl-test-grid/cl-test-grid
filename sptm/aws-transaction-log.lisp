@@ -254,17 +254,17 @@ Transaction commit consists of:
                         (simpledb-options log)))))
 
 (defun border-transaction-item (log max-or-min)
-  (first (select-all (format nil
-                             "select * from ~A where itemName() like '%-tx' and itemName() > '~A-~A-tx' and itemName() < '~A-~A-tx' order by itemName() ~A limit 1"
-                             (simpledb-domain log)
-                             (name log)
-                             (version-str 0)
-                             (name log)
-                             (max-version-str)
-                             (ecase max-or-min
-                               (:max "desc")
-                               (:min "asc")))
-                     (simpledb-options log))))
+  (select-first (format nil
+                        "select * from ~A where itemName() like '%-tx' and itemName() > '~A-~A-tx' and itemName() < '~A-~A-tx' order by itemName() ~A limit 1"
+                        (simpledb-domain log)
+                        (name log)
+                        (version-str 0)
+                        (name log)
+                        (max-version-str)
+                        (ecase max-or-min
+                          (:max "desc")
+                          (:min "asc")))
+                (simpledb-options log)))
 
 (defun min-transaction-item (log)
   (border-transaction-item log :min))
@@ -290,11 +290,11 @@ Transaction commit consists of:
         (handle-if-absent if-absent "Unable to return max transaction version as there is no transaction records for the transaction log ~A" log))))
 
 (defun last-snapshot-item (log)
-  (first (select-all (format nil
-                             "select * from ~A where itemName() like '~A-%' and itemName() like '%-snapshot' order by itemName() desc limit 1"
-                             (simpledb-domain log)
-                             (name log))
-                     (simpledb-options log))))
+  (select-first (format nil
+                        "select * from ~A where itemName() like '~A-%' and itemName() like '%-snapshot' order by itemName() desc limit 1"
+                        (simpledb-domain log)
+                        (name log))
+                (simpledb-options log)))
 
 (defmethod snapshot-version ((log aws-transaction-log) &key (if-absent :error))
   (let ((item (last-snapshot-item log)))
