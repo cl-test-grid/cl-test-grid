@@ -384,7 +384,7 @@ external-program:process-status, otherwize returns NIL."
          (handler-case (let ((status (wait timeout-seconds p)))
                          (when (not (eq :exited status))
                            (log:warn "Lisp process ~A ~S finished with stauts ~S. Trying to kill the process and its possible child processes"
-                                     lisp-exe forms timeout-seconds)
+                                     lisp-exe forms status)
                            (try-to-kill-process-tree p)))
            (lisp-process-timeout (c)
              (log:warn "Lisp process ~A ~S exceeded the timeout of ~A seconds. Trying to kill the process and its possible child processes"
