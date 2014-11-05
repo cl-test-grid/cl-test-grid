@@ -314,9 +314,10 @@ command, the rest strings are the command arguments."))
 ;;; also detecting the machine hibernation while the process is running.
 
 (defun wait (seconds lisp-process)
-  "If the process is not finished upot the SECONDS timeout
+  "If the process is not finished upon the SECONDS timeout
 signal LISP-PROCESS-TIMEOUT conditios and exit (the process
-remains running)."
+remains running). If the process is finished, returns its
+external-program:process-status, otherwize returns NIL."
   (let* ((last-active-time (get-universal-time))
          (end-time (+ seconds last-active-time)))
     (loop
@@ -380,9 +381,14 @@ remains running)."
 (defmethod run-with-timeout (timeout-seconds lisp-exe &rest forms)
   (let ((p (apply #'start-lisp-process lisp-exe forms)))
     (unwind-protect
-         (handler-case (wait timeout-seconds p)
+         (handler-case (let ((status (wait timeout-seconds p)))
+                         (when (not (eq :exited status))
+                           (log:warn "Lisp process ~A ~S finished with stauts ~S. Trying to kill the process and its possible child processes"
+                                     lisp-exe forms timeout-seconds)
+                           (try-to-kill-process-tree p)))
            (lisp-process-timeout (c)
-             (log:warn "Lisp process ~A ~S exceeded the timeout of ~A seconds. Trying to kill the process and its possible child processes" lisp-exe forms timeout-seconds)
+             (log:warn "Lisp process ~A ~S exceeded the timeout of ~A seconds. Trying to kill the process and its possible child processes"
+                       lisp-exe forms timeout-seconds)
              (try-to-kill-process-tree p)
              (signal c)))
       (cleanup p))))
