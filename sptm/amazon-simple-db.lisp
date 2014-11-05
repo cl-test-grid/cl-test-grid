@@ -113,7 +113,7 @@ I.e. limit serves as a maximum batch size."
   (let ((next-token nil)
         (results '()))
     (loop (let ((bindings (submit-select query options :next-token next-token)))
-            (setf results (nconc (zaws-xml:bvalue :items bindings) results)
+            (setf results (nconc results (zaws-xml:bvalue :items bindings))
                   next-token (zaws-xml:bvalue :next-token bindings))
             (when (null next-token)
               (return results))))))
@@ -125,7 +125,7 @@ The problem this function solves, is that Amazon Simple DB
 seems sometimes return empty result, even if matching records
 exist (maybe due to query timeout, or other problems).
 
-The solution is to repeat request if result was empty, but NextToken is present." 
+The solution is to repeat request if result is empty, but NextToken is present." 
   (let ((next-token nil))
     (loop (let* ((bindings (submit-select query options :next-token next-token))
                  (results (zaws-xml:bvalue :items bindings)))
