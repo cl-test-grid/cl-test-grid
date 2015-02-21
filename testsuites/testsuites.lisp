@@ -1079,3 +1079,8 @@ just passed to the QUICKLISP:QUICKLOAD."
   (asdf:clear-system :nibbles-tests)
   (quicklisp:quickload :nibbles-tests)
   (run-rt-test-suite))
+
+(defmethod libtest ((library-name (eql :cl-custom-hash-table)))
+  ;; The test framework used: hu.dwim.stefil.
+  (ql:quickload :cl-custom-hash-table)
+  (run-hu.dwim.stefil-test-suite (read-from-string "cl-custom-hash-table-test::test-suite")))
