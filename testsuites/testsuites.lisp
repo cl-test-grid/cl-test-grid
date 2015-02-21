@@ -93,7 +93,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-mustache           :trivial-gray-streams :drakma              :optima
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd
-    :bencode               :jsown                :nibbles)
+    :bencode               :jsown                :nibbles             :cl-custom-hash-table)
   "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -1079,3 +1079,8 @@ just passed to the QUICKLISP:QUICKLOAD."
   (asdf:clear-system :nibbles-tests)
   (quicklisp:quickload :nibbles-tests)
   (run-rt-test-suite))
+
+(defmethod libtest ((library-name (eql :cl-custom-hash-table)))
+  ;; The test framework used: hu.dwim.stefil.
+  (ql:quickload :cl-custom-hash-table-test)
+  (run-hu.dwim.stefil-test-suite (read-from-string "cl-custom-hash-table-test::test-suite")))

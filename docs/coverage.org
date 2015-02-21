@@ -52,6 +52,7 @@
 + cl-cont 2010-11-10
 + cl-containers 2010-11-10
 +2 cl-csv 2012-03-07 (lisp-unit support in cl-test-grid is necessary)
++ cl-custom-hash-table-test 2015-01-13
 + cl-fad 2010-11-10 (very simple test suite: a file test.lisp
                      with a single function "test"
                      which uses cl:assert for test conditions)
