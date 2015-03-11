@@ -104,9 +104,9 @@
   - fresh recompilation and loading of every ASDF system found in Quicklisp;
   - testsuites of some of the libraries.
 
-  For testsuites we have so far considered 127 libraries,
+  For testsuites we have so far considered 128 libraries,
   starting from more often downloaded ones.
-  72 of these libraries have appropriate test suites
+  73 of these libraries have appropriate test suites
   (fully automated, no user interaction is needed) which
   are added to the cl-test-grid.
   

@@ -157,6 +157,7 @@
                                     can not be compiled on my SBCL windows, because
                                     the default external format :cp-1251 can not read
                                     this file)
++ hyperluminal-mem 2015-03-02
 + ieee-floats 2012-03-07
 +2 iolib 2012-03-07 (Requies a echo server to run run. Hangs on CCL.
                      As iolib is not implemented for windows,

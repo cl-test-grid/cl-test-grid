@@ -93,7 +93,8 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-mustache           :trivial-gray-streams :drakma              :optima
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd
-    :bencode               :jsown                :nibbles             :cl-custom-hash-table)
+    :bencode               :jsown                :nibbles             :cl-custom-hash-table
+    :hyperluminal-mem)
   "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -1084,3 +1085,9 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; The test framework used: hu.dwim.stefil.
   (ql:quickload :cl-custom-hash-table-test)
   (run-hu.dwim.stefil-test-suite (read-from-string "cl-custom-hash-table-test::test-suite")))
+
+(defmethod libtest ((library-name (eql :hyperluminal-mem)))
+  ;; The test framework used: fiveam.
+  (quicklisp:quickload :hyperluminal-mem)
+  (quicklisp:quickload :hyperluminal-mem-test)
+  (run-fiveam-test-suite (read-from-string "hyperluminal-mem-test::suite")))
