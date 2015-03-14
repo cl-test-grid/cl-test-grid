@@ -244,4 +244,6 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
               (read-db (archive-file "db3.lisp"))
               (read-db (archive-file "db4.lisp"))
               (read-db (archive-file "db5.lisp"))
-              (read-db (archive-file "db6.lisp")))))
+              (read-db (archive-file "db6.lisp"))
+              (read-db (archive-file "db7.lisp"))
+              (read-db (archive-file "db8.lisp")))))
