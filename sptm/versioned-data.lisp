@@ -174,29 +174,52 @@ there is no saved snapshots."))
            (let ((transactions (list-transactions log version)))
              (log:info "~A new transactions found after version ~A" (length transactions) version)
              transactions))
-         (get-snapshot* (log)
+         (get-snapshot* (log expected-snapshot-version)
+           (log:info "retrieving snapshot of version ~A..." expected-snapshot-version)
            (let ((snapshot (get-snapshot log)))
              (log:info "retrieved snapshot of version ~A" (version snapshot))
              snapshot)))
 
     (assert (>= (version versioned-data) 0))
 
-    (let ((min-tx-ver (min-transaction-version log :if-absent :absent)))
-      (if (eq :absent min-tx-ver)
+    (let ((min-tx-ver (min-transaction-version log :if-absent nil))
+          (snapshot-ver (snapshot-version log :if-absent nil)))
+      (if (not min-tx-ver)
           ;; The log doesn't have transaction records
-          ;; Check if a snaphost is present that is later
-          ;; than our version of data.
-          (if (> (snapshot-version log :if-absent 0)
-                 (version versioned-data))
-              (get-snapshot* log)
+          ;; If a snaphost exists that is later than the
+          ;; local versioned-data - use the snapshot;
+          ;; otherwise return the local versioned-data.
+          (if (and snapshot-ver (> snapshot-ver (version versioned-data)))
+              (get-snapshot* log snapshot-ver)
               versioned-data)
-          (let* ((cur-vdata (if (< (version versioned-data)
-                                   (1- min-tx-ver))
-                                ;; Our versioned-data is so outdated, that transaction
-                                ;; log doesn't have all the transactions necessary to roll forward.
-                                ;;
-                                ;; Then we start from scratch. There must be a snaphsot.
-                                (get-snapshot* log)
+          ;; Some transactions exist
+          (let* ((cur-vdata (if (and snapshot-ver ;; snapshot exists
+                                     (or
+
+                                      ;; Our versioned-data is so outdated,
+                                      ;; that the transaction log doesn't have
+                                      ;; all the transactions necessary to roll forward.
+                                      ;; We need to start from the snapshot.
+                                      (< (version versioned-data) (1- min-tx-ver))
+
+                                      ;; Our local versioned-data hasn't accumulated
+                                      ;; any transactions yet. In this case
+                                      ;; it's for sure cheaper to get the snapshot first.
+                                      (zerop (version versioned-data))
+
+                                      ;; We need to chose what to use - the snapshot first,
+                                      ;; or execute all the transactions since the local
+                                      ;; version of data.
+                                      ;;
+                                      ;; Our simple heuristic: if snapshot saves us
+                                      ;; at least 100 transactions - use the snapshot.
+                                      ;;
+                                      ;; (100 is reasonable for cl-test-grid with its
+                                      ;; large transactions; for other apps make this
+                                      ;; a parameter of the TRANSACTION-LOG object,
+                                      ;; or use more intelligent solution)
+                                      (> snapshot-ver (+ (version versioned-data) 100))))
+                                (get-snapshot* log snapshot-ver)
                                 versioned-data))
                  (transactions (list-transactions* log (version cur-vdata))))
             (assert (>= (version cur-vdata) (1- min-tx-ver)))
