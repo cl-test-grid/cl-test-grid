@@ -94,7 +94,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd
     :bencode               :jsown                :nibbles             :cl-custom-hash-table
-    :hyperluminal-mem)
+    :hyperluminal-mem      :clpython)
   "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -1091,3 +1091,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (quicklisp:quickload :hyperluminal-mem)
   (quicklisp:quickload :hyperluminal-mem-test)
   (run-fiveam-test-suite (read-from-string "hyperluminal-mem-test::suite")))
+
+(defmethod libtest ((library-name (eql :clpython)))
+  ;; The test framework used: ptester.
+  (fncall "clpython.test::run-tests"))

@@ -106,7 +106,7 @@
 
   For testsuites we have so far considered 128 libraries,
   starting from more often downloaded ones.
-  73 of these libraries have appropriate test suites
+  74 of these libraries have appropriate test suites
   (fully automated, no user interaction is needed) which
   are added to the cl-test-grid.
   
