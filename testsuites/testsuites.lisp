@@ -94,7 +94,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd
     :bencode               :jsown                :nibbles             :cl-custom-hash-table
-    :hyperluminal-mem      :clpython)
+    :hyperluminal-mem      :cl-python)
   "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -1092,7 +1092,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   (quicklisp:quickload :hyperluminal-mem-test)
   (run-fiveam-test-suite (read-from-string "hyperluminal-mem-test::suite")))
 
-(defmethod libtest ((library-name (eql :clpython)))
+(defmethod libtest ((library-name (eql :cl-python)))
   ;; The test framework used:
   ;; clpython internally uses ptester (or on Allegro - Allegro provided util.test)
   ;; The function clpython.test::run-tests returns T in case of success and NIL otherwise.
