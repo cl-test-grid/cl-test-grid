@@ -1093,5 +1093,10 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-fiveam-test-suite (read-from-string "hyperluminal-mem-test::suite")))
 
 (defmethod libtest ((library-name (eql :clpython)))
-  ;; The test framework used: ptester.
+  ;; The test framework used:
+  ;; clpython internally uses ptester (or on Allegro - Allegro provided util.test)
+  ;; The function clpython.test::run-tests returns T in case of success and NIL otherwise.
+
+  (ql:quickload :clpython)  ; without this Quicklisp can't find clpython.test
+  (ql:quickload :clpython.test)
   (fncall "clpython.test::run-tests"))

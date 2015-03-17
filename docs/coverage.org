@@ -83,6 +83,7 @@
                          but it's a code to reproduce some particular issue. It does not seem
                          to be intended for automated regression testing of closer-mop)
 - closure-common 2010-11-10
++ clpython 2015-03-02
 + clsql 2010-11-10 (big test suite, requires database server(s). Runs the tests
                     tests on the DB servers you specified in the configiration.
                     Therefore we need to think how to represent results - we can't
