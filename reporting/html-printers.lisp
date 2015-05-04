@@ -123,7 +123,7 @@ to include in to the text of the link, defaults to RESULT-SPEC"
     (github-issue (format nil "<a class=\"note\" href=\"~A\">#~A/~A</a>" (ticket-url note) (repo note) (numbr note)))
     (launchpad-ticket (format nil "<a class=\"note\" href=\"~A\">#lp~A</a>" (ticket-url note) (id note)))
     (prj-ticket (format nil "<a class=\"note\" href=\"~A\">#~(~A~)/~A</a>" (ticket-url note) (project-key note) (ticket-id note)))
-    (string (format nil "<span class=\"note\">~A</span>" note))))
+    (string (format nil "<span class=\"note\">~A</span>" (html-template:escape-string-all note)))))
 
 (defun notes-html (result)
   (format nil "~{~A~^, ~}"
