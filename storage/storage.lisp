@@ -9,6 +9,8 @@
   (:export
    ;; replica creation
    #:make-replica
+   ;; lazily create a replica, or get a cached version (convenience function)
+   #:get-replica
    ;; replica attributes
    #:name
    #:data
@@ -80,3 +82,23 @@
 (defun add-test-run (storage-name test-run)
   (let ((log (make-transaction-log storage-name)))
     (sptm:record-transaction log 'test-grid-data::add-test-run (list test-run))))
+
+;;; A cache of replicas - a convenience functionality.
+;;;
+;;; I have several reporting scripts, and don't want to use separate
+;;; replica instance for each script, because reading snapshot is long
+;;; even from local disc.
+;;;
+;;; Therefore a global cache of replicas is provided here. The cache
+;;; key is the storage name.
+
+(defvar *replicas* (make-hash-table :test #'equal))
+
+(defun get-replica (storage-name &key (snapshot-directory (asdf:system-source-directory :test-grid-storage)))
+  ;; no syncrhonization, as we expect it be used from SLIME interactively, concurrency is very unlikely
+  (or (gethash storage-name *replicas*)
+      (let ((r (make-replica storage-name
+                             (uiop:subpathname snapshot-directory
+                                               (format nil "db-~A.lisp" storage-name)))))
+        (setf (gethash storage-name *replicas*)
+              r))))

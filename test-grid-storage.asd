@@ -6,7 +6,9 @@
   :version "1.0.1"
   :serial t
   :depends-on (#:test-grid-data
-               #:sptm)
+               #:sptm
+               #:asdf
+               #:uiop)
   :components ((:module "storage"
                         :serial t
                         :components
