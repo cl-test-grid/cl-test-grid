@@ -12,7 +12,7 @@
       [[http://common-lisp.net/project/cl-test-grid/acl-load-failures.html][ACL]]
       [[http://common-lisp.net/project/cl-test-grid/ccl-load-failures.html][CCL]]
       [[http://common-lisp.net/project/cl-test-grid/cmucl-load-failures.html][CMUCL]]
-      [[http://common-lisp.net/project/cl-test-grid/ecl-load-failures.html][ECL]]
+      [[https://common-lisp.net/project/cl-test-grid/ecl-load-failures-lisp-to-c.html][ECL]]
       [[http://common-lisp.net/project/cl-test-grid/sbcl-load-failures.html][SBCL]]
     - [[https://github.com/cl-test-grid/cl-test-grid/tree/dev/reporting#combining-failures-and-dependency-information][explanation]]
 - for Quicklisp maintainer: [[http://common-lisp.net/project/cl-test-grid/quicklisp-diff.html][compare test results of two quicklisp dist versions on various lisps]]
