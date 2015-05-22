@@ -24,7 +24,7 @@ of too generic contract of CL:SET-EXCLUSIVE-OR)."
   (when test-not
     (warn "FAST-EXCLUSIVE-OR falls back to CL:SET-EXCLUSIVE-OR because we don't know how to handle TEST-NOT")
     (return-from fast-exclusive-or (apply #'cl:set-exclusive-or list-1 list-2 rest)))
-  (when (not (member test `(eq eql equal equalp ,#'eq ,#'eql ,#'equal #'equalp)))
+  (when (not (member test `(eq eql equal equalp ,#'eq ,#'eql ,#'equal ,#'equalp)))
     (warn "FAST-EXCLUSIVE-OR falls back to CL:SET-EXCLUSIVE-OR because the TEST predicate is not a designator of EQ, EQL, EQUAL or EQUALP")
     (return-from fast-exclusive-or (apply #'cl:set-exclusive-or list-1 list-2 rest)))
   (unless key (setq key #'identity))
