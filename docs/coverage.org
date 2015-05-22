@@ -69,6 +69,7 @@
 + cl-project 2012-03-07
 + cl-python 2015-03-02
 + cl-routes 2012-03-07
++ cl-slug 2015-05-05
 +2 cl-sqlite 2012-03-07 (depends on a foreign library: sqllite dll)
 + cl-store 2012-03-07
 + cl-unicode 2012-03-07

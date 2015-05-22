@@ -94,7 +94,7 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd
     :bencode               :jsown                :nibbles             :cl-custom-hash-table
-    :hyperluminal-mem      :cl-python)
+    :hyperluminal-mem      :cl-python            :cl-slug)
   "All the libraries, testsuites of which we know how to run.")
 
 (defun clean-rt (&optional (rt-package :rtest))
@@ -1100,3 +1100,8 @@ just passed to the QUICKLISP:QUICKLOAD."
   (ql:quickload :clpython)  ; without this Quicklisp can't find clpython.test
   (ql:quickload :clpython.test)
   (fncall "clpython.test::run-tests"))
+
+(defmethod libtest ((library-name (eql :cl-slug)))
+  ;; test framework used: prove
+  (ql:quickload :cl-slug-test)
+  (fncall "prove:run" :cl-slug-test))
