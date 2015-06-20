@@ -39,6 +39,9 @@
 .note:visited {
     color: black;}
 
+.manual-note {
+    background-color: yellow;}
+
 .result {
     padding-left: 2ex;
     text-indent: -2ex;}

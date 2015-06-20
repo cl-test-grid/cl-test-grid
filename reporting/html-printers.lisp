@@ -120,9 +120,10 @@ to include in to the text of the link, defaults to RESULT-SPEC"
 
 (defun note-html (note)
   (etypecase note
-    (github-issue (format nil "<a class=\"note\" href=\"~A\">#~A/~A</a>" (ticket-url note) (repo note) (numbr note)))
-    (launchpad-ticket (format nil "<a class=\"note\" href=\"~A\">#lp~A</a>" (ticket-url note) (id note)))
-    (prj-ticket (format nil "<a class=\"note\" href=\"~A\">#~(~A~)/~A</a>" (ticket-url note) (project-key note) (ticket-id note)))
+    (github-issue (format nil "<a class=\"manual-note\" href=\"~A\">#~A/~A</a>" (ticket-url note) (repo note) (numbr note)))
+    (launchpad-ticket (format nil "<a class=\"manual-note\" href=\"~A\">#lp~A</a>" (ticket-url note) (id note)))
+    (prj-ticket (format nil "<a class=\"manual-note\" href=\"~A\">#~(~A~)/~A</a>" (ticket-url note) (project-key note) (ticket-id note)))
+    (manual-text-note (format nil "<span class=\"manual-note\">~A</span>" (html-template:escape-string-all (note-text note))))
     (string (format nil "<span class=\"note\">~A</span>" (html-template:escape-string-all note)))))
 
 (defun notes-html (result)

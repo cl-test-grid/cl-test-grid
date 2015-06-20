@@ -73,7 +73,10 @@
 
 (defparameter *prj-ticket-base-url*
   (alexandria:plist-hash-table '(:abcl "http://abcl.org/trac/ticket/"
-                                 :cmucl "http://trac.common-lisp.net/cmucl/ticket/")))
+                                 :cmucl "http://trac.common-lisp.net/cmucl/ticket/"
+                                 :pgloader "https://github.com/dimitri/pgloader/issues/"
+                                 :xsubseq "https://github.com/fukamachi/xsubseq/issues/"
+                                 :cl-ansi-text "https://github.com/pnathan/cl-ansi-text/issues/")))
 
 (defun prj-ticket (project-key ticket-id)
   (make-instance 'prj-ticket
@@ -117,7 +120,7 @@
   (let ((notes nil))
     (maphash (lambda (fields index)
                (let* ((field-vals (mapcar (lambda (field)
-                                           (funcall field result))
+                                            (funcall field result))
                                           fields))
                       (note (gethash field-vals index)))
                  (when (functionp note)
@@ -573,7 +576,88 @@
                         (lisp ("cmu-snapshot-2014-01__20e_unicode_-linux-x86"
                                "cmu-snapshot-2014-05-dirty__20e_unicode_-linux-x86")
                           ,(prj-ticket :cmucl 99)))))
-                  )))
+                  (lib-world ("qlalpha 2014-09-11" "quicklisp 2014-09-14")
+                    (failure-p t
+                      (system-name "pgloader"
+                        (lisp-impl-type :abcl
+                          ,(prj-ticket :pgloader 114)))
+                      (system-name "lisp-unit2"
+                                   "Russ Tyndall informed, fix released.")))
+                  (lib-world ("quicklisp 2015-06-08 + asdf.d70a8f8")
+                    (failure-p t
+                      (lisp "sbcl-1.2.6-linux-x86"
+                        (system-name "checkl-docs" "Ignore - it uses (asdf:load-system :cl-gendoc) instead of :defsystem-depends-on")
+                        (system-name "inner-conditional-test" "Ignore - SBCL conservative GC problem"))
+                      (lisp "abcl-1.3.2-fasl42-linux-x86"
+                        (system-name "cl-bloom" "Ignore - must be the same error"))
+                      (lisp "clisp-2.49-unix-x86"
+                        (system-name ("eazy-gnuplot.test" "eazy-process.test"
+                                      "eazy-project.test" "lime-test" "gtk-cff"
+                                      "smackjack-demo")
+                                     "not a regression"))
+                      (lisp "cmu-snapshot-2014-12___20f_unicode_-linux-x86"
+                        (system-name ("ele-bdb" "beirc" "cl-libusb") "the same error"))
+                      (lisp "ecl-13.5.1-unknown-linux-i686-bytecode"
+                        (system-name ("arrow-macros" "esrap-liquid")
+                                     "not a regression"))
+                      (lisp "ecl-13.5.1-unknown-linux-i686-lisp-to-c"
+                        (system-name "crane-test" "not a regression"))
+                      (lisp "sbcl-1.0.58-linux-x86"
+                        ,(lambda (r)
+                           (when (search "The system definition for \"sb-rotate-byte\" uses deprecated ASDF option :IF-COMPONENT-DEP-FAILS. Starting with ASDF 3, please use :IF-FEATURE instead"
+                                         (fail-condition-text r))
+                             "sb-rotate-byte deployed with old SBCL (it's not from Quicklisp) relies on old ASDF")))
+                      (lisp-impl-type :ecl
+                        (fail-condition-text "COMPILE-FILE-ERROR while compiling #<cl-source-file \"alexandria\" \"macros\">"
+                           "Ignore. Wandering ECL bug, happens elsewhere too."))))
+
+                  ;; also reported
+                  ;; https://github.com/fukamachi/quri/issues/4
+                  ;; https://github.com/fukamachi/xsubseq/issues/1
+
+                  ;; (lib-world ("qlalpha 2014-12-15" "quicklisp 2014-12-17")
+                  ;;   (failure-p t
+                  ;;    ,(lambda (r)
+                  ;;             (when (search "VARIABLE-INFORMATION" (fail-condition-text r))
+                  ;;               (prj-ticket :xsubseq 1)))
+                  ;;   ))
+
+
+                  ;;; Well known failures ;;;
+                  (failure-p t
+                    (lisp-impl-type :ccl
+                     ,(lambda (r)
+                        (when (search "No MAKE-LOAD-FORM method is defined for #S(CL-COLORS:RGB :RED 38/51 :GREEN 38/51 :BLUE 38/51)"
+                                      (fail-condition-text r))
+                          (prj-ticket :cl-ansi-text 7))))
+                    (lisp-impl-type :abcl
+                      (fail-condition-text "There is no class named ABSTRACT-CONTAINER."
+                         ,(prj-ticket :abcl 357)))
+                    (fail-condition-type ("ASDF/FIND-SYSTEM:LOAD-SYSTEM-DEFINITION-ERROR"
+                                          "ASDF:LOAD-SYSTEM-DEFINITION-ERROR")
+                      ,(lambda (r)
+                         (let ((err-text (fail-condition-text r)))
+                           (when (or ;; The symbol NON-PROPAGATING-OPERATION is not present in package ASDF/INTERFACE.
+                                     (search "NON-PROPAGATING-OPERATION" err-text)
+                                     (search "REINITIALIZE-INSTANCE: illegal keyword/value pair" err-text)
+                                     ;; :MAILTO is an invalid initarg to REINITIALIZE-INSTANCE
+                                     (search "is an invalid initarg to REINITIALIZE-INSTANCE" err-text)
+                                     (search "There is no symbol ASDF::NON-PROPAGATING-OPERATION" err-text)
+                                     (search "Cannot COMMON-LISP:IMPORT \"NON-PROPAGATING-OPERATION\" from package \"ASDF\"" err-text)
+                                     (search "Cannot IMPORT \"NON-PROPAGATING-OPERATION\" from package \"ASDF\"" err-text))
+                             "needs newer ASDF"))))))))
+
+(defclass manual-text-note ()
+  ((text :initarg :text :accessor note-text)))
+
+(defun manual-text-note (text)
+  (make-instance 'manual-text-note :text text))
+
+(defun ensure-manual-note (note)
+  "Ensures the NOTE is either a ticket object, or a MANUAL-TEXT-NOTE object."
+  (if (stringp note)
+      (manual-text-note note)
+      note))
 
 (defun notes (result)
   (let ((notes (db-notes *note-db* result)))
@@ -581,5 +665,10 @@
       (push "ffi" notes))
     (when (ffi-grovel-failure-p result)
       (push "ffi-grovel" notes))
-    notes))
-
+    (setf notes (mapcar #'ensure-manual-note notes))
+    (if (fail-condition-type result)
+      (append notes
+              (list (format nil "~A : ~A"
+                            (fail-condition-type result)
+                            (fail-condition-text result))))
+      notes)))
