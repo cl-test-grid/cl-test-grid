@@ -58,3 +58,28 @@
                :rows '((libname string<) (lisp string<))
                :cols `((lib-world ,(tg-utils::ordering-comparator (list old-quicklisp new-quicklisp) #'string=)))
                :cell-printer #'results-cell-printer))
+
+(defun tests-failed-on-new (all-results old-lib-world new-lib-world)
+  "Results from the two lib worlds, which have failures on the NEW-LIB-WORLD"
+  (flet ((test-specification (result)
+           (list (tg-rep::libname result)
+                 (tg-rep::lisp result)
+                 (tg-rep::result-spec-test result)))
+         (fill-hash (hash-table list &key (key #'identity))
+           (dolist (elem list)
+             (setf (gethash (funcall key elem) hash-table) t))
+           hash-table))
+    (let* ((failed-new-results (tg-rep::subset all-results
+                                               (lambda (r)
+                                                 (and (string= (tg-rep::lib-world r) new-lib-world)
+                                                      (tg-rep::failure-p r)))))
+           (test-specs (fill-hash (make-hash-table :size (length failed-new-results)
+                                                   :test #'equal)
+                                  failed-new-results
+                                  :key #'test-specification)))
+      (tg-rep::subset all-results
+                      (lambda (r)
+                        (and (member (tg-rep::lib-world r)
+                                     (list old-lib-world new-lib-world)
+                                     :test #'string=)
+                             (gethash (test-specification r) test-specs)))))))
