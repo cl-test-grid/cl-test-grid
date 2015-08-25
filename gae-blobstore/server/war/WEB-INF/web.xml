@@ -6,8 +6,17 @@
   <display-name>CL Test Grid</display-name>
 
   <servlet>
-    <servlet-name>blob</servlet-name>
+    <servlet-name>blob-old</servlet-name>
     <servlet-class>cltestgrid.GetBlob</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>blob-old</servlet-name>
+    <url-pattern>/blob-old</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>blob</servlet-name>
+    <servlet-class>cltestgrid.GetBlob2</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>blob</servlet-name>

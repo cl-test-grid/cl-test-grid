@@ -1,5 +1,8 @@
-<project name="cltestgridblobstore" default="compile">
+<project xmlns:ivy="antlib:org.apache.ivy.ant"
+         name="cltestgridblobstore" default="compile">
+
   <property name="project.dir" location="." />
+  <include file="${project.dir}/init-ivy.xml"/>
   <property file="${project.dir}/build.properties"/>
 
   <import file="${appengine.sdk}/config/user/ant-macros.xml" />
@@ -23,17 +26,23 @@
     </delete>
   </target>
 
-  <target name="copyjars">
+  <target name="resolve" description="Use ivy to resolve dependencies"
+          depends="init-ivy.init-ivy">
+    <ivy:resolve/>
+    <ivy:report todir='${project.dir}/build-reports' graph='false' xml='false'/>
+  </target>
+
+  <target name="retrieve" depends="resolve" description="Populate lib directory">
+    <ivy:retrieve pattern="${project.dir}/war/WEB-INF/lib/[artifact]-[revision].[ext]"/>
+  </target>
+
+  <target name="copyjars" depends="retrieve">
     <mkdir dir="${project.dir}/war/WEB-INF/lib"/>
     <copy
         todir="${project.dir}/war/WEB-INF/lib"
         flatten="true">
       <fileset dir="${appengine.sdk}/lib/user">
         <include name="appengine-api-*.jar" />
-      </fileset>
-      <fileset dir="${java.libs}">
-        <include name="commons-fileupload-1.0.jar" />
-        <include name="commons-io-2.4-bin/commons-io-2.4/commons-io-2.4.jar"/>
       </fileset>
     </copy>
   </target>

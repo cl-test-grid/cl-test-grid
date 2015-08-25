@@ -1,0 +1,22 @@
+<ivy-module version="2.0">
+  <info organisation="cltestgrid" module="cltestgridblobstore"/>
+
+  <dependencies>
+    <dependency org="com.google.appengine.tools"
+                name="appengine-gcs-client"
+                rev="latest.integration"
+                conf="default"/>
+
+    <!-- The two below have specific versions.
+         Maybe other versions will work too, but these two are tested and work well.
+    -->
+    <dependency org="commons-fileupload"
+                name="commons-fileupload"
+                rev="1.0"
+                conf="default"/>
+    <dependency org="commons-io"
+                name="commons-io"
+                rev="2.4"
+                conf="default"/>
+  </dependencies>
+</ivy-module>
