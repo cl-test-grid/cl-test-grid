@@ -15,7 +15,7 @@ from project name to a list of the ASDF
 systems provided by that project."
   (mapcar (lambda (release)
             (cons (ql-dist:name release)
-                  (mapcar #'ql-dist:name (ql-dist:provided-systems release)))) 
+                  (mapcar #'ql-dist:name (ql-dist:provided-systems release))))
           (let ((releases (ql-dist:provided-releases (ql-dist:dist "quicklisp"))))
             ;; Workdaround for the quiclisp issue 61
             ;; https://github.com/quicklisp/quicklisp-client/issues/61
