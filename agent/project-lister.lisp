@@ -42,15 +42,17 @@
       (log:info "Retrieving the list of projects and their ASDF systems from the Quicklisp version we are going to test...")
       (lisp-exe:run-with-timeout +list-quicklisp-projects-timeout-seconds+ lisp-exe code))))
 
+(defun sorted-project-systems-alist (project-systems-alist)
+  (sort (mapcar (lambda (elem)
+                  (destructuring-bind (project-name &rest system-names) elem
+                    (cons project-name
+                          (sort (copy-list system-names)
+                                #'string<))))
+                project-systems-alist)
+        #'string<
+        :key #'first))
 
 (defun init-project-lister (lisp-exe private-quicklisp-dir)
-  (let* ((alist (proc-list-quicklisp-projects lisp-exe private-quicklisp-dir))
-         (sorted (sort (mapcar (lambda (elem)
-                                 (destructuring-bind (project-name &rest system-names) elem
-                                   (cons project-name
-                                         (sort (copy-list system-names)
-                                               #'string<))))
-                               alist)
-                       #'string<
-                       :key #'first)))
-    (make-instance 'project-lister :project-systems-alist sorted)))
+  (let* ((alist (proc-list-quicklisp-projects lisp-exe private-quicklisp-dir)))
+    (make-instance 'project-lister
+                   :project-systems-alist (sorted-project-systems-alist alist))))
