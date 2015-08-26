@@ -27,7 +27,7 @@
                    ...}> 
 |#
 
-(defparameter +persistence-file+ (test-grid-reporting::src-file "meta-info-quicklisp-2014-04-25.lisp")
+(defparameter +persistence-file+ (test-grid-reporting::src-file "meta-info-quicklisp-2015-08-04.lisp")
   "This is where dependencies are save to and loaded from.")
 
 (defun skip-header (stream file-pathname)
