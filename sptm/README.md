@@ -49,7 +49,7 @@ Therefore the full procedure of restoring the in-memory database state
 when application is restarted is to read the snapshot if present, and then
 execute the transactions recorded in the log after the snapshot was made.
 
-To make this working, all these functions have `database` as the first
+To make this working, all these functions have `database` as their first
 parameter, and all other parameters must be serializable.
 
 The functions must be ready to receive arguments deserialized from log/snapshot,
@@ -70,7 +70,9 @@ on his machine and so receives the data collected.
 ### Concurrency Control
 
 In cl-prevalence transactions in different application threads
-may be serialized using global lock.
+may be serialized using global lock aquired by the `execute-transaction` function,
+effectively serializing the transactions (which remains fast, as appending
+to a file is a very quick operation).
 
 But in SPTM the transactions are executed in different processes
 running on different machines over Internet. How to synchronize them?
@@ -85,7 +87,7 @@ also the functions do not perform any IO.
 
 After the function has computed new version of data, an attempt to
 commit the transaction is performed (in Clojure this means storing
-new data value in Ref; in SPTM this means adding transaction record
+new data value in a Ref; in SPTM this means adding a transaction record
 to the transaction log).
 
 If during the commit attempt it is determined that another transaction(s)
@@ -105,6 +107,13 @@ that the account has enough funds, and signal a condition otherwise.
 If a concurrent transaction has spent all the funds, our transation
 signlas the condition, and user receives notification. Thus only
 consistent modifications of database are comitted to the transaction log.
+
+Note also, that not all transactions require synchronization.
+For example `add-test-run` transaction in cl-test-grid: we just
+need to add test run results, this operation is not tied by
+any consistency constraint with other data in the database,
+so we can just freely record it. The `sptm:record-transaction`
+function provides this possibility.
 
 ## Security
 

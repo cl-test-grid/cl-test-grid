@@ -1,9 +1,8 @@
+;; Execute it form by form with C-x C-e in SLIME, as a tutorial.
 (pushnew "directory/of/sptm-asdf/" asdf:*central-registry* :test #'equal)
 (ql:quickload :sptm)
 
-(defpackage :stpm-example
-  (:use :cl))
-
+(defpackage :stpm-example (:use :cl))
 (in-package :stpm-example)
 
 ;; This example operates on two bank accounts: A and B
@@ -27,7 +26,11 @@ changed to NEW-VALUE."
 (assert (= 2 (getf (updated-plist '(:a 1 :b 1) :a 2)
                    :a)))
 
-;;; Database operations
+;;; Database operations.
+;;; Just lisp data modifications, persistence doesn't even mentioned.
+;;; We only need to have DB as the first argument, and return
+;;; new DB as a result, and functions must be ready that the other
+;;; parameters may be deserialized from log.
 
 (defun deposit (db account-name amount)
   (let* ((account (getf db account-name))
@@ -84,9 +87,12 @@ In the form (\"Access Key Id\" \"Secret Access Key\").")
   (member fun-symbol '(deposit withdraw transfer)))
 
 
-;;; Demostration of the lower-level SPTM functions:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Now lets play with the database.
 
-;; Retrieve whatever other people left in the DB:
+;;; Lower-level SPTM functions:
+
+;; Retrieve whatever other people have left in the DB:
 (defparameter *d*
   (sptm:roll-forward *log*
                      (make-instance 'sptm:versioned-data :version 0 :data (new-db))
