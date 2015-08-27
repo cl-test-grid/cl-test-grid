@@ -583,18 +583,31 @@
                           ,(prj-ticket :pgloader 114)))
                       (system-name "lisp-unit2"
                                    "Russ Tyndall informed, fix released.")))
-                  (lib-world ("quicklisp 2015-06-08 + asdf.d70a8f8")
+                  (lib-world ("quicklisp 2015-06-08 + asdf.d70a8f8"
+                              "quicklisp 2015-06-08 + asdf.c3f7c73")
                     (failure-p t
-                      (lisp "sbcl-1.2.6-linux-x86"
-                        (system-name "checkl-docs" "Ignore - it uses (asdf:load-system :cl-gendoc) instead of :defsystem-depends-on")
-                        (system-name "inner-conditional-test" "Ignore - SBCL conservative GC problem"))
                       (lisp "abcl-1.3.2-fasl42-linux-x86"
-                        (system-name "cl-bloom" "Ignore - must be the same error"))
+                        (system-name "cl-bloom"
+                                     "Ignore - must be the same error"))
+                      (lisp "abcl-1.3.0-fasl42-linux-x86"
+                        (system-name "cl-bloom"
+                                     "Ignore - must be the same error")
+                        (system-name ("lucerne-test" "eazy-process.test")
+                                     "not a regression"))
+                      (lisp "abcl-1.2.1-fasl42-linux-x86"
+                        (system-name ("cl-bloom" "type-i.test"
+                                      "trivia.balland2006.enabled.test"
+                                      "trivia.balland2006.test")
+                          "not a regression"))
+                      (lisp "ccl-1.8-r15286m-f95-linux-x86"
+                        (system-name ("coleslaw" "lime-test" "cl-rrt.benchmark")
+                                     "not a regression"))
                       (lisp "clisp-2.49-unix-x86"
                         (system-name ("eazy-gnuplot.test" "eazy-process.test"
                                       "eazy-project.test" "lime-test" "gtk-cff"
-                                      "smackjack-demo")
-                                     "not a regression"))
+                                      "smackjack-demo" "cl-inotify")
+                                     "not a regression")
+                        (system-name "opticl-doc" "can be reproduced without new ASDF"))
                       (lisp "cmu-snapshot-2014-12___20f_unicode_-linux-x86"
                         (system-name ("ele-bdb" "beirc" "cl-libusb") "the same error"))
                       (lisp "ecl-13.5.1-unknown-linux-i686-bytecode"
@@ -603,10 +616,15 @@
                       (lisp "ecl-13.5.1-unknown-linux-i686-lisp-to-c"
                         (system-name "crane-test" "not a regression"))
                       (lisp "sbcl-1.0.58-linux-x86"
+                        (system-name "lime-test" "not a regression")
                         ,(lambda (r)
                            (when (search "The system definition for \"sb-rotate-byte\" uses deprecated ASDF option :IF-COMPONENT-DEP-FAILS. Starting with ASDF 3, please use :IF-FEATURE instead"
                                          (fail-condition-text r))
                              "sb-rotate-byte deployed with old SBCL (it's not from Quicklisp) relies on old ASDF")))
+                      (lisp "sbcl-1.2.6-linux-x86"
+                        (system-name "checkl-docs" "Ignore - it uses (asdf:load-system :cl-gendoc) instead of :defsystem-depends-on")
+                        (system-name "inner-conditional-test" "Ignore - SBCL conservative GC problem")
+                        (system-name "racer" "Happens sometimes, without new ASDF too"))
                       (lisp-impl-type :ecl
                         (fail-condition-text "COMPILE-FILE-ERROR while compiling #<cl-source-file \"alexandria\" \"macros\">"
                            "Ignore. Wandering ECL bug, happens elsewhere too."))))
