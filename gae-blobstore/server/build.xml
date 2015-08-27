@@ -53,7 +53,9 @@
         srcdir="${project.dir}/src"
         destdir="${project.dir}/war/WEB-INF/classes"
         classpathref="project.classpath"
-        debug="on" />
+        debug="on">
+      <compilerarg value="-Xlint:unchecked"/>
+  </javac>
   </target>
 
   <target name="runserver" depends="compile"

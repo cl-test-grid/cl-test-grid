@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
 import java.nio.channels.Channels;
+import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.Random;
@@ -30,12 +31,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.api.files.AppEngineFile;
-import com.google.appengine.api.files.FileReadChannel;
-import com.google.appengine.api.files.FileService;
-import com.google.appengine.api.files.FileServiceFactory;
-import com.google.appengine.api.files.FileWriteChannel;
 import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
+
+import com.google.appengine.tools.cloudstorage.GcsService;
+import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
+import com.google.appengine.tools.cloudstorage.RetryParams;
+import com.google.appengine.tools.cloudstorage.GcsFileOptions;
+import com.google.appengine.tools.cloudstorage.GcsFilename;
+import com.google.appengine.tools.cloudstorage.GcsOutputChannel;
+
 import com.google.appengine.api.ThreadManager;
 
 import org.apache.commons.fileupload.*;
@@ -112,8 +116,8 @@ public class Upload2 extends HttpServlet {
 
     The OutputStream we provide for every file could be one of:
     1. A stream writting directly to a CloudStorage blob.
-       Unfortunatelly, saving to CloudStorage is quite slow, 
-       and if we save the files one by one, the request handling
+       Unfortunatelly, saving to CloudStorage is quite slow and
+       if we save the files one by one, the request handling
        takes too long and exceedes the 30 seconds timeout. In result
        Google App Engine kills our servlet. This happens even
        if the submit consists of just 10-15 files.
@@ -124,6 +128,11 @@ public class Upload2 extends HttpServlet {
        files submitted in one request.
        As we accumulate all the files in memory, we impose a limit on
        the file size and total number of files submitted in one request.
+
+    (For the record: the multiple thread design decision was made
+    when we used the old Files API - com.google.appengine.api.files.
+    But we assume and have some evidence that the new
+    Cloud Storage Clien Library is similary slow.)
 
     ---------------------------------
 
@@ -176,7 +185,9 @@ public class Upload2 extends HttpServlet {
       if (isMultipartContent(req)) {    
         FileItemFactory factory = new MyFileItemFactory();
         FileUpload upload = new FileUpload(factory);
-        return (List<MyFileItem>)upload.parseRequest(req);
+        @SuppressWarnings("unchecked")
+        List<MyFileItem> result = upload.parseRequest(req);
+        return result;
       } else {
         log.warning("Non multipart request");
         return Collections.<MyFileItem>emptyList();
@@ -197,20 +208,7 @@ public class Upload2 extends HttpServlet {
         MyFileItem item = null;
         try {
           while ((item = tasks.poll()) != null) {
-            try {
-              saveBlob(item.blobName, item.contentType, item.dataCollector.toByteArray());
-              // Saving blob may throw a LockException due to CloudStorage issue
-              // http://code.google.com/p/googleappengine/issues/detail?id=8592
-              // Therefore retry two times in case of LockException:
-            } catch (com.google.appengine.api.files.LockException e) {                
-              try {
-                log.log(Level.WARNING, "retry saving blob " + item.blobName + " because of LockException when saving it first time", e);
-                saveBlob(item.blobName, item.contentType, item.dataCollector.toByteArray());
-              } catch (com.google.appengine.api.files.LockException e2) {
-                log.log(Level.WARNING, "second retry saving blob " + item.blobName + " because of LockException when saving it at first retry", e2);
-                saveBlob(item.blobName, item.contentType, item.dataCollector.toByteArray());
-              }
-            }
+            saveBlob(item.blobName, item.contentType, item.dataCollector.toByteArray());
           }
         } catch (Throwable t) {
           if (item != null) {item.saveError = t;}
@@ -314,32 +312,23 @@ public class Upload2 extends HttpServlet {
     }
   }
   
+  private static final GcsService gcsService = GcsServiceFactory.createGcsService(RetryParams.getDefaultInstance());
+
   private static void saveBlob(String blobName, String contentType, byte[] data) throws IOException {
     log.info("saving blob " + blobName);
-    FileWriteChannel blobChannel = newBlobChannel(blobName, contentType);
-    
-    OutputStream ostream = Channels.newOutputStream(blobChannel);
-    ostream.write(data);
-    ostream.flush();
-    blobChannel.closeFinally();
-  }
+    GcsFilename fileName = new GcsFilename("cl-test-grid-logs", blobName);
 
-  private static FileWriteChannel newBlobChannel(String blobName, String contentType) throws IOException {
-    FileService fileService = FileServiceFactory.getFileService();
-
-    GSFileOptionsBuilder optionsBuilder = new GSFileOptionsBuilder()
-      .setBucket("cl-test-grid-logs")
-      .setKey(blobName)
-      .setAcl("public-read")
-      .setContentEncoding("gzip");
+    GcsFileOptions.Builder optionsBuilder = new GcsFileOptions.Builder()
+      .acl("public-read")
+      .contentEncoding("gzip");
     if (contentType != null) {
-      optionsBuilder.setMimeType(contentType);
+      optionsBuilder.mimeType(contentType);
     }
 
-    AppEngineFile writableFile = fileService.createNewGSFile(optionsBuilder.build());
-
-    boolean lockForWrite = true; // We want to lock it, because we are going to call closeFinally in the end
-    return fileService.openWriteChannel(writableFile, lockForWrite);
+    @SuppressWarnings("resource")
+    GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, optionsBuilder.build());
+    outputChannel.write(ByteBuffer.wrap(data));
+    outputChannel.close();
   }
 
   /* ======== ID Generation ========= */

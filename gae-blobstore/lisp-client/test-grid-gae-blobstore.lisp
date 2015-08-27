@@ -16,7 +16,7 @@ for every submitted file (the blobkey is used for later
 references to the file in the blobstore).
 
 Example:
- (submit-files my-blobstore '((:flexi-streams . #P\"flexi-streams.log\")
+ (submit-files2 my-blobstore '((:flexi-streams . #P\"flexi-streams.log\")
                               (:cl-ppcre . #P\"cl-ppcre.log\")))
   => ((:flexi-streams . \"iv1b5xbp1z\")
       (:cl-ppcre . \"1lnnja5y4d\"))
@@ -122,7 +122,7 @@ the beginning of the file, a warning message, followed by the end of the file."
 
 (defun submit-files-impl (upload-url-fn id-pathname-alist file-sender-factory &key (batch-size 100))
   "FILE-SENDER-FACTORY is a unary function, accepts pathname, returns
-a file sender as drakma uses - another unary accepting byte output stream,
+a file sender as drakma uses - another unary function accepting a byte output stream,
 and writting the file to that stream."
   (let ((total (length id-pathname-alist))
         (done 0))
@@ -210,18 +210,26 @@ of the pathnames passed in ID-PATHNAME-ALIST."
                      :batch-size batch-size))
 
 ;;; tests:
+#|
+ (submit-files2 (make-blob-store :base-url "http://19.cl-test-grid.appspot.com")
+                '((:test . #P"/home/anton/prj/cl-test-grid/work/stmx.log")))
 
-;; (submit-files2 (make-blob-store :base-url "http://7.cl-test-grid.appspot.com")
-;;                '((:test . #P"C:\\Users\\anton\\projects\\cl-test-grid2\\work\\test.txt")))
+(format t "~S" (mapcar #'cdr
+                       (submit-files2 (make-blob-store :base-url "http://19.cl-test-grid.appspot.com")
+                                      (mapcar (lambda (file)
+                                                (cons (file-namestring file) file))
+                                              (cl-fad:list-directory #P"/home/anton/prj/cl-test-grid/work/many-files/"))
+                                      :batch-size 500)))
 
-;; (submit-files (make-blob-store :base-url "http://7.cl-test-grid.appspot.com")
-;;               '((:test . #P"C:\\Users\\anton\\projects\\cl-test-grid2\\work\\test.txt")))
+(delete-files (make-blob-store :base-url "http://19.cl-test-grid.appspot.com")
+              (tg-utils::safe-read-file "/home/anton/prj/cl-test-grid/work/to-delete.sexp")
+              :batch-size 500)
 
-;; (submit-files2 (make-blob-store :base-url "http://7.cl-test-grid.appspot.com")
-;;                (mapcar (lambda (file)
-;;                          (cons (file-namestring file) file))
-;;                        (cl-fad:list-directory #P"C:\\Users\\anton\\projects\\cl-test-grid2\\work\\test\\1"))
-;;                :batch-size 500)
+(delete-files (make-blob-store :base-url "http://19.cl-test-grid.appspot.com")
+              '("1nuigoukcc" "1bk11y5rqo" "1ock47mwog")
+              :batch-size 500)
+
+|#
 
 ;; Blob keys referred via http://cl-test-grid.appspot.com/blob?key=<blob key>
 ;; in Internet.
