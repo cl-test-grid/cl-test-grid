@@ -330,7 +330,8 @@ the PREDICATE."
                              (update-testing-quicklisp agent ql-dist))))
           (setf (project-lister agent)
                 (init-project-lister (preferred-lisp agent)
-                                     (private-quicklisp-dir agent)))
+                                     (private-quicklisp-dir agent)
+                                     ql-dist))
           ;; now do the work
           (run-tests agent lib-world)))))
   (log:info "Agent is done. Bye."))

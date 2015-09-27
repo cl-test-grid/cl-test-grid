@@ -9,14 +9,14 @@
 
 (in-package :cl-user)
 
-(defun list-quicklisp-projects()
+(defun list-quicklisp-projects (dist-name)
   "Returns alist specifying mapping
 from project name to a list of the ASDF
 systems provided by that project."
   (mapcar (lambda (release)
             (cons (ql-dist:name release)
                   (mapcar #'ql-dist:name (ql-dist:provided-systems release))))
-          (let ((releases (ql-dist:provided-releases (ql-dist:dist "quicklisp"))))
+          (let ((releases (ql-dist:provided-releases (ql-dist:dist dist-name))))
             ;; Workdaround for the quiclisp issue 61
             ;; https://github.com/quicklisp/quicklisp-client/issues/61
             ;; Don't include release, if quicklisp can't find it by it's name

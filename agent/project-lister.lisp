@@ -31,14 +31,14 @@
 
 (defparameter +list-quicklisp-projects-timeout-seconds+ 180)
 
-(defun proc-list-quicklisp-projects (lisp-exe private-quicklisp-dir)
+(defun proc-list-quicklisp-projects (lisp-exe private-quicklisp-dir dist-name)
   (with-response-file (response-file)
     (let* ((code `(progn
                     (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
                     (load ,(src-file "proc-common.lisp"))
                     (load ,(src-file "proc-list-quicklisp-projects.lisp"))
                     (cl-user::set-response ,response-file
-                                           (cl-user::list-quicklisp-projects)))))
+                                           (cl-user::list-quicklisp-projects ,dist-name)))))
       (log:info "Retrieving the list of projects and their ASDF systems from the Quicklisp version we are going to test...")
       (lisp-exe:run-with-timeout +list-quicklisp-projects-timeout-seconds+ lisp-exe code))))
 
@@ -52,7 +52,7 @@
         #'string<
         :key #'first))
 
-(defun init-project-lister (lisp-exe private-quicklisp-dir)
-  (let* ((alist (proc-list-quicklisp-projects lisp-exe private-quicklisp-dir)))
+(defun init-project-lister (lisp-exe private-quicklisp-dir dist-name)
+  (let* ((alist (proc-list-quicklisp-projects lisp-exe private-quicklisp-dir dist-name)))
     (make-instance 'project-lister
                    :project-systems-alist (sorted-project-systems-alist alist))))
