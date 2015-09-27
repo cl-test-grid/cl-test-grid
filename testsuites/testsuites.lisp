@@ -561,7 +561,9 @@ just passed to the QUICKLISP:QUICKLOAD."
   (asdf:clear-system :named-readtables-test)
 
   (quicklisp:quickload :named-readtables)
-  (quicklisp:quickload :named-readtables-test)
+  (handler-case (ql:quickload :named-readtables/test)
+    ;; in old versions the systems was named :named-readtables-test
+    (ql:system-not-found () (ql:quickload :named-readtables-test)))
 
   (run-rt-test-suite :named-readtables-test))
 
@@ -947,7 +949,9 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :cl-6502)))
   ;; The test framework used: fiveam.
   (quicklisp:quickload :cl-6502)
-  (quicklisp:quickload :cl-6502-tests)
+  (handler-case (ql:quickload :cl-6502-test)
+    ;; in old versions the system was named cl-6502-tests
+    (ql:system-not-found () (ql:quickload :cl-6502-tests)))
   (run-fiveam-test-suite (read-from-string "6502-tests::6502-tests")))
 
 (defmethod libtest ((library-name (eql :doplus)))
