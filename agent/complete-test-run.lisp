@@ -15,6 +15,7 @@ for different parameters. Example for complete-test-run2:
                                 :contact-email "avodonosov@yandex.ru")
                               (merge-pathnames "test-runs/my-test-run/" (user-homedir-pathname))
                               (merge-pathnames "quicklisp/" (user-homedir-pathname))
+                              "qlalpha"
                               *sbcl*)
 
 The first parameter is the plist of test run description attributes.
@@ -25,7 +26,12 @@ The second parameter is the directory where test results will be placed.
 
 The third parameter is the directory where Quicklisp to be tested is located.
 
-The fourth parameter is the lisp-exe instance to be tested.
+The fourth parameter is the name of the active Quicklisp dist - we will be
+collecting project names and system names from that dist, and expect
+ql:quickload will use that dist (i.e. you have already switched to that
+dist if necessary).
+
+The fifth parameter is the lisp-exe instance to be tested.
 
 The function also has keyword parameter :project-names allowing
 to specify explicitly list of projects, instead of testing all the
@@ -39,13 +45,14 @@ Example:
 
 (defparameter *ccl*
   (make-instance 'lisp-exe:ccl
-                 :exe-path "C:\\Users\\anton\\unpacked\\ccl\\ccl-1.8-windows\\wx86cl.exe"))
+                 :exe-path "/home/anton//unpacked/ccl-1.8/lx86cl64"))
 
 
 (tg-agent::complete-test-run2 '(:lib-world "quicklisp 2013-01-28"
                                 :contact-email "avodonosov@yandex.ru")
                               (merge-pathnames "test-runs/my-test-run/" (user-homedir-pathname))
                               (merge-pathnames "quicklisp/" (user-homedir-pathname))
+                              "quicklisp"
                               *ccl*
                               :project-names '(:alexandria :babel :flexi-streams)
                               :helper-lisp-exe *sbcl*)
@@ -358,7 +365,8 @@ results in this directory are tested."
                             project-names
                             (alexandria:curry #'project-systems (project-lister agent)))))
 
-(defun complete-test-run2 (description run-dir quicklisp-dir lisp-exe &key project-names helper-lisp-exe)
+(defun complete-test-run2 (description run-dir quicklisp-dir quicklisp-dist-name lisp-exe
+                           &key project-names helper-lisp-exe)
   (unless (getf description :lib-world) (error "please specify :lib-world in the description"))
   (unless (getf description :contact-email) (error "lease specify :contact-email in the description"))
   (let* ((lisp-exe:*temp-dir* (or lisp-exe:*temp-dir* (ensure-directories-exist run-dir)))
@@ -370,7 +378,7 @@ results in this directory are tested."
                                                      (test-grid-data::run-descr saved-test-run))
                              (test-grid-data::run-results saved-test-run)))
          (helper-lisp (or helper-lisp-exe lisp-exe))
-         (project-lister (init-project-lister helper-lisp quicklisp-dir))
+         (project-lister (init-project-lister helper-lisp quicklisp-dir quicklisp-dist-name))
          (project-names (or project-names (project-names project-lister)))
          (project-systems-fn (alexandria:curry #'project-systems project-lister)))
     (save-run-info test-run run-dir)
