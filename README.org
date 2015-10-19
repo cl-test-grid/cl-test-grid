@@ -132,7 +132,7 @@
 
   Some HTML reports are demonstrated above, in the Test Results
   section. More information about reporting may be found
-  in the =test-gird-reporting= module documentation.
+  in the =test-grid-reporting= module documentation.
 
   The issue tracker at https://bugs.launchpad.net/common-lisp/
   is used to record the bugs we submitted to various CL projects.
@@ -229,7 +229,7 @@
    for integration with the =nst= test framework.
    Testsutes of =nst= and =track-best=.
    Contributing test results.
- - Timo Myyr‰ - contributes test results.
+ - Timo Myyr√§ - contributes test results.
  - Jan Moringen - contributes test restuls.
    
  Sorry if I missed anyone in this list. Please send me a note in this case.
