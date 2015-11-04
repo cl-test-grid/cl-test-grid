@@ -951,7 +951,9 @@ just passed to the QUICKLISP:QUICKLOAD."
   (quicklisp:quickload :cl-6502)
   (handler-case (ql:quickload :cl-6502-test)
     ;; in old versions the system was named cl-6502-tests
-    (ql:system-not-found () (ql:quickload :cl-6502-tests)))
+    (ql:system-not-found ()
+      (format t "Failed to load cl-6502-test - ql:system-not-found. Probably we deal with an old version where the system was called cl-6502-testS. Trying it...~%")
+      (ql:quickload :cl-6502-tests)))
   (run-fiveam-test-suite (read-from-string "6502-tests::6502-tests")))
 
 (defmethod libtest ((library-name (eql :doplus)))
