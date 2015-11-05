@@ -5,7 +5,7 @@
 (asdf:defsystem #:test-grid-reporting
   :version "0.1.0"
   :serial t
-  :depends-on (#:test-grid-data #:test-grid-utils #:test-grid-agent #:html-template)
+  :depends-on (#:test-grid-data #:test-grid-utils #:test-grid-agent #:html-template :cl-ppcre)
   :components
   ((:module "reporting"
     :serial t

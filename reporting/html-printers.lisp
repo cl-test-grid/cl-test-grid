@@ -118,13 +118,36 @@ to include in to the text of the link, defaults to RESULT-SPEC"
           (html-template:escape-string-all (log-uri result))
           (html-template:escape-string-all (fields-to-string result fields))))
 
+;; Some texts, like exception messages, may contain very long sequences
+;; of non-whitespace characters, for example tens of thousands of dots.
+;; This breaks HTML table formatting, because the cell becomes too wide.
+;; We replace limit length of such long "words"
+(defparameter *long-word-scanner*
+  ;; 300 or more consequtive non-whitespace chars
+  (cl-ppcre:create-scanner "\\S{200,}"))
+
+(defun limit-word-length (msg)
+  (if (> (length msg) 300) ;; only employ regexp if the message itself is somewhat ong
+      (cl-ppcre:regex-replace-all *long-word-scanner*
+                                  msg
+                                  (lambda (target-string start end match-start match-end reg-starts reg-ends)
+                                    (declare (ignore start end reg-starts reg-ends))
+                                    (let ((cut-point (min (+ match-start 30)
+                                                          match-end)))
+                                      (concatenate 'string (subseq target-string match-start cut-point) "..."))))
+      msg))
+
+;; test
+(assert (string= (limit-word-length (format nil "hi there ~A" (make-string 400 :initial-element #\-)))
+                 "hi there ------------------------------..."))
+
 (defun note-html (note)
   (etypecase note
     (github-issue (format nil "<a class=\"manual-note\" href=\"~A\">#~A/~A</a>" (ticket-url note) (repo note) (numbr note)))
     (launchpad-ticket (format nil "<a class=\"manual-note\" href=\"~A\">#lp~A</a>" (ticket-url note) (id note)))
     (prj-ticket (format nil "<a class=\"manual-note\" href=\"~A\">#~(~A~)/~A</a>" (ticket-url note) (project-key note) (ticket-id note)))
     (manual-text-note (format nil "<span class=\"manual-note\">~A</span>" (html-template:escape-string-all (note-text note))))
-    (string (format nil "<span class=\"note\">~A</span>" (html-template:escape-string-all note)))))
+    (string (format nil "<span class=\"note\">~A</span>" (html-template:escape-string-all (limit-word-length note))))))
 
 (defun notes-html (result)
   (format nil "~{~A~^, ~}"
