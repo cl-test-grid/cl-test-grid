@@ -82,6 +82,21 @@
 ** TODO Document the Notes feature: code comments and the reporting/README.md
 ** TODO Debug ECL hangup on MacOS X of Patrick Stein
 ** TODO Ask Paul about the CLISP failures happening only at his CLISP
+* someday
+** DONE work-dir/agent/quicklisp-update.log with output of the quicklisp update process
+   CLOSED: [2015-11-07 Суб 05:11]
+* November 2015
+** DONE GC Quicklisp libraries
+   CLOSED: [2015-11-07 Суб 05:10]
+   After Quicklisp updates dist version, the tarballs and sources
+   of old library versions not used by new dist remain on the file system.
+   It is desirable to remove them to save disk space.
+
+   Use (ql-dist:clean (ql-dist:dist "qlalpha")) during the quicklisp update.
+   Of course, sometimes we may want the old archives to remain present,
+   in case we want to return to old version. But that's rare case,
+   so the simple solution of always purging old versions could be
+   the right thing.
 * Engage People (ideas)
 ** TODO Invite test-runners by publishing clearly my needs:
    - Coverage table for Quicklisp testing,
@@ -173,16 +188,6 @@
 ** TODO Luis Oliveira: buld library heads from source control
 ** TODO Juan Jose: add the function call performed by test grid to the log
 * Backlog
-** TODO GC Quicklisp libraries
-   After Quicklisp updates dist version, the tarballs and sources
-   of old library versions not used by new dist remain on the file system.
-   It is desirable to remove them to save disk space.
-
-   Use (ql-dist:clean (ql-dist:dist "qlalpha")) during the quicklisp update.
-   Of course, sometimes we may want the old archives to remain present,
-   in case we want to return to old version. But that's rare case,
-   so the simple solution of always purging old versions could be
-   the right thing.
 ** TODO GC logs
 ** TODO proc-update-quicklisp: when dist-specifier is an URL, disable other dists
 ** TODO proc-update-quicklisp: prevent full re-download of archives done by ql-dist:install-dist
@@ -190,7 +195,6 @@
       new parameter IF-EXISTS may be either :ERROR :UPDATE :REPLACE
       old paramteter REPLACE gets deprecated
    or workaround it somehow else.
-** TODO work-dir/agent/quicklisp-update.log with output of the quicklisp update process
 ** TODO Add Camille to the credits section
 ** TODO recover from submit-results failure
    When log files are uploaded sucessfully, but the test-run-info.lisp
