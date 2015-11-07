@@ -121,13 +121,13 @@ to include in to the text of the link, defaults to RESULT-SPEC"
 ;; Some texts, like exception messages, may contain very long sequences
 ;; of non-whitespace characters, for example tens of thousands of dots.
 ;; This breaks HTML table formatting, because the cell becomes too wide.
-;; We replace limit length of such long "words"
+;; We limit length of such long "words"
 (defparameter *long-word-scanner*
-  ;; 300 or more consequtive non-whitespace chars
+  ;; 200 or more consequtive non-whitespace chars
   (cl-ppcre:create-scanner "\\S{200,}"))
 
 (defun limit-word-length (msg)
-  (if (> (length msg) 300) ;; only employ regexp if the message itself is somewhat ong
+  (if (> (length msg) 300) ;; only employ regexp if the message itself is somewhat long
       (cl-ppcre:regex-replace-all *long-word-scanner*
                                   msg
                                   (lambda (target-string start end match-start match-end reg-starts reg-ends)
