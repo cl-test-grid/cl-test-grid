@@ -49,47 +49,40 @@
   `(restarting-downloads-impl (lambda () ,@body)))
 
 (defun do-quicklisp-update (install-dir dist-specifier)
+  ;; returns QL-DIST:DIST, it can be out of sync with FS data,
+  ;; becuase ql:update-dist doesn't update the DIST object, but only updates FS data
   (restarting-downloads
 
     (install-quicklisp install-dir)
     (fncall "ql:update-client" :prompt nil)
 
-    (flet ((version-string (dist)
-             ;; find a fresh DIST object in case it is stale,
-             ;; because QL:UPDATE-DIST only changes data on file system
-             ;; and does not update the DIST object
-             (let ((dist (fncall "ql-dist:dist" (fncall "ql-dist:name" dist))))
-               (format nil "~A ~A"
-                       (fncall "ql-dist:name" dist)
-                       (fncall "ql-dist:version" dist)))))
-
-      (cond ((string= "quicklisp" dist-specifier)
-             (let ((qlalpha (fncall "ql-dist:find-dist" "qlalpha")))
-               (when qlalpha (fncall "ql-dist:disable" qlalpha)))
-             (let ((dist (fncall "ql-dist:dist" "quicklisp")))
-               (fncall "ql-dist:enable" dist)
-               (fncall "ql:update-dist" dist :prompt nil)
-               (version-string dist)))
-            ((string= "qlalpha" dist-specifier)
-             (fncall "ql-dist:disable" (fncall "ql-dist:dist" "quicklisp"))
-             (let ((dist (or (fncall "ql-dist:find-dist" "qlalpha")
-                             (fncall "ql-dist:install-dist" "http://alpha.quicklisp.org/dist/qlalpha.txt" :prompt nil :replace t))))
-               (fncall "ql-dist:enable" dist)
-               (fncall "ql:update-dist" dist :prompt nil)
-               (version-string dist)))
-            (t
-             ;; dist-specifier must be an URL string, like
-             ;; "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt"
-             ;; Useful, when we need to test a particular quicklisp version.
-             (version-string (fncall "ql-dist:install-dist" dist-specifier :replace t :prompt nil))
-             ;; Note, even if other dists are installed in quicklisp,
-             ;; the new dist gets higher precedence by ql:quickload, because
-             ;; ql-dist:install-dist; records (get-universal-time) as the "preference number" of the dist,
-             ;; thus giving the dist higher preference than of previously installed dists.
-             ;;
-             ;; It would be more reliable to explicitly disable other dists,
-             ;; but quicklisp does not provide a function to enumerate dists.
-             )))))
+    (cond ((string= "quicklisp" dist-specifier)
+           (let ((qlalpha (fncall "ql-dist:find-dist" "qlalpha")))
+             (when qlalpha (fncall "ql-dist:disable" qlalpha)))
+           (let ((dist (fncall "ql-dist:dist" "quicklisp")))
+             (fncall "ql-dist:enable" dist)
+             (fncall "ql:update-dist" dist :prompt nil)
+             dist))
+          ((string= "qlalpha" dist-specifier)
+           (fncall "ql-dist:disable" (fncall "ql-dist:dist" "quicklisp"))
+           (let ((dist (or (fncall "ql-dist:find-dist" "qlalpha")
+                           (fncall "ql-dist:install-dist" "http://alpha.quicklisp.org/dist/qlalpha.txt" :prompt nil :replace t))))
+             (fncall "ql-dist:enable" dist)
+             (fncall "ql:update-dist" dist :prompt nil)
+             dist))
+          (t
+           ;; dist-specifier must be an URL string, like
+           ;; "http://beta.quicklisp.org/dist/quicklisp/2012-08-11/distinfo.txt"
+           ;; Useful, when we need to test a particular quicklisp version.
+           (fncall "ql-dist:install-dist" dist-specifier :replace t :prompt nil))
+          ;; Note, even if other dists are installed in quicklisp,
+          ;; the new dist gets higher precedence by ql:quickload, because
+          ;; ql-dist:install-dist; records (get-universal-time) as the "preference number" of the dist,
+          ;; thus giving the dist higher preference than of previously installed dists.
+          ;;
+          ;; It would be more reliable to explicitly disable other dists,
+          ;; but quicklisp does not provide a function to enumerate dists.
+          )))
 
 (defun update-quicklisp (install-dir dist-specifier log-file)
   (labels ((fmt-time (universal-time &optional destination)
@@ -99,12 +92,37 @@
                        "~2,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
                        year month date hour min sec)))
            (log-msg (destination msg)
+             (format destination "~&; ~A ~A~%" (fmt-time (get-universal-time)) msg))
+           (log-hdr (destination msg)
              (format destination "~&;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;~%")
-             (format destination "; ~A ~A" (fmt-time (get-universal-time)) msg)
-             (format destination "~&;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;~%")))
+             (log-msg destination msg)
+             (format destination "~&;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;~%"))
+           (dist-clean (dist)
+             ;; returns the DIST
+             (handler-case
+                 (progn
+                   (log-msg t "running (ql-dist:clean <dist>)...")
+                   (fncall "ql-dist:clean" dist)
+                   (log-msg t "finished (ql-dist:clean <dist>)")
+                   dist)
+               (serious-condition (e)
+                 (warn "problem runnining ql-dist:clean: ~A: ~A"
+                       (let ((*package* (find-package :keyword))) (princ-to-string (type-of e)))
+                       e)
+                 dist)))
+           (fresh-dist (dist)
+             ;; find a fresh DIST object in case it is stale,
+             ;; because QL:UPDATE-DIST only changes data on file system
+             ;; and does not update the DIST object
+             (fncall "ql-dist:dist" (fncall "ql-dist:name" dist)))
+           (version-string (dist)
+             (format nil "~A ~A"
+                     (fncall "ql-dist:name" dist)
+                     (fncall "ql-dist:version" dist))))
     (capturing-io log-file
                   (lambda ()
                     (prog2
-                        (log-msg t "update-quicklisp start")
-                        (do-quicklisp-update install-dir dist-specifier)
-                      (log-msg t "update-quicklisp done"))))))
+                        (log-hdr t "update-quicklisp start")
+                        (version-string (dist-clean (fresh-dist (do-quicklisp-update install-dir
+                                                                                     dist-specifier))))
+                      (log-hdr t "update-quicklisp done"))))))
