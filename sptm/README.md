@@ -40,7 +40,7 @@ except for the `database` argument, to a transaction log. In cl-prevalence
 transaction log is a file on local file system.
 
 When application process is restarted after a crash or normal termination,
-it reads the transaction log and executes the functions specified here.
+it reads the transaction log and executes the functions specified there.
 In result all the database modifications are repeated, so the
 application sees its in-memory database persistent across restarts.
 
