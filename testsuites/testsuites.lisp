@@ -339,7 +339,9 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   ;; The test framework used: fiveam.
 
-  (quicklisp:quickload :bordeaux-threads-test)
+  (handler-case (ql:quickload :bordeaux-threads/test)
+    ;; in old versions the systems was named :bordeaux-threads-test
+    (ql:system-not-found () (ql:quickload :bordeaux-threads-test)))
 
   (run-fiveam-test-suite :bordeaux-threads))
 
