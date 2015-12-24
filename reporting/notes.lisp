@@ -76,7 +76,9 @@
                                  :cmucl "http://trac.common-lisp.net/cmucl/ticket/"
                                  :pgloader "https://github.com/dimitri/pgloader/issues/"
                                  :xsubseq "https://github.com/fukamachi/xsubseq/issues/"
-                                 :cl-ansi-text "https://github.com/pnathan/cl-ansi-text/issues/")))
+                                 :cl-ansi-text "https://github.com/pnathan/cl-ansi-text/issues/"
+                                 :ccl "http://trac.clozure.com/ccl/ticket/"
+                                 :cl+ssl "https://github.com/cl-plus-ssl/cl-plus-ssl/issues/")))
 
 (defun prj-ticket (project-key ticket-id)
   (make-instance 'prj-ticket
@@ -151,6 +153,12 @@
         (dolist (spec note-spec-list)
           (fill-rec '() '() spec)))
       db)))
+
+(defun ecl-alexandria-bug-p (result)
+  (and (failure-p result)
+       (eq :ecl (lisp-impl-type result))
+       (search "COMPILE-FILE-ERROR while compiling #<cl-source-file \"alexandria\" \"macros\">"
+               (fail-condition-text result))))
 
 (defparameter *note-db*
   (fill-note-db `((lib-world "quicklisp 2013-08-13"
@@ -629,6 +637,22 @@
                         (fail-condition-text "COMPILE-FILE-ERROR while compiling #<cl-source-file \"alexandria\" \"macros\">"
                            "Ignore. Wandering ECL bug, happens elsewhere too."))))
 
+                  (lib-world ("quicklisp 2015-09-24 + asdf.3.1.5.20")
+                    (failure-p t
+                      (system-name "opticl-doc"
+                        (lisp-impl-type :clisp
+                           "Ignore. Reproduces sometimes without new ASDF too."))
+                      (libname (:nst :track-best)
+                        (lisp "ccl-1.8-r15286m-f95-linux-x86"
+                           ;; see also: http://osdir.com/ml/asdf-devel/2015-07/msg00052.html
+                           (fail-condition-text "value NIL is not of the expected type STRUCTURE."
+                             ,(prj-ticket :ccl 784))))))
+                  (lib-world ("quicklisp 2015-12-18")
+                    (failure-p t
+                      (fail-condition-text "Undefined foreign symbol: \"SSL_CTX_set_default_verify_dir\""
+                        ,(prj-ticket :cl+ssl 33))))
+
+
                   ;; also reported
                   ;; https://github.com/fukamachi/quri/issues/4
                   ;; https://github.com/fukamachi/xsubseq/issues/1
@@ -644,10 +668,33 @@
                   ;;; Well known failures ;;;
                   (failure-p t
                     (lisp-impl-type :ccl
+                      (libname :usocket
+                        (result-spec ((:whole-test-suite :timeout))
+                          ,(lambda (r)
+                             (when (search "1.11" (lisp r))
+                                   (prj-ticket :ccl 1324)))))
+                      (libname :cl-python
+                        (result-spec ((:whole-test-suite :fail))
+                          ,(lambda (r)
+                             (when (search "1.11" (lisp r))
+                                   (prj-ticket :ccl 1323))))))
+                    (ecl-alexandria-bug-p t
+                      "Ignore. Wandering ECL bug, happens elsewhere too.")
+                    (system-name "checkl-docs"
+                        ,(lambda (r) (search "Component :CL-GENDOC not found"
+                                            (fail-condition-text r)))
+                        "Ignore - checkl-docs uses (asdf:load-system :cl-gendoc) instead of :defsystem-depends-on")
+                    (lisp-impl-type :ccl
                      ,(lambda (r)
                         (when (search "No MAKE-LOAD-FORM method is defined for #S(CL-COLORS:RGB :RED 38/51 :GREEN 38/51 :BLUE 38/51)"
                                       (fail-condition-text r))
-                          (prj-ticket :cl-ansi-text 7))))
+                          (prj-ticket :cl-ansi-text 7)))
+                     ,(lambda (r)
+                        (when (and (search "There is no applicable method for the generic function:"
+                                           (fail-condition-text r))
+                                   (search "#<STANDARD-GENERIC-FUNCTION CCL:SLOT-VALUE-USING-CLASS"
+                                           (fail-condition-text r)))
+                           (prj-ticket :ccl 1157))))
                     (lisp-impl-type :abcl
                       (fail-condition-text "There is no class named ABSTRACT-CONTAINER."
                          ,(prj-ticket :abcl 357)))
