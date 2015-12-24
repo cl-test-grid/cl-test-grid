@@ -188,7 +188,11 @@
 ** TODO Luis Oliveira: buld library heads from source control
 ** TODO Juan Jose: add the function call performed by test grid to the log
 * Backlog
-** TODO GC logs
+** TODO More reliable way to determine the directory containing lisp scripts
+   Our .lisp scripts often need to determine the directory containing the script.
+   Do it this way:
+   http://lisptips.com/post/133211847914/making-a-directory-from-a-pathname
+** TODO Garbage-collect log files
 ** TODO proc-update-quicklisp: when dist-specifier is an URL, disable other dists
 ** TODO proc-update-quicklisp: prevent full re-download of archives done by ql-dist:install-dist
    Either propose a change to ql-dist:install-dist :
