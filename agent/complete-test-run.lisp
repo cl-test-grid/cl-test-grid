@@ -228,25 +228,34 @@ LIXP-EXE:HIBERNATION-DETECTED condition is signalled, then
 upon the BODY completion runs the BODY again."
   `(restarting-on-hibernate-impl (lambda () ,@body)))
 
+(defun ensure-list-response (response)
+  (if (listp response)
+      response
+      (progn
+        (log:info "The response is expected to be a LIST, but was a ~A: ~S. We consider the lisp process crashed. "
+                  (type-of response) response)
+        '(:status :crash))))
+
 (defun proc-run-libtest (lisp-exe libname run-descr logfile private-quicklisp-dir asdf-output-dir)
   "Runs test-grid-testsuites::run-libtest in a separate process and returns the result."
   (restarting-on-hibernate
     (let ((start-time (get-internal-real-time))
           (status (handler-case
-                      (with-response-file (response-file)
-                        (let* ((code `(progn
-                                        (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
-                                        (load ,(src-file "proc-common.lisp"))
-                                        (load ,(src-file "proc-common-asdf.lisp"))
-                                        (load ,(src-file "proc-run-libtest.lisp"))
-                                        (cl-user::set-response ,response-file
-                                                               (cl-user::run-libtest-main ,libname
-                                                                                          ,logfile
-                                                                                          ,private-quicklisp-dir
-                                                                                          ,asdf-output-dir)))))
-                          (log:info "Starting ~A test suite..." libname)
-                          (print-testsuite-log-header libname run-descr logfile)
-                          (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code)))
+                      (ensure-list-response
+                       (with-response-file (response-file)
+                         (let* ((code `(progn
+                                         (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
+                                         (load ,(src-file "proc-common.lisp"))
+                                         (load ,(src-file "proc-common-asdf.lisp"))
+                                         (load ,(src-file "proc-run-libtest.lisp"))
+                                         (cl-user::set-response ,response-file
+                                                                (cl-user::run-libtest-main ,libname
+                                                                                           ,logfile
+                                                                                           ,private-quicklisp-dir
+                                                                                           ,asdf-output-dir)))))
+                           (log:info "Starting ~A test suite..." libname)
+                           (print-testsuite-log-header libname run-descr logfile)
+                           (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code))))
                     (no-response (condition)
                       (appending log logfile
                         (format log "~%Child lisp process running the ~A test suite finished without returing result test status. "
@@ -292,21 +301,22 @@ upon the BODY completion runs the BODY again."
                           logfile private-quicklisp-dir asdf-output-dir)
   (let ((start-time (get-internal-real-time))
         (status (handler-case
-                    (with-response-file (response-file)
-                      (let* ((code `(progn
-                                      (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
-                                      (load ,(src-file "proc-common.lisp"))
-                                      (load ,(src-file "proc-common-asdf.lisp"))
-                                      (load ,(src-file "proc-test-loading.lisp"))
-                                      (cl-user::set-response
-                                       ,response-file
-                                       (cl-user::test-loading-main ,logfile
-                                                                   ,system-name
-                                                                   ,private-quicklisp-dir
-                                                                   ,asdf-output-dir)))))
-                        (log:info "Testing load of system ~A..." system-name)
-                        (print-loadtest-log-header system-name run-descr logfile)
-                        (lisp-exe:run-with-timeout +loadtest-timeout-seconds+ lisp-exe code)))
+                    (ensure-list-response
+                     (with-response-file (response-file)
+                       (let* ((code `(progn
+                                       (load ,(merge-pathnames "setup.lisp" private-quicklisp-dir))
+                                       (load ,(src-file "proc-common.lisp"))
+                                       (load ,(src-file "proc-common-asdf.lisp"))
+                                       (load ,(src-file "proc-test-loading.lisp"))
+                                       (cl-user::set-response
+                                        ,response-file
+                                        (cl-user::test-loading-main ,logfile
+                                                                    ,system-name
+                                                                    ,private-quicklisp-dir
+                                                                    ,asdf-output-dir)))))
+                         (log:info "Testing load of system ~A..." system-name)
+                         (print-loadtest-log-header system-name run-descr logfile)
+                         (lisp-exe:run-with-timeout +loadtest-timeout-seconds+ lisp-exe code))))
                   (no-response (condition)
                     (appending log logfile
                       (format log "~%Child lisp process loading the ~A system finished without returing result test status."
