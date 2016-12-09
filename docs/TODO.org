@@ -193,6 +193,8 @@
    Do it this way:
    http://lisptips.com/post/133211847914/making-a-directory-from-a-pathname
 ** TODO Garbage-collect log files
+** TODO quicklisp udpate: separate process for client update and dist update
+   (Because client updeate has effect only on restart)
 ** TODO proc-update-quicklisp: when dist-specifier is an URL, disable other dists
 ** TODO proc-update-quicklisp: prevent full re-download of archives done by ql-dist:install-dist
    Either propose a change to ql-dist:install-dist :
