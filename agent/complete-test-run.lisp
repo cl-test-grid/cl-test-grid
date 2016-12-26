@@ -319,9 +319,9 @@ upon the BODY completion runs the BODY again."
                          (lisp-exe:run-with-timeout +loadtest-timeout-seconds+ lisp-exe code))))
                   (no-response (condition)
                     (appending log logfile
-                      (format log "~%Child lisp process loading the ~A system finished without returing result test status."
+                      (format log "~%Child lisp process loading the ~A system finished without returing result test status. "
                               system-name)
-                      (format log "Looks like the lisp process has crashed.")
+                      (format log "Looks like the lisp process has crashed. ")
                       (format log "The error condition signalled in the parent process: ~A" condition))
                     (log:info "Child lisp process seems crashed: didn't returned any response. The NO-RESPONSE error signalled: ~A"
                               condition)
