@@ -703,6 +703,7 @@
                       ,(lambda (r)
                          (let ((err-text (fail-condition-text r)))
                            (when (or ;; The symbol NON-PROPAGATING-OPERATION is not present in package ASDF/INTERFACE.
+                                     (search "CFFI-toolchain requires ASDF 3.1" err-text)
                                      (search "NON-PROPAGATING-OPERATION" err-text)
                                      (search "REINITIALIZE-INSTANCE: illegal keyword/value pair" err-text)
                                      ;; :MAILTO is an invalid initarg to REINITIALIZE-INSTANCE
