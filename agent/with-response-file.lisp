@@ -34,9 +34,12 @@ java.lang.Throwable#getCause in Java)"))
 (define-condition no-response (caused-condition simple-error)
   ())
 
+(defparameter *response-file-random-state* (make-random-state t))
+
 (defun with-response-file-impl (body-func)
   (let* ((response-file-name (format nil "response~A.lisp"
-                                     (random #.(1- (expt 2 64)))))
+                                     (random #.(1- (expt 2 64))
+                                             *response-file-random-state*)))
          (response-file (if lisp-exe:*temp-dir*
                             (merge-pathnames response-file-name lisp-exe:*temp-dir*)
                             (progn (log:warn "~A is not set, temporary response file will be created in the default directory."
