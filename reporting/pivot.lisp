@@ -179,9 +179,16 @@ Every subaddress represents some level of pivot groupping."
 (defun print-row-header (row-addr row-spans out)
   (dolist (subaddr (subaddrs row-addr))
     (let* ((helper (gethash subaddr row-spans))
-           (rowspan (span helper))
+           (rowspan (if (> (span helper) 7)
+                        ;; Don't group too many rows under one row header
+                        ;; because it's difficult to find the grouping value.
+                        ;; Id it's than 7 rows are under this subaddr, pring separate
+                        ;; header for each row.
+                        1
+                        (span helper)))
            (maybe-css-class (if (> rowspan 1) "class=\"no-hover\"" "")))
-      (when (not (printed helper))
+      (when (or (= rowspan 1)
+                (not (printed helper)))
         (format out "<th rowspan=\"~A\" ~A>~A</th>"
                 rowspan maybe-css-class
                 (html-template:escape-string-all (string-downcase (car (last subaddr)))))
