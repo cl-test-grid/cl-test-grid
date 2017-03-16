@@ -12,6 +12,7 @@
 
    ;; generic transaction log functions
    #:roll-forward
+   #:use-partially-updated ;; the restart installed by roll-forward
    #:exec-transaction
    #:record-transaction
 
