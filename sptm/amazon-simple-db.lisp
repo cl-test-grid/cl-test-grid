@@ -31,15 +31,37 @@
   `(let ((zaws:*credentials* (getf ,options :credentials)))
      ,@body))
 
+
 (defun submit-sdb-request (options action param-key-vals)
   (let ((request (apply #'make-instance
                         'simpledb-request
                         :action action
                         :action-parameters (apply #'zaws:make-parameters param-key-vals)
                         :allow-other-keys t
-                        options)))
+                        options))
+        (retries 3)
+        (sleep-times '(20 60 200))
+        (cur-retry 0))
     (with-sdb-credentials (options)
-      (zaws:submit request))))
+      (tagbody
+       retry
+         (handler-bind
+             ((serious-condition
+               (lambda  (c)
+                 (multiple-value-bind (sec min hour)
+                     (decode-universal-time (get-universal-time))
+                   (format *error-output*
+                           "[~2,'0d:~2,'0d:~2,'0d] Error during submit-sdb-request: ~A~%"
+                           hour min sec c))
+                 (when (<= (incf cur-retry) retries)
+                   (let ((sleep-time (nth (1- cur-retry) sleep-times)))
+                     (format *error-output*
+                             "Sleeping ~A seconds before retry ~A/~A~%"
+                             sleep-time cur-retry retries)
+                     (sleep sleep-time))
+                   (go retry)))))
+           (return-from submit-sdb-request
+             (zaws:submit request)))))))
 
 ;;; SELECT function, returns a list of items.
 ;;; Each item has ITEM-NAME and 
