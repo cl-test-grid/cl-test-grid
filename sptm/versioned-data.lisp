@@ -229,8 +229,9 @@ there is no saved snapshots."))
       (use-partially-updated ()
         :report (lambda (stream)
                   (format stream
-                          "Use partically updated versioned data, version ~A"
-                          (version partially-updated)))
+                          "Use partically updated versioned data, version ~A (the original version was ~A)"
+                          (version partially-updated)
+                          (version versioned-data)))
         partially-updated))))
 
 ;;; perform new transactions
