@@ -146,9 +146,17 @@ Transaction commit consists of:
     (with-input-from-string (s string)
       (test-grid-utils::safe-read s))))
 
+;; temporary workaround for https://github.com/xach/zs3/issues/27
+(defun as-simple-array (byte-array)
+  (if (typep byte-array '(simple-array (unsigned-byte 8) (*)))
+      byte-array
+      (make-array (length byte-array)
+                  :element-type '(unsigned-byte 8)
+                  :initial-contents byte-array)))
+
 (defun gzip-string (str)
   "Returns byte vector"
-  (gzip-stream:gzip-sequence (babel:string-to-octets str :encoding :utf-8)))
+  (as-simple-array (gzip-stream:gzip-sequence (babel:string-to-octets str :encoding :utf-8))))
 
 (defun gunzip-string (byte-vector)
   (babel:octets-to-string (gzip-stream:gunzip-sequence byte-vector)
