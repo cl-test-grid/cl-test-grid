@@ -681,9 +681,9 @@
                     (ecl-alexandria-bug-p t
                       "Ignore. Wandering ECL bug, happens elsewhere too.")
                     (system-name "checkl-docs"
-                        ,(lambda (r) (search "Component :CL-GENDOC not found"
-                                            (fail-condition-text r)))
-                        "Ignore - checkl-docs uses (asdf:load-system :cl-gendoc) instead of :defsystem-depends-on")
+                      ,(lambda (r) (when (search "Component :CL-GENDOC not found"
+                                                 (fail-condition-text r))
+                                     "Ignore - checkl-docs uses (asdf:load-system :cl-gendoc) instead of :defsystem-depends-on")))
                     (lisp-impl-type :ccl
                      ,(lambda (r)
                         (when (search "No MAKE-LOAD-FORM method is defined for #S(CL-COLORS:RGB :RED 38/51 :GREEN 38/51 :BLUE 38/51)"
