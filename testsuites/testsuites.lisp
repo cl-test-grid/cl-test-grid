@@ -572,7 +572,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :arnesi)))
   ;; test framework used: FiveAM
   (quicklisp:quickload :arnesi)
-  (quicklisp:quickload :arnesi.test)
+  (quicklisp:quickload :arnesi/test)
   (run-fiveam-test-suite :it.bese.arnesi))
 
 (defmethod libtest ((library-name (eql :local-time)))
