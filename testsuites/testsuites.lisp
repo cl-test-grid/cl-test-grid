@@ -94,8 +94,9 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd
     :bencode               :jsown                :nibbles             :cl-custom-hash-table
-    :hyperluminal-mem      :cl-python            :cl-slug)
+    :hyperluminal-mem      :cl-python            :cl-slug             :cl+ssl)
   "All the libraries, testsuites of which we know how to run.")
+
 
 (defun clean-rt (&optional (rt-package :rtest))
   (require-impl "rt-api")
@@ -1113,3 +1114,28 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; test framework used: prove
   (ql:quickload :cl-slug-test)
   (fncall "prove:run" :cl-slug-test))
+
+(defmethod libtest ((library-name (eql :cl+ssl)))
+  ;; The test framework used: fiveam.
+  (handler-bind ((error #'(lambda (condition)
+                            ;; Check if the error is a
+                            ;; cffi:load-foreign-library-error.
+                            ;; Take into account that it might
+                            ;; be some other error which prevents
+                            ;; even CFFI system to load,
+                            ;; and therefore CFFI package may be
+                            ;; absent. That's why use use ignore-errors
+                            ;; when looking for a symbol in the CFFI
+                            ;; packge.
+                            (when (eq (type-of condition)
+                                      (ignore-errors (find-symbol (symbol-name '#:load-foreign-library-error)
+                                                                  '#:cffi)))
+                              (format t
+                                      "~&Foreging library load error when running cl+ssl tests:~%~A~&~%"
+                                      condition)
+                              (return-from libtest :no-resource))
+                            ;; resignal the condition
+                            (error condition))))
+    (ql:quickload :cl+ssl.test)
+    (run-fiveam-test-suite :cl+ssl)))
+
