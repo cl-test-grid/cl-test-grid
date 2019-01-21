@@ -195,6 +195,20 @@ just passed to the QUICKLISP:QUICKLOAD."
           (return-from running-cl-test-more-suite :fail))))
     :ok))
 
+(defun cffi-load-foreign-library-error-p (condition)
+  ;; Check if the error is a
+  ;; cffi:load-foreign-library-error.
+  ;; Take into account that it might
+  ;; be some other error which prevents
+  ;; even CFFI system to load,
+  ;; and therefore CFFI package may be
+  ;; absent. That's why use use ignore-errors
+  ;; when looking for a symbol in the CFFI
+  ;; packge.
+  (eq (type-of condition)
+      (ignore-errors (find-symbol (symbol-name '#:load-foreign-library-error)
+                                  '#:cffi))))
+
 (defun combine-extended-libresult (libresult-a libresult-b)
   (list :failed-tests (union (getf libresult-a :failed-tests)
                              (getf libresult-b :failed-tests)
@@ -261,18 +275,7 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; If the library is not available, CFFI tests
   ;; signal cffi:load-foreign-library-error.
   (handler-bind ((error #'(lambda (condition)
-                            ;; Check if the error is a
-                            ;; cffi:load-foreign-library-error.
-                            ;; Take into account that it might
-                            ;; be some other error which prevents
-                            ;; even CFFI system to load,
-                            ;; and therefore CFFI package may be
-                            ;; absent. That's why use use ignore-errors
-                            ;; when looking for a symbol in the CFFI
-                            ;; packge.
-                            (when (eq (type-of condition)
-                                      (ignore-errors (find-symbol (symbol-name '#:load-foreign-library-error)
-                                                                  '#:cffi)))
+                            (when (cffi-load-foreign-library-error-p condition)
                               ;; todo: add the full path to the 'test' directory,
                               ;; where user can find the scripts to compile
                               ;; the test C library, to the error message.
@@ -1118,18 +1121,7 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :cl+ssl)))
   ;; The test framework used: fiveam.
   (handler-bind ((error #'(lambda (condition)
-                            ;; Check if the error is a
-                            ;; cffi:load-foreign-library-error.
-                            ;; Take into account that it might
-                            ;; be some other error which prevents
-                            ;; even CFFI system to load,
-                            ;; and therefore CFFI package may be
-                            ;; absent. That's why use use ignore-errors
-                            ;; when looking for a symbol in the CFFI
-                            ;; packge.
-                            (when (eq (type-of condition)
-                                      (ignore-errors (find-symbol (symbol-name '#:load-foreign-library-error)
-                                                                  '#:cffi)))
+                            (when (cffi-load-foreign-library-error-p condition)
                               (format t
                                       "~&Foreging library load error when running cl+ssl tests:~%~A~&~%"
                                       condition)
