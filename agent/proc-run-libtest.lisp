@@ -38,15 +38,19 @@
 (defmacro fncall (funname &rest args)
   `(funcall (read-from-string ,funname) ,@args))
 
-(defun run-libtest (libname)
+(defun run-libtest (libname eval-before-test)
   (wrap-status
     (ql:quickload :test-grid-testsuites)
+    (when eval-before-test
+      (format t "evaluating the EVAL-BEFORE-TEST code: ~S~%" eval-before-test)
+      (eval eval-before-test))
     (fncall "test-grid-testsuites::normalize-status" (fncall "test-grid-testsuites:libtest" libname))))
 
 (defun run-libtest-main (libname
                          log-file
                          private-quicklisp-dir
-                         asdf-output-root-dir)
+                         asdf-output-root-dir
+                         &key eval-before-test)
   (setup-asdf-output-translations private-quicklisp-dir asdf-output-root-dir)
   (capturing-io log-file
                 (lambda ()
@@ -54,5 +58,5 @@
                     (format t "  *features*:        ~(~S~)~%" (sort (copy-list *features*) #'string<)))
                   (format t "  ASDF version:      ~A~%" (asdf:asdf-version))
                   (format t "============================================================~%~%")
-                  (run-libtest libname))))
+                  (run-libtest libname eval-before-test))))
 

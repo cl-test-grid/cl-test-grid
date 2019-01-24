@@ -236,7 +236,7 @@ upon the BODY completion runs the BODY again."
                   (type-of response) response)
         '(:status :crash))))
 
-(defun proc-run-libtest (lisp-exe libname run-descr logfile private-quicklisp-dir asdf-output-dir)
+(defun proc-run-libtest (lisp-exe libname run-descr logfile private-quicklisp-dir asdf-output-dir &key eval-before-test)
   "Runs test-grid-testsuites::run-libtest in a separate process and returns the result."
   (restarting-on-hibernate
     (let ((start-time (get-internal-real-time))
@@ -252,7 +252,8 @@ upon the BODY completion runs the BODY again."
                                                                 (cl-user::run-libtest-main ,libname
                                                                                            ,logfile
                                                                                            ,private-quicklisp-dir
-                                                                                           ,asdf-output-dir)))))
+                                                                                           ,asdf-output-dir
+                                                                                           :eval-before-test ',eval-before-test)))))
                            (log:info "Starting ~A test suite..." libname)
                            (print-testsuite-log-header libname run-descr logfile)
                            (lisp-exe:run-with-timeout +libtest-timeout-seconds+ lisp-exe code))))
