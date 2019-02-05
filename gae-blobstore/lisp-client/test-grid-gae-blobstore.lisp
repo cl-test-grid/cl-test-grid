@@ -147,31 +147,38 @@ and writting the file to that stream."
                                            id-pathname-alist-part))
                       (retry-count 0)
                       (max-retries 3))
+                 ;; Due to GAE bugs, server sometimes fails with HTTP 500 Internal Server Error,
+                 ;; INPUT-TIMEOUT errors. Probably other errors are possible too.
+                 ;; Retry helps.
                  (prog ()
                   retry
                   (return
-                    (multiple-value-bind (stream status-code headers uri stream2 must-close reason-phrase)
-                        (drakma:http-request (funcall upload-url-fn)
-                                             :method :post
-                                             :content-length t
-                                             :parameters post-params
-                                             :want-stream t)
-                      (declare (ignore headers uri stream2 must-close))
-                      (cond ((/= 200 status-code)
-                             (if (<= (incf retry-count) max-retries)
-                                 ;; Due to a GAE bugs, server sometimes fails with HTTP 500 Internal Server Error
-                                 ;; (probably other errors are possible too).
-                                 ;; Retry helps.
-                                 (let ((sleep-seconds (* 10 (expt 2 (1- retry-count)))))
-                                   (log:warn "HTTP response code ~A: ~A. Retry ~A/~A after ~A seconds..."
-                                             status-code reason-phrase
-                                             retry-count max-retries sleep-seconds)
-                                   (sleep sleep-seconds)
-                                   (go retry))
-                                 (error "Error uploading files, the HTTP response code ~A: ~A" status-code reason-phrase)))
-                            (t (with-open-stream (stream stream)
-                                 ;; And read the response
-                                 (test-grid-utils::safe-read stream)))))))))
+                    (multiple-value-bind (stream error-descr)
+                        (handler-case
+                            (multiple-value-bind (stream status-code headers uri stream2 must-close reason-phrase)
+                                (drakma:http-request (funcall upload-url-fn)
+                                                     :method :post
+                                                     :content-length t
+                                                     :parameters post-params
+                                                     :want-stream t)
+                              (declare (ignore headers uri stream2 must-close))
+                              (if (/= 200 status-code)
+                                  (values nil (format nil "HTTP response code ~A: ~A"
+                                                      status-code reason-phrase))
+                                  (values stream nil)))
+                          (serious-condition (c)
+                            (values nil (format nil "Serious condition of type ~A: ~A" (type-of c) c))))
+                      (if error-descr
+                          (if (<= (incf retry-count) max-retries)
+                              (let ((sleep-seconds (* 10 (expt 2 (1- retry-count)))))
+                                (log:warn "~A. Retry ~A/~A after ~A seconds..."
+                                          error-descr retry-count max-retries sleep-seconds)
+                                (sleep sleep-seconds)
+                                (go retry))
+                              (error "Error uploading files, ~A" error-descr))
+                          (with-open-stream (stream stream)
+                            ;; And read the response
+                            (test-grid-utils::safe-read stream))))))))
              (submit-batch-logging (id-pathname-alist-part)
                (prog1
                    (submit-batch id-pathname-alist-part)
