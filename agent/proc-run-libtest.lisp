@@ -40,10 +40,10 @@
 
 (defun run-libtest (libname eval-before-test)
   (wrap-status
-    (ql:quickload :test-grid-testsuites)
     (when eval-before-test
       (format t "evaluating the EVAL-BEFORE-TEST code: ~S~%" eval-before-test)
       (eval eval-before-test))
+    (ql:quickload :test-grid-testsuites)
     (fncall "test-grid-testsuites::normalize-status" (fncall "test-grid-testsuites:libtest" libname))))
 
 (defun run-libtest-main (libname
