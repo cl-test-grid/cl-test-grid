@@ -30,6 +30,7 @@
            #:ecl
            #:compiler ; ecl slot accessor
            #:lispworks
+           #:clasp
 
            ;; the main function of interest for test-grid agent
            #:run-with-timeout
@@ -122,6 +123,8 @@ Otherwise he may just ignore the condition."))
              :accessor compiler
              :initarg :compiler
              :initform (error "compiler must be either :bytecode or :lisp-to-c. Can not be NIL"))))
+
+(defclass clasp (single-exe-lisp-exe) ())
 
 (defclass acl (single-exe-lisp-exe) ())
 ;; Lispwork was not verified, as I don't have a license,
@@ -250,6 +253,13 @@ command, the rest strings are the command arguments."))
           "--no-userinit"
           ,@(prepend-each "--eval" form-strings)
           "--eval" "(sb-ext:quit)")))
+
+(defmethod make-command-line ((lisp-exe clasp) form-strings)
+  (cons (exe-path lisp-exe)
+        `("--norc"
+          "--eval (setq clasp-cleavir::*use-ast-interpreter* nil)"
+          ,@(prepend-each "--eval" form-strings)
+          "--eval" "(core:quit)")))
 
 (defmethod make-command-line ((lisp-exe cmucl) form-strings)
   (cons (exe-path lisp-exe)

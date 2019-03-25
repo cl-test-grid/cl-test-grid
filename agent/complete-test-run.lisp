@@ -149,13 +149,13 @@ data (libraries test suites output and the run results) will be saved."
   (merge-pathnames (lib-log-name lib-name)
                    (test-run-log-dir test-run-directory)))
 
-(defparameter +libtest-timeout-seconds+ #.(* 15 60)
+(defparameter +libtest-timeout-seconds+ #-clasp  #.(* 15 60) #+clasp #.(* 15 60 4)
   "Maximum number of seconds we give each library test suite
 to complete. After this time we consider the test suite
 as hung, kill the lisp process and record :TIMEOUT
 as the library test result.")
 
-(defparameter +loadtest-timeout-seconds+ #.(* 15 60)
+(defparameter +loadtest-timeout-seconds+ #-clasp #.(* 15 60) #+clasp #.(* 15 60 4)
   "Maximum number of seconds we give each ASDF system to load
 in a fresh lisp process.  After this time we consider system
 as hung, kill the lisp process and record :TIMEOUT

@@ -10,7 +10,7 @@
 
 ;;; utf-8 external format, if supported by the lisp implementation.
 ;;; copy/pasted from ASDF
-#+(or abcl (and allegro ics) (and (or clisp cmu ecl mkcl) unicode)
+#+(or abcl (and allegro ics) (and (or clasp clisp cmu ecl mkcl) unicode)
       clozure lispworks (and sbcl sb-unicode) scl)
 (eval-when (:load-toplevel :compile-toplevel :execute)
   (pushnew :asdf-unicode *features*))
@@ -71,6 +71,8 @@ hopefully, if done consistently, that won't affect program behavior too much.")
       :from-read-eval-print-loop nil
       :count t
       :all t))
+  #+clasp
+  (core:btcl :stream stream)
   #+clisp
   (system::print-backtrace :out stream :limit count)
   #+(or clozure mcl)
