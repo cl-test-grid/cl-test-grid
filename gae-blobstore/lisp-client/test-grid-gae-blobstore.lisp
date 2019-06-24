@@ -146,7 +146,7 @@ and writting the file to that stream."
                                                              :content-type "text/plain"))))
                                            id-pathname-alist-part))
                       (retry-count 0)
-                      (max-retries 3))
+                      (max-retries 5))
                  ;; Due to GAE bugs, server sometimes fails with HTTP 500 Internal Server Error,
                  ;; INPUT-TIMEOUT errors. Probably other errors are possible too.
                  ;; Retry helps.
