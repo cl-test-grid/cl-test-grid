@@ -160,7 +160,17 @@ and writting the file to that stream."
                                                      :method :post
                                                      :content-length t
                                                      :parameters post-params
-                                                     :want-stream t)
+                                                     :want-stream t
+                                                     ;; As of the current usocket,
+                                                     ;; CCL sockets input-timeout are
+                                                     ;; set to the same value as
+                                                     ;; the connection-timeout which
+                                                     ;; defaults to 20 seconds in drakma.
+                                                     ;; We need the input-timeout be longer
+                                                     ;; than the maximum GAE servlet request
+                                                     ;; duration time, which is 60
+                                                     ;; seconds currently.
+                                                     :connection-timeout 75)
                               (declare (ignore headers uri stream2 must-close))
                               (if (/= 200 status-code)
                                   (values nil (format nil "HTTP response code ~A: ~A"
