@@ -12,7 +12,8 @@
                                   (append
                                    ;; the first element is the testsuite log of the project
                                    ;; (if the project has one)
-                                   (when (getf lib-result :status)
+                                   (when (and (getf lib-result :status)
+                                              (not (getf lib-result :log-blob-key)))
                                      (let ((log-file (lib-log-file test-run-dir
                                                                    (getf lib-result :libname))))
                                        (list (cons (pathname-name log-file) log-file))))
@@ -21,25 +22,31 @@
                                              (let ((log-file (loadtest-log-file test-run-dir
                                                                                 (getf load-result :system))))
                                                (cons (pathname-name log-file) log-file)))
-                                           (getf lib-result :load-results))))
+                                           (remove-if (lambda (load-result)
+                                                        (getf load-result :log-blob-key))
+                                                      (getf lib-result :load-results)))))
                                 (test-grid-data::run-results run-info)))
          (log-name-to-blobkey-alist (test-grid-gae-blobstore:submit-files2 blobstore
                                                                            submit-params)))
     (flet ((get-blob-key (log-name)
-                 (or (cdr (assoc log-name log-name-to-blobkey-alist :test #'string=))
-                     (error "blobstore didn't returned blob key for the log file ~A" log-name))))
+             (cdr (assoc log-name log-name-to-blobkey-alist :test #'string=))))
+      (dolist (submit-param submit-params)
+        (unless (get-blob-key (car submit-param))
+          (error "blobstore hasn't returned blob key for the log file ~A" (car submit-param))))
       ;; now patch the run-info with the received blob keys
       (setf (test-grid-data::run-results run-info)
             (mapcar (lambda (lib-result)
                       ;; set blobkey of the project testsuite (if the project has one)
                       (when (getf lib-result :status)
                         (setf (getf lib-result :log-blob-key)
-                              (get-blob-key (lib-log-name (getf lib-result :libname)))))
+                              (or (get-blob-key (lib-log-name (getf lib-result :libname)))
+                                  (getf lib-result :log-blob-key))))
                       ;; and blobkeys of loadtests for all the ASDF systems in the project
                       (setf (getf lib-result :load-results)
                             (mapcar (lambda (load-result)
                                       (setf (getf load-result :log-blob-key)
-                                            (get-blob-key (loadtest-log-name (getf load-result :system))))
+                                            (or (get-blob-key (loadtest-log-name (getf load-result :system)))
+                                                (getf load-result :log-blob-key)))
                                       load-result)
                                     (getf lib-result :load-results)))
                       lib-result)
@@ -69,22 +76,26 @@ for some log."
   (let* ((blobstore (make-gae-blobstore))
          (run-info (submit-logs blobstore test-run-dir)))
     (log:info "The log files are submitted. Submitting the test run info...")
-    (dolist (storage storage-names)
-      (test-grid-storage:add-test-run storage run-info))
+    (tg-utils::write-to-file (mapcar (lambda (storage)
+                                       (cons storage
+                                             (test-grid-storage:add-test-run storage
+                                                                             run-info)))
+                                     storage-names)
+                             (merge-pathnames "committed-versions.lisp"
+                                              test-run-dir))
     (send-notification (format nil "[test run submitted] [storages: ~{~A~^, ~}]"
                                storage-names)
                        (format nil "~S" (tg-data::run-descr run-info)))
     (log:info "Done. The test results are submitted.")
     run-info))
 
-(defun list-test-runs (test-runs-root-dir)
+(defun list-unfinished-test-runs (test-runs-root-dir)
   (let ((test-runs '()))
     (dolist (child (cl-fad:list-directory test-runs-root-dir))
       (let ((run-info-file (merge-pathnames "test-run-info.lisp"
                                             child)))
-        (when (probe-file run-info-file)
-          (push (test-grid-utils::safe-read-file run-info-file) test-runs))))
+        (when (and (probe-file run-info-file)
+                   (not (probe-file (merge-pathnames "comitted-versions.lisp"
+                                                     child))))
+          (push (tg-utils::safe-read-file run-info-file) test-runs))))
     test-runs))
-
-(defun list-unfinished-test-runs (test-runs-root-dir)
-  (remove-if #'submitted-p (list-test-runs test-runs-root-dir)))
