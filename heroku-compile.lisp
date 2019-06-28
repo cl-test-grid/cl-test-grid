@@ -13,6 +13,7 @@
 (sb-ext:save-lisp-and-die (merge-pathnames "tg-server" *build-dir*)
                           :toplevel (lambda ()
                                       (tg-server:start :port (parse-integer (asdf::getenv "PORT"))
+                                                       :smtp-user (asdf::getenv "SMTP_USER")
                                                        :smtp-password (asdf::getenv "SMTP_PASSWORD"))
                                       (loop (sleep 1000)))
                           :executable t
