@@ -39,9 +39,6 @@
 ;;;; At the end, spaces inserted into encoded string, at random
 ;;;; places, in avearate after every 5 characters.
 
-(with-output-to-string (s)
-  (encode-base64-digit #\m s))
-
 (defpackage #:obfuscate-base64
   (:use :cl)
   (:export #:obfuscate-base64-string
@@ -60,9 +57,6 @@
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
 (defparameter +base64-index-by-digit+ (char-indexes +base64-digits+))
 
-;; a = 20
-;; b = 40
-;; c = 60
 (defparameter +high-digits+ "abc")
 (defparameter +high-index-by-digit+ (char-indexes +high-digits+))
 
