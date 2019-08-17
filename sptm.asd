@@ -17,7 +17,8 @@
   ((:module "sptm"
     :serial t
     :components
-    ((:file "package")
+    ((:file "obfuscate-base64")
+     (:file "package")
      (:file "versioned-data")
      (:file "amazon-simple-db")
      (:file "aws-transaction-log")

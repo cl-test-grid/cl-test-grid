@@ -377,3 +377,20 @@ Transaction commit consists of:
                                                (list :credentials credentials
                                                      :host simpledb-endpoint-host)))
                      :test #'string=))
+
+;; If you want to leave AWS credentials in public source code,
+;; you may want to obfuscate them, so they don't draw attention
+;; from people searching for credentials by regual expression,
+;; for example.
+;;
+;; These two functions obfuscate and deobfuscate credentials,
+;; represented as a list of base64 encoded strings
+;; (Access Key Id and Secret Access Key)
+
+(defun credfuscate (credentials &optional (random-state *random-state*))
+  (mapcar (lambda (string)
+            (obfuscate-base64:obfuscate-base64-string string random-state))
+          credentials))
+
+(defun decredfuscate (obfuscated-credentials)
+  (mapcar #'obfuscate-base64:deobfuscate-base64-string obfuscated-credentials))

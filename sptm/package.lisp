@@ -35,4 +35,6 @@
    #:aws-transaction-log
    #:name
    #:save-snapshot
-   #:delete-records))
+   #:delete-records
+   #:credfuscate
+   #:decredfuscate))
