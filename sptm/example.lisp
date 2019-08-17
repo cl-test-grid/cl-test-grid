@@ -63,11 +63,20 @@ changed to NEW-VALUE."
 
 ;;; Persistence for this database
 
+
 (defparameter *sptm-demo-credentials*
-  '("AKIAJXNCKVRUZHUFNCSQ" "32E8Jk/PoBuJBxY0GRKcRTWv0bsM6ifVQ7rhxugw")
+
+  ;; we use functions sptm:credfuscate / sptm:decredfuscate to avoid
+  ;; storing the credentials in the public repo
+  (sptm:decredfuscate
+   '("domda dae agni s ada daga fqttglah"
+     "qbezbqb g oayb lbmbxbhyb rb oaybqxcf aqaqaof brfg lkambtadbq ibmbi ahcdayb ebq g"))
+
   "Credentials of an Amazon Web Services account having write access
 to our demo Amazon S3 bucket and Amazon SimpleDB domain.
 In the form (\"Access Key Id\" \"Secret Access Key\").")
+
+
 
 (defun make-demo-transaction-log (name)
   "Creates a transaction log persisted to the demo storage."

@@ -34,7 +34,9 @@
 ;; but has access to them (wich can be quickly revoked in case
 ;; of any hooliganism)
 (defparameter *cl-test-grid-user-credentials*
-  '("AKIAJS4QAUS7CU5BK5MA" "wf4CbpVQHwuD9LkS+7Dby3exfc7PTv1upvZewIa0"))
+  (sptm:decredfuscate
+   '("do mdadaea gnisada dahhbsnkbzbvn"
+     "nraicgaqbp anasbdhagbok ah bnay kza zb ieama d bybq lbec d takbznan p a iatcgbkdai")))
 
 (defun make-transaction-log (name)
   (make-instance 'sptm:aws-transaction-log
