@@ -65,7 +65,7 @@
 
 (defun encode-base64-digit (base64-digit stream)
   (let ((index (gethash base64-digit +base64-index-by-digit+)))
-    (assert index nil "~A is not a base64 digit")
+    (assert index nil "~A is not a base64 digit" base64-digit)
     (multiple-value-bind (quot rem)
         (floor index (length +low-digits+))
       (when (> quot 0)
@@ -74,7 +74,7 @@
                 "~A" quot)
         (write-char (aref +high-digits+
                           ;; 1- because we don't encode zero in high position,
-                          ;; so the first hight digit is not zero
+                          ;; so to represent 1 we use the high digit at index 0.
                           (1- quot))
                     stream))
       (assert (< rem (length +low-digits+)))
@@ -123,7 +123,8 @@
                       (decode-base64-string
                        (encode-base64-string +base64-digits+))))
 
-(defun obfuscate-base64-string (base64-string &optional (random-state *random-state*))
+(defun obfuscate-base64-string (base64-string
+                                &optional (random-state *random-state*))
   "An utility which transforms a base64 string into a string looking like
 a sentence - a number space separated sequences of lower latin caracters.
 RANDOM-STATE is used to place spaces randomily in this representation."
@@ -137,7 +138,8 @@ RANDOM-STATE is used to place spaces randomily in this representation."
               (write-char #\Space out))))))))
 
 (defun deobfuscate-base64-string (obfuscated-string)
-  "Decodes a string produced by OBFUSCATE-BASE64-STRING back to its original base64 form."
+  "Decodes a string produced by OBFUSCATE-BASE64-STRING back to its
+original base64 form."
   (let ((without-spaces (with-output-to-string (out)      
                           (with-input-from-string (in obfuscated-string)
                             (dostream (in char)
