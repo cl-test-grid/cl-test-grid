@@ -111,7 +111,7 @@
   (with-output-to-string (out)
     (with-input-from-string (in str)
       (dostream (in char)
-        (encode-base64-digit char out))))))
+        (encode-base64-digit char out)))))
 
 (defun decode-base64-string (str)
   (with-output-to-string (out)
@@ -148,5 +148,5 @@ original base64 form."
     (decode-base64-string without-spaces)))
 
 (assert (string-equal +base64-digits+
-                      (deobfuscate-base64
-                       (obfuscate-base64 +base64-digits+))))
+                      (deobfuscate-base64-string
+                       (obfuscate-base64-string +base64-digits+))))
