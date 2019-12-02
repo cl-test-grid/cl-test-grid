@@ -124,15 +124,13 @@ Otherwise he may just ignore the condition."))
              :initarg :compiler
              :initform (error "compiler must be either :bytecode or :lisp-to-c. Can not be NIL"))))
 
-(defclass clasp (single-exe-lisp-exe) ())
-
 (defclass acl (single-exe-lisp-exe) ())
 ;; Lispwork was not verified, as I don't have a license,
 ;; and the free personal edition doesn't have
 ;; a command line executable, only GUI.
 (defclass lispworks (single-exe-lisp-exe) ())
 
-
+(defclass clasp (single-exe-lisp-exe) ())
 ;;;
 ;;; Implementation
 ;;;
@@ -254,13 +252,6 @@ command, the rest strings are the command arguments."))
           ,@(prepend-each "--eval" form-strings)
           "--eval" "(sb-ext:quit)")))
 
-(defmethod make-command-line ((lisp-exe clasp) form-strings)
-  (cons (exe-path lisp-exe)
-        `("--norc"
-          "--eval (setq clasp-cleavir::*use-ast-interpreter* nil)"
-          ,@(prepend-each "--eval" form-strings)
-          "--eval" "(core:quit)")))
-
 (defmethod make-command-line ((lisp-exe cmucl) form-strings)
   (cons (exe-path lisp-exe)
         `("-noinit"
@@ -319,6 +310,13 @@ command, the rest strings are the command arguments."))
           "-eval" "(load-all-patches)"
           ,@(prepend-each "-eval" form-strings)
           "-eval" "(lispworks:quit)")))
+
+(defmethod make-command-line ((lisp-exe clasp) form-strings)
+  (cons (exe-path lisp-exe)
+        `("--norc"
+          #+(or) "--eval (setq clasp-cleavir::*use-ast-interpreter* nil)"
+          ,@(prepend-each "--eval" form-strings)
+          "--eval" "(core:quit)")))
 
 ;;; Timeouts: waiting for the process and killing the process tree on timeout;
 ;;; also detecting the machine hibernation while the process is running.
