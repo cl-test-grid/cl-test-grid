@@ -30,6 +30,7 @@
            #:ecl
            #:compiler ; ecl slot accessor
            #:lispworks
+           #:clasp
 
            ;; the main function of interest for test-grid agent
            #:run-with-timeout
@@ -129,7 +130,7 @@ Otherwise he may just ignore the condition."))
 ;; a command line executable, only GUI.
 (defclass lispworks (single-exe-lisp-exe) ())
 
-
+(defclass clasp (single-exe-lisp-exe) ())
 ;;;
 ;;; Implementation
 ;;;
@@ -309,6 +310,13 @@ command, the rest strings are the command arguments."))
           "-eval" "(load-all-patches)"
           ,@(prepend-each "-eval" form-strings)
           "-eval" "(lispworks:quit)")))
+
+(defmethod make-command-line ((lisp-exe clasp) form-strings)
+  (cons (exe-path lisp-exe)
+        `("--norc"
+          #+(or) "--eval (setq clasp-cleavir::*use-ast-interpreter* nil)"
+          ,@(prepend-each "--eval" form-strings)
+          "--eval" "(core:quit)")))
 
 ;;; Timeouts: waiting for the process and killing the process tree on timeout;
 ;;; also detecting the machine hibernation while the process is running.
