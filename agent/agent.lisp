@@ -155,8 +155,9 @@ lib-world identifier of that quicklisp."
               `(load ,(truename (src-file "proc-common.lisp")))
               '(compile (defun cl-user::-unique-name--- ()))
               `(cl-user::set-response ,response-file
-                                      (not (string= "#<compiled-function -UNIQUE-NAME--->"
-                                                    (format nil "~A" (function cl-user::-unique-name---)))))))))
+                                      (not (string= "compiled-function"
+                                                    (subseq (format nil "~A" (function cl-user::-unique-name---))
+                                                             2 19))))))))
       (when compile-failure-p
         (error "ECL implementation ~A can not compile functions. Ensure that C compiler is available in PATH."
                lisp-exe)))))
