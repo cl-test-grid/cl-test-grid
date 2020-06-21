@@ -168,11 +168,20 @@ lib-world identifier of that quicklisp."
   (log:info "Checking external process functionality for the preffered lisp ~A..."
             (preferred-lisp agent))
   (check-lisp (preferred-lisp agent))
-  (dolist (lisp (lisp-exes agent))
-    (log:info "Checking external process functionality for ~A..." lisp)
-    (check-lisp lisp)
-    (log:info "~A OK" lisp))
-  (log:info "All the external lisps passed the configuration check OK")
+  (let ((failed-lisps
+         (remove-if (alexandria:named-lambda bad-lisp-p (lisp)
+                      (log:info "Checking external process functionality for ~A..." lisp)
+                      (handler-case (progn
+                                      (check-lisp lisp)
+                                      (log:info "~A OK" lisp)
+                                      nil)
+                        (serious-condition (c)
+                          (log:error "Lisp failed: ~A ~A~%" lisp c)
+                          t)))
+                    (lisp-exes agent))))
+    (if (null failed-lisps)
+        (log:info "All the external lisps passed the configuration check OK")
+        (error "Failed lisps: ~S"  failed-lisps)))
   t)
 
 (defparameter +implementation-identifier-timeout+ (* 3 60))
@@ -195,11 +204,13 @@ lib-world identifier of that quicklisp."
     ;; because we memoize IMPLEMENTAION-IDENTIFIER function,
     ;; and there is no portable way to memoize
     ;; generic functions.
-    (if (typep lisp-exe 'lisp-exe:ecl)
-        (format nil "~A-~A"
-                identifier
-                (string-downcase (lisp-exe:compiler lisp-exe)))
-        identifier)))
+    (cond ((typep lisp-exe 'lisp-exe:ecl)
+           (format nil "~A-~A"
+                   identifier
+                   (string-downcase (lisp-exe:compiler lisp-exe))))
+          ((typep lisp-exe 'lisp-exe:clisp-asdf3)
+           (format nil "~A-asdf3" identifier))
+          (t identifier))))
 
 ;; note: not thread-safe
 (fare-memoization:memoize 'implementation-identifier)

@@ -20,6 +20,8 @@
            ;; lisp-exe classes for particular CL implementations
            ;; which we know how to run
            #:clisp
+           #:clisp-asdf3
+           #:asdf3-path ;; clisp-asdf3 slot accessor
            #:ccl
            #:abcl
            #:java-exe-path ; abcl slot accessor
@@ -93,6 +95,12 @@ Otherwise he may just ignore the condition."))
              :initform (error "exe-path must be specified"))))
 
 (defclass clisp (single-exe-lisp-exe) ())
+(defclass clisp-asdf3 (clisp)
+  ((asdf3-path :type (or string pathname)
+               :accessor asdf3-path
+               :initarg :asdf3-path
+               :initform (error "asdf3-path must be specified"))))
+
 (defclass ccl (single-exe-lisp-exe) ())
 (defclass abcl (lisp-exe)
   ((java-exe-path :type string
@@ -225,6 +233,13 @@ command, the rest strings are the command arguments."))
         `("-norc"
           "-m" "100MB"
           ,@(prepend-each "-x" form-strings))))
+
+(defmethod make-command-line ((lisp-exe clisp-asdf3) form-strings)
+  (call-next-method lisp-exe
+                    (cons (format nil
+                                  "(load ~S)"
+                                  (namestring (truename (asdf3-path lisp-exe))))
+                          form-strings)))
 
 (defmethod make-command-line ((lisp-exe ccl) form-strings)
   (cons (exe-path lisp-exe)
