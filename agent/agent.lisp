@@ -170,15 +170,15 @@ lib-world identifier of that quicklisp."
             (preferred-lisp agent))
   (check-lisp (preferred-lisp agent))
   (let ((failed-lisps
-         (remove-if (alexandria:named-lambda bad-lisp-p (lisp)
+         (remove-if (alexandria:named-lambda good-lisp-p (lisp)
                       (log:info "Checking external process functionality for ~A..." lisp)
                       (handler-case (progn
                                       (check-lisp lisp)
                                       (log:info "~A OK" lisp)
-                                      nil)
+                                      t)
                         (serious-condition (c)
                           (log:error "Lisp failed: ~A ~A~%" lisp c)
-                          t)))
+                          nil)))
                     (lisp-exes agent))))
     (if (null failed-lisps)
         (log:info "All the external lisps passed the configuration check OK")
