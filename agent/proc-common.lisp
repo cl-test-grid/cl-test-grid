@@ -138,6 +138,15 @@ if it wants to prevent the lisp to hang in the debugger."
                               (funcall on-problem-func condition))))
       (funcall body-func))))
 
+(defun limit-length (str max-len)
+  (if (> (length str) max-len)
+      (concatenate 'string
+                   (subseq str 0 max-len)
+                   (format nil
+                           " [ truncated by cl-test-grid, total length ~A ]"
+                           (length str)))
+      str))
+
 (defun wrap-status-impl (body-fn)
   (catching-problems (lambda () (list :status (funcall body-fn)))
                      (lambda (condition)
@@ -145,7 +154,8 @@ if it wants to prevent the lisp to hang in the debugger."
                          (list :status :fail
                                :fail-condition-type (let ((*package* (find-package :keyword)))
                                                       (prin1-to-string (type-of condition)))
-                               :fail-condition-text (princ-to-string  condition))))))
+                               :fail-condition-text (limit-length (princ-to-string condition)
+                                                                  1000))))))
 
 (defmacro cl-user::wrap-status (&body body)
   "Executes BODY. If BODY finishes successfully,
