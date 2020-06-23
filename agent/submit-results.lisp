@@ -58,12 +58,17 @@
 
 (defun submitted-p (test-run)
   "Tests whether the specified TEST-RUN is already
-submitetd by checking if it contains a blobstore key
-for some log."
-  (let ((lib-result (first (getf test-run :results))))
-    (or (getf lib-result :log-blob-key)
-        (let ((load-result (first (getf lib-result :load-results))))
-          (getf load-result :log-blob-key)))))
+submitetd by checking if every load and test
+result has blobstore key for log."
+  (flet ((lib-submitted-p (lib-result)
+           (and (let ((test-result (getf lib-result :status)))
+                  (or (not test-result)
+                      (getf test-result :log-blob-key)))
+                (every (lambda (load-result)
+                         (getf load-result :log-blob-key))
+                       (getf lib-result :load-results)))))
+    (every #'lib-submitted-p
+           (getf test-run :results))))
 
 (defun make-gae-blobstore ()
   (test-grid-gae-blobstore:make-blob-store :base-url
