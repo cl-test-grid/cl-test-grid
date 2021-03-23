@@ -94,7 +94,8 @@ just passed to the QUICKLISP:QUICKLOAD."
     :cl-6502               :doplus               :nst                 :track-best
     :cleric                :cl-erlang-term       :stmx                :cl-epmd
     :bencode               :jsown                :nibbles             :cl-custom-hash-table
-    :hyperluminal-mem      :cl-python            :cl-slug             :cl+ssl)
+    :hyperluminal-mem      :cl-python            :cl-slug             :cl+ssl
+    :shasht)
   "All the libraries, testsuites of which we know how to run.")
 
 
@@ -1131,3 +1132,9 @@ just passed to the QUICKLISP:QUICKLOAD."
     (ql:quickload :cl+ssl.test)
     (run-fiveam-test-suite :cl+ssl)))
 
+(defmethod libtest ((library-name (eql :shasht)))
+  ;; The test framework used: parachute
+  (ql:quickload :shasht)  ; without this Quicklisp can't find :shasht/test
+  (ql:quickload :shasht/test)
+  (asdf:test-system :shasht))
+  
