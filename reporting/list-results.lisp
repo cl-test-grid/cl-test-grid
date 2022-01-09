@@ -60,7 +60,7 @@
   (alexandria:alist-hash-table (mapcar (lambda (keyword)
                                          (cons (string-downcase keyword)
                                                keyword))
-                                       '(:abcl :acl :ccl :clisp :corman :cmu
+                                       '(:abcl :acl :ccl :clasp :clisp :corman :cmu
                                          :ecl :gcl :lw :mcl :mkcl :sbcl :scl :symbolics :xcl))
                                :test #'equal))
 
