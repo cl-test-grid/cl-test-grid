@@ -236,22 +236,28 @@ NEW-KEY-VALS are new key-values for descriptions of that test runs."
                       :external-format tg-utils:*utf-8-external-format*)
     (test-grid-utils::safe-read in)))
 
-(defun read-archive (&optional (archive-dir (standard-archive-dir)))
+(defun archive-files (&optional (archive-dir (standard-archive-dir)))
+  ;; All the existing files named from db01.lisp to db99.lisp
+  ;; inside the archive-dir, ordered by names.
+  ;; Stops at the first non-existing file, so for example,
+  ;; if the directory contains db01.lisp, db02.lisp and db05.lisp,
+  ;; only db01.lisp and db02.lisp are listed.
   (flet ((archive-file (file-name)
            (merge-pathnames file-name archive-dir)))
-    (join-dbs (read-db (archive-file "db01.lisp"))
-              (read-db (archive-file "db02.lisp"))
-              (read-db (archive-file "db03.lisp"))
-              (read-db (archive-file "db04.lisp"))
-              (read-db (archive-file "db05.lisp"))
-              (read-db (archive-file "db06.lisp"))
-              (read-db (archive-file "db07.lisp"))
-              (read-db (archive-file "db08.lisp"))
-              (read-db (archive-file "db09.lisp"))
-              (read-db (archive-file "db10.lisp"))
-              (read-db (archive-file "db11.lisp"))
-              (read-db (archive-file "db12.lisp"))
-              (read-db (archive-file "db13.lisp"))
-              (read-db (archive-file "db14.lisp"))
-              (read-db (archive-file "db15.lisp"))
-              (read-db (archive-file "db16.lisp")))))
+    (let ((result nil))
+      (loop for i from 1 below 100
+         do (let* ((cur-file-name (format nil "db~2,'0d.lisp" i))
+                   (cur-file (archive-file cur-file-name)))
+              (when (not (probe-file cur-file))
+                (return-from archive-files (nreverse result)))
+              (setq result (cons cur-file result)))))))
+
+(defun read-archive (&key (archive-dir (standard-archive-dir))
+                       last-n)
+  (let ((files (archive-files archive-dir)))
+    (apply #'join-dbs
+           (mapcar #'read-db
+                   (if last-n
+                       (last files last-n)
+                       files)))))
+
