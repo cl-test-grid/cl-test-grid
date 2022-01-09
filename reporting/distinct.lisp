@@ -20,6 +20,14 @@
                                         (list (test-grid-utils::plist-getter :a)))
                               :test #'equal))
 
+(defun distinct1 (objects object-prop-reader)
+  (alexandria:flatten (distinct objects (list object-prop-reader))))
+
+(assert (alexandria:set-equal '(1 7)
+                              (distinct1 '((:a 1 :b 2) (:a 1 :b 3) (:a 7 :b 1))
+                                         (test-grid-utils::plist-getter :a))
+                              :test #'equal))
+
 (defun largest (prop-reader objects &key (count 1) (predicate #'string>))
   (let* ((distinct (distinct objects (list prop-reader)))
          (flat (alexandria:flatten distinct))

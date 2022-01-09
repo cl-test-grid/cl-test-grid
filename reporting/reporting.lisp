@@ -29,9 +29,11 @@
 (assert (string= "../" (reports-root-dir-relative-path "demo/abc.html")))
 (assert (string= "../../" (reports-root-dir-relative-path "demo/subdir/abc.html")))
 
+(defun report-file (filename)
+  (merge-pathnames filename (reports-dir)))
+
 (defun with-report-file-impl (filename handler-func)
-  (let* ((reports-dir (reports-dir))
-         (output-file (merge-pathnames filename reports-dir)))
+  (let* ((output-file (report-file filename)))
     (ensure-directories-exist output-file)
     (with-open-file (out output-file
                          :direction :output

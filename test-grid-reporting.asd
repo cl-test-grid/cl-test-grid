@@ -5,7 +5,8 @@
 (asdf:defsystem #:test-grid-reporting
   :version "0.1.0"
   :serial t
-  :depends-on (#:test-grid-data #:test-grid-utils #:test-grid-agent #:html-template :cl-ppcre)
+  :depends-on (#:test-grid-data #:test-grid-utils #:test-grid-agent
+               #:html-template #:cl-ppcre #:vecto)
   :components
   ((:module "reporting"
     :serial t
@@ -25,6 +26,9 @@
      (:file "pivot")
      (:file "quicklisp-diff")
      (:file "quicklisp-diff2")
+     (:file "status-icon")
+     (:file "status-icon-svg")
+     (:file "status-icon-png")
      (:file "library-report")
      (:file "regressions")
      (:file "meta-info-from-quicklisp")
