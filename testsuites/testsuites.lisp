@@ -79,24 +79,34 @@ just passed to the QUICKLISP:QUICKLOAD."
   '(:alexandria            :babel                :trivial-features    :cffi
     :cl-ppcre              :usocket              :flexi-streams       :bordeaux-threads
     :cl-base64             :cl-fad               :trivial-backtrace   :puri
-    :anaphora              :parenscript          :trivial-garbage     :iterate
+    :anaphora              :parenscript       #| :trivial-garbage |#  :iterate
     :metabang-bind         :cl-json              :cl-containers       :metatilities-base
-    :cl-cont               :moptilities          :trivial-timeout     :metatilities
+    :cl-cont               :moptilities       #| :trivial-timeout |#  :metatilities
     :named-readtables      :arnesi               :local-time          :s-xml
     :cl-oauth              :cl-routes            :cl-unicode          :fiveam
-    :trivial-utf-8         :yason                :cl-annot            :cl-openid
+    :trivial-utf-8         :yason             #| :cl-annot |#         :cl-openid
     :split-sequence        :cl-closure-template  :cl-interpol         :trivial-shell
     :let-plus              :data-sift            :cl-num-utils        :ieee-floats
     :cl-project            :trivial-http         :cl-store            :hu.dwim.stefil
     :kmrcl                 :cxml-stp             :hu.dwim.walker      :hu.dwim.defclass-star
     :bknr-datastore        :yaclml               :com.google.base     :external-program
-    :cl-mustache           :trivial-gray-streams :drakma              :optima
-    :cl-6502               :doplus               :nst                 :track-best
-    :cleric                :cl-erlang-term       :stmx                :cl-epmd
+ #| :cl-mustache |#        :trivial-gray-streams :drakma              :optima
+    :cl-6502            #| :doplus |#            :nst                 :track-best
+ #| :cleric |#          #| :cl-erlang-term |#    :stmx                :cl-epmd
     :bencode               :jsown                :nibbles             :cl-custom-hash-table
     :hyperluminal-mem      :cl-python            :cl-slug             :cl+ssl)
   "All the libraries, testsuites of which we know how to run.")
 
+(defun try-quickload (system-name)
+  "(ql:quickload system-name), but suppress
+the system-not-found error, returning nil in this case."
+  (handler-bind
+      ((ql:system-not-found
+         (lambda (c)
+           (when (string-equal (string-downcase system-name)
+                               (ql:system-not-found-name c))
+             (return-from try-quickload)))))
+    (ql:quickload system-name)))
 
 (defun clean-rt (&optional (rt-package :rtest))
   (require-impl "rt-api")
@@ -353,15 +363,23 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   ;; The test framework used: ptester.
 
-  ;; Load cl-base64 first, because cl-base64-tests
-  ;; is defined in cl-base64.asd which confuses
-  ;; quicklisp (some versions of, see issue #1)
-  (quicklisp:quickload :cl-base64)
+  ;; In the new version the testsuite system is renamed
+  ;; from :cl-base64-tests to :cl-base64/test
+  (if (try-quickload :cl-base64/test)
+      (funcall (intern (symbol-name '#:do-tests)
+                       (find-package '#:cl-base64/test)))
+      (progn
+        (format t "Failed to find cl-base64/test, trying the old system cl-base64-tests...")
 
-  (quicklisp:quickload :cl-base64-tests)
+        ;; The old code.
 
-  (funcall (intern (symbol-name '#:do-tests)
-                   (find-package '#:cl-base64-tests))))
+        ;; Load cl-base64 first, because cl-base64-tests
+        ;; is defined in cl-base64.asd which confuses
+        ;; quicklisp (some versions of, see issue #1)
+        (quicklisp:quickload :cl-base64)
+        (quicklisp:quickload :cl-base64-tests)
+        (funcall (intern (symbol-name '#:do-tests)
+                         (find-package '#:cl-base64-tests))))))
 
 (defmethod libtest ((library-name (eql :cl-fad)))
 
@@ -413,50 +431,74 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   ;; The test framework used: ptester.
 
-  ;; Load puri first, because puri-tests
-  ;; is defined in puri.asd which confuses
-  ;; quicklisp (some versions of, see issue #1)
-  (quicklisp:quickload :puri)
+  (if (try-quickload :puri/test)
+      ;; copy/paste from puri.asd
+      (funcall (intern (symbol-name '#:do-tests)
+                       (find-package :puri/test)))
+      (progn
+        ;; For old versions
+        (format t "Failed to find puri/test, trying the old system puri-tests...")
 
-  (quicklisp:quickload :puri-tests)
+        ;; Load puri first, because puri-tests
+        ;; is defined in puri.asd which confuses
+        ;; quicklisp (some versions of, see issue #1)
+        (quicklisp:quickload :puri)
 
-  ;; copy/paste from puri.asd
-  (funcall (intern (symbol-name '#:do-tests)
-                   (find-package :puri-tests))))
+        (quicklisp:quickload :puri-tests)
+
+        ;; copy/paste from puri.asd
+        (funcall (intern (symbol-name '#:do-tests)
+                         (find-package :puri-tests))))))
 
 (defmethod libtest ((library-name (eql :anaphora)))
 
   ;; The test framework used: rt.
   (clean-rt)
-  (asdf:clear-system :anaphora-test)
   ;; anaphora-test is defined in anaphora.asd,
   ;; therefore to reload :anaphora-test
   ;; we need to clean the :anaphora system too
   (asdf:clear-system :anaphora)
 
-  ;; Load anaphora first, because anaphora-tests
-  ;; is defined in anaphora.asd which confuses
-  ;; quicklisp (some versions of, see issue #1)
-  (quicklisp:quickload :anaphora)
-  (quicklisp:quickload :anaphora-test)
+  (or
+   ;; new version
+   (try-quickload :anaphora/test)
+   ;; old version
+   (progn
+     ;; Load anaphora first, because anaphora-tests
+     ;; is defined in anaphora.asd which confuses
+     ;; quicklisp (some versions of, see issue #1)
+     (quicklisp:quickload :anaphora)
+     (try-quickload :anaphora-test))
+   (error "Neither anaphora/test nor anaphora-test found"))
 
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :parenscript)))
-  ;; The test framework used: eos (similar to FiveAM).
+  (cond
+    ;; new version
+    ((try-quickload :parenscript.tests)
+     ;; The test framework used: FiveAM.
+     (run-fiveam-test-suite
+      (read-from-string "parenscript.tests::parenscript-tests")))
+    ;; old version
+    ((try-quickload :parenscript.test)
 
-  (quicklisp:quickload :parenscript.test)
+     ;; The test framework used: eos (similar to FiveAM).
+     ;; asdf:test-op is not provided for parenscript,
+     ;; only a separate package ps-test with public
+     ;; function run-tests.
 
-  ;; asdf:test-op is not provided for parenscript,
-  ;; only a separate package ps-test with public
-  ;; function run-tests.
+     ;; The test suites to run are taken from the
+     ;; the function run-tests in the file
+     ;; <parenscript sources>/t/test.lisp.
+     (run-eos-test-suites (intern (string '#:output-tests) :ps-test)
+                          (intern (string '#:package-system-tests) :ps-test)
+                          (intern (string '#:eval-tests) :ps-test)))
+    (t (error "Neither :parenscript.tests nor :parenscript.test found"))))
 
-  ;; The test suites to run are taken from the
-  ;; the function run-tests in the file
-  ;; <parenscript sources>/t/test.lisp.
-  (run-eos-test-suites (intern (string '#:output-tests) :ps-test)
-                       (intern (string '#:package-system-tests) :ps-test)
-                       (intern (string '#:eval-tests) :ps-test)))
+#|
+
+The test system renamed, and quicklisp / asdf can not find it anymore, as of 2020-01-11.
 
 (defmethod libtest ((library-name (eql :trivial-garbage)))
 
@@ -473,18 +515,31 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   (run-rt-test-suite))
 
+|#
+
 (defmethod libtest ((library-name (eql :iterate)))
 
   ;; The test framework used: rt.
   (clean-rt #+sbcl :sb-rt #-sbcl :rtest)
-  (asdf:clear-system :iterate-tests)
+  ;; the test system is defined in the iterate.asd,
+  ;; so need to clear the main system too if want
+  ;; to re-load the test system.
   (asdf:clear-system :iterate)
 
-  ;; Load iterate first, because iterate-tests
-  ;; is defined in iterate.asd which confuses
-  ;; quicklisp (some versions of, see issue #1)
-  (quicklisp:quickload :iterate)
-  (quicklisp:quickload :iterate-tests)
+  (or
+   ;; new version
+   (progn
+     (asdf:clear-system :iterate/tests)
+     (try-quickload :iterate/tests))
+   ;; old version
+   (progn
+     (asdf:clear-system :iterate-tests)
+     ;; Load iterate first, because iterate-tests
+     ;; is defined in iterate.asd which confuses
+     ;; quicklisp (some versions of, see issue #1)
+     (quicklisp:quickload :iterate)
+     (try-quickload :iterate-tests))
+   (error "Neither iterate/tests nor iterate-tests found"))
 
   (run-rt-test-suite #+sbcl :sb-rt #-sbcl :rtest))
 
@@ -549,10 +604,17 @@ just passed to the QUICKLISP:QUICKLOAD."
   (quicklisp:quickload :moptilities-test)
   (run-lift-test-suite :moptilities-test))
 
+#|
+
+The test system is broken: https://github.com/gwkkwg/trivial-timeout/issues/1
+So Quicklisp can does not index it and can not load.
+
 (defmethod libtest ((library-name (eql :trivial-timeout)))
   ;; The test framework used: lift.
   (quicklisp:quickload :trivial-timeout-test)
   (run-lift-test-suite :trivial-timeout-test))
+
+|#
 
 (defmethod libtest ((library-name (eql :metatilities)))
   ;; The test framework used: lift.
@@ -580,9 +642,16 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-fiveam-test-suite :it.bese.arnesi))
 
 (defmethod libtest ((library-name (eql :local-time)))
-  ;; test framework used: stefil
-  (quicklisp:quickload :local-time.test)
-  (run-stefil-test-suite (read-from-string "local-time.test::test")))
+  (cond
+    ((try-quickload :local-time/test)
+     ;; new version
+     ;; test framework used: hu.dwim.stefil
+     (run-hu.dwim.stefil-test-suite (read-from-string "local-time.test::test")))
+    ((try-quickload :local-time.test)
+     ;; old version
+     ;; test framework used: stefil
+     (run-stefil-test-suite (read-from-string "local-time.test::test")))
+    (t (error "Neither local-time/test nor local-time.test is found"))))
 
 (defmethod libtest ((library-name (eql :s-xml)))
   ;; test framework used: cl:assert
@@ -642,8 +711,15 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :cl-unicode)))
   ;; The test framework used: custom.
-  (quicklisp:quickload :cl-unicode)
-  (quicklisp:quickload :cl-unicode-test)
+  (or
+   ;; new version
+   (try-quickload :cl-unicode/test)
+   ;; old version
+   (progn
+     (quicklisp:quickload :cl-unicode)
+     (try-quickload :cl-unicode-test))
+   (error "Niether :cl-unicode/test nor :cl-unicode-test found."))
+
   (funcall (read-from-string "cl-unicode-test:run-all-tests")))
 
 (defmethod libtest ((library-name (eql :fiveam)))
@@ -654,15 +730,30 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :trivial-utf-8)))
   ;; test framework used: cl:assert
 
-  (quicklisp:quickload :trivial-utf-8)
 
   ;; trivial-utf-8-tests test suite uses cl:assert, and all
   ;; the assertsions are top level, i.e. executed
   ;; immediatelly during the system load
+
+  ;; clear the main system to make
+  ;; sure ASDF checks the main .asd file
+  ;; when searching for test system.
+  (asdf:clear-system :trivial-utf-8)
+
   (handler-case
-      (progn
-        (asdf:operate 'asdf:load-op :trivial-utf-8-tests :force t)
-        :ok)
+      (or
+       ;; new version
+       (progn
+         (asdf:clear-system :trivial-utf-8/tests)
+         (and (try-quickload :trivial-utf-8/tests)
+              :ok))
+       ;; old version
+       (progn
+         (asdf:clear-system :trivial-utf-8-tests)
+         (ql:quickload :trivial-utf-8)
+         (and (try-quickload :trivial-utf-8-tests)
+              :ok))
+       (error "Neigher trivial-utf-8/tests nor trivial-utf-8-tests found"))
     (error (e)
       (format t "trivial-utf-8 test suite failed with error: ~A" e)
       :fail)))
@@ -701,6 +792,10 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; now run the tests. It returns a boolean
   (funcall (read-from-string "unit-test:run-all-tests") :unit :yason))
 
+#|
+The test suite system cl-annot-test is absent in quicklisp
+https://github.com/quicklisp/quicklisp-controller/issues/6
+
 (defmethod libtest ((library-name (eql :cl-annot)))
   ;; test framework used: cl-test-more
   (running-cl-test-more-suite "cl-annot"
@@ -709,6 +804,7 @@ just passed to the QUICKLISP:QUICKLOAD."
                                   (asdf:clear-system :cl-annot)
                                   (asdf:clear-system :cl-annot-test)
                                   (quicklisp:quickload :cl-annot-test))))
+|#
 
 (defmethod libtest ((library-name (eql :cl-openid)))
   ;; test framework used: FiveAM
@@ -718,8 +814,15 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :split-sequence)))
   ;; test framework used: FiveAM
-  (ql:quickload :split-sequence)
-  (ql:quickload :split-sequence-tests)
+  (or
+   ;; new version
+   (try-quickload :split-sequence/tests)
+   ;; old version
+   (progn
+     (ql:quickload :split-sequence)
+     (try-quickload :split-sequence-tests))
+   (error "Neither :split-sequence/tests nor :split-sequence-tests found"))
+
   (run-fiveam-test-suite :split-sequence))
 
 (defmethod libtest ((library-name (eql :cl-closure-template)))
@@ -766,8 +869,16 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :let-plus)))
   ;; The test framework used: lift.
-  (ql:quickload :let-plus)
-  (ql:quickload :let-plus-tests)
+
+  (or
+   ;; new version
+   (try-quickload :let-plus/tests)
+   ;; old version
+   (progn
+     (ql:quickload :let-plus)
+     (try-quickload :let-plus-tests))
+   (error "Nither :let-plus/tests nor let-plus-tests found"))
+
   (run-lift-test-suite (read-from-string "let-plus-tests::let-plus-tests")))
 
 (defmethod libtest ((library-name (eql :data-sift)))
@@ -819,17 +930,36 @@ just passed to the QUICKLISP:QUICKLOAD."
 
 (defmethod libtest ((library-name (eql :hu.dwim.stefil)))
   ;; The test framework used: hu.dwim.stefil.
+  (cond
+    ;; New version
+    ((try-quickload :hu.dwim.stefil/test)
+     (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.stefil/test::test")))
+    ;; Old version
+    ((try-quickload :hu.dwim.stefil.test)
+     (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.stefil.test::test")))
+    (t (error "Neither hu.dwim.stefil/test nor hu.dwim.stefil.test found"))))
 
-  (ql:quickload :hu.dwim.stefil.test)
-  (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.stefil.test::test")))
-
-(defmethod libtest ((library-name (eql  :kmrcl)))
+(defmethod libtest ((library-name (eql :kmrcl)))
 
   ;; The test framework used: rt.
   (clean-rt)
-  (asdf:clear-system :kmrcl-tests)
+  (or
+   ;; new version
+   (progn
+     (asdf:clear-system :kmrcl/test)
+     ;; If the main system remains registered,
+     ;; ASDF will not try to load the same .asd file when
+     ;; searching for the main/child system.
+     ;; So ASDF will fail "Component not found: kmrcl/test"
+     ;; Therefore:
+     (asdf:clear-system :kmrcl)
 
-  (ql:quickload :kmrcl-tests)
+     (try-quickload :kmrcl/test))
+   ;; old version
+   (progn
+     (asdf:clear-system :kmrcl-tests)
+     (try-quickload :kmrcl-tests))
+   (error "Neither kmrcl/test nor kmrcl-tests found"))
 
   (run-rt-test-suite))
 
@@ -837,23 +967,47 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   ;; The test framework used: rt.
   (clean-rt)
-  (asdf:clear-system :cxml-stp)
-  (asdf:clear-system :cxml-stp-test)
 
-  (ql:quickload :cxml-stp)
-  (ql:quickload :cxml-stp-test)
+  ;; Clear main system to make
+  ;; sure ASDF loads the main .asd
+  ;; file when searching for test system
+  ;; (which is really defined in the main file).
+  (asdf:clear-system :cxml-stp)
+  (or
+   ;; new version
+   (progn
+     (asdf:clear-system :cxml-stp/test)
+     (try-quickload :cxml-stp/test))
+   ;; old version
+   (progn
+     (asdf:clear-system :cxml-stp-test)
+     (ql:quickload :cxml-stp)
+     (try-quickload :cxml-stp-test))
+   (error "Neither cxml-stp/test nor cxml-stp-test found"))
 
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :hu.dwim.walker)))
   ;; The test framework used: hu.dwim.stefil.
-  (ql:quickload :hu.dwim.walker.test)
-  (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.walker.test::test")))
+  (cond
+    ;; new version
+    ((try-quickload :hu.dwim.walker/test)
+     (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.walker/test::test")))
+    ;; old version
+    ((try-quickload :hu.dwim.walker.test)
+     (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.walker.test::test")))
+    (t (error "Neither hu.dwim.walker/test nor hu.dwim.walker.test found"))))
 
 (defmethod libtest ((library-name (eql :hu.dwim.defclass-star)))
   ;; The test framework used: hu.dwim.stefil.
-  (ql:quickload :hu.dwim.defclass-star.test)
-  (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.defclass-star.test::test")))
+  (cond
+    ;; new version
+    ((try-quickload :hu.dwim.defclass-star/test)
+     (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.defclass-star/test::test")))
+    ;; old version
+    ((try-quickload :hu.dwim.defclass-star.test)
+     (run-hu.dwim.stefil-test-suite (read-from-string "hu.dwim.defclass-star.test::test")))
+    (t (error "Neither hu.dwim.defclass-star/test nor hu.dwim.defclass-star.test found"))))
 
 (defmethod libtest ((library-name (eql :bknr-datastore)))
   ;; test framework used: FiveAM
@@ -878,16 +1032,27 @@ just passed to the QUICKLISP:QUICKLOAD."
 
   ;; remove nicknames from the :yaclml package
   (rename-package :it.bese.yaclml.xml :it.bese.yaclml.xml nil)
-  ;; rename :json back to it's original name
+  ;; rename :xml back to it's original name
   (when (find-package :xml-temp-uinuque-name)
     (rename-package :xml-temp-uinuque-name :xml))
 
-  (ql:quickload :yaclml.test)
+  (or
+   ;; new version
+   (try-quickload :yaclml/test)
+   ;; old version
+   (try-quickload :yaclml.test)
+   (error "Neither :yaclml/test nor :yaclml.test found"))
+
   (run-fiveam-test-suite :it.bese.yaclml))
 
 (defmethod libtest ((library-name (eql :com.google.base)))
   ;; The test framework used: hu.dwim.stefil.
-  (ql:quickload :com.google.base-test)
+  (or
+   ;; new version
+   (try-quickload :com.google.base/test)
+   ;; old version
+   (tryquickload :com.google.base-test)
+   (error "Neither :com.google.base/test nor :com.google.base-test found"))
   (run-hu.dwim.stefil-test-suite (read-from-string "com.google.base-test::test-base")))
 
 (defmethod libtest ((library-name (eql :external-program)))
@@ -916,12 +1081,18 @@ just passed to the QUICKLISP:QUICKLOAD."
 ;;   (combine-extended-libresult (run-lift-test-suite :weblocks-suite)
 ;;                               (run-lift-test-suite :store-suite)))
 
+#|
+
+Test framework changed from cl-test-more to prove.
+
 (defmethod libtest ((library-name (eql :cl-mustache)))
   ;; test framework used: cl-test-more
   (running-cl-test-more-suite "cl-mustache"
                               #'(lambda ()
                                   (quicklisp:quickload :cl-mustache-test)
                                   (funcall (read-from-string "mustache-test:run")))))
+
+|#
 
 (defmacro fncall (funname &rest args)
   `(funcall (read-from-string ,funname) ,@args))
@@ -962,10 +1133,16 @@ just passed to the QUICKLISP:QUICKLOAD."
       (ql:quickload :cl-6502-tests)))
   (run-fiveam-test-suite (read-from-string "6502-tests::6502-tests")))
 
+#|
+
+"system-not-found: doplus-tests", for some reason. Also test framework chagned from EOS to FiveAM (similar)
+
 (defmethod libtest ((library-name (eql :doplus)))
   ;; The test framework used: eos (similar to FiveAM).
   (quicklisp:quickload :doplus-tests)
   (run-eos-test-suites (read-from-string "doplus-tests::doplus-suite")))
+
+|#
 
 (defmethod libtest ((library-name (eql :nst)))
   ;; The test framework used: nst.
@@ -1000,6 +1177,9 @@ just passed to the QUICKLISP:QUICKLOAD."
   (quicklisp:quickload :track-best-tests)
   (run-nst-test-suites :track-best-tests))
 
+#|
+"system-not-found: cleric-test" not found, because of https://github.com/flambard/CLERIC/issues/13
+
 (defmethod libtest ((library-name (eql :cleric)))
   ;; The test framework used: fiveam.
 
@@ -1018,6 +1198,12 @@ just passed to the QUICKLISP:QUICKLOAD."
   (run-fiveam-test-suite (if (find-symbol (string 'all-tests) 'cleric-test)
                              (read-from-string "cleric-test:all-tests")
                              (read-from-string "cleric-test::cleric"))))
+
+|#
+
+#|
+The test suite is broken
+https://github.com/flambard/cl-erlang-term/issues/6
 
 (defmethod libtest ((library-name (eql :cl-erlang-term)))
   ;; The test framework used: fiveam.
@@ -1046,6 +1232,8 @@ just passed to the QUICKLISP:QUICKLOAD."
                                 "erlang-term-test::encode"
                                 "erlang-term-test::erlang-object"
                                 "erlang-term-test::erlang-translatable"))))))
+
+|#
 
 (defmethod libtest ((library-name (eql :stmx)))
   ;; The test framework used: fiveam.
@@ -1088,9 +1276,20 @@ just passed to the QUICKLISP:QUICKLOAD."
 (defmethod libtest ((library-name (eql :nibbles)))
   ;; The test framework used: rt.
   (clean-rt)
+  ;; The main system (nibbles) needs to be cleared
+  ;; for ASDF to reload the same .asd file
+  ;; and find the child system nibbles/tests.
   (asdf:clear-system :nibbles)
-  (asdf:clear-system :nibbles-tests)
-  (quicklisp:quickload :nibbles-tests)
+  (or
+   ;; new version
+   (progn
+     (asdf:clear-system :nibbles/tests)
+     (try-quickload :nibbles/tests))
+   ;; old version
+   (progn
+     (asdf:clear-system :nibbles-tests)
+     (try-quickload :nibbles-tests))
+   (error "Neither nibbles/tests nor nibbles-tests found"))
   (run-rt-test-suite))
 
 (defmethod libtest ((library-name (eql :cl-custom-hash-table)))
@@ -1109,8 +1308,14 @@ just passed to the QUICKLISP:QUICKLOAD."
   ;; clpython internally uses ptester (or on Allegro - Allegro provided util.test)
   ;; The function clpython.test::run-tests returns T in case of success and NIL otherwise.
 
-  (ql:quickload :clpython)  ; without this Quicklisp can't find clpython.test
-  (ql:quickload :clpython.test)
+  (or
+   ;; new version
+   (try-quickload :clpython/test)
+   ;; old version
+   (progn
+     (ql:quickload :clpython)  ; without this Quicklisp can't find clpython.test
+     (ignore-errors (ql:quickload :clpython.test)))
+   (error "Neither clpython/test nor clpython.test found"))
   (fncall "clpython.test::run-tests"))
 
 (defmethod libtest ((library-name (eql :cl-slug)))
