@@ -13,7 +13,7 @@
          (src-file "library-report-template.html")
          (list :library-name (html-template:escape-string (string-downcase libname))
                :results-table (pivot-table-html4 results
-                                                 :cols '((lib-world string>))
+                                                 :cols '((lib-world string<))
                                                  :rows '((lisp string<))
                                                  :cell-printer #'results-cell-printer)
                :resuts-by-testcases (cond ((not (member libname test-grid-testsuites:*all-libs*))
@@ -84,7 +84,8 @@
                    report))))
 
 (defun print-library-reports (all-results)
-  (let* ((last-quicklisps (largest #'lib-world all-results :count 2))
+  (let* ((last-quicklisps (sort (largest #'lib-world all-results :count 2)
+                                #'string<))
          (recent-results (subset all-results
                                  (lambda (r) (member (lib-world r)
                                                      last-quicklisps
