@@ -50,7 +50,9 @@
     (let ((report
            (with-output-to-string (s)
              (format s "<html>~%")
-             (format s "  <head>")
+             (format s "  <head>~%")
+             (format s "    <meta charset=\"utf-8\"/>~%")
+             (format s "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">~%")
              (format s "    <title>Library Reports | CL Test Grid</title>~%")
              (format s "    <style>~%")
              (format s "      .status {~%")
