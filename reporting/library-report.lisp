@@ -44,7 +44,7 @@
                                           libnames
                                           lisp-count
                                           lib-world-count
-                                          (report-file "library/statuses-icons.png")
+                                          (report-file "library/status-icons.png")
                                           :cell-width status-cell-width
                                           :cell-height status-cell-height)
     (let ((report
@@ -59,7 +59,7 @@
              (format s "        display: inline-block;~%")
              (format s "        height: ~Apx;~%" status-height)
              (format s "        width: ~Apx;~%" status-width)
-             (format s "        background: url(statuses-icons.png);~%")
+             (format s "        background: url(status-icons.png);~%")
              (format s "        background-repeat: no-repeat;~%")
              (format s "        background-size: auto;~%")
              (format s "        margin-right: 0.5ex;~%")
