@@ -94,21 +94,21 @@
 #|  Test:
 
 (let ((*cl-test-grid-output-translations* '()))
-  (add-asdf-output-translation #P "/" #P "/default/target/dir/")
-  (add-asdf-output-translation #P "/source/dir/" #P "/target/dir/")
+  (add-asdf-output-translation #p"/" #p"/default/target/dir/")
+  (add-asdf-output-translation #p"/source/dir/" #p"/target/dir/")
 
-  (assert (equal #P"/target/dir/file.lisp"
-                 (apply-cl-test-grid-output-translations #P"/source/dir/file.lisp"))
+  (assert (equal #p"/target/dir/file.lisp"
+                 (apply-cl-test-grid-output-translations #p"/source/dir/file.lisp"))
           ()
-          "Output translation for a specific source dir must overrride the default")
+          "Output translation for a specific source dir must override the default")
 
-  (assert (equal #P"/default/target/dir/other/dir/file.lisp"
-                 (apply-cl-test-grid-output-translations #P"/other/dir/file.lisp"))
+  (assert (equal #p"/default/target/dir/other/dir/file.lisp"
+                 (apply-cl-test-grid-output-translations #p"/other/dir/file.lisp"))
           ()
           "The default translation must work")
 
-  (assert (equal #P"/target/dir/file.lisp"
-                 (apply-cl-test-grid-output-translations #P"/target/dir/file.lisp"))
+  (assert (equal #p"/target/dir/file.lisp"
+                 (apply-cl-test-grid-output-translations #p"/target/dir/file.lisp"))
           ()
           "A file located in the target dir must remain untranslated, despite the target dir is under our default source dir:"))
 
