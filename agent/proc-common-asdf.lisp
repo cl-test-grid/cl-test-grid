@@ -105,7 +105,7 @@
   (assert (equal #P"/default/target/dir/other/dir/file.lisp"
                  (apply-cl-test-grid-output-translations #P"/other/dir/file.lisp"))
           ()
-          "The default translation must workd")
+          "The default translation must work")
 
   (assert (equal #P"/target/dir/file.lisp"
                  (apply-cl-test-grid-output-translations #P"/target/dir/file.lisp"))
