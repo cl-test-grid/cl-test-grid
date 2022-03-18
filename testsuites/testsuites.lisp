@@ -242,8 +242,12 @@ the system-not-found error, returning nil in this case."
 
   ;; The test framework used: rt.
   (clean-rt #+sbcl :sb-rt #-sbcl :rtest)
-  (asdf:clear-system :alexandria-tests)
-  (quicklisp:quickload :alexandria-tests)
+
+  (asdf:clear-system :alexandria/tests)
+  (unless (try-quickload :alexandria/tests)
+    (format t "Failed to find alexandria/tests, trying the old system alexandria-tests...")
+    (asdf:clear-system :alexandria-tests)
+    (quicklisp:quickload :alexandria-tests))
 
   (run-rt-test-suite #+sbcl :sb-rt #-sbcl :rtest))
 
