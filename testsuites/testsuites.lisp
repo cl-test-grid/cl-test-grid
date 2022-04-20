@@ -1055,7 +1055,7 @@ https://github.com/quicklisp/quicklisp-controller/issues/6
    ;; new version
    (try-quickload :com.google.base/test)
    ;; old version
-   (tryquickload :com.google.base-test)
+   (try-quickload :com.google.base-test)
    (error "Neither :com.google.base/test nor :com.google.base-test found"))
   (run-hu.dwim.stefil-test-suite (read-from-string "com.google.base-test::test-base")))
 
