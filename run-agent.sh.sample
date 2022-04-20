@@ -3,7 +3,7 @@
 cd "`dirname $0`"
 
 # Update to the recent cl-test-grid version (required).
-git pull
+git pull || exit $?
 
 # Start your run-agent.lisp script. We suppose
 # Quicklisp is installed and added to the init
