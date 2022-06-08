@@ -72,7 +72,7 @@ hopefully, if done consistently, that won't affect program behavior too much.")
       :count t
       :all t))
   #+clasp
-  (core:btcl :stream stream)
+  (clasp-debug:print-backtrace :stream stream)
   #+clisp
   (system::print-backtrace :out stream :limit count)
   #+(or clozure mcl)
