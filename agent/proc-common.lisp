@@ -72,7 +72,15 @@ hopefully, if done consistently, that won't affect program behavior too much.")
       :count t
       :all t))
   #+clasp
-  (clasp-debug:print-backtrace :stream stream)
+  (;; lookup the function name programmatically at read time,
+   ;; becuase the name has changed in new clasp
+   #.(or
+      ;; core:btcl was in the original version copy/pasted from the old ASDF
+      (ignore-errors (find-symbol (string '#:btcl) '#:core))
+      ;; new function is called clasp-debug:print-backtrace
+      (ignore-errors (find-symbol (string '#:print-backtrace) '#:clasp-debug)))
+
+     :stream stream)
   #+clisp
   (system::print-backtrace :out stream :limit count)
   #+(or clozure mcl)
