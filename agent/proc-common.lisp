@@ -76,9 +76,10 @@ hopefully, if done consistently, that won't affect program behavior too much.")
    ;; becuase the name has changed in new clasp
    #.(or
       ;; core:btcl was in the original version copy/pasted from the old ASDF
-      (ignore-errors (find-symbol (string '#:btcl) '#:core))
+      (ignore-errors (read-from-string "core:btcl"))
       ;; new function is called clasp-debug:print-backtrace
-      (ignore-errors (find-symbol (string '#:print-backtrace) '#:clasp-debug)))
+      (ignore-errors (read-from-string "clasp-debug:print-backtrace"))
+      (error "Neither core:btcl nor clasp-debug:print-backtrace is found"))
 
      :stream stream)
   #+clisp
