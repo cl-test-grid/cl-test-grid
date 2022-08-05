@@ -1,7 +1,7 @@
 <project name="init-ivy" basedir=".">
     <!-- the code below is copied from http://ant.apache.org/ivy/history/latest-milestone/install.html -->
 
-    <property name="ivy.install.version" value="2.1.0-rc2" />
+    <property name="ivy.install.version" value="2.5.0" />
 
     <condition property="ivy.home" value="${env.IVY_HOME}">
       <isset property="env.IVY_HOME" />
