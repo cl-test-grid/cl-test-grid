@@ -6,4 +6,21 @@
   </system-properties>
 
   <threadsafe>true</threadsafe>
+
+  <!--
+       Force GAE cache to not return gzipped response if client requested
+       uncompressed content.
+       https://cloud.google.com/appengine/docs/legacy/standard/java/how-requests-are-handled#response_caching
+
+       Because web crawlers, like Dotbot from moz.com, can't process
+       unexpectedly gzipped robots.txt and in result crawl the resources
+       we don't want to be crawled.
+  -->
+  <static-files>
+    <include path="/**">
+      <http-header name="Vary" value="Accept-Encoding"/>
+    </include>
+    <exclude path="/**.jsp"/>
+  </static-files>
+
 </appengine-web-app>
