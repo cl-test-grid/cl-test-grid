@@ -3,6 +3,7 @@
 ;;;; See LICENSE for details.
 
 (defpackage #:test-grid-reporting/status-icon
+  (:use #:common-lisp)
   (:nicknames #:tg-reporting/status-icon #:tg-rep/status-icon))
 
 (in-package :tg-reporting/status-icon)
@@ -12,7 +13,7 @@
 where earch row is a lisp, and each column is a lib-world.
 The table cell is a symbol designating testing result.
 :FAIL if any failure happend there - a test case, load failure, anything.
-:OK if the testing was successful. 
+:OK if the testing was successful.
 :NONE if there are no results for this lisp / lib-world combination.
 
 Example for three lisps and two lib-worlds:

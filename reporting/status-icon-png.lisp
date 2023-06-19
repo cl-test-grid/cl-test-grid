@@ -1,4 +1,5 @@
 (defpackage #:test-grid-reporting/status-icon-png
+  (:use #:common-lisp)
   (:nicknames #:tg-reporting/status-icon-png #:tg-rep/status-icon-png)
   ;; dependency for package inferred system
   (:import-from :vecto)) 
