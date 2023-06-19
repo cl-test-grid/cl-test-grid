@@ -3,6 +3,7 @@
 ;;;; See LICENSE for details.
 
 (defpackage #:test-grid-reporting/status-icon-svg
+  (:use #:common-lisp)
   (:nicknames #:tg-reporting/status-icon-svg #:tg-rep/status-icon-svg))
 
 (in-package :tg-reporting/status-icon-svg)
